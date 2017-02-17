@@ -8,7 +8,7 @@ const char* GLOBAL_HEADER = "Cache-Control: no-cache\n\
 Pragma: no-cache\n\
 Expires: Thu, 16 Oct 1997 06:00:00 GMT\n\
 X-Powered-By: GuanglingScoreHelper\n\
-Content-Type: text/html; charset=gb2312\n\n";
+Content-Type: text/html; charset=gb2312\n";
 
 // Ê×Ò³ HTTP ÇëÇó
 const char* REQUEST_HOME_PAGE = "\

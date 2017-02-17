@@ -31,7 +31,7 @@ int main()
 	}
 	if (g_fQueryCount == NULL)
 	{
-		puts("Status: 500 Internal Server Error\n");
+		puts("Status: 500 Internal Server Error");
 		puts("<p>fopen()  ß∞‹£°</p>");
 		return -1;
 	}
@@ -41,7 +41,7 @@ int main()
 	HRSRC hRsrc = FindResource(NULL, MAKEINTRESOURCE(IDR_HTML1), MAKEINTRESOURCE(RT_HTML));
 	if (NULL == hRsrc)
 	{
-		puts("Status: 500 Internal Server Error\n");
+		puts("Status: 500 Internal Server Error");
 		puts("<p>FindResoure()  ß∞‹£°</p>");
 		return -1;
 	}
@@ -50,7 +50,7 @@ int main()
 	DWORD dwSize = SizeofResource(NULL, hRsrc);
 	if (0 == dwSize)
 	{
-		puts("Status: 500 Internal Server Error\n");
+		puts("Status: 500 Internal Server Error");
 		puts("<p>SizeofResource()  ß∞‹£°</p>");
 		return -1;
 	}
@@ -59,7 +59,7 @@ int main()
 	HGLOBAL hGlobal = LoadResource(NULL, hRsrc);
 	if (NULL == hGlobal)
 	{
-		puts("Status: 500 Internal Server Error\n");
+		puts("Status: 500 Internal Server Error");
 		puts("<p>LoadResoure()  ß∞‹£°</p>");
 		return -1;
 	}
@@ -68,7 +68,7 @@ int main()
 	ERROR_HTML = (char *)LockResource(hGlobal);
 	if (NULL == ERROR_HTML)
 	{
-		puts("Status: 500 Internal Server Error\n");
+		puts("Status: 500 Internal Server Error");
 		puts("<p>LockResoure()  ß∞‹£°</p>");
 		return -1;
 	}
@@ -76,7 +76,7 @@ int main()
 	if (CGI_REQUEST_METHOD == NULL || CGI_CONTENT_LENGTH == NULL || CGI_SCRIPT_NAME == NULL || CGI_QUERY_STRING == NULL ||
 		CGI_PATH_TRANSLATED == NULL || CGI_HTTP_COOKIE == NULL)
 	{
-		puts("Status: 500 Internal Server Error\n");
+		puts("Status: 500 Internal Server Error");
 		puts("<p>CGI Ω”ø⁄“Ï≥££¨«ÎºÏ≤È…Ë÷√£°</p>");
 		return -1;
 	}
