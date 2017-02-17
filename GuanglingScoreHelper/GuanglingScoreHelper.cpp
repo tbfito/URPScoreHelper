@@ -31,7 +31,7 @@ int main()
 	}
 	if (g_fQueryCount == NULL)
 	{
-		puts("Status: 500 Internal Server Error");
+		puts("Status: 500 Internal Server Error\n");
 		puts("<p>fopen() 失败！</p>");
 		return -1;
 	}
@@ -41,7 +41,7 @@ int main()
 	HRSRC hRsrc = FindResource(NULL, MAKEINTRESOURCE(IDR_HTML1), MAKEINTRESOURCE(RT_HTML));
 	if (NULL == hRsrc)
 	{
-		puts("Status: 500 Internal Server Error");
+		puts("Status: 500 Internal Server Error\n");
 		puts("<p>FindResoure() 失败！</p>");
 		return -1;
 	}
@@ -50,7 +50,7 @@ int main()
 	DWORD dwSize = SizeofResource(NULL, hRsrc);
 	if (0 == dwSize)
 	{
-		puts("Status: 500 Internal Server Error");
+		puts("Status: 500 Internal Server Error\n");
 		puts("<p>SizeofResource() 失败！</p>");
 		return -1;
 	}
@@ -59,7 +59,7 @@ int main()
 	HGLOBAL hGlobal = LoadResource(NULL, hRsrc);
 	if (NULL == hGlobal)
 	{
-		puts("Status: 500 Internal Server Error");
+		puts("Status: 500 Internal Server Error\n");
 		puts("<p>LoadResoure() 失败！</p>");
 		return -1;
 	}
@@ -68,7 +68,7 @@ int main()
 	ERROR_HTML = (char *)LockResource(hGlobal);
 	if (NULL == ERROR_HTML)
 	{
-		puts("Status: 500 Internal Server Error");
+		puts("Status: 500 Internal Server Error\n");
 		puts("<p>LockResoure() 失败！</p>");
 		return -1;
 	}
@@ -76,7 +76,7 @@ int main()
 	if (CGI_REQUEST_METHOD == NULL || CGI_CONTENT_LENGTH == NULL || CGI_SCRIPT_NAME == NULL || CGI_QUERY_STRING == NULL ||
 		CGI_PATH_TRANSLATED == NULL || CGI_HTTP_COOKIE == NULL)
 	{
-		puts("Status: 500 Internal Server Error");
+		puts("Status: 500 Internal Server Error\n");
 		puts("<p>CGI 接口异常，请检查设置！</p>");
 		return -1;
 	}
@@ -147,6 +147,7 @@ int parse_index()
 	{
 		closesocket(g_so);
 		WSACleanup();
+		puts("Status: 500 Internal Server Error");
 		Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 标头失败。</p>");
 		return -1;
 	}
@@ -155,6 +156,7 @@ int parse_index()
 	{
 		closesocket(g_so);
 		WSACleanup();
+		puts("Status: 500 Internal Server Error");
 		Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 结尾失败。</p>");
 		return -1;
 	}
@@ -183,6 +185,7 @@ int parse_index()
 	if (pStr1 == NULL)
 	{
 		WSACleanup();
+		puts("Status: 500 Internal Server Error");
 		Error("<p>无法分析验证码响应协议。</p>");
 		return -1;
 	}
@@ -200,6 +203,7 @@ int parse_index()
 	FILE *m_file_homepage = fopen(CGI_PATH_TRANSLATED, "rb");
 	if (m_file_homepage == NULL)
 	{
+		puts("Status: 500 Internal Server Error");
 		Error("<p>错误：找不到主页面模板。</p>");
 		return -1;
 	}
@@ -210,6 +214,7 @@ int parse_index()
 	ZeroMemory(m_lpszHomepage, m_file_homepage_length + 1);
 	if (fread(m_lpszHomepage, m_file_homepage_length, 1, m_file_homepage) != 1) // 将硬盘数据拷至内存
 	{
+		puts("Status: 500 Internal Server Error");
 		Error("<p>无法读取主页模板内容。</p>");
 		fclose(m_file_homepage);
 		free(m_lpszHomepage);
