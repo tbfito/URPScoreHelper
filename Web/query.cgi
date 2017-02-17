@@ -38,10 +38,9 @@
        <!-- 其他的单个page内联页（如果有） -->
        <!-- <div class="page">...</div> -->
     </div>
-    <script type='text/javascript' src='js/zepto.min.js' charset='utf-8'></script>
+  </body>
+	<script type='text/javascript' src='js/zepto.min.js' charset='utf-8'></script>
     <script type='text/javascript' src='js/sm.min.js' charset='utf-8'></script>
     <script type='text/javascript' src='js/sm-extend.min.js' charset='utf-8'></script>
-    <!-- 默认必须要执行$.init(),实际业务里一般不会在HTML文档里执行，通常是在业务页面代码的最后执行 -->
-    <!--<script>$.init()</script>-->
-  </body>
+	<script type='text/javascript' src='js/GuanglingScoreHelper.js' charset='gb2312'></script>
 </html>
