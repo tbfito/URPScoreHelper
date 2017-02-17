@@ -30,7 +30,7 @@ $(function () {
 		
 		$(document).on("pageInit", "", function(e, id, page) {
 			//定义画布宽高和生成点的个数
-			var WIDTH = window.innerWidth - 50, HEIGHT = window.innerHeight - 100, POINT = 20;
+			var WIDTH = window.innerWidth - 25, HEIGHT = window.innerHeight - 100, POINT = 20;
 			
 			var canvas = document.getElementById('i_canvas');
 			canvas.width = WIDTH,

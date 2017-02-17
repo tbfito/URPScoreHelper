@@ -458,7 +458,7 @@ void parse_friendly_score(char *p_lpszScore)
 		free(m_lpszQuery);
 		puts(GLOBAL_HEADER);
 		puts(p_lpszScore);
-		Error("<p>额，不是吧，上来就出错了。0.0</p>");
+		Error("<p>额，分数页面神隐了 0.0。稍后再试试吧~</p>");
 		return;
 	}
 
@@ -468,6 +468,10 @@ void parse_friendly_score(char *p_lpszScore)
 	char *pStr3 = NULL;
 
 	// 循环获取每一项成绩信息
+
+	double m_Total_xuefen = 0.000000;
+	double m_Total_pointsxxuefen = 0.000000;
+
 	while (pStr1 != NULL) 
 	{
 		pStr2 = pStr1;
@@ -489,7 +493,7 @@ void parse_friendly_score(char *p_lpszScore)
 		if (pStr3 == NULL) break;
 		char m_subXuefen[128] = { 0 };
 		mid(m_subXuefen, pStr2, pStr3 - pStr2 - 19, 19);
-		if (atoi(m_subXuefen) == 0) strcpy(m_subXuefen, "暂无数据");
+		if (atof(m_subXuefen) == 0) sprintf(m_subXuefen, "暂无数据");
 
 		pStr2 = pStr3;
 		pStr2 = strstr(pStr2 + 19, "<td align=\"center\">");
@@ -498,7 +502,7 @@ void parse_friendly_score(char *p_lpszScore)
 		if (pStr3 == NULL) break;
 		char m_subzuigaofen[128] = { 0 };
 		mid(m_subzuigaofen, pStr2, pStr3 - pStr2 - 19, 19);
-		if (atoi(m_subzuigaofen) == 0) strcpy(m_subzuigaofen, "暂无数据");
+		if (atof(m_subzuigaofen) == 0) sprintf(m_subzuigaofen, "暂无数据");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
 		if (pStr2 == NULL) break;
@@ -506,7 +510,7 @@ void parse_friendly_score(char *p_lpszScore)
 		if (pStr3 == NULL) break;
 		char m_subzuidifen[128] = { 0 };
 		mid(m_subzuidifen, pStr2, pStr3 - pStr2 - 19, 19);
-		if (atoi(m_subzuidifen) == 0) strcpy(m_subzuidifen, "暂无数据");
+		if (atof(m_subzuidifen) == 0) sprintf(m_subzuidifen, "暂无数据");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
 		if (pStr2 == NULL) break;
@@ -514,7 +518,7 @@ void parse_friendly_score(char *p_lpszScore)
 		if (pStr3 == NULL) break;
 		char m_subjunfen[128] = { 0 };
 		mid(m_subjunfen, pStr2, pStr3 - pStr2 - 19, 19);
-		if (atoi(m_subjunfen) == 0) strcpy(m_subjunfen, "暂无数据");
+		if (atof(m_subjunfen) == 0) sprintf(m_subjunfen, "暂无数据");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
 		if (pStr2 == NULL) break;
@@ -523,7 +527,7 @@ void parse_friendly_score(char *p_lpszScore)
 		char m_subchengji[256] = { 0 };
 		mid(m_subchengji, pStr2, pStr3 - pStr2 - 19, 19);
 		//if (atoi(m_subchengji) == 0) strcpy(m_subchengji, "暂无数据");
-		if (atoi(m_subchengji) < 60) 
+		if (atof(m_subchengji) < 60) 
 		{
 
 			char m_completecj[256] = "<b style=\"color:#f6383a\">";
@@ -539,12 +543,28 @@ void parse_friendly_score(char *p_lpszScore)
 		if (pStr3 == NULL) break;
 		char m_submingci[128] = { 0 };
 		mid(m_submingci, pStr2, pStr3 - pStr2 - 19, 19);
-		if (atoi(m_submingci) == 0) strcpy(m_submingci, "暂无数据");
+		if (atof(m_submingci) == 0) sprintf(m_submingci, "暂无数据");
 
 		char m_StrTmp[10240] = { 0 };
 		sprintf(m_StrTmp, SCORE_TEMPLATE, m_subName, m_subchengji, m_subjunfen, m_subzuigaofen, m_subzuidifen,
 				m_submingci, m_subXuefen);
 		strcat(m_Output, m_StrTmp);
+
+		// （分数x学分）全都加起来/总学分 = 加权分
+		float m_xuefen = atof(m_subXuefen);
+		if (m_xuefen != 0)
+		{
+			m_Total_xuefen += m_xuefen;
+		}
+		float m_chengji = atof(m_subchengji);
+		if (m_chengji != 0)
+		{
+			double m_pointsxxuefen = m_xuefen * m_chengji;
+			if (m_pointsxxuefen != 0)
+			{
+				m_Total_pointsxxuefen += m_pointsxxuefen;
+			}
+		}
 
 		m_success = true; // 查到一个算一个
 		pStr1 = strstr(pStr3, "<tr class=\"odd\" onMouseOut=\"this.className='even';\" onMouseOver=\"this.className='evenfocus';\">");
@@ -559,16 +579,27 @@ void parse_friendly_score(char *p_lpszScore)
 		return;
 	}
 
+	puts(GLOBAL_HEADER);
+
 	// 填充返回页面
+	if (m_Total_pointsxxuefen != 0 || m_Total_xuefen != 0)
+	{
+		char m_jiaquanfen[81920] = { 0 };
+		sprintf(m_jiaquanfen, "<div id=\"i_total\"><p>本学期学业综合分（评优依据，仅供参考）：</p><center>%.1f</center></div>", 
+				m_Total_pointsxxuefen / m_Total_xuefen);
+		strcat(m_jiaquanfen, m_Output);
+		ZeroMemory(m_Output, 81920);
+		strcpy(m_Output, m_jiaquanfen);
+	}
 	char m_lpszCompleteQuery[81920] = { 0 };
 	sprintf(m_lpszCompleteQuery, m_lpszQuery, m_Student, m_Student, m_Output);
+	
 	free(m_lpszQuery);
-
-	puts(GLOBAL_HEADER);
-	puts(m_lpszCompleteQuery);
 
 	fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
 	fclose(g_fQueryCount);
+
+	puts(m_lpszCompleteQuery);
 
 	// 安全登出教务系统。
 	int m_iResult = 0;
