@@ -38,9 +38,9 @@
        <!-- 其他的单个page内联页（如果有） -->
        <!-- <div class="page">...</div> -->
     </div>
-  </body>
 	<script type='text/javascript' src='js/zepto.min.js' charset='utf-8'></script>
     <script type='text/javascript' src='js/sm.min.js' charset='utf-8'></script>
     <script type='text/javascript' src='js/sm-extend.min.js' charset='utf-8'></script>
 	<script type='text/javascript' src='js/GuanglingScoreHelper.js' charset='gb2312'></script>
+  </body>
 </html>
