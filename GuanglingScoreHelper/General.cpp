@@ -98,6 +98,7 @@ void Error( char *p_ErrMsg )
 	sprintf(m_ErrPage, ERROR_HTML, p_ErrMsg);
 	char m_ErrMsg[4096] = {0};
 	strcat( m_ErrMsg, GLOBAL_HEADER );
+	strcat( m_ErrMsg, "\n"); // ²¹È« CGI_HEADER »»ÐÐ·û
 	strcat( m_ErrMsg, m_ErrPage );
 	puts( m_ErrMsg );
 }
