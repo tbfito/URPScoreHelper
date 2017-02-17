@@ -22,7 +22,7 @@
             </header>
             <!-- 工具栏 -->
             <nav class="bar bar-tab">
-                <a class="tab-item external active" href="#">
+                <a class="tab-item external active" href="index.cgi">
                     <span class="icon icon-star"></span>
                     <span class="tab-label">成绩查询</span>
                 </a>

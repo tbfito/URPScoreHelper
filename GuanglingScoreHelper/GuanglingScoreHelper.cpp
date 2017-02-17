@@ -6,6 +6,7 @@
 #include "StringHelper.h"
 #include "CrawlFactory.h"
 #include "GuanglingScoreHelper.h"
+#include "resource.h"
 
 // 入口函数
 int main()
@@ -17,11 +18,66 @@ int main()
 	CGI_PATH_TRANSLATED = getenv("PATH_TRANSLATED"); // 脚本位置
 	CGI_HTTP_COOKIE = getenv("HTTP_COOKIE"); // Cookie
 
-	if (CGI_REQUEST_METHOD == NULL || CGI_CONTENT_LENGTH == NULL || CGI_SCRIPT_NAME == NULL || CGI_QUERY_STRING == NULL ||
-		CGI_PATH_TRANSLATED == NULL || CGI_HTTP_COOKIE == NULL )
+	// 获取多少用户使用了我们的服务 :)
+	g_fQueryCount = fopen("QueryCount.log","r+");
+	g_QueryCount = 0;
+	if (g_fQueryCount != NULL) 
 	{
-		puts("Status: 500 Internal Server Error");
-		Error("<p>CGI 接口异常，请检查设置！</p>");
+		fscanf(g_fQueryCount, "%ld", &g_QueryCount);
+	}
+	else
+	{
+		g_fQueryCount = fopen("QueryCount.log", "w+");
+	}
+	if (g_fQueryCount == NULL)
+	{
+		puts("Status: 500 Internal Server Error\n");
+		puts("<p>fopen() 失败！</p>");
+		return -1;
+	}
+	fseek(g_fQueryCount, 0, SEEK_SET);
+
+	// 查找资源
+	HRSRC hRsrc = FindResource(NULL, MAKEINTRESOURCE(IDR_HTML1), MAKEINTRESOURCE(RT_HTML));
+	if (NULL == hRsrc)
+	{
+		puts("Status: 500 Internal Server Error\n");
+		puts("<p>FindResoure() 失败！</p>");
+		return -1;
+	}
+
+	// 获取资源的大小
+	DWORD dwSize = SizeofResource(NULL, hRsrc);
+	if (0 == dwSize)
+	{
+		puts("Status: 500 Internal Server Error\n");
+		puts("<p>SizeofResource() 失败！</p>");
+		return -1;
+	}
+
+	// 加载资源
+	HGLOBAL hGlobal = LoadResource(NULL, hRsrc);
+	if (NULL == hGlobal)
+	{
+		puts("Status: 500 Internal Server Error\n");
+		puts("<p>LoadResoure() 失败！</p>");
+		return -1;
+	}
+
+	// 锁定资源
+	ERROR_HTML = (char *)LockResource(hGlobal);
+	if (NULL == ERROR_HTML)
+	{
+		puts("Status: 500 Internal Server Error\n");
+		puts("<p>LockResoure() 失败！</p>");
+		return -1;
+	}
+
+	if (CGI_REQUEST_METHOD == NULL || CGI_CONTENT_LENGTH == NULL || CGI_SCRIPT_NAME == NULL || CGI_QUERY_STRING == NULL ||
+		CGI_PATH_TRANSLATED == NULL || CGI_HTTP_COOKIE == NULL)
+	{
+		puts("Status: 500 Internal Server Error\n");
+		puts("<p>CGI 接口异常，请检查设置！</p>");
 		return -1;
 	}
 
@@ -166,7 +222,7 @@ int parse_index()
 	int m_iBufferSize = m_file_homepage_length + strlen(m_DataURL); // 获得缓冲区长度
 	char *m_lpszCompleteHomepage = (char *)malloc(m_iBufferSize);
 	ZeroMemory(m_lpszCompleteHomepage, m_iBufferSize);
-	sprintf(m_lpszCompleteHomepage, m_lpszHomepage, m_DataURL);
+	sprintf(m_lpszCompleteHomepage, m_lpszHomepage, g_QueryCount, m_DataURL);
 	free(m_lpszHomepage);
 
 	// 输出网页
@@ -282,7 +338,7 @@ int parse_query()
 		free(m_post_data);
 		free(m_rep_body);
 		puts("Status: 403 Forbidden");
-		Error("<p>学号或密码不对啊，大佬。 TAT。</p>");
+		Error("<p>学号或密码不对啊，大佬。 TAT。</p><p>默认密码是就是学号哦，如果你修改过密码，你懂的~</p>");
 		return -1;
 	}
 	m_login_not_auth = strstr(m_result, "验证码");
@@ -312,7 +368,7 @@ int parse_query()
 		free(m_post_data);
 		free(m_rep_body);
 		puts("Status: 403 Forbidden");
-		Error("<p>天呐。登录成功后，发生了谜一般的问题！教务系统神隐了 0.0</p>");
+		Error("<p>天呐。发生了谜一般的问题！教务系统神隐了 0.0</p>");
 		return -1;
 	}
 	
@@ -322,9 +378,9 @@ int parse_query()
 
 	// 开始查分。
 	char QUERY_SCORE[512] = { 0 };
-	m_rep_body = (char *)malloc(40960);
+	m_rep_body = (char *)malloc(81920);
 	sprintf( QUERY_SCORE, REQUEST_QUERY_SCORE, CGI_HTTP_COOKIE );
-	if (!CrawlRequest(QUERY_SCORE, m_rep_body, 40960, &m_iResult))
+	if (!CrawlRequest(QUERY_SCORE, m_rep_body, 81920, &m_iResult))
 	{
 		free(m_rep_body);
 		return -1;
@@ -381,7 +437,7 @@ void parse_friendly_score(char *p_lpszScore)
 	{
 		free(m_lpszQuery);
 		puts("Status: 403 Forbidden");
-		char *m_original_str = "<p><b>亲爱的%s，教务系统君说你没有注册 0.0</b></p><p>我可以施展法术，一键帮你在教务系统注册哦~</p>\
+		char *m_original_str = "<p><b>亲爱的%s，教务系统君说你本学期还没有电子注册 0.0</b></p><p>我可以施展法术，一键帮你在教务系统注册哦~</p>\
 				<div class=\"col-100\"><a href=\"query.cgi?act=system_registration\" class=\"button button-big but\
 				ton-fill button-success\">一键注册</a></div>";
 		char m_output_str[1024] = { 0 };
@@ -402,7 +458,7 @@ void parse_friendly_score(char *p_lpszScore)
 	}
 
 	bool m_success = false;
-	char m_Output[40960] = { 0 };
+	char m_Output[81920] = { 0 };
 	char *pStr2 = NULL;
 	char *pStr3 = NULL;
 
@@ -418,7 +474,7 @@ void parse_friendly_score(char *p_lpszScore)
 		if (pStr2 == NULL) break;
 		pStr3 = strstr(pStr2, "</td>");
 		if (pStr3 == NULL) break;
-		char m_subName[256] = { 0 };
+		char m_subName[512] = { 0 };
 		mid(m_subName, pStr2, pStr3 - pStr2 - 19, 19);
 
 		pStr2 = pStr3;
@@ -426,7 +482,7 @@ void parse_friendly_score(char *p_lpszScore)
 		if (pStr2 == NULL) break;
 		pStr3 = strstr(pStr2, "</td>");
 		if (pStr3 == NULL) break;
-		char m_subXuefen[64] = { 0 };
+		char m_subXuefen[128] = { 0 };
 		mid(m_subXuefen, pStr2, pStr3 - pStr2 - 19, 19);
 		if (atoi(m_subXuefen) == 0) strcpy(m_subXuefen, "暂无数据");
 
@@ -435,7 +491,7 @@ void parse_friendly_score(char *p_lpszScore)
 		if (pStr2 == NULL) break;
 		pStr3 = strstr(pStr2, "</td>");
 		if (pStr3 == NULL) break;
-		char m_subzuigaofen[64] = { 0 };
+		char m_subzuigaofen[128] = { 0 };
 		mid(m_subzuigaofen, pStr2, pStr3 - pStr2 - 19, 19);
 		if (atoi(m_subzuigaofen) == 0) strcpy(m_subzuigaofen, "暂无数据");
 
@@ -443,7 +499,7 @@ void parse_friendly_score(char *p_lpszScore)
 		if (pStr2 == NULL) break;
 		pStr3 = strstr(pStr2, "</td>");
 		if (pStr3 == NULL) break;
-		char m_subzuidifen[64] = { 0 };
+		char m_subzuidifen[128] = { 0 };
 		mid(m_subzuidifen, pStr2, pStr3 - pStr2 - 19, 19);
 		if (atoi(m_subzuidifen) == 0) strcpy(m_subzuidifen, "暂无数据");
 
@@ -451,7 +507,7 @@ void parse_friendly_score(char *p_lpszScore)
 		if (pStr2 == NULL) break;
 		pStr3 = strstr(pStr2, "</td>");
 		if (pStr3 == NULL) break;
-		char m_subjunfen[64] = { 0 };
+		char m_subjunfen[128] = { 0 };
 		mid(m_subjunfen, pStr2, pStr3 - pStr2 - 19, 19);
 		if (atoi(m_subjunfen) == 0) strcpy(m_subjunfen, "暂无数据");
 
@@ -459,16 +515,16 @@ void parse_friendly_score(char *p_lpszScore)
 		if (pStr2 == NULL) break;
 		pStr3 = strstr(pStr2, "</td>");
 		if (pStr3 == NULL) break;
-		char m_subchengji[128] = { 0 };
+		char m_subchengji[256] = { 0 };
 		mid(m_subchengji, pStr2, pStr3 - pStr2 - 19, 19);
 		//if (atoi(m_subchengji) == 0) strcpy(m_subchengji, "暂无数据");
 		if (atoi(m_subchengji) < 60) 
 		{
 
-			char m_completecj[128] = "<b style=\"color:#f6383a\">";
+			char m_completecj[256] = "<b style=\"color:#f6383a\">";
 			strcat(m_completecj, m_subchengji);
 			strcat(m_completecj, "</b>");
-			ZeroMemory(m_subchengji, 128);
+			ZeroMemory(m_subchengji, 256);
 			strcpy(m_subchengji, m_completecj);
 		}
 
@@ -476,11 +532,11 @@ void parse_friendly_score(char *p_lpszScore)
 		if (pStr2 == NULL) break;
 		pStr3 = strstr(pStr2, "</td>");
 		if (pStr3 == NULL) break;
-		char m_submingci[64] = { 0 };
+		char m_submingci[128] = { 0 };
 		mid(m_submingci, pStr2, pStr3 - pStr2 - 19, 19);
 		if (atoi(m_submingci) == 0) strcpy(m_submingci, "暂无数据");
 
-		char m_StrTmp[4096] = { 0 };
+		char m_StrTmp[10240] = { 0 };
 		sprintf(m_StrTmp, SCORE_TEMPLATE, m_subName, m_subchengji, m_subjunfen, m_subzuigaofen, m_subzuidifen,
 				m_submingci, m_subXuefen);
 		strcat(m_Output, m_StrTmp);
@@ -499,12 +555,15 @@ void parse_friendly_score(char *p_lpszScore)
 	}
 
 	// 填充返回页面
-	char m_lpszCompleteQuery[20480] = { 0 };
+	char m_lpszCompleteQuery[81920] = { 0 };
 	sprintf(m_lpszCompleteQuery, m_lpszQuery, m_Student, m_Student, m_Output);
 	free(m_lpszQuery);
 
 	puts(GLOBAL_HEADER);
 	puts(m_lpszCompleteQuery);
+
+	fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
+	fclose(g_fQueryCount);
 
 	// 安全登出教务系统。
 	int m_iResult = 0;
@@ -586,37 +645,41 @@ int system_registration()
 	}
 
 	// 查找需要电子注册的学期信息。
-	char *pStr1 = strstr(m_rep_header, "<option value=\"");
-	char *pLastStr = NULL;
+	char *pStr1 = strstr(m_rep_header, "selected>");
 	if (pStr1 == NULL)
 	{
 		free(m_rep_header);
 		Error("<p>数据错误。不好意思，自动注册失败，劳请大佬去教务系统看看吧~ (1)</p>");
 		return -1;
 	}
-	while (pStr1 != NULL) 
-	{
-		pLastStr = pStr1;
-		pStr1 = strstr(pStr1 + 16, "<option value=\"");
-	}
-	char *pStr2 = strstr(pLastStr + 16, "\"");
+	pStr1 -= 70;
+	char *pStr2 = strstr(pStr1, "<option value=\"");
 	if (pStr2 == NULL)
 	{
 		free(m_rep_header);
 		Error("<p>数据错误。不好意思，自动注册失败，劳请大佬去教务系统看看吧~ (2)</p>");
 		return -1;
 	}
-	char m_regval[1024] = { 0 };
-	mid(m_regval, pLastStr, pStr2 - pLastStr - 15, 15);
+	pStr1 = pStr2;
+	pStr2 = strstr(pStr1 + 16, "\"");
+	if (pStr2 == NULL)
+	{
+		free(m_rep_header);
+		Error("<p>数据错误。不好意思，自动注册失败，劳请大佬去教务系统看看吧~ (3)</p>");
+		return -1;
+	}
+
+	char m_regval[4096] = { 0 };
+	mid(m_regval, pStr1, pStr2 - pStr1 - 15, 15);
 	free(m_rep_header);
 
 	// 填充电子注册信息
-	char m_post_reg_info[2048] = "zxjxjhh=";
+	char m_post_reg_info[4096] = "zxjxjhh=";
 	strcat(m_post_reg_info, m_regval);
 	int m_post_reg_info_length = strlen(m_post_reg_info);
 
 	// 填充注册请求
-	char m_post_req[4096] = { 0 };
+	char m_post_req[8192] = { 0 };
 	sprintf(m_post_req, REQUEST_POST_REGISTER_INTERFACE, m_regval, CGI_HTTP_COOKIE, m_post_reg_info_length, 
 			m_post_reg_info);
 
@@ -634,7 +697,7 @@ int system_registration()
 	if (pStr1 == NULL)
 	{
 		free(m_rep_header);
-		Error("<p>不好意思，自动注册失败，劳请大佬去教务系统看看吧~ (3)</p>");
+		Error("<p>不好意思，自动注册失败，劳请大佬去教务系统看看吧~ (4)</p>");
 		return -1;
 	}
 
@@ -643,9 +706,9 @@ int system_registration()
 
 	// 为刚电子注册的同学查询成绩
 	char QUERY_SCORE[512] = { 0 };
-	m_rep_header = (char *)malloc(40960);
+	m_rep_header = (char *)malloc(81920);
 	sprintf(QUERY_SCORE, REQUEST_QUERY_SCORE, CGI_HTTP_COOKIE);
-	if (!CrawlRequest(QUERY_SCORE, m_rep_header, 40960, &m_iResult))
+	if (!CrawlRequest(QUERY_SCORE, m_rep_header, 81920, &m_iResult))
 	{
 		free(m_rep_header);
 		return -1;

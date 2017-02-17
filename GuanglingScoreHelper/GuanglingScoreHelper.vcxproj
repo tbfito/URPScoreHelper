@@ -152,6 +152,7 @@
     <ClInclude Include="CrawlFactory.h" />
     <ClInclude Include="General.h" />
     <ClInclude Include="GuanglingScoreHelper.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StringHelper.h" />
     <ClInclude Include="targetver.h" />
@@ -167,6 +168,14 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="StringHelper.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GuanglingScoreHelper.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="html1.htm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -3,7 +3,7 @@
   <head>
     <meta charset="gb2312">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>%s的成绩</title>
+    <title>%s的成绩 - 广陵学院教务系统</title>
     <meta name="viewport" content="initial-scale=1, maximum-scale=1">
     <link rel="shortcut icon" href="/favicon.ico">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -26,7 +26,7 @@
             </header>
 			<!-- 工具栏 -->
             <nav class="bar bar-tab">
-                <a class="tab-item external active" href="#">
+                <a class="tab-item external active" href="index.cgi">
                     <span class="icon icon-star"></span>
                     <span class="tab-label">成绩查询</span>
                 </a>

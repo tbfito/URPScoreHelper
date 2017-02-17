@@ -87,16 +87,16 @@ Connection: close\r\n\r\n\
 ";
 
 // 分数显示块
-const char *SCORE_TEMPLATE = "<div class=\"content-block-title\">%s</div><div class=\"list-block\"><ul><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">成绩</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">平均分</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">最高分</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">最低分</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">名次</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">所得学分</div><div class=\"item-after\">%s</div></div></li></ul></div>";
+const char *SCORE_TEMPLATE = "<div class=\"content-block-title\">%s</div><div class=\"list-block\"><ul><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">成绩</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">平均分</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">最高分</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">最低分</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">名次</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">学分</div><div class=\"item-after\">%s</div></div></li></ul></div>";
 
-// 错误页面
-const char *ERROR_PAGE = "<!DOCTYPE html><html><head><meta charset=\"gb2312\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><title>出错啦TAT</title><meta name=\"viewport\" content=\"initial-scale=1,maximum-scale=1\"><link rel=\"shortcut icon\" href=\"/favicon.ico\"><meta name=\"apple-mobile-web-app-capable\" content=\"yes\"><meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black\"><link rel=\"stylesheet\" href=\"css/sm.min.css\"><link rel=\"stylesheet\" href=\"css/sm-extend.min.css\"></head><body><div class=\"page-group\"><div class=\"page\"><header class=\"bar bar-nav\"><button class=\"button button-link button-nav pull-left\"><span class=\"icon icon-left\"></span><a href=\"index.cgi\">返回</a></button><h1 class=\"title\">出错啦 TAT</h1></header><nav class=\"bar bar-tab\"><a class=\"tab-item external active\" href=\"#\"><span class=\"icon icon-star\"></span><span class=\"tab-label\">成绩查询</span></a></nav><div class=\"content\"><div class=\"card demo-card-header-pic\"><div class=\"card-content\"><div class=\"card-content-inner\">%s</div></div><div valign=\"bottom\" class=\"card-header color-white no-border no-padding\"><img class=\"card-cover\" src=\"error.jpg\" alt=\"\"></div></div></div></div><script type=\"text/javascript\" src=\"js/zepto.min.js\" charset=\"utf-8\"></script><script type=\"text/javascript\" src=\"js/sm.min.js\" charset=\"utf-8\"></script><script type=\"text/javascript\" src=\"js/sm-extend.min.js\" charset=\"utf-8\"></script></div></body></html>";
+// 错误页面初始化
+char *ERROR_HTML = NULL;
 
 void Error( char *p_ErrMsg )
 {
-	char m_ErrPage[2048] = { 0 };
-	sprintf(m_ErrPage, ERROR_PAGE, p_ErrMsg);
-	char m_ErrMsg[2048] = {0};
+	char m_ErrPage[4096] = { 0 };
+	sprintf(m_ErrPage, ERROR_HTML, p_ErrMsg);
+	char m_ErrMsg[4096] = {0};
 	strcat( m_ErrMsg, GLOBAL_HEADER );
 	strcat( m_ErrMsg, m_ErrPage );
 	puts( m_ErrMsg );

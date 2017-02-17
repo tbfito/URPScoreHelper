@@ -5,6 +5,10 @@ char *CGI_SCRIPT_NAME; // 脚本名称
 char *CGI_QUERY_STRING; // 查询参数
 char *CGI_PATH_TRANSLATED; // 脚本位置
 char *CGI_HTTP_COOKIE; // Cookie
+
+FILE *g_fQueryCount;
+INT64 g_QueryCount;
+
 int parse_index();
 int parse_query();
 void parse_friendly_score(char *p_lpszScore);

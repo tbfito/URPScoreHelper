@@ -11,6 +11,7 @@ extern const char* REQUEST_LOGOUT;
 extern const char* SCORE_TEMPLATE;
 extern const char* REQUEST_GET_REGISTER_INTERFACE;
 extern const char* REQUEST_POST_REGISTER_INTERFACE;
+extern char* ERROR_HTML;
 extern char JSESSIONID[256];
 extern void Error( char *p_ErrMsg );
 extern char * base64_encode(const unsigned char * bindata, char * base64, int binlength);
