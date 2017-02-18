@@ -26,7 +26,7 @@
 		<div class="content">
 			<div class="content-block" style="overflow: hidden">
 				<p>
-					我已为小伙伴们提供了 %ld 次查询操作~
+					我已为小伙伴们提供了 %ld 次查询~
 				</p>
 				<p>
 					输入学生信息来查询成绩 :)
@@ -83,7 +83,7 @@
 							<li class="align-top">
 							<div class="item-content">
 								<div class="item-media">
-									验证码图像：<a href="index.cgi" title="点击刷新"><img alt="" height="40" width="120" src="%s"/></a>
+									验证码图像：<a href="index.cgi" class="external" title="点击刷新"><img alt="" height="40" width="120" src="%s"/></a>
 								</div>
 							</div>
 							</li>
@@ -98,7 +98,9 @@
 					</div>
 				</div>
 			</form>
-			<p>编译日期：%s %s</p>
+			<center>%s</center>
+			<center>编译日期：%s %s</center>
+			<center>服务端环境：%s</center>
 		</div>
 	</div>
 </div>
