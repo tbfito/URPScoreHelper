@@ -1,3 +1,8 @@
+@font-face {
+	font-family: 'LeagueGothic';
+	src: url('/webfont/LeagueGothic.eot');
+	src: local('LeagueGothic'), url('/webfont/LeagueGothic.woff') format('woff'), url('/webfont/LeagueGothic.ttf') format('truetype');
+}
 #i_total p
 {
 	padding-left: 20px;
@@ -5,7 +10,7 @@
 #i_total center
 {
 	margin: 0 auto;
-	font-family: 'League Gothic', Impact;
+	font-family: 'LeagueGothic', Impact;
     font-weight: bold;
     font-size: 3.8em;
     color: #0092bf;
