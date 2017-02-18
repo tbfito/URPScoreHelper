@@ -4,6 +4,7 @@
 extern SOCKET g_so;
 extern const char* GLOBAL_HEADER;
 extern const char* REQUEST_HOME_PAGE;
+extern const char* REQUEST_HOME_PAGE_WITH_COOKIE;
 extern const char* REQUEST_CAPTCHA;
 extern const char* REQUEST_LOGIN;
 extern const char* REQUEST_QUERY_SCORE;

@@ -17,9 +17,10 @@ int main()
 	CGI_QUERY_STRING = getenv("QUERY_STRING"); // 查询参数
 	CGI_PATH_TRANSLATED = getenv("PATH_TRANSLATED"); // 脚本位置
 	CGI_HTTP_COOKIE = getenv("HTTP_COOKIE"); // Cookie
+	CGI_SERVER_SOFTWARE = getenv("SERVER_SOFTWARE"); // 服务器软件
 
 	// 获取多少用户使用了我们的服务 :)
-	g_fQueryCount = fopen("QueryCount.log","r+");
+	g_fQueryCount = fopen("QueryCount.bin","r+");
 	g_QueryCount = 0;
 	if (g_fQueryCount != NULL) 
 	{
@@ -27,11 +28,12 @@ int main()
 	}
 	else
 	{
-		g_fQueryCount = fopen("QueryCount.log", "w+");
+		g_fQueryCount = fopen("QueryCount.bin", "w+");
 	}
 	if (g_fQueryCount == NULL)
 	{
-		puts("Status: 500 Internal Server Error\n");
+		puts("Status: 500 Internal Server Error");
+		puts(GLOBAL_HEADER);
 		puts("<p>fopen() 失败！</p>");
 		return -1;
 	}
@@ -41,7 +43,8 @@ int main()
 	HRSRC hRsrc = FindResource(NULL, MAKEINTRESOURCE(IDR_HTML1), MAKEINTRESOURCE(RT_HTML));
 	if (NULL == hRsrc)
 	{
-		puts("Status: 500 Internal Server Error\n");
+		puts("Status: 500 Internal Server Error");
+		puts(GLOBAL_HEADER);
 		puts("<p>FindResoure() 失败！</p>");
 		return -1;
 	}
@@ -50,7 +53,8 @@ int main()
 	DWORD dwSize = SizeofResource(NULL, hRsrc);
 	if (0 == dwSize)
 	{
-		puts("Status: 500 Internal Server Error\n");
+		puts("Status: 500 Internal Server Error");
+		puts(GLOBAL_HEADER);
 		puts("<p>SizeofResource() 失败！</p>");
 		return -1;
 	}
@@ -59,7 +63,8 @@ int main()
 	HGLOBAL hGlobal = LoadResource(NULL, hRsrc);
 	if (NULL == hGlobal)
 	{
-		puts("Status: 500 Internal Server Error\n");
+		puts("Status: 500 Internal Server Error");
+		puts(GLOBAL_HEADER);
 		puts("<p>LoadResoure() 失败！</p>");
 		return -1;
 	}
@@ -68,7 +73,8 @@ int main()
 	ERROR_HTML = (char *)LockResource(hGlobal);
 	if (NULL == ERROR_HTML)
 	{
-		puts("Status: 500 Internal Server Error\n");
+		puts("Status: 500 Internal Server Error");
+		puts(GLOBAL_HEADER);
 		puts("<p>LockResoure() 失败！</p>");
 		return -1;
 	}
@@ -76,7 +82,8 @@ int main()
 	if (CGI_REQUEST_METHOD == NULL || CGI_CONTENT_LENGTH == NULL || CGI_SCRIPT_NAME == NULL || CGI_QUERY_STRING == NULL ||
 		CGI_PATH_TRANSLATED == NULL || CGI_HTTP_COOKIE == NULL)
 	{
-		puts("Status: 500 Internal Server Error\n");
+		puts("Status: 500 Internal Server Error");
+		puts(GLOBAL_HEADER);
 		puts("<p>CGI 接口异常，请检查设置！</p>");
 		return -1;
 	}
@@ -91,6 +98,10 @@ int main()
 	{
 		if (strcmp(CGI_SCRIPT_NAME, "/") == 0 || strcmp(CGI_SCRIPT_NAME, "/index.cgi") == 0)
 		{
+			if (strcmp(CGI_QUERY_STRING, "act=logout") == 0)
+			{
+				student_logout();
+			}
 			return parse_index();
 		}
 		if (strcmp(CGI_SCRIPT_NAME, "/query.cgi") == 0)
@@ -131,39 +142,79 @@ int main()
 int parse_index()
 {
 	int m_iResult = 0;
+	bool m_need_update_cookie = false;
 
-	// 申请内存，并接受服务端返回数据。
-	char * m_rep_header = (char *)malloc(512);
-	ZeroMemory(m_rep_header, 512);
-	if (!CrawlRequest(REQUEST_HOME_PAGE, m_rep_header, 512, &m_iResult))
+	if (strlen(CGI_HTTP_COOKIE) != 0) // 如果客户端已经拿到 JSESSIONID
 	{
+		// 申请内存，并接受服务端返回数据。
+		char * m_rep_header = (char *)malloc(512);
+		ZeroMemory(m_rep_header, 512);
+		char m_req_homepage_cookie[2048] = {0};
+		sprintf(m_req_homepage_cookie, REQUEST_HOME_PAGE_WITH_COOKIE, CGI_HTTP_COOKIE);
+		if (!CrawlRequest(m_req_homepage_cookie, m_rep_header, 512, &m_iResult))
+		{
+			free(m_rep_header);
+			return -1;
+		}
+
+		// 看看原 Cookie 是否过期、有效（即服务器是否设置了新 Cookie）。
+		char *pStr1 = strstr(m_rep_header, "JSESSIONID=");
+		if (pStr1 != NULL)
+		{
+			char *pStr2 = strstr(pStr1 + 11, ";");
+			if (pStr2 == NULL)
+			{
+				free(m_rep_header);
+				WSACleanup();
+				puts("Status: 500 Internal Server Error");
+				Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 结尾失败。</p>");
+				return -1;
+			}
+			mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11); // 成功获得新 Session ID。
+			m_need_update_cookie = true;
+		}
+		else // 如果 Cookie 还能用，就获取它。
+		{
+			right(JSESSIONID, (char *)CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - 11);
+		}
 		free(m_rep_header);
-		return -1;
 	}
+	else
+	{
+		// 申请内存，并接受服务端返回数据。
+		char * m_rep_header = (char *)malloc(512);
+		ZeroMemory(m_rep_header, 512);
+		if (!CrawlRequest(REQUEST_HOME_PAGE, m_rep_header, 512, &m_iResult))
+		{
+			free(m_rep_header);
+			return -1;
+		}
 
-	// 获取 Session ID。
-	char *pStr1 = strstr(m_rep_header, "JSESSIONID=");
-	if (pStr1 == NULL)
-	{
-		closesocket(g_so);
-		WSACleanup();
-		puts("Status: 500 Internal Server Error");
-		Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 标头失败。</p>");
-		return -1;
+		// 获取 Session ID。
+		char *pStr1 = strstr(m_rep_header, "JSESSIONID=");
+		if (pStr1 == NULL)
+		{
+			closesocket(g_so);
+			WSACleanup();
+			puts("Status: 500 Internal Server Error");
+			Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 标头失败。</p>");
+			return -1;
+		}
+		char *pStr2 = strstr(pStr1 + 11, ";");
+		if (pStr2 == NULL)
+		{
+			closesocket(g_so);
+			WSACleanup();
+			puts("Status: 500 Internal Server Error");
+			Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 结尾失败。</p>");
+			return -1;
+		}
+		mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11); // 成功获得 Session ID。
+		//printf(JSESSIONID);
+		//printf("\n");
+		free(m_rep_header);
+		m_need_update_cookie = true;
 	}
-	char *pStr2 = strstr(pStr1 + 11, ";");
-	if (pStr2 == NULL)
-	{
-		closesocket(g_so);
-		WSACleanup();
-		puts("Status: 500 Internal Server Error");
-		Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 结尾失败。</p>");
-		return -1;
-	}
-	mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11); // 成功获得 Session ID。
-	//printf(JSESSIONID);
-	//printf("\n");
-	free(m_rep_header);
 
 	// 置随机数种子，并取得一个随机数，用于获取验证码。
 	srand((int)time(0));
@@ -181,7 +232,7 @@ int parse_index()
 	}
 
 	// 从返回数据流中获取验证码图片。
-	pStr1 = strstr(m_rep_body, "\r\n\r\n");
+	char *pStr1 = strstr(m_rep_body, "\r\n\r\n");
 	if (pStr1 == NULL)
 	{
 		WSACleanup();
@@ -224,14 +275,21 @@ int parse_index()
 	fclose(m_file_homepage); // 关闭文件
 
 	 // 填充网页模板
-	int m_iBufferSize = m_file_homepage_length + strlen(m_DataURL); // 获得缓冲区长度
+	int m_iBufferSize = m_file_homepage_length + strlen(m_DataURL) + strlen(__DATE__) + strlen(__TIME__)
+						+ strlen(__FILE__) + strlen(CGI_SERVER_SOFTWARE); // 获得缓冲区长度
+
 	char *m_lpszCompleteHomepage = (char *)malloc(m_iBufferSize);
 	ZeroMemory(m_lpszCompleteHomepage, m_iBufferSize);
-	sprintf(m_lpszCompleteHomepage, m_lpszHomepage, g_QueryCount, m_DataURL);
+
+	sprintf(m_lpszCompleteHomepage, m_lpszHomepage, g_QueryCount, m_DataURL, 
+			__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+
 	free(m_lpszHomepage);
 
 	// 输出网页
-	printf("Set-Cookie: JSESSIONID=%s; path=/\n", JSESSIONID);
+	if (m_need_update_cookie)
+		printf("Set-Cookie: JSESSIONID=%s; path=/\n", JSESSIONID);
+
 	puts(GLOBAL_HEADER);
 	puts(m_lpszCompleteHomepage);
 
@@ -307,92 +365,31 @@ int parse_query()
 	char m_captcha[128] = { 0 };
 	right(m_captcha, pStr1 + 4, 4);
 
-	// 发送登陆请求。
-	int m_iResult = 0;
-	char * m_rep_body = (char *)malloc(40960);
-	ZeroMemory(m_rep_body, 40960);
-	char POST_LOGIN[1024] = { 0 };
-	char *m_origin = "zjh1=&tips=&lx=&evalue=&eflag=&fs=&dzslh=&zjh=%s&mm=%s&v_yzm=%s";
-	char m_padding[1024] = { 0 };
-	sprintf(m_padding, m_origin, m_xuehao, m_password, m_captcha);
-	int m_ContentLength = strlen(m_padding); // TODO: 这里不用加莫名其妙的结束长度
-	sprintf( POST_LOGIN, REQUEST_LOGIN, m_ContentLength, CGI_HTTP_COOKIE, m_xuehao, m_password, m_captcha );
-	if (!CrawlRequest( POST_LOGIN, m_rep_body, 40960, &m_iResult ))
+	if (!student_login(m_xuehao, m_password, m_captcha))
 	{
-		free(m_rep_body);
+		// 其余资源清理已在学生登录里面做过了。
+		free(m_post_data);
 		return -1;
 	}
 
-	// 拉取登录结果。
-	char *m_result = strstr(m_rep_body, "\r\n\r\n");
-	if (m_result == NULL)
-	{
-		WSACleanup();
-		free(m_post_data);
-		free(m_rep_body);
-		puts("Status: 500 Internal Server Error");
-		Error("<p>从服务器拉取登录结果失败。</p>");
-		return -1;
-	}
-
-	// 处理登录结果。
-	char *m_login_not_auth = strstr(m_result, "证件号");
-	if (m_login_not_auth != NULL)
-	{
-		WSACleanup();
-		free(m_post_data);
-		free(m_rep_body);
-		puts("Status: 403 Forbidden");
-		Error("<p>学号或密码不对啊，大佬。 TAT。</p><p>默认密码是就是学号哦，如果你修改过密码，你懂的~</p>");
-		return -1;
-	}
-	m_login_not_auth = strstr(m_result, "验证码");
-	if (m_login_not_auth != NULL)
-	{
-		WSACleanup();
-		free(m_post_data);
-		free(m_rep_body);
-		puts("Status: 403 Forbidden");
-		Error("<p>验证码不对啊，大佬。 TAT。</p>");
-		return -1;
-	}
-	m_login_not_auth = strstr(m_result, "数据库");
-	if (m_login_not_auth != NULL)
-	{
-		WSACleanup();
-		free(m_post_data);
-		free(m_rep_body);
-		puts("Status: 403 Forbidden");
-		Error("<p>教务系统君说数据库繁忙 :P</p><p>对于<b>数据库跑路</b>问题，那就等等先咯~</p>");
-		return -1;
-	}
-	char *m_login_success = strstr(m_result, "学分制综合教务");
-	if (m_login_success == NULL)
-	{
-		WSACleanup();
-		free(m_post_data);
-		free(m_rep_body);
-		puts("Status: 403 Forbidden");
-		Error("<p>天呐。发生了谜一般的问题！教务系统神隐了 0.0</p>");
-		return -1;
-	}
-	
-	// 至此，学生登录成功，释放资源。
 	free(m_post_data);
-	free(m_rep_body);
 
 	// 开始查分。
+	int m_iResult = 0;
 	char QUERY_SCORE[512] = { 0 };
-	m_rep_body = (char *)malloc(81920);
+	char *m_rep_body = (char *)malloc(81920);
 	sprintf( QUERY_SCORE, REQUEST_QUERY_SCORE, CGI_HTTP_COOKIE );
 	if (!CrawlRequest(QUERY_SCORE, m_rep_body, 81920, &m_iResult))
 	{
+		student_logout();
 		free(m_rep_body);
+		WSACleanup();
 		return -1;
 	}
-	m_result = strstr(m_rep_body, "\r\n\r\n");
+	char *m_result = strstr(m_rep_body, "\r\n\r\n");
 	if (m_result == NULL)
 	{
+		student_logout();
 		WSACleanup();
 		free(m_post_data);
 		free(m_rep_body);
@@ -420,6 +417,7 @@ void parse_friendly_score(char *p_lpszScore)
 	FILE *m_file_query = fopen(CGI_PATH_TRANSLATED, "rb");
 	if (m_file_query == NULL)
 	{
+		student_logout();
 		Error("<p>错误：找不到分数页面模板。</p>");
 		return;
 	}
@@ -430,6 +428,7 @@ void parse_friendly_score(char *p_lpszScore)
 	ZeroMemory(m_lpszQuery, m_file_query_length + 1);
 	if (fread(m_lpszQuery, m_file_query_length, 1, m_file_query) != 1) // 将硬盘数据拷至内存
 	{
+		student_logout();
 		Error("<p>无法读取分数页模板内容。</p>");
 		fclose(m_file_query);
 		free(m_lpszQuery);
@@ -442,9 +441,12 @@ void parse_friendly_score(char *p_lpszScore)
 	{
 		free(m_lpszQuery);
 		puts("Status: 403 Forbidden");
-		char *m_original_str = "<p><b>亲爱的%s，教务系统君说你本学期还没有电子注册 0.0</b></p><p>我可以施展法术，一键帮你在教务系统注册哦~</p>\
-				<div class=\"col-100\"><a href=\"query.cgi?act=system_registration\" class=\"button button-big but\
-				ton-fill button-success\">一键注册</a></div>";
+
+		char *m_original_str = "<p><b>亲爱的%s，系统君说你本学期还没有电子注册 0.0</b></p><p>我可以施展法术，\
+一键帮你在教务系统注册哦~</p><p>--&gt; 点按下方按钮，直达查分界面 :P &lt;--</p>\
+<div class=\"col-100\"><a href=\"query.cgi?act=system_registration\" class=\"button button-big but\
+ton-fill button-success\">一键注册</a></div>";
+
 		char m_output_str[1024] = { 0 };
 		sprintf(m_output_str, m_original_str, m_Student);
 		Error(m_output_str);
@@ -455,6 +457,7 @@ void parse_friendly_score(char *p_lpszScore)
 	char *pStr1 = strstr(p_lpszScore,"<tr class=\"odd\" onMouseOut=\"this.className='even';\" onMouseOver=\"this.className='evenfocus';\">");
 	if (pStr1 == NULL)
 	{
+		student_logout();
 		free(m_lpszQuery);
 		puts(GLOBAL_HEADER);
 		puts(p_lpszScore);
@@ -550,15 +553,15 @@ void parse_friendly_score(char *p_lpszScore)
 				m_submingci, m_subXuefen);
 		strcat(m_Output, m_StrTmp);
 
-		// （分数x学分）全都加起来/总学分 = 加权分，排除体育
+		// （分数x学分）全都加起来/总学分 = 加权分，排除体育和课程设计
 		if (strstr(m_subName, "体育") == NULL)
 		{
 			float m_xuefen = atof(m_subXuefen);
-			if (m_xuefen != 0)
+			float m_chengji = atof(m_subchengji);
+			if (m_xuefen != 0 || m_chengji !=0) // 排除课程设计，并统计总学分
 			{
 				m_Total_xuefen += m_xuefen;
 			}
-			float m_chengji = atof(m_subchengji);
 			if (m_chengji != 0)
 			{
 				double m_pointsxxuefen = m_xuefen * m_chengji;
@@ -576,6 +579,7 @@ void parse_friendly_score(char *p_lpszScore)
 	// 假如发生了错误
 	if (!m_success) 
 	{
+		student_logout();
 		free(m_lpszQuery);
 		Error("<p>内个，发生意外错误啦。</p>");
 		return;
@@ -604,16 +608,7 @@ void parse_friendly_score(char *p_lpszScore)
 	puts(m_lpszCompleteQuery);
 
 	// 安全登出教务系统。
-	int m_iResult = 0;
-	char m_logout[1024] = { 0 };
-	sprintf(m_logout, REQUEST_LOGOUT, CGI_HTTP_COOKIE);
-	char *m_outbuffer = (char *)malloc(1024);
-	if (!CrawlRequest(m_logout, m_outbuffer, 40960, &m_iResult))
-	{
-		free(m_outbuffer);
-		return;
-	}
-	free(m_outbuffer);
+	student_logout();
 
 }
 
@@ -664,7 +659,7 @@ int system_registration()
 {
 	if (strlen(CGI_HTTP_COOKIE) == 0)
 	{
-		puts("Status: 302 Found\nLocation: index.cgi\n");
+		puts("Status: 302 Found\nLocation: index.cgi");
 		puts(GLOBAL_HEADER);
 		return -1;
 	}
@@ -679,6 +674,8 @@ int system_registration()
 	if (!CrawlRequest(m_req, m_rep_header, 10240, &m_iResult))
 	{
 		free(m_rep_header);
+		student_logout();
+		WSACleanup();
 		return -1;
 	}
 
@@ -688,6 +685,8 @@ int system_registration()
 	{
 		free(m_rep_header);
 		Error("<p>数据错误。不好意思，自动注册失败，劳请大佬去教务系统看看吧~ (1)</p>");
+		student_logout();
+		WSACleanup();
 		return -1;
 	}
 	pStr1 -= 70;
@@ -696,6 +695,8 @@ int system_registration()
 	{
 		free(m_rep_header);
 		Error("<p>数据错误。不好意思，自动注册失败，劳请大佬去教务系统看看吧~ (2)</p>");
+		student_logout();
+		WSACleanup();
 		return -1;
 	}
 	pStr1 = pStr2;
@@ -704,6 +705,8 @@ int system_registration()
 	{
 		free(m_rep_header);
 		Error("<p>数据错误。不好意思，自动注册失败，劳请大佬去教务系统看看吧~ (3)</p>");
+		student_logout();
+		WSACleanup();
 		return -1;
 	}
 
@@ -726,7 +729,9 @@ int system_registration()
 	ZeroMemory(m_rep_header, 10240);
 	if (!CrawlRequest(m_post_req, m_rep_header, 10240, &m_iResult))
 	{
+		student_logout();
 		free(m_rep_header);
+		WSACleanup();
 		return -1;
 	}
 
@@ -735,6 +740,8 @@ int system_registration()
 	if (pStr1 == NULL)
 	{
 		free(m_rep_header);
+		student_logout();
+		WSACleanup();
 		Error("<p>不好意思，自动注册失败，劳请大佬去教务系统看看吧~ (4)</p>");
 		return -1;
 	}
@@ -749,23 +756,111 @@ int system_registration()
 	if (!CrawlRequest(QUERY_SCORE, m_rep_header, 81920, &m_iResult))
 	{
 		free(m_rep_header);
+		WSACleanup();
 		return -1;
 	}
 	char *m_result = strstr(m_rep_header, "\r\n\r\n");
 	if (m_result == NULL)
 	{
-		WSACleanup();
+		student_logout();
 		free(m_rep_header);
 		puts("Status: 500 Internal Server Error");
 		Error("<p>从服务器拉取分数失败。</p>");
+		WSACleanup();
 		return -1;
 	}
 
 	// 优化接受结果，显示查询页面
 	parse_friendly_score(m_result);
 	free(m_rep_header);
-
-	// 完事~。
+	
+	// 完事~
 	WSACleanup();
 	return 0;
+}
+
+// 登录学生
+bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
+{
+	// 发送登陆请求。
+	int m_iResult = 0;
+	char * m_rep_body = (char *)malloc(40960);
+	ZeroMemory(m_rep_body, 40960);
+	char POST_LOGIN[1024] = { 0 };
+	char *m_origin = "zjh1=&tips=&lx=&evalue=&eflag=&fs=&dzslh=&zjh=%s&mm=%s&v_yzm=%s";
+	char m_padding[1024] = { 0 };
+	sprintf(m_padding, m_origin, p_xuehao, p_password, p_captcha);
+	int m_ContentLength = strlen(m_padding); // TODO: 这里不用加莫名其妙的结束长度
+	sprintf(POST_LOGIN, REQUEST_LOGIN, m_ContentLength, CGI_HTTP_COOKIE, p_xuehao, p_password, p_captcha);
+	if (!CrawlRequest(POST_LOGIN, m_rep_body, 40960, &m_iResult))
+	{
+		free(m_rep_body);
+		return false;
+	}
+
+	// 拉取登录结果。
+	char *m_result = strstr(m_rep_body, "\r\n\r\n");
+	if (m_result == NULL)
+	{
+		WSACleanup();
+		free(m_rep_body);
+		puts("Status: 500 Internal Server Error");
+		Error("<p>从服务器拉取登录结果失败。</p>");
+		return false;
+	}
+
+	// 处理登录结果。
+	char *m_login_not_auth = strstr(m_result, "证件号");
+	if (m_login_not_auth != NULL)
+	{
+		WSACleanup();
+		free(m_rep_body);
+		puts("Status: 403 Forbidden");
+		Error("<p>学号或密码不对啊，大佬。 TAT。</p><p>默认密码是就是学号哦，如果你修改过密码，你懂的~</p>");
+		return false;
+	}
+	m_login_not_auth = strstr(m_result, "验证码");
+	if (m_login_not_auth != NULL)
+	{
+		WSACleanup();
+		free(m_rep_body);
+		puts("Status: 403 Forbidden");
+		Error("<p>验证码不对啊，大佬。 TAT。</p>");
+		return false;
+	}
+	m_login_not_auth = strstr(m_result, "数据库");
+	if (m_login_not_auth != NULL)
+	{
+		WSACleanup();
+		free(m_rep_body);
+		puts("Status: 403 Forbidden");
+		Error("<p>教务系统君说数据库繁忙 :P</p><p>对于<b>数据库跑路</b>问题，那就等等先咯~</p>");
+		return false;
+	}
+	char *m_login_success = strstr(m_result, "学分制综合教务");
+	if (m_login_success == NULL)
+	{
+		WSACleanup();
+		free(m_rep_body);
+		puts("Status: 403 Forbidden");
+		Error("<p>天呐。发生了谜一般的问题！教务系统神隐了 0.0</p><p>建议你稍候再试试吧。</p>");
+		return false;
+	}
+
+	// 至此，学生登录成功，释放资源。
+	free(m_rep_body);
+	return true;
+}
+
+// 登出学生
+void student_logout()
+{
+	if (strlen(CGI_HTTP_COOKIE) == 0) return;
+
+	int m_iResult = 0;
+	char m_logout[1024] = { 0 };
+	sprintf(m_logout, REQUEST_LOGOUT, CGI_HTTP_COOKIE);
+	char *m_outbuffer = (char *)malloc(1024);
+	CrawlRequest(m_logout, m_outbuffer, 40960, &m_iResult);
+	free(m_outbuffer);
 }

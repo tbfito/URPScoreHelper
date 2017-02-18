@@ -98,6 +98,7 @@
 					</div>
 				</div>
 			</form>
+			<p>БрвыШеЦкЃК%s %s</p>
 		</div>
 	</div>
 </div>

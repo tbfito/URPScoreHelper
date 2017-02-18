@@ -18,6 +18,15 @@ User-Agent: iEdon-GuanglingScoreHelper\r\n\
 Accept: */*\r\n\
 Connection: close\r\n\r\n";
 
+// 首页 HTTP 请求（带 COOKIE ）
+const char* REQUEST_HOME_PAGE_WITH_COOKIE = "\
+GET / HTTP/1.0\r\n\
+Host: 58.220.248.249\r\n\
+User-Agent: iEdon-GuanglingScoreHelper\r\n\
+Accept: */*\r\n\
+Cookie: %s\r\n\
+Connection: close\r\n\r\n";
+
 // 验证码 HTTP 请求
 const char* REQUEST_CAPTCHA = "\
 GET /validateCodeAction.do?random=0.%d HTTP/1.0\r\n\

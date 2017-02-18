@@ -20,6 +20,11 @@ bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTo
 {
 	// 创建 IPv4 TCP 套接字对象。
 	g_so = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (WSAGetLastError() == WSANOTINITIALISED) // 没有初始化或因 WSACleanup() 已清理环境
+	{
+		InitSocketLibrary(); // 再次初始化
+		g_so = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	}
 	if (g_so == INVALID_SOCKET)
 	{
 		WSACleanup();
