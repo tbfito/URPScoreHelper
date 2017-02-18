@@ -550,22 +550,24 @@ void parse_friendly_score(char *p_lpszScore)
 				m_submingci, m_subXuefen);
 		strcat(m_Output, m_StrTmp);
 
-		// （分数x学分）全都加起来/总学分 = 加权分
-		float m_xuefen = atof(m_subXuefen);
-		if (m_xuefen != 0)
+		// （分数x学分）全都加起来/总学分 = 加权分，排除体育
+		if (strstr(m_subName, "体育") == NULL)
 		{
-			m_Total_xuefen += m_xuefen;
-		}
-		float m_chengji = atof(m_subchengji);
-		if (m_chengji != 0)
-		{
-			double m_pointsxxuefen = m_xuefen * m_chengji;
-			if (m_pointsxxuefen != 0)
+			float m_xuefen = atof(m_subXuefen);
+			if (m_xuefen != 0)
 			{
-				m_Total_pointsxxuefen += m_pointsxxuefen;
+				m_Total_xuefen += m_xuefen;
+			}
+			float m_chengji = atof(m_subchengji);
+			if (m_chengji != 0)
+			{
+				double m_pointsxxuefen = m_xuefen * m_chengji;
+				if (m_pointsxxuefen != 0)
+				{
+					m_Total_pointsxxuefen += m_pointsxxuefen;
+				}
 			}
 		}
-
 		m_success = true; // 查到一个算一个
 		pStr1 = strstr(pStr3, "<tr class=\"odd\" onMouseOut=\"this.className='even';\" onMouseOver=\"this.className='evenfocus';\">");
 
