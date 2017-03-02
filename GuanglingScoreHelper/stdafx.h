@@ -10,11 +10,15 @@
 #include <stdio.h>
 #include <tchar.h>
 
+// TODO:  在此处引用程序需要的其他头文件
+
 #include <stdlib.h>
 #include <Windows.h>
 #include <winsock.h>
 #include <time.h>
 #include <string.h>
+#include "libfcgi_include/fcgio.h"  
+#include "libfcgi_include/fcgi_config.h"
+#include <iostream>
+#pragma comment(lib, "libfcgi.lib")
 #pragma comment(lib, "ws2_32.lib")
-
-// TODO:  在此处引用程序需要的其他头文件

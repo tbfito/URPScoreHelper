@@ -18,7 +18,7 @@
 		<h1 class="title">广陵学院 · 学生成绩查询</h1>
 		</header>
 		<nav class="bar bar-tab">
-		<a class="tab-item external active" href="index.cgi">
+		<a class="tab-item external active" href="index.fcgi">
 		<span class="icon icon-star"></span>
 		<span class="tab-label">成绩查询</span>
 		</a>
@@ -32,7 +32,7 @@
 					输入学生信息来查询成绩 :)
 				</p>
 				<canvas id="i_canvas" style="position:absolute;top:0;left:0;right:0;bottom:0"></canvas>
-				<form action="query.cgi" method="post">
+				<form action="query.fcgi" method="post">
 					<div class="list-block">
 						<ul style="opacity: 0.75;z-index:9999">
 							<li>
@@ -83,7 +83,7 @@
 							<li class="align-top">
 							<div class="item-content">
 								<div class="item-media">
-									验证码图像：<a href="index.cgi" class="external" title="点击刷新"><img alt="" height="40" width="120" src="%s"/></a>
+									验证码图像：<a href="index.fcgi" class="external" title="点击刷新"><img alt="" height="40" width="120" src="%s"/></a>
 								</div>
 							</div>
 							</li>
@@ -100,7 +100,7 @@
 			</form>
 			<center>%s</center>
 			<center>编译日期：%s %s</center>
-			<center>服务端环境：%s</center>
+			<center>服务端环境：FastCGI on %s</center>
 		</div>
 	</div>
 </div>

@@ -1,14 +1,16 @@
 #include "stdafx.h"
 #include "General.h"
 
+using namespace std;
+
 SOCKET g_so = INVALID_SOCKET;
 char JSESSIONID[256] = {0};
 
-const char* GLOBAL_HEADER = "Cache-Control: no-cache\n\
-Pragma: no-cache\n\
-Expires: Thu, 16 Oct 1997 06:00:00 GMT\n\
-X-Powered-By: GuanglingScoreHelper\n\
-Content-Type: text/html; charset=gb2312\n";
+const char* GLOBAL_HEADER = "Cache-Control: no-cache\r\n\
+Pragma: no-cache\r\n\
+Expires: Thu, 16 Oct 1997 06:00:00 GMT\r\n\
+X-Powered-By: GuanglingScoreHelper\r\n\
+Content-Type: text/html; charset=gb2312\r\n\r\n";
 
 // 首页 HTTP 请求
 const char* REQUEST_HOME_PAGE = "\
@@ -109,7 +111,7 @@ void Error( char *p_ErrMsg )
 	strcat( m_ErrMsg, GLOBAL_HEADER );
 	strcat( m_ErrMsg, "\n"); // 补全 CGI_HEADER 换行符
 	strcat( m_ErrMsg, m_ErrPage );
-	puts( m_ErrMsg );
+	cout << m_ErrMsg;
 }
 
 const char * base64char = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";

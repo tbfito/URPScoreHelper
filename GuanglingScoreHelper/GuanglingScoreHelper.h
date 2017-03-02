@@ -11,7 +11,7 @@ FILE *g_fQueryCount;
 INT64 g_QueryCount;
 
 int parse_index();
-int parse_query();
+int parse_query(FCGX_Request p_req);
 void parse_friendly_score(char *p_lpszScore);
 void get_student_name(char *p_lpszBuffer);
 int system_registration();
