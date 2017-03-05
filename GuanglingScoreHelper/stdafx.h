@@ -17,8 +17,5 @@
 #include <winsock.h>
 #include <time.h>
 #include <string.h>
-#include "libfcgi_include/fcgio.h"  
-#include "libfcgi_include/fcgi_config.h"
 #include <iostream>
-#pragma comment(lib, "libfcgi.lib")
 #pragma comment(lib, "ws2_32.lib")

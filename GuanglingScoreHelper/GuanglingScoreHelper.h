@@ -11,9 +11,11 @@ FILE *g_fQueryCount;
 INT64 g_QueryCount;
 
 int parse_index();
-int parse_query(FCGX_Request p_req);
+int parse_query();
 void parse_friendly_score(char *p_lpszScore);
 void get_student_name(char *p_lpszBuffer);
 int system_registration();
 void student_logout();
 bool student_login(char *p_xuehao, char *p_password, char *p_captcha);
+void parse_QuickQuery_Intro();
+void parse_QuickQuery_Result();
