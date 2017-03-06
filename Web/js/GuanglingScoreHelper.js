@@ -4,6 +4,7 @@ $(function () {
 				   var r1 = document.getElementById("i_xh").value;
 				   var r2 = document.getElementById("i_mm").value;
 				   var r3 = document.getElementById("i_yzm").value;
+				   var r4 = document.getElementById("i_xhs").value;
 				if(r1=="")
 				{
 					$.toast("(⊙o⊙) 学号还没输呢。");
@@ -17,6 +18,11 @@ $(function () {
 				if(r3=="")
 				{
 					$.toast("(⊙o⊙) 验证码还没输呢。");
+					return false;
+				}
+				if(r4=="")
+				{
+					$.toast("(⊙o⊙) 起码得输入个学号吧...");
 					return false;
 				}
 				show_querying();

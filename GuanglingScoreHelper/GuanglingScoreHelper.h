@@ -9,6 +9,7 @@ const char *CGI_SERVER_SOFTWARE; // ·þÎñÆ÷Èí¼þ
 
 FILE *g_fQueryCount;
 INT64 g_QueryCount;
+clock_t g_start_time;
 
 int parse_index();
 int parse_query();
@@ -19,3 +20,11 @@ void student_logout();
 bool student_login(char *p_xuehao, char *p_password, char *p_captcha);
 void parse_QuickQuery_Intro();
 void parse_QuickQuery_Result();
+
+typedef struct test_info
+{
+	char kcmz[256] = {0};
+	char cj[64] = {0};
+	char lb[64] = {0};
+	int date = 0;
+};

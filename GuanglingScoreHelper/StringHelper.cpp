@@ -49,3 +49,29 @@ char * right(char *dst, char *src, int n)
 		;
 	return(dst);
 }
+// 将字符串中指定子字符串用指定字符串代替，targ_str 是被替换的，val是替换的字符串
+void replace_string(char * source_str, char * targ_str, char *val)
+{
+	char temp_sstr[513], result[513];
+	char * p, *q;
+	int len; len = 0; q = p = NULL;
+	memset(result, 0, sizeof(result));
+	memset(temp_sstr, 0, sizeof(temp_sstr));
+	strcpy(temp_sstr, source_str);
+	p = q = temp_sstr;
+	len = strlen(targ_str);
+	while (q != NULL)
+	{
+		if ((q = strstr(p, targ_str)) != NULL)
+		{
+			strncat(result, p, q - p);
+			strcat(result, val);
+			strcat(result, "\0");
+			q += len;
+			p = q;
+		}
+		else
+			strcat(result, p);
+	}
+	strcpy(source_str, result);
+}

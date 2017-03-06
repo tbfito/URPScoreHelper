@@ -42,7 +42,7 @@
 										学号
 									</div>
 									<div class="item-input">
-										<textarea id="i_xh" name="xh" type="text" placeholder="多个学号换行输入(最多5个)"></textarea>
+										<textarea id="i_xhs" name="xh" type="text" placeholder="多个学号换行输入(最多5个)"></textarea>
 									</div>
 								</div>
 							</div>
@@ -52,7 +52,7 @@
 					<div class="content-block">
 						<div class="row">
 							<div class="col-100">
-								<input style="z-index:9999" id="i_submit" type="submit" value="查询" class="button button-big button-fill button-success">
+								<input onclick="show_querying();" style="z-index:9999" id="i_submit" type="submit" value="查询" class="button button-big button-fill button-success">
 							</div>
 							<div class="col-100">
 								<a style="z-index:9999;margin-top:10px" title="加权分+排名 综合查询" class="button button-big button-fill" href="index.cgi">加权分+排名 综合查询</a>
@@ -69,5 +69,13 @@
 <script type='text/javascript' src='js/sm.min.js' charset='utf-8'></script>
 <script type='text/javascript' src='js/sm-extend.min.js' charset='utf-8'></script>
 <script type='text/javascript' src='js/GuanglingScoreHelper.js' charset='gb2312'></script>
+<script>
+	function show_querying() {
+		$.showPreloader('O(∩_∩)O 正在查询');
+		setTimeout(function () {
+			$.hidePreloader();
+		}, 10000);
+	}
+</script>
 </body>
 </html>
