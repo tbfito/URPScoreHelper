@@ -97,7 +97,7 @@ int main()
 		{
 			cout << "Status: 500 Internal Server Error\n"
 				<< GLOBAL_HEADER
-				<< "<p>FastCGI 接口异常，请检查设置。</p>";
+				<< "<p>CGI 接口异常，请检查设置。</p>";
 			return 0;
 		}
 
@@ -581,7 +581,15 @@ ton-fill button-success\">一键注册</a></div>";
 		}
 		if (strstr(m_subchengji, "及格") != NULL)
 		{
-			strcpy(m_subchengji, "65");
+			if (atoi(m_subzuidifen) > 60)
+			{
+				strcpy(m_subchengji, m_subzuidifen);
+			}
+			else
+			{
+				strcpy(m_subchengji, "60");
+			}
+			
 		}
 		//if (atoi(m_subchengji) == 0) strcpy(m_subchengji, "暂无数据");
 		if (atof(m_subchengji) < 60) 
@@ -1050,367 +1058,393 @@ void parse_QuickQuery_Result()
 	free(m_post_data);
 
 	for (int xh_index = 0; xh_index < m_xhgs; xh_index++)
-	{
-		if (strlen(m_xh[xh_index]) != 9)
 		{
-			WSACleanup();
-			free(m_post_data);
-			cout << "Status: 500 Internal Server Error\n";
-			if (m_need_update_cookie)
-				cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-			Error("<p>输入的学号中有长度存在问题，请确认！</p>");
-			return;
-		}
+			if (strlen(m_xh[xh_index]) != 9)
+			{
+				WSACleanup();
+				cout << "Status: 500 Internal Server Error\n";
+				if (m_need_update_cookie)
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+				Error("<p>输入的学号中有长度存在问题，请确认！</p>");
+				return;
+			}
 
-		char m_query_param[1024] = { 0 };
-		sprintf(m_query_param, "LS_XH=%s", m_xh[xh_index]);
-		strcat(m_query_param, "&resultPage=http%3A%2F%2F58.220.248.249%3A80%2FreportFiles%2Fcj%2Fcj_zwcjd.jsp%3F");
-		char m_query_request[2048] = { 0 };
-		sprintf(m_query_request, REQUEST_SET_REPORT_PARAMS, CGI_HTTP_COOKIE, strlen(m_query_param));
-		strcat(m_query_request, m_query_param);
+			char m_query_param[1024] = { 0 };
+			sprintf(m_query_param, "LS_XH=%s", m_xh[xh_index]);
+			strcat(m_query_param, "&resultPage=http%3A%2F%2F58.220.248.249%3A80%2FreportFiles%2Fcj%2Fcj_zwcjd.jsp%3F");
+			char m_query_request[2048] = { 0 };
+			sprintf(m_query_request, REQUEST_SET_REPORT_PARAMS, CGI_HTTP_COOKIE, strlen(m_query_param));
+			strcat(m_query_request, m_query_param);
 
-		int m_ilength = 0;
-		char *m_lpvBuffer = (char *)malloc(4096);
-		ZeroMemory(m_lpvBuffer, 4096);
-		if (!CrawlRequest(m_query_request, m_lpvBuffer, 4096, &m_ilength))
-		{
-			cout << "Status: 500 Internal Server Error\n";
-			if (m_need_update_cookie)
-				cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-			Error("<p>投递免密查询请求失败。</p><p>请确认教务系统是可用的。</p>");
-			WSACleanup();
-			free(m_lpvBuffer);
-			return;
-		}
-
-		pStr1 = strstr(m_lpvBuffer, "&reportParamsId=");
-		if (pStr1 == NULL)
-		{
-			cout << "Status: 500 Internal Server Error\n";
-			if (m_need_update_cookie)
-				cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-			Error("<p>获取报表ID错误。(1)</p>");
-			WSACleanup();
-			free(m_lpvBuffer);
-			return;
-		}
-		pStr2 = strstr(pStr1 + 16, "\n");
-		if (pStr1 == NULL)
-		{
-			cout << "Status: 500 Internal Server Error\n";
-			if (m_need_update_cookie)
-				cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-			Error("<p>获取报表ID错误。(2)</p>");
-			WSACleanup();
-			free(m_lpvBuffer);
-			return;
-		}
-		char m_paramsID[512] = { 0 };
-		mid(m_paramsID, pStr1 + 16, pStr2 - pStr1 - 16, 0);
-		pStr1 = NULL;
-		pStr2 = NULL;
-		free(m_lpvBuffer);
-
-		char m_query_report[512] = { 0 };
-		sprintf(m_query_report, REQUEST_REPORT_FILES, m_paramsID, CGI_HTTP_COOKIE);
-		m_lpvBuffer = (char *)malloc(40960);
-		ZeroMemory(m_lpvBuffer, 40960);
-		if (!CrawlRequest(m_query_report, m_lpvBuffer, 40960, &m_ilength))
-		{
-			cout << "Status: 500 Internal Server Error\n";
-			if (m_need_update_cookie)
-				cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-			Error("<p>通过ID免密查询失败。</p><p>发生了天知道的错误。</p>");
-			WSACleanup();
-			free(m_lpvBuffer);
-			return;
-		}
-
-		pStr1 = strstr(m_lpvBuffer, "Exception: ");
-		if (pStr1 != NULL)
-		{
-			pStr2 = strstr(pStr1, "at");
-			if (pStr2 != NULL)
+			int m_ilength = 0;
+			char *m_lpvBuffer = (char *)malloc(4096);
+			ZeroMemory(m_lpvBuffer, 4096);
+			if (!CrawlRequest(m_query_request, m_lpvBuffer, 4096, &m_ilength))
 			{
 				cout << "Status: 500 Internal Server Error\n";
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-				char m_Exception[512] = { 0 };
-				mid(m_Exception, pStr1 + 11, pStr2 - pStr1 - 11, 0);
-				char m_ExceptionMsg[512] = "<p><b>教务系统抛出了如下错误...</b></p><p>";
-				strcat(m_ExceptionMsg, m_Exception);
-				strcat(m_ExceptionMsg, "</p>");
-				Error(m_ExceptionMsg);
+				Error("<p>投递免密查询请求失败。</p><p>请确认教务系统是可用的。</p>");
 				WSACleanup();
 				free(m_lpvBuffer);
 				return;
 			}
-		}
-		pStr1 = NULL;
-		pStr2 = NULL;
 
-		pStr1 = strstr(m_lpvBuffer, "com.runqian.report.view.text.TextFileServlet");
-		if (pStr1 == NULL)
-		{
-			cout << "Status: 500 Internal Server Error\n";
-			if (m_need_update_cookie)
-				cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-			Error("<p>免密查询返回参数错误。(1)</p>");
-			WSACleanup();
+			pStr1 = strstr(m_lpvBuffer, "&reportParamsId=");
+			if (pStr1 == NULL)
+			{
+				cout << "Status: 500 Internal Server Error\n";
+				if (m_need_update_cookie)
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+				Error("<p>获取报表ID错误。(1)</p>");
+				WSACleanup();
+				free(m_lpvBuffer);
+				return;
+			}
+			pStr2 = strstr(pStr1 + 16, "\n");
+			if (pStr1 == NULL)
+			{
+				cout << "Status: 500 Internal Server Error\n";
+				if (m_need_update_cookie)
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+				Error("<p>获取报表ID错误。(2)</p>");
+				WSACleanup();
+				free(m_lpvBuffer);
+				return;
+			}
+			char m_paramsID[512] = { 0 };
+			mid(m_paramsID, pStr1 + 16, pStr2 - pStr1 - 16, 0);
+			pStr1 = NULL;
+			pStr2 = NULL;
 			free(m_lpvBuffer);
-			return;
-		}
-		pStr2 = strstr(pStr1 + 46, "\";");
-		if (pStr1 == NULL)
-		{
-			cout << "Status: 500 Internal Server Error\n";
-			if (m_need_update_cookie)
-				cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-			Error("<p>免密查询返回参数错误。(2)</p>");
-			WSACleanup();
+
+			char m_query_report[512] = { 0 };
+			sprintf(m_query_report, REQUEST_REPORT_FILES, m_paramsID, CGI_HTTP_COOKIE);
+			m_lpvBuffer = (char *)malloc(40960);
+			ZeroMemory(m_lpvBuffer, 40960);
+			if (!CrawlRequest(m_query_report, m_lpvBuffer, 40960, &m_ilength))
+			{
+				cout << "Status: 500 Internal Server Error\n";
+				if (m_need_update_cookie)
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+				Error("<p>通过ID免密查询失败。</p><p>发生了天知道的错误。</p>");
+				WSACleanup();
+				free(m_lpvBuffer);
+				return;
+			}
+
+			pStr1 = strstr(m_lpvBuffer, "Exception: ");
+			if (pStr1 != NULL)
+			{
+				pStr2 = strstr(pStr1, "at");
+				if (pStr2 != NULL)
+				{
+					cout << "Status: 500 Internal Server Error\n";
+					if (m_need_update_cookie)
+						cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+					char m_Exception[512] = { 0 };
+					mid(m_Exception, pStr1 + 11, pStr2 - pStr1 - 11, 0);
+					char m_ExceptionMsg[512] = "<p><b>教务系统抛出了如下错误...</b></p><p>";
+					strcat(m_ExceptionMsg, m_Exception);
+					strcat(m_ExceptionMsg, "</p>");
+					Error(m_ExceptionMsg);
+					WSACleanup();
+					free(m_lpvBuffer);
+					return;
+				}
+			}
+			pStr1 = NULL;
+			pStr2 = NULL;
+
+			pStr1 = strstr(m_lpvBuffer, "com.runqian.report.view.text.TextFileServlet");
+			if (pStr1 == NULL)
+			{
+				cout << "Status: 500 Internal Server Error\n";
+				if (m_need_update_cookie)
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+				Error("<p>免密查询返回参数错误。(1)</p>");
+				WSACleanup();
+				free(m_lpvBuffer);
+				return;
+			}
+			pStr2 = strstr(pStr1 + 46, "\";");
+			if (pStr1 == NULL)
+			{
+				cout << "Status: 500 Internal Server Error\n";
+				if (m_need_update_cookie)
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+				Error("<p>免密查询返回参数错误。(2)</p>");
+				WSACleanup();
+				free(m_lpvBuffer);
+				return;
+			}
+			char m_txt_req_path[512] = { 0 };
+			mid(m_txt_req_path, pStr1 + 45, pStr2 - pStr1 - 45, 0);
 			free(m_lpvBuffer);
-			return;
-		}
-		char m_txt_req_path[512] = { 0 };
-		mid(m_txt_req_path, pStr1 + 45, pStr2 - pStr1 - 45, 0);
-		free(m_lpvBuffer);
 
-		char m_query_score[512] = { 0 };
-		sprintf(m_query_score, REQUEST_TXT_SCORES, m_txt_req_path, m_paramsID, CGI_HTTP_COOKIE);
-		m_lpvBuffer = (char *)malloc(40960);
-		ZeroMemory(m_lpvBuffer, 40960);
-		if (!CrawlRequest(m_query_score, m_lpvBuffer, 40960, &m_ilength))
-		{
-			cout << "Status: 500 Internal Server Error\n";
-			if (m_need_update_cookie)
-				cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-			Error("<p>接受分数信息失败！</p>");
-			WSACleanup();
-			free(m_lpvBuffer);
-			return;
-		}
+			char m_query_score[512] = { 0 };
+			sprintf(m_query_score, REQUEST_TXT_SCORES, m_txt_req_path, m_paramsID, CGI_HTTP_COOKIE);
+			m_lpvBuffer = (char *)malloc(40960);
+			ZeroMemory(m_lpvBuffer, 40960);
+			if (!CrawlRequest(m_query_score, m_lpvBuffer, 40960, &m_ilength))
+			{
+				cout << "Status: 500 Internal Server Error\n";
+				if (m_need_update_cookie)
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+				Error("<p>接受分数信息失败！</p>");
+				WSACleanup();
+				free(m_lpvBuffer);
+				return;
+			}
 
-		pStr1 = strstr(m_lpvBuffer, "姓名\t");
-		if (pStr1 == NULL)
-		{
-			cout << "Status: 500 Internal Server Error\n";
-			if (m_need_update_cookie)
-				cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-			Error("<p>学生姓名获取失败！(1)</p>");
-			WSACleanup();
-			free(m_lpvBuffer);
-			return;
-		}
-		pStr2 = strstr(pStr1 + 4, "\t\t");
-		if (pStr2 == NULL)
-		{
-			cout << "Status: 500 Internal Server Error\n";
-			if (m_need_update_cookie)
-				cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-			Error("<p>学生姓名获取失败！(2)</p>");
-			WSACleanup();
-			free(m_lpvBuffer);
-			return;
-		}
-
-		mid(m_xxmz, pStr1 + 4, pStr2 - pStr1 - 5, 1);
-		if (strlen(m_xxmz) < 2)
-		{
-			cout << "Status: 500 Internal Server Error\n";
-			if (m_need_update_cookie)
-				cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-			Error("<p>获取信息失败，请确认输入正确。</p>");
-			WSACleanup();
-			free(m_lpvBuffer);
-			return;
-		}
-		char m_xxmz_html[128] = { 0 };
-		sprintf(m_xxmz_html, "<div class=\"content-block-title\">%s</div>", m_xxmz);
-
-		pStr1 = NULL;
-		pStr2 = NULL;
-		pStr1 = strstr(m_lpvBuffer, "考试时间\t\t\n");
-		if (pStr1 == NULL)
-		{
-			cout << "Status: 500 Internal Server Error\n";
-			if (m_need_update_cookie)
-				cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-			Error("<p>接受到的报表存在问题。</p>");
-			WSACleanup();
-			free(m_lpvBuffer);
-			return;
-		}
-
-		if (strlen(m_lpvBuffer) <= 800)
-		{
-			cout << "Status: 500 Internal Server Error\n";
-			if (m_need_update_cookie)
-				cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-			Error("<p>收到的报表大小存在问题。</p>");
-			WSACleanup();
-			free(m_lpvBuffer);
-			return;
-		}
-
-		pStr1 += 11;
-		pStr2 = strstr(pStr1, "\t\t\t\t");
-		bool m_success = true;
-		strcat(m_list, m_xxmz_html);
-		strcat(m_list, "<div class=\"list-block\"><ul>");
-		test_info m_test_info[256];
-		int m_index = 0;
-
-		while (pStr2 != NULL)
-		{
-			char m_kcmz[128] = { 0 };
-			mid(m_kcmz, pStr1, pStr2 - pStr1, 0);
-			//cout << m_kcmz;
-
-			pStr1 = pStr2 + 4;
-			pStr2 = strstr(pStr1, "\t");
+			pStr1 = strstr(m_lpvBuffer, "姓名\t");
+			if (pStr1 == NULL)
+			{
+				cout << "Status: 500 Internal Server Error\n";
+				if (m_need_update_cookie)
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+				Error("<p>学生姓名获取失败！(1)</p>");
+				WSACleanup();
+				free(m_lpvBuffer);
+				return;
+			}
+			pStr2 = strstr(pStr1 + 4, "\t\t");
 			if (pStr2 == NULL)
 			{
-				m_success = false;
-				break;
+				cout << "Status: 500 Internal Server Error\n";
+				if (m_need_update_cookie)
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+				Error("<p>学生姓名获取失败！(2)</p>");
+				WSACleanup();
+				free(m_lpvBuffer);
+				return;
 			}
 
-			char m_xf[64] = { 0 };
-			mid(m_xf, pStr1, pStr2 - pStr1, 0);
-			pStr1 = pStr2 + 1; // 学分
-			pStr2 = strstr(pStr1, "\t");
-			if (pStr2 == NULL)
+			if ((pStr2 - pStr1) <= 4)
 			{
-				m_success = false;
-				break;
+				cout << "Status: 500 Internal Server Error\n";
+				if (m_need_update_cookie)
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+				char m_friendly_error[512] = { 0 };
+				sprintf(m_friendly_error, 
+					"<p><b>呃，获取失败了。请确认所输信息是正确的。</b></p><p>发生错误的学号: %s</p>", 
+					m_xh[xh_index]);
+				Error(m_friendly_error);
+				WSACleanup();
+				free(m_lpvBuffer);
+				return;
 			}
 
-			char m_cj[64] = { 0 };
-			mid(m_cj, pStr1, pStr2 - pStr1, 0);
-			if (atoi(m_cj) < 60)
+			mid(m_xxmz, pStr1 + 4, pStr2 - pStr1 - 5, 1);
+			if (strlen(m_xxmz) < 2)
 			{
-				char m_red[64] = "<b style=\"color:#f6383a\">";
-				strcat(m_red, m_cj);
-				strcat(m_red, "</b>");
-				strcpy(m_cj, m_red);
+				cout << "Status: 500 Internal Server Error\n";
+				if (m_need_update_cookie)
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+				char m_friendly_error[512] = { 0 };
+				sprintf(m_friendly_error,
+					"<p><b>获取信息失败，请确认输入正确。</b></p><p>发生错误的学号: %s</p>",
+					m_xh[xh_index]);
+				Error(m_friendly_error);
+				WSACleanup();
+				free(m_lpvBuffer);
+				return;
 			}
+			char m_xxmz_html[128] = { 0 };
+			sprintf(m_xxmz_html, "<div class=\"content-block-title\">%s</div>", m_xxmz);
 
-			//cout << " - " << m_cj;
-			pStr2 = strstr(pStr2 + 1, "\t");
-			if (pStr2 == NULL)
+			pStr1 = NULL;
+			pStr2 = NULL;
+			pStr1 = strstr(m_lpvBuffer, "考试时间\t\t\n");
+			if (pStr1 == NULL)
 			{
-				m_success = false;
-				break;
+				cout << "Status: 500 Internal Server Error\n";
+				if (m_need_update_cookie)
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+				char m_friendly_error[512] = { 0 };
+				sprintf(m_friendly_error,
+					"<p><b>接受到的报表存在问题。</b></p><p>发生错误的学号: %s</p>",
+					m_xh[xh_index]);
+				Error(m_friendly_error);
+				WSACleanup();
+				free(m_lpvBuffer);
+				return;
 			}
 
-			char m_lb[64] = { 0 };
-			mid(m_lb, pStr1, pStr2 - pStr1, 0);
-			if (strstr(m_lb, "重修") != NULL)
+			if (strlen(m_lpvBuffer) <= 800)
 			{
-				char m_kcmz_cx[256] = { 0 };
-				strcat(m_kcmz_cx, "[重修] ");
-				strcat(m_kcmz_cx, m_kcmz);
-				strcpy(m_kcmz, m_kcmz_cx);
+				cout << "Status: 500 Internal Server Error\n";
+				if (m_need_update_cookie)
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+				char m_friendly_error[512] = { 0 };
+				sprintf(m_friendly_error,
+					"<p><b>收到的报表大小存在问题。</b></p><p>发生错误的学号: %s</p>",
+					m_xh[xh_index]);
+				Error(m_friendly_error);
+				WSACleanup();
+				free(m_lpvBuffer);
+				return;
 			}
 
-			//cout << " - " << m_lb;
-			pStr1 = pStr2 + 6;
-			pStr2 = strstr(pStr1, "\t\t");
-			if (pStr2 == NULL)
-			{
-				m_success = false;
-				break;
-			}
-
-			char m_date[128] = { 0 };
-			mid(m_date, pStr1, pStr2 - pStr1, 0);
-			char m_date_4[64] = { 0 };
-			left(m_date_4, m_date, 6);
-
-
-			//cout << " - " << m_date << endl;
-			pStr1 = pStr2 + 2;
+			pStr1 += 11;
 			pStr2 = strstr(pStr1, "\t\t\t\t");
+			bool m_success = true;
+			strcat(m_list, m_xxmz_html);
+			strcat(m_list, "<div class=\"list-block\"><ul>");
+			test_info m_test_info[256];
+			int m_index = 0;
 
-			if (atoi(m_xf) == 0 && atoi(m_cj) == 0)
+			while (pStr2 != NULL)
 			{
-				break;
+				char m_kcmz[128] = { 0 };
+				mid(m_kcmz, pStr1, pStr2 - pStr1, 0);
+				//cout << m_kcmz;
+
+				pStr1 = pStr2 + 4;
+				pStr2 = strstr(pStr1, "\t");
+				if (pStr2 == NULL)
+				{
+					m_success = false;
+					break;
+				}
+
+				char m_xf[64] = { 0 };
+				mid(m_xf, pStr1, pStr2 - pStr1, 0);
+				pStr1 = pStr2 + 1; // 学分
+				pStr2 = strstr(pStr1, "\t");
+				if (pStr2 == NULL)
+				{
+					m_success = false;
+					break;
+				}
+
+				char m_cj[64] = { 0 };
+				mid(m_cj, pStr1, pStr2 - pStr1, 0);
+				if (atoi(m_cj) < 60)
+				{
+					char m_red[64] = "<b style=\"color:#f6383a\">";
+					strcat(m_red, m_cj);
+					strcat(m_red, "</b>");
+					strcpy(m_cj, m_red);
+				}
+
+				//cout << " - " << m_cj;
+				pStr2 = strstr(pStr2 + 1, "\t");
+				if (pStr2 == NULL)
+				{
+					m_success = false;
+					break;
+				}
+
+				char m_lb[64] = { 0 };
+				mid(m_lb, pStr1, pStr2 - pStr1, 0);
+				if (strstr(m_lb, "重修") != NULL)
+				{
+					char m_kcmz_cx[256] = { 0 };
+					strcat(m_kcmz_cx, "[重修] ");
+					strcat(m_kcmz_cx, m_kcmz);
+					strcpy(m_kcmz, m_kcmz_cx);
+				}
+
+				//cout << " - " << m_lb;
+				pStr1 = pStr2 + 6;
+				pStr2 = strstr(pStr1, "\t\t");
+				if (pStr2 == NULL)
+				{
+					m_success = false;
+					break;
+				}
+
+				char m_date[128] = { 0 };
+				mid(m_date, pStr1, pStr2 - pStr1, 0);
+				char m_date_4[64] = { 0 };
+				left(m_date_4, m_date, 6);
+
+
+				//cout << " - " << m_date << endl;
+				pStr1 = pStr2 + 2;
+				pStr2 = strstr(pStr1, "\t\t\t\t");
+
+				if (atoi(m_xf) == 0 && atoi(m_cj) == 0)
+				{
+					break;
+				}
+
+				strcpy(m_test_info[m_index].cj, m_cj);
+				strcpy(m_test_info[m_index].kcmz, m_kcmz);
+				m_test_info[m_index].date = atoi(m_date_4);
+				m_index++;
 			}
 
-			strcpy(m_test_info[m_index].cj, m_cj);
-			strcpy(m_test_info[m_index].kcmz, m_kcmz);
-			m_test_info[m_index].date = atoi(m_date_4);
-			m_index++;
-		}
+			free(m_lpvBuffer);
 
-		free(m_lpvBuffer);
-
-		if (!m_success)
-		{
-			cout << "Status: 500 Internal Server Error\n";
-			if (m_need_update_cookie)
-				cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-			Error("<p>抱歉，免密查询失败，请稍后再试。</p>");
-			WSACleanup();
-			return;
-		}
-
-		int m_max_date = 0;
-		int m_secondary_max = 0;
-
-		for (int i = 0; i < m_index; i++)
-		{
-			if (m_test_info[i].date > m_max_date)
+			if (!m_success)
 			{
-				m_max_date = m_test_info[i].date;
+				cout << "Status: 500 Internal Server Error\n";
+				if (m_need_update_cookie)
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+				Error("<p>抱歉，免密查询失败，请稍后再试。</p>");
+				WSACleanup();
+				return;
 			}
-		}
 
-		for (int i = 0; i < m_index; i++)
-		{
-			if (m_test_info[i].date != m_max_date && m_test_info[i].date > m_secondary_max)
+			int m_max_date = 0;
+			int m_secondary_max = 0;
+
+			for (int i = 0; i < m_index; i++)
 			{
-				m_secondary_max = m_test_info[i].date;
+				if (m_test_info[i].date > m_max_date)
+				{
+					m_max_date = m_test_info[i].date;
+				}
 			}
-		}
 
-		int m_interval = m_max_date - m_secondary_max;
-
-		for (int i = 0; i < m_index; i++)
-		{
-			if (m_interval > 90)
+			for (int i = 0; i < m_index; i++)
 			{
-				if (m_test_info[i].date == m_max_date)
+				if (m_test_info[i].date != m_max_date && m_test_info[i].date > m_secondary_max)
+				{
+					m_secondary_max = m_test_info[i].date;
+				}
+			}
+
+			int m_interval = m_max_date - m_secondary_max;
+
+			for (int i = 0; i < m_index; i++)
+			{
+				if (m_interval > 90)
+				{
+					if (m_test_info[i].date == m_max_date)
+					{
+						char m_temp[1024] = { 0 };
+						sprintf(m_temp, QUICK_SCORE, m_test_info[i].kcmz, m_test_info[i].cj);
+						strcat(m_list, m_temp);
+					}
+				}
+				else if (m_test_info[i].date == m_max_date || m_test_info[i].date == m_secondary_max)
 				{
 					char m_temp[1024] = { 0 };
 					sprintf(m_temp, QUICK_SCORE, m_test_info[i].kcmz, m_test_info[i].cj);
 					strcat(m_list, m_temp);
 				}
 			}
-			else if (m_test_info[i].date == m_max_date || m_test_info[i].date == m_secondary_max)
-			{
-				char m_temp[1024] = { 0 };
-				sprintf(m_temp, QUICK_SCORE, m_test_info[i].kcmz, m_test_info[i].cj);
-				strcat(m_list, m_temp);
-			}
+			strcat(m_list, "</ul></div>");
 		}
-		strcat(m_list, "</ul></div>");
-	}
-	cout << GLOBAL_HEADER;
-	char m_query_time[512] = { 0 };
-	sprintf(m_query_time, "<center>本次查询耗时 %.2f 秒</center>", (double)((GetTickCount() - g_start_time) / 1000));
-	strcat(m_list, m_query_time);
-	char m_outer[204800] = { 0 };
-	if (m_xhgs > 1)
-	{
-		sprintf(m_outer, m_lpszQuery, "多人查询", "多人查询", m_list);
-	}
-	else
-	{
-		sprintf(m_outer, m_lpszQuery, m_xxmz, m_xxmz, m_list);
-	}
+		cout << GLOBAL_HEADER;
+		char m_query_time[512] = { 0 };
+		sprintf(m_query_time, "<center>本次查询耗时 %.2f 秒</center>", (double)((GetTickCount() - g_start_time) / 1000));
+		strcat(m_list, m_query_time);
+		char m_outer[204800] = { 0 };
+		if (m_xhgs > 1)
+		{
+			sprintf(m_outer, m_lpszQuery, "多人查询", "多人查询", m_list);
+		}
+		else
+		{
+			sprintf(m_outer, m_lpszQuery, m_xxmz, m_xxmz, m_list);
+		}
 
-	cout << m_outer;
-	g_QueryCount = g_QueryCount + m_xhgs;
-	fprintf(g_fQueryCount, "%ld", g_QueryCount);
-	fclose(g_fQueryCount);
+		cout << m_outer;
+		g_QueryCount = g_QueryCount + m_xhgs;
+		fprintf(g_fQueryCount, "%ld", g_QueryCount);
+		fclose(g_fQueryCount);
 }

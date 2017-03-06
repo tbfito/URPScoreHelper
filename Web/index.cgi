@@ -83,7 +83,7 @@
 							<li class="align-top">
 							<div class="item-content">
 								<div class="item-media">
-									验证码图像：<a href="index.cgi" class="external" title="点击刷新"><img alt="" height="40" width="120" src="%s"/></a>
+									验证码图像：<a onclick="show_loading();" href="index.cgi" class="external" title="点击刷新"><img alt="" height="40" width="120" src="%s"/></a>
 								</div>
 							</div>
 							</li>
@@ -95,15 +95,17 @@
 								<input style="z-index:9999" id="i_submit" type="submit" value="查询" class="button button-big button-fill button-success">
 							</div>
 							<div class="col-100">
-								<a style="z-index:9999;margin-top:10px" title="免密查询入口" class="button button-big button-fill" href="QuickQuery.cgi">免密查询入口</a>
+								<a style="z-index:9999;margin-top:10px" title="免密查询入口" onclick="show_loading();" class="button button-big button-fill external" href="QuickQuery.cgi">免密查询入口</a>
 							</div>
 						</div>
 					</div>
 				</div>
 			</form>
-			<center>%s</center>
-			<center>编译日期：%s %s</center>
-			<center>服务端环境：%s</center>
+			<small>
+				<center>%s</center>
+				<center>编译日期：%s %s</center>
+				<center>服务端环境：%s</center>
+			</small>
 		</div>
 	</div>
 </div>
