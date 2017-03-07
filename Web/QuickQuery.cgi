@@ -15,6 +15,7 @@
 <div class="page-group">
 	<div class="page">
 		<header class="bar bar-nav">
+		<button class="button button-link button-nav pull-left"><span class="icon icon-left"></span><a href="index.cgi">返回</a></button>
 		<h1 class="title">广陵学院 · 免密成绩查询</h1>
 		</header>
 		<nav class="bar bar-tab">
@@ -52,7 +53,7 @@
 					<div class="content-block">
 						<div class="row">
 							<div class="col-100">
-								<input onclick="return check();" style="z-index:9999" id="i_submit" type="submit" value="查询" class="button button-big button-fill button-success">
+								<input onclick="return check();" style="z-index:9999" id="i_submit" type="submit" value="查询" class="button button-big button-fill button-success" />
 							</div>
 							<div class="col-100">
 								<a style="z-index:9999;margin-top:10px" onclick="show_loading();" title="加权分+排名 综合查询" class="button button-big button-fill external" href="index.cgi">加权分+排名 综合查询</a>

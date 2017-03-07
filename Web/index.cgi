@@ -15,6 +15,8 @@
 <div class="page-group">
 	<div class="page">
 		<header class="bar bar-nav">
+		<button class="button button-link button-nav pull-left"><span class="icon icon-share"></span>&nbsp;&nbsp;<a onclick="return show_about();">关于</a></button>
+		<button class="button button-link button-nav pull-right"><a href="Comments.html">留言</a>&nbsp;&nbsp;<span class="icon icon-message"></span></button>
 		<h1 class="title">广陵学院 · 学生成绩查询</h1>
 		</header>
 		<nav class="bar bar-tab">
@@ -92,7 +94,7 @@
 					<div class="content-block">
 						<div class="row">
 							<div class="col-100">
-								<input style="z-index:9999" id="i_submit" type="submit" value="查询" class="button button-big button-fill button-success">
+								<input style="z-index:9999" id="i_submit" type="submit" value="查询" class="button button-big button-fill button-success" />
 							</div>
 							<div class="col-100">
 								<a style="z-index:9999;margin-top:10px" title="免密查询入口" onclick="show_loading();" class="button button-big button-fill external" href="QuickQuery.cgi">免密查询入口</a>
@@ -101,12 +103,8 @@
 					</div>
 				</div>
 			</form>
-			<small>
-				<center>%s</center>
-				<center>编译日期：%s %s</center>
-				<center>服务端环境：%s</center>
-			</small>
 		</div>
+		<input id="about" style="display:none" value="<b>%s</b><br /><small>&copy; 2012-2017 iEdon Inside</br>编译于: %s %s<br />服务端环境: %s<br />QQ: 11595137<br />N加青年 · 提供</small>"/>
 	</div>
 </div>
 <script type='text/javascript' src='js/zepto.min.js' charset='utf-8'></script>

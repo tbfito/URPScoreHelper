@@ -137,6 +137,10 @@ function show_loading() {
 		$.hidePreloader();
 	}, 10000);
 }
+function show_about() {
+	var r1 = document.getElementById("about").value;
+	$.alert(r1);
+}
 function check() {
 	var r1 = document.getElementById("i_xhs").value;
 	if(r1=="")

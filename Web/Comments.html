@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="gb2312">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>留言板 - 广陵学院教务系统</title>
+<meta name="viewport" content="initial-scale=1, maximum-scale=1">
+<link rel="shortcut icon" href="/favicon.ico">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="stylesheet" href="css/sm.min.css">
+<link rel="stylesheet" href="css/sm-extend.min.css">
+</head>
+<body>
+<div class="page-group">
+	<div class="page">
+		<header class="bar bar-nav">
+		<button class="button button-link button-nav pull-left">
+		<span class="icon icon-left"></span><a href="index.cgi">返回</a></button>
+		<h1 class="title">留言板</h1>
+		</header>
+		<nav class="bar bar-tab">
+		<a class="tab-item external active" href="index.cgi">
+		<span class="icon icon-star"></span>
+		<span class="tab-label">成绩查询</span>
+		</a>
+		</nav>
+		<canvas id="i_canvas" style="position:absolute;top:0;left:0;right:0;bottom:0"></canvas>
+		<div class="content" style="opacity: 0.75;z-index:9999">
+		<div class="content-block" style="overflow: hidden">
+			<b>说明：</b><br />
+			<small>各位亲们，我是广陵学院的宅一枚，本查询工具是我利用业余时间使用 C++ 写的，旨在方便大家查询自己的成绩。希望大家喜欢！</small>
+			<br /><br />
+			<b>免责申明:</b><br />
+			<small>
+			使用本工具产生的一切影响及后果由使用者本人承担，作者不承担任何责任。使用即代表默认同意。<br />
+			我们承诺不收集使用者的任何信息，请放心使用。<br />
+			</small>
+			<p>有什么想法和槽点都留下来吧，谢谢~</p>
+			<!-- 多说评论框 start -->
+			<div class="ds-thread" data-thread-key="1" data-title="留言板 - 广陵学院教务系统" data-url="https://home.iedon.com/Comments.html"></div>
+			<!-- 多说评论框 end -->
+			<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+			<script type="text/javascript">
+			var duoshuoQuery = {short_name:"glxycf"};
+				(function() {
+					var ds = document.createElement('script');
+					ds.type = 'text/javascript';ds.async = true;
+					ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+					ds.charset = 'UTF-8';
+					(document.getElementsByTagName('head')[0] 
+					 || document.getElementsByTagName('body')[0]).appendChild(ds);
+				})();
+				</script>
+			<!-- 多说公共JS代码 end -->
+		</div>
+	</div>
+</div>
+<script type='text/javascript' src='js/zepto.min.js' charset='utf-8'></script>
+<script type='text/javascript' src='js/sm.min.js' charset='utf-8'></script>
+<script type='text/javascript' src='js/sm-extend.min.js' charset='utf-8'></script>
+<script type='text/javascript' src='js/GuanglingScoreHelper.js' charset='gb2312'></script>
+</body>
+</html>
