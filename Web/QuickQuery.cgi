@@ -16,6 +16,7 @@
 	<div class="page">
 		<header class="bar bar-nav">
 		<button class="button button-link button-nav pull-left"><span class="icon icon-left"></span><a href="index.cgi">返回</a></button>
+		<button class="button button-link button-nav pull-right"><a href="Comments.html">留言</a>&nbsp;&nbsp;<span class="icon icon-message"></span></button>
 		<h1 class="title">广陵学院 · 免密成绩查询</h1>
 		</header>
 		<nav class="bar bar-tab">
