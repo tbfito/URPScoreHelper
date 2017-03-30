@@ -3,7 +3,7 @@
 <head>
 <meta charset="gb2312">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>免密查询 - 广陵学院教务系统</title>
+<title>免密查询 - iEdon URP查分助手</title>
 <meta name="viewport" content="initial-scale=1, maximum-scale=1">
 <link rel="shortcut icon" href="/favicon.ico">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -28,7 +28,7 @@
 		<div class="content">
 			<div class="content-block" style="overflow: hidden">
 				<p>
-					输入学号来查询成绩 :)
+					输入学号来查询成绩，暂时只支持广陵学院 :)
 				</p>
 				<canvas id="i_canvas" style="position:absolute;top:0;left:0;right:0;bottom:0"></canvas>
 				<form action="query.cgi?act=QuickQuery" method="post">
@@ -70,6 +70,6 @@
 <script type='text/javascript' src='js/zepto.min.js' charset='utf-8'></script>
 <script type='text/javascript' src='js/sm.min.js' charset='utf-8'></script>
 <script type='text/javascript' src='js/sm-extend.min.js' charset='utf-8'></script>
-<script type='text/javascript' src='js/GuanglingScoreHelper.js' charset='gb2312'></script>
+<script type='text/javascript' src='js/URPScoreHelper.js' charset='gb2312'></script>
 </body>
 </html>

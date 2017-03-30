@@ -1,5 +1,8 @@
 #pragma once
 
+#define SERVER_IP "58.220.248.249"
+//#define SERVER_IP "10.191.0.24"
+
 // 公开给外部使用的变量
 extern SOCKET g_so;
 

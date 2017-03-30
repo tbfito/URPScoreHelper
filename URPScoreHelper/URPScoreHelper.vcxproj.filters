@@ -33,18 +33,15 @@
     <ClInclude Include="CrawlFactory.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="GuanglingScoreHelper.h">
+    <ClInclude Include="resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
+    <ClInclude Include="URPScoreHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="GuanglingScoreHelper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="General.cpp">
@@ -56,13 +53,16 @@
     <ClCompile Include="CrawlFactory.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="GuanglingScoreHelper.rc">
-      <Filter>资源文件</Filter>
-    </ResourceCompile>
+    <ClCompile Include="URPScoreHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="html1.htm" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="URPScoreHelper.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

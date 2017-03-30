@@ -3,7 +3,7 @@
 <head>
 <meta charset="gb2312">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>广陵学院教务系统 - 成绩查询</title>
+<title>iEdon URP查分助手</title>
 <meta name="viewport" content="initial-scale=1, maximum-scale=1">
 <link rel="shortcut icon" href="/favicon.ico">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -17,7 +17,7 @@
 		<header class="bar bar-nav">
 		<button class="button button-link button-nav pull-left"><span class="icon icon-share"></span>&nbsp;&nbsp;<a onclick="return show_about();">关于</a></button>
 		<button class="button button-link button-nav pull-right"><a href="Comments.html">留言</a>&nbsp;&nbsp;<span class="icon icon-message"></span></button>
-		<h1 class="title">广陵学院 · 学生成绩查询</h1>
+		<h1 class="title">N加青年 广陵查分助手</h1>
 		</header>
 		<nav class="bar bar-tab">
 		<a class="tab-item external active" href="index.cgi">
@@ -31,7 +31,7 @@
 					已成功完成 %ld 次查询操作
 				</p>
 				<p>
-					输入学生信息来查询成绩 :)
+					输入你的教务系统账号来查询成绩 :)
 				</p>
 				<canvas id="i_canvas" style="position:absolute;top:0;left:0;right:0;bottom:0"></canvas>
 				<form action="query.cgi" method="post">
@@ -110,6 +110,17 @@
 <script type='text/javascript' src='js/zepto.min.js' charset='utf-8'></script>
 <script type='text/javascript' src='js/sm.min.js' charset='utf-8'></script>
 <script type='text/javascript' src='js/sm-extend.min.js' charset='utf-8'></script>
-<script type='text/javascript' src='js/GuanglingScoreHelper.js' charset='gb2312'></script>
+<script type='text/javascript' src='js/URPScoreHelper.js' charset='gb2312'></script>
+<script>
+var _mtac = {};
+(function() {
+    var mta = document.createElement("script");
+    mta.src = "http://pingjs.qq.com/h5/stats.js?v2.0.2";
+    mta.setAttribute("name", "MTAH5");
+    mta.setAttribute("sid", "500426156");
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(mta, s);
+})();
+</script>
 </body>
 </html>

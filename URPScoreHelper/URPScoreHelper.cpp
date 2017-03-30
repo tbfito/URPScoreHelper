@@ -1,78 +1,78 @@
-// GuanglingScoreHelper.cpp : ¶¨Òå¿ØÖÆÌ¨Ó¦ÓÃ³ÌĞòµÄÈë¿Úµã¡£
+ï»¿// URPScoreHelper.cpp : å®šä¹‰æ§åˆ¶å°åº”ç”¨ç¨‹åºçš„å…¥å£ç‚¹ã€‚
 //
 
 #include "stdafx.h"
 #include "General.h"
 #include "StringHelper.h"
 #include "CrawlFactory.h"
-#include "GuanglingScoreHelper.h"
+#include "URPScoreHelper.h"
 #include "resource.h"
 
 using namespace std;
 
-// Èë¿Úº¯Êı
+// å…¥å£å‡½æ•°
 int main()
 {
 	g_start_time = GetTickCount();
 
-	// ²éÕÒ×ÊÔ´
+	// æŸ¥æ‰¾èµ„æº
 	HRSRC hRsrc = FindResource(NULL, MAKEINTRESOURCE(IDR_HTML1), MAKEINTRESOURCE(RT_HTML));
 	if (NULL == hRsrc)
 	{
 		cout << "Status: 500 Internal Server Error\n"
 			<< GLOBAL_HEADER
-			<< "<p>FindResource() Ê§°Ü£¡</p>";
+			<< "<p>FindResource() å¤±è´¥ï¼</p>";
 		return -1;
 	}
 
-	// »ñÈ¡×ÊÔ´µÄ´óĞ¡
+	// è·å–èµ„æºçš„å¤§å°
 	DWORD dwSize = SizeofResource(NULL, hRsrc);
 	if (0 == dwSize)
 	{
 		cout << "Status: 500 Internal Server Error\n"
 			<< GLOBAL_HEADER
-			<< "<p>SizeofResource() Ê§°Ü£¡</p>";
+			<< "<p>SizeofResource() å¤±è´¥ï¼</p>";
 		return -1;
 	}
 
-	// ¼ÓÔØ×ÊÔ´
+	// åŠ è½½èµ„æº
 	HGLOBAL hGlobal = LoadResource(NULL, hRsrc);
 	if (NULL == hGlobal)
 	{
 		cout << "Status: 500 Internal Server Error\n"
 			<< GLOBAL_HEADER
-			<< "<p>LoadResource() Ê§°Ü£¡</p>";
+			<< "<p>LoadResource() å¤±è´¥ï¼</p>";
 		return -1;
 	}
 
-	// Ëø¶¨×ÊÔ´
+	// é”å®šèµ„æº
 	ERROR_HTML = (char *)LockResource(hGlobal);
 	if (NULL == ERROR_HTML)
 	{
 		cout << "Status: 500 Internal Server Error\n"
 			<< GLOBAL_HEADER
-			<< "<p>LockResource() Ê§°Ü£¡</p>";
+			<< "<p>LockResource() å¤±è´¥ï¼</p>";
 		return -1;
 	}
 
-	// ³õÊ¼»¯ Socket ¿â¡£
+	// åˆå§‹åŒ– Socket åº“ã€‚
 	if (!InitSocketLibrary())
 	{
 		cout << "Status: 500 Internal Server Error\n"
 			<< GLOBAL_HEADER
-			<< "<p>Socket ³õÊ¼»¯Ê§°Ü£¡</p>";
+			<< "<p>Socket åˆå§‹åŒ–å¤±è´¥ï¼</p>";
 		return -1;
 	}
 
-		CGI_REQUEST_METHOD = getenv("REQUEST_METHOD"); // ÇëÇó·½·¨
-		CGI_CONTENT_LENGTH = getenv("CONTENT_LENGTH"); // Êı¾İ³¤¶È
-		CGI_SCRIPT_NAME = getenv("SCRIPT_NAME"); // ½Å±¾Ãû³Æ
-		CGI_QUERY_STRING = getenv("QUERY_STRING"); // ²éÑ¯²ÎÊı
-		CGI_PATH_TRANSLATED = getenv("PATH_TRANSLATED"); // ½Å±¾Î»ÖÃ
+		CGI_REQUEST_METHOD = getenv("REQUEST_METHOD"); // è¯·æ±‚æ–¹æ³•
+		CGI_CONTENT_LENGTH = getenv("CONTENT_LENGTH"); // æ•°æ®é•¿åº¦
+		CGI_SCRIPT_NAME = getenv("SCRIPT_NAME"); // è„šæœ¬åç§°
+		CGI_QUERY_STRING = getenv("QUERY_STRING"); // æŸ¥è¯¢å‚æ•°
+		CGI_PATH_TRANSLATED = getenv("PATH_TRANSLATED"); // è„šæœ¬ä½ç½®
 		CGI_HTTP_COOKIE = getenv("HTTP_COOKIE"); // Cookie
-		CGI_SERVER_SOFTWARE = getenv("SERVER_SOFTWARE"); // ·şÎñÆ÷Èí¼ş
+		CGI_SERVER_SOFTWARE = getenv("SERVER_SOFTWARE"); // æœåŠ¡å™¨è½¯ä»¶
 
-		// »ñÈ¡¶àÉÙÓÃ»§Ê¹ÓÃÁËÎÒÃÇµÄ·şÎñ :)
+		// è·å–å¤šå°‘ç”¨æˆ·ä½¿ç”¨äº†æˆ‘ä»¬çš„æœåŠ¡ :)
 		g_fQueryCount = fopen("QueryCount.bin", "r+");
 		g_QueryCount = 0;
 		if (g_fQueryCount != NULL)
@@ -87,7 +87,7 @@ int main()
 		{
 			cout << "Status: 500 Internal Server Error\n"
 				<< GLOBAL_HEADER
-				<< "<p>fopen() Ê§°Ü£¡</p>";
+				<< "<p>fopen() å¤±è´¥ï¼</p>";
 			return 0;
 		}
 		fseek(g_fQueryCount, 0, SEEK_SET);
@@ -97,11 +97,11 @@ int main()
 		{
 			cout << "Status: 500 Internal Server Error\n"
 				<< GLOBAL_HEADER
-				<< "<p>CGI ½Ó¿ÚÒì³££¬Çë¼ì²éÉèÖÃ¡£</p>";
+				<< "<p>CGI æ¥å£å¼‚å¸¸ï¼Œè¯·æ£€æŸ¥è®¾ç½®ã€‚</p>";
 			return 0;
 		}
 
-		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0) // Èç¹ûÊÇ GET ÇëÇó
+		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0) // å¦‚æœæ˜¯ GET è¯·æ±‚
 		{
 			if (strcmp(CGI_SCRIPT_NAME, "/") == 0 || strcmp(CGI_SCRIPT_NAME, "/index.cgi") == 0)
 			{
@@ -125,7 +125,7 @@ int main()
 				else
 				{
 					cout << "Status: 405 Method Not Allowed\n";
-					Error("<p>¸ÃÒ³Ãæ²»ÔÊĞí GET ÇëÇó¡£</p>");
+					Error("<p>è¯¥é¡µé¢ä¸å…è®¸ GET è¯·æ±‚ã€‚</p>");
 					WSACleanup();
 					return 0;
 				}
@@ -138,14 +138,14 @@ int main()
 			}
 
 			cout << "Status: 404 No Such CGI Page\n";
-			Error("<p>ÕÒ²»µ½¸ÃÒ³Ãæ¡£</p>");
+			Error("<p>æ‰¾ä¸åˆ°è¯¥é¡µé¢ã€‚</p>");
 			WSACleanup();
 			
 			ZeroMemory(JSESSIONID, 256);
 			return -1;
 		}
 
-		if (strcmp(CGI_REQUEST_METHOD, "POST") == 0) // Èç¹ûÊÇ POST ÇëÇó
+		if (strcmp(CGI_REQUEST_METHOD, "POST") == 0) // å¦‚æœæ˜¯ POST è¯·æ±‚
 		{
 			if (strcmp(CGI_SCRIPT_NAME, "/query.cgi") == 0)
 			{
@@ -160,19 +160,19 @@ int main()
 		}
 
 	puts("Status: 500 Internal Server Error");
-	Error("<p>·¢Éú´íÎó£¬Î´¾­´¦ÀíµÄÒì³£¡£</p>");
+	Error("<p>å‘ç”Ÿé”™è¯¯ï¼Œæœªç»å¤„ç†çš„å¼‚å¸¸ã€‚</p>");
 	WSACleanup();
 	return -1;
 }
 
-// ´¦Àí Cookie
+// å¤„ç† Cookie
 int process_cookie(bool *p_need_update_cookie)
 {
 	int m_iResult = 0;
 
-	if (strcmp(CGI_HTTP_COOKIE, "") != 0) // Èç¹û¿Í»§¶ËÒÑ¾­ÄÃµ½ JSESSIONID
+	if (strcmp(CGI_HTTP_COOKIE, "") != 0) // å¦‚æœå®¢æˆ·ç«¯å·²ç»æ‹¿åˆ° JSESSIONID
 	{
-		// ÉêÇëÄÚ´æ£¬²¢½ÓÊÜ·şÎñ¶Ë·µ»ØÊı¾İ¡£
+		// ç”³è¯·å†…å­˜ï¼Œå¹¶æ¥å—æœåŠ¡ç«¯è¿”å›æ•°æ®ã€‚
 		char * m_rep_header = (char *)malloc(1024);
 		ZeroMemory(m_rep_header, 1024);
 		char m_req_homepage_cookie[2048] = { 0 };
@@ -183,7 +183,7 @@ int process_cookie(bool *p_need_update_cookie)
 			return -1;
 		}
 
-		// ¿´¿´Ô­ Cookie ÊÇ·ñ¹ıÆÚ¡¢ÓĞĞ§£¨¼´·şÎñÆ÷ÊÇ·ñÉèÖÃÁËĞÂ Cookie£©¡£
+		// çœ‹çœ‹åŸ Cookie æ˜¯å¦è¿‡æœŸã€æœ‰æ•ˆï¼ˆå³æœåŠ¡å™¨æ˜¯å¦è®¾ç½®äº†æ–° Cookieï¼‰ã€‚
 		char *pStr1 = strstr(m_rep_header, "JSESSIONID=");
 		if (pStr1 != NULL)
 		{
@@ -193,15 +193,15 @@ int process_cookie(bool *p_need_update_cookie)
 				free(m_rep_header);
 				WSACleanup();
 				cout << "Status: 500 Internal Server Error\n";
-				Error("<p>ÎŞ·¨»ñÈ¡ Servlet Session ID¡£</p><p>Cookie ½áÎ²Ê§°Ü¡£</p>");
+				Error("<p>æ— æ³•è·å– Servlet Session IDã€‚</p><p>Cookie ç»“å°¾å¤±è´¥ã€‚</p>");
 				return -1;
 			}
-			mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11); // ³É¹¦»ñµÃĞÂ Session ID¡£
+			mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11); // æˆåŠŸè·å¾—æ–° Session IDã€‚
 			*p_need_update_cookie = true;
 			free(m_rep_header);
 			return 0;
 		}
-		else // Èç¹û Cookie »¹ÄÜÓÃ£¬¾Í»ñÈ¡Ëü¡£
+		else // å¦‚æœ Cookie è¿˜èƒ½ç”¨ï¼Œå°±è·å–å®ƒã€‚
 		{
 			right(JSESSIONID, (char *)CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - 11);
 		}
@@ -209,7 +209,7 @@ int process_cookie(bool *p_need_update_cookie)
 	}
 	else
 	{
-		// ÉêÇëÄÚ´æ£¬²¢½ÓÊÜ·şÎñ¶Ë·µ»ØÊı¾İ¡£
+		// ç”³è¯·å†…å­˜ï¼Œå¹¶æ¥å—æœåŠ¡ç«¯è¿”å›æ•°æ®ã€‚
 		char * m_rep_header = (char *)malloc(1024);
 		ZeroMemory(m_rep_header, 1024);
 		if (!CrawlRequest(REQUEST_HOME_PAGE, m_rep_header, 1024, &m_iResult))
@@ -218,14 +218,14 @@ int process_cookie(bool *p_need_update_cookie)
 			return -1;
 		}
 
-		// »ñÈ¡ Session ID¡£
+		// è·å– Session IDã€‚
 		char *pStr1 = strstr(m_rep_header, "JSESSIONID=");
 		if (pStr1 == NULL)
 		{
 			closesocket(g_so);
 			WSACleanup();
 			cout << "Status: 500 Internal Server Error\n";
-			Error("<p>ÎŞ·¨»ñÈ¡ Servlet Session ID¡£</p><p>Cookie ±êÍ·Ê§°Ü¡£</p>");
+			Error("<p>æ— æ³•è·å– Servlet Session IDã€‚</p><p>Cookie æ ‡å¤´å¤±è´¥ã€‚</p>");
 			return -1;
 		}
 		char *pStr2 = strstr(pStr1 + 11, ";");
@@ -234,17 +234,17 @@ int process_cookie(bool *p_need_update_cookie)
 			closesocket(g_so);
 			WSACleanup();
 			cout << "Status: 500 Internal Server Error\n";
-			Error("<p>ÎŞ·¨»ñÈ¡ Servlet Session ID¡£</p><p>Cookie ½áÎ²Ê§°Ü¡£</p>");
+			Error("<p>æ— æ³•è·å– Servlet Session IDã€‚</p><p>Cookie ç»“å°¾å¤±è´¥ã€‚</p>");
 			return -1;
 		}
-		mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11); // ³É¹¦»ñµÃ Session ID¡£
+		mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11); // æˆåŠŸè·å¾— Session IDã€‚
 
 		free(m_rep_header);
 		*p_need_update_cookie = true;
 	}
 }
 
-// ´¦ÀíÖ÷Ò³ÃæÇëÇó (GET / /index.cgi)
+// å¤„ç†ä¸»é¡µé¢è¯·æ±‚ (GET / /index.cgi)
 int parse_index()
 {
 	int m_iResult = 0;
@@ -252,13 +252,13 @@ int parse_index()
 
 	process_cookie(&m_need_update_cookie);
 
-	// ÖÃËæ»úÊıÖÖ×Ó£¬²¢È¡µÃÒ»¸öËæ»úÊı£¬ÓÃÓÚ»ñÈ¡ÑéÖ¤Âë¡£
+	// ç½®éšæœºæ•°ç§å­ï¼Œå¹¶å–å¾—ä¸€ä¸ªéšæœºæ•°ï¼Œç”¨äºè·å–éªŒè¯ç ã€‚
 	srand((int)time(0));
 	int m_rand = rand();
 	char Captcha[256] = { 0 };
 	sprintf(Captcha, REQUEST_CAPTCHA, m_rand, JSESSIONID);
 
-	// ·¢ËÍÑéÖ¤ÂëÇëÇó£¬»ñÈ¡ÑéÖ¤ÂëÊı¾İ¡£
+	// å‘é€éªŒè¯ç è¯·æ±‚ï¼Œè·å–éªŒè¯ç æ•°æ®ã€‚
 	char * m_rep_body = (char *)malloc(8192);
 	ZeroMemory(m_rep_body, 8192);
 	if (!CrawlRequest(Captcha, m_rep_body, 8192, &m_iResult))
@@ -267,52 +267,52 @@ int parse_index()
 		return -1;
 	}
 
-	// ´Ó·µ»ØÊı¾İÁ÷ÖĞ»ñÈ¡ÑéÖ¤ÂëÍ¼Æ¬¡£
+	// ä»è¿”å›æ•°æ®æµä¸­è·å–éªŒè¯ç å›¾ç‰‡ã€‚
 	char *pStr1 = strstr(m_rep_body, "\r\n\r\n");
 	if (pStr1 == NULL)
 	{
 		WSACleanup();
 		cout << "Status: 500 Internal Server Error\n";
-		Error("<p>ÎŞ·¨·ÖÎöÑéÖ¤ÂëÏìÓ¦Ğ­Òé¡£</p>");
+		Error("<p>æ— æ³•åˆ†æéªŒè¯ç å“åº”åè®®ã€‚</p>");
 		return -1;
 	}
-	pStr1 += 4; // Ö¸ÕëºóÒÆËÄÎ»£¬Ö¸Ïò jpg ¿ªÊ¼Î»ÖÃ¡£
-	int m_CaptchaLength = m_iResult - (pStr1 - m_rep_body); // ÑéÖ¤ÂëÍ¼Æ¬µÄ´óĞ¡
+	pStr1 += 4; // æŒ‡é’ˆåç§»å››ä½ï¼ŒæŒ‡å‘ jpg å¼€å§‹ä½ç½®ã€‚
+	int m_CaptchaLength = m_iResult - (pStr1 - m_rep_body); // éªŒè¯ç å›¾ç‰‡çš„å¤§å°
 
-	// ½«ÑéÖ¤Âë×ª»¯Îª base64 ±àÂëºóµÄ DataURL£¬ä¯ÀÀÆ÷Ö±½ÓÏÔÊ¾£¬¹©ÓÃ»§²é¿´¡£
+	// å°†éªŒè¯ç è½¬åŒ–ä¸º base64 ç¼–ç åçš„ DataURLï¼Œæµè§ˆå™¨ç›´æ¥æ˜¾ç¤ºï¼Œä¾›ç”¨æˆ·æŸ¥çœ‹ã€‚
 	char m_base64[8192] = { 0 };
 	base64_encode((const unsigned char *)pStr1, m_base64, m_CaptchaLength);
 	char m_DataURL[10240] = "data:image/jpg;base64,";
 	strcat(m_DataURL, m_base64);
 	free(m_rep_body);
 
-	// ¶ÁÈëÖ÷Ò³ÃæÎÄ¼ş
+	// è¯»å…¥ä¸»é¡µé¢æ–‡ä»¶
 	FILE *m_file_homepage = fopen(CGI_PATH_TRANSLATED, "rb");
 	if (m_file_homepage == NULL)
 	{
 		cout << "Status: 500 Internal Server Error\n";
-		Error("<p>´íÎó£ºÕÒ²»µ½Ö÷Ò³ÃæÄ£°å¡£</p>");
+		Error("<p>é”™è¯¯ï¼šæ‰¾ä¸åˆ°ä¸»é¡µé¢æ¨¡æ¿ã€‚</p>");
 		return -1;
 	}
-	fseek(m_file_homepage, 0, SEEK_END); // ÒÆµ½Î²
-	int m_file_homepage_length = ftell(m_file_homepage); // »ñÈ¡ÎÄ¼ş³¤¶È
-	fseek(m_file_homepage, 0, SEEK_SET); // ÖØĞÂÒÆ»ØÀ´
+	fseek(m_file_homepage, 0, SEEK_END); // ç§»åˆ°å°¾
+	int m_file_homepage_length = ftell(m_file_homepage); // è·å–æ–‡ä»¶é•¿åº¦
+	fseek(m_file_homepage, 0, SEEK_SET); // é‡æ–°ç§»å›æ¥
 	char *m_lpszHomepage = (char *)malloc(m_file_homepage_length + 1);
 	ZeroMemory(m_lpszHomepage, m_file_homepage_length + 1);
-	if (fread(m_lpszHomepage, m_file_homepage_length, 1, m_file_homepage) != 1) // ½«Ó²ÅÌÊı¾İ¿½ÖÁÄÚ´æ
+	if (fread(m_lpszHomepage, m_file_homepage_length, 1, m_file_homepage) != 1) // å°†ç¡¬ç›˜æ•°æ®æ‹·è‡³å†…å­˜
 	{
 		cout << "Status: 500 Internal Server Error\n";
-		Error("<p>ÎŞ·¨¶ÁÈ¡Ö÷Ò³Ä£°åÄÚÈİ¡£</p>");
+		Error("<p>æ— æ³•è¯»å–ä¸»é¡µæ¨¡æ¿å†…å®¹ã€‚</p>");
 		fclose(m_file_homepage);
 		free(m_lpszHomepage);
 		WSACleanup();
 		return -1;
 	}
-	fclose(m_file_homepage); // ¹Ø±ÕÎÄ¼ş
+	fclose(m_file_homepage); // å…³é—­æ–‡ä»¶
 
-	 // Ìî³äÍøÒ³Ä£°å
+	 // å¡«å……ç½‘é¡µæ¨¡æ¿
 	int m_iBufferSize = m_file_homepage_length + strlen(m_DataURL) + strlen(__DATE__) + strlen(__TIME__)
-						+ strlen(__FILE__) + strlen(CGI_SERVER_SOFTWARE); // »ñµÃ»º³åÇø³¤¶È
+						+ strlen(__FILE__) + strlen(CGI_SERVER_SOFTWARE); // è·å¾—ç¼“å†²åŒºé•¿åº¦
 
 	char *m_lpszCompleteHomepage = (char *)malloc(m_iBufferSize);
 	ZeroMemory(m_lpszCompleteHomepage, m_iBufferSize);
@@ -322,28 +322,28 @@ int parse_index()
 
 	free(m_lpszHomepage);
 
-	// Êä³öÍøÒ³
+	// è¾“å‡ºç½‘é¡µ
 	if (m_need_update_cookie)
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 
 	cout << GLOBAL_HEADER;
 	cout << m_lpszCompleteHomepage;
 
-	// ÊÍ·Å×ÊÔ´
+	// é‡Šæ”¾èµ„æº
 	free(m_lpszCompleteHomepage);
 	WSACleanup();
 	return 0;
 }
 
-// ´¦Àí²éÑ¯Ò³ÃæÇëÇó (POST /query.cgi)
+// å¤„ç†æŸ¥è¯¢é¡µé¢è¯·æ±‚ (POST /query.cgi)
 int parse_query()
 {
-	// »ñÈ¡ POST Êı¾İ¡£
+	// è·å– POST æ•°æ®ã€‚
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0)
 	{
 		cout << "Status: 500 Internal Server Error\n";
-		Error("<p>·¢Éú´íÎó£¬POST Êı¾İ³¤¶ÈÒì³£¡£</p>");
+		Error("<p>å‘ç”Ÿé”™è¯¯ï¼ŒPOST æ•°æ®é•¿åº¦å¼‚å¸¸ã€‚</p>");
 		WSACleanup();
 		return -1;
 	}
@@ -351,19 +351,19 @@ int parse_query()
 	if (fgets(m_post_data, m_post_length + 1, stdin) == NULL)
 	{
 		cout << "Status: 500 Internal Server Error\n";
-		Error("<p>·¢Éú´íÎó£¬POST Êı¾İÀ­È¡Ê§°Ü¡£</p>");
+		Error("<p>å‘ç”Ÿé”™è¯¯ï¼ŒPOST æ•°æ®æ‹‰å–å¤±è´¥ã€‚</p>");
 		WSACleanup();
 		return -1;
 	}
 
-	// »ñÈ¡Ñ§ºÅ
+	// è·å–å­¦å·
 	char *pStr1 = strstr(m_post_data, "xh=");
 	if (pStr1 == NULL)
 	{
 		WSACleanup();
 		free(m_post_data);
 		cout << "Status: 500 Internal Server Error\n";
-		Error("<p>ÎŞ·¨»ñÈ¡Ñ§ºÅĞÅÏ¢¡£</p>");
+		Error("<p>æ— æ³•è·å–å­¦å·ä¿¡æ¯ã€‚</p>");
 		return -1;
 	}
 	char *pStr2 = strstr(pStr1 + 3, "&");
@@ -372,14 +372,14 @@ int parse_query()
 	pStr1 = NULL;
 	pStr2 = NULL;
 
-	// »ñÈ¡ÃÜÂë
+	// è·å–å¯†ç 
 	pStr1 = strstr(m_post_data, "mm=");
 	if (pStr1 == NULL)
 	{
 		WSACleanup();
 		free(m_post_data);
 		cout << "Status: 500 Internal Server Error\n";
-		Error("<p>ÎŞ·¨»ñÈ¡ÃÜÂëĞÅÏ¢¡£</p>");
+		Error("<p>æ— æ³•è·å–å¯†ç ä¿¡æ¯ã€‚</p>");
 		return -1;
 	}
 	pStr2 = strstr(pStr1 + 3, "&");
@@ -388,14 +388,14 @@ int parse_query()
 	pStr1 = NULL;
 	pStr2 = NULL;
 
-	// »ñÈ¡ÑéÖ¤Âë
+	// è·å–éªŒè¯ç 
 	pStr1 = strstr(m_post_data, "yzm=");
 	if (pStr1 == NULL)
 	{
 		WSACleanup();
 		free(m_post_data);
 		cout << "Status: 500 Internal Server Error\n";
-		Error("<p>ÎŞ·¨»ñÈ¡ÑéÖ¤ÂëĞÅÏ¢¡£</p>");
+		Error("<p>æ— æ³•è·å–éªŒè¯ç ä¿¡æ¯ã€‚</p>");
 		return -1;
 	}
 	char m_captcha[128] = { 0 };
@@ -403,14 +403,14 @@ int parse_query()
 
 	if (!student_login(m_xuehao, m_password, m_captcha))
 	{
-		// ÆäÓà×ÊÔ´ÇåÀíÒÑÔÚÑ§ÉúµÇÂ¼ÀïÃæ×ö¹ıÁË¡£
+		// å…¶ä½™èµ„æºæ¸…ç†å·²åœ¨å­¦ç”Ÿç™»å½•é‡Œé¢åšè¿‡äº†ã€‚
 		free(m_post_data);
 		return -1;
 	}
 
 	free(m_post_data);
 
-	// ¿ªÊ¼²é·Ö¡£
+	// å¼€å§‹æŸ¥åˆ†ã€‚
 	int m_iResult = 0;
 	char QUERY_SCORE[512] = { 0 };
 	char *m_rep_body = (char *)malloc(81920);
@@ -430,58 +430,58 @@ int parse_query()
 		free(m_post_data);
 		free(m_rep_body);
 		cout << "Status: 500 Internal Server Error\n";
-		Error("<p>´Ó·şÎñÆ÷À­È¡·ÖÊıÊ§°Ü¡£</p>");
+		Error("<p>ä»æœåŠ¡å™¨æ‹‰å–åˆ†æ•°å¤±è´¥ã€‚</p>");
 		return -1;
 	}
 
-	// ÓÅ»¯½ÓÊÜ½á¹û£¬ÏÔÊ¾²éÑ¯Ò³Ãæ
+	// ä¼˜åŒ–æ¥å—ç»“æœï¼Œæ˜¾ç¤ºæŸ¥è¯¢é¡µé¢
 	parse_friendly_score(m_result);
 	free(m_rep_body);
 
-	// ´¦ÀíÍê±Ï¡£
+	// å¤„ç†å®Œæ¯•ã€‚
 	WSACleanup();
 	return 0;
 }
 
-// Êä³ö·ÖÊıÒ³Ãæ
+// è¾“å‡ºåˆ†æ•°é¡µé¢
 void parse_friendly_score(char *p_lpszScore)
 {
 	char m_Student[64] = { 0 };
 	get_student_name(m_Student);
 
-	// ¶ÁÈë·ÖÊıÒ³ÃæÎÄ¼ş
+	// è¯»å…¥åˆ†æ•°é¡µé¢æ–‡ä»¶
 	FILE *m_file_query = fopen(CGI_PATH_TRANSLATED, "rb");
 	if (m_file_query == NULL)
 	{
 		student_logout();
-		Error("<p>´íÎó£ºÕÒ²»µ½·ÖÊıÒ³ÃæÄ£°å¡£</p>");
+		Error("<p>é”™è¯¯ï¼šæ‰¾ä¸åˆ°åˆ†æ•°é¡µé¢æ¨¡æ¿ã€‚</p>");
 		return;
 	}
-	fseek(m_file_query, 0, SEEK_END); // ÒÆµ½Î²
-	int m_file_query_length = ftell(m_file_query); // »ñÈ¡ÎÄ¼ş³¤¶È
-	fseek(m_file_query, 0, SEEK_SET); // ÖØĞÂÒÆ»ØÀ´
+	fseek(m_file_query, 0, SEEK_END); // ç§»åˆ°å°¾
+	int m_file_query_length = ftell(m_file_query); // è·å–æ–‡ä»¶é•¿åº¦
+	fseek(m_file_query, 0, SEEK_SET); // é‡æ–°ç§»å›æ¥
 	char *m_lpszQuery = (char *)malloc(m_file_query_length + 1);
 	ZeroMemory(m_lpszQuery, m_file_query_length + 1);
-	if (fread(m_lpszQuery, m_file_query_length, 1, m_file_query) != 1) // ½«Ó²ÅÌÊı¾İ¿½ÖÁÄÚ´æ
+	if (fread(m_lpszQuery, m_file_query_length, 1, m_file_query) != 1) // å°†ç¡¬ç›˜æ•°æ®æ‹·è‡³å†…å­˜
 	{
 		student_logout();
-		Error("<p>ÎŞ·¨¶ÁÈ¡·ÖÊıÒ³Ä£°åÄÚÈİ¡£</p>");
+		Error("<p>æ— æ³•è¯»å–åˆ†æ•°é¡µæ¨¡æ¿å†…å®¹ã€‚</p>");
 		fclose(m_file_query);
 		free(m_lpszQuery);
 		return;
 	}
-	fclose(m_file_query); // ¹Ø±ÕÎÄ¼ş
+	fclose(m_file_query); // å…³é—­æ–‡ä»¶
 
-	char *m_query_not_reg = strstr(p_lpszScore, "Ã»ÓĞ×¢²á");
+	char *m_query_not_reg = strstr(p_lpszScore, "æ²¡æœ‰æ³¨å†Œ");
 	if (m_query_not_reg != NULL)
 	{
 		free(m_lpszQuery);
 		cout << "Status: 403 Forbidden\n";
 
-		char *m_original_str = "<p><b>Ç×°®µÄ%s£¬ÏµÍ³¾ıËµÄã±¾Ñ§ÆÚ»¹Ã»ÓĞµç×Ó×¢²á 0.0</b></p><p>ÎÒ¿ÉÒÔÊ©Õ¹·¨Êõ£¬\
-Ò»¼ü°ïÄãÔÚ½ÌÎñÏµÍ³×¢²áÅ¶~</p><p>--&gt; µã°´ÏÂ·½°´Å¥£¬Ö±´ï²é·Ö½çÃæ :P &lt;--</p>\
+		char *m_original_str = "<p><b>äº²çˆ±çš„%sï¼Œç³»ç»Ÿå›è¯´ä½ æœ¬å­¦æœŸè¿˜æ²¡æœ‰ç”µå­æ³¨å†Œ 0.0</b></p><p>æˆ‘å¯ä»¥æ–½å±•æ³•æœ¯ï¼Œ\
+ä¸€é”®å¸®ä½ åœ¨æ•™åŠ¡ç³»ç»Ÿæ³¨å†Œå“¦~</p><p>--&gt; ç‚¹æŒ‰ä¸‹æ–¹æŒ‰é’®ï¼Œç›´è¾¾æŸ¥åˆ†ç•Œé¢ :P &lt;--</p>\
 <div class=\"col-100\"><a href=\"query.cgi?act=system_registration\" class=\"button button-big but\
-ton-fill button-success\">Ò»¼ü×¢²á</a></div>";
+ton-fill button-success\">ä¸€é”®æ³¨å†Œ</a></div>";
 
 		char m_output_str[1024] = { 0 };
 		sprintf(m_output_str, m_original_str, m_Student);
@@ -489,17 +489,15 @@ ton-fill button-success\">Ò»¼ü×¢²á</a></div>";
 		return;
 	}
 
-	// °²È«µÇ³ö½ÌÎñÏµÍ³¡£
+	// å®‰å…¨ç™»å‡ºæ•™åŠ¡ç³»ç»Ÿã€‚
 	student_logout();
 
-	// ¶¨Î»µ½µÚÒ»Ïî³É¼¨
+	// å®šä½åˆ°ç¬¬ä¸€é¡¹æˆç»©
 	char *pStr1 = strstr(p_lpszScore,"<tr class=\"odd\" onMouseOut=\"this.className='even';\" onMouseOver=\"this.className='evenfocus';\">");
 	if (pStr1 == NULL)
 	{
 		free(m_lpszQuery);
-		cout << GLOBAL_HEADER;
-		cout << p_lpszScore;
-		Error("<p>¶î£¬·ÖÊıÒ³ÃæÉñÒşÁË 0.0¡£ÉÔºóÔÙÊÔÊÔ°É~</p>");
+		Error("<p><b>é¢ï¼Œåˆ†æ•°é¡µé¢ç¥éšäº† 0.0ã€‚</b></p><p>è¿™å¯èƒ½æ˜¯å› ä¸ºæ–°çš„å­¦æœŸå¼€å§‹äº†ï¼Œä¸Šæ¬¡è€ƒè¯•æˆç»©å­˜æ¡£äº†å“¦~ æˆ–è€…å¯ä»¥è¯•è¯•å…å¯†æŸ¥è¯¢åŠŸèƒ½ã€‚</p>");
 		return;
 	}
 
@@ -508,7 +506,7 @@ ton-fill button-success\">Ò»¼ü×¢²á</a></div>";
 	char *pStr2 = NULL;
 	char *pStr3 = NULL;
 
-	// Ñ­»·»ñÈ¡Ã¿Ò»Ïî³É¼¨ĞÅÏ¢
+	// å¾ªç¯è·å–æ¯ä¸€é¡¹æˆç»©ä¿¡æ¯
 
 	double m_Total_xuefen = 0.0;
 	double m_Total_pointsxxuefen = 0.0;
@@ -534,7 +532,7 @@ ton-fill button-success\">Ò»¼ü×¢²á</a></div>";
 		if (pStr3 == NULL) break;
 		char m_subXuefen[128] = { 0 };
 		mid(m_subXuefen, pStr2, pStr3 - pStr2 - 19, 19);
-		if (atof(m_subXuefen) == 0) sprintf(m_subXuefen, "ÔİÎŞÊı¾İ");
+		if (atof(m_subXuefen) == 0) sprintf(m_subXuefen, "æš‚æ— æ•°æ®");
 
 		pStr2 = pStr3;
 		pStr2 = strstr(pStr2 + 19, "<td align=\"center\">");
@@ -543,7 +541,7 @@ ton-fill button-success\">Ò»¼ü×¢²á</a></div>";
 		if (pStr3 == NULL) break;
 		char m_subzuigaofen[128] = { 0 };
 		mid(m_subzuigaofen, pStr2, pStr3 - pStr2 - 19, 19);
-		if (atof(m_subzuigaofen) == 0) sprintf(m_subzuigaofen, "ÔİÎŞÊı¾İ");
+		if (atof(m_subzuigaofen) == 0) sprintf(m_subzuigaofen, "æš‚æ— æ•°æ®");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
 		if (pStr2 == NULL) break;
@@ -551,7 +549,7 @@ ton-fill button-success\">Ò»¼ü×¢²á</a></div>";
 		if (pStr3 == NULL) break;
 		char m_subzuidifen[128] = { 0 };
 		mid(m_subzuidifen, pStr2, pStr3 - pStr2 - 19, 19);
-		if (atof(m_subzuidifen) == 0) sprintf(m_subzuidifen, "ÔİÎŞÊı¾İ");
+		if (atof(m_subzuidifen) == 0) sprintf(m_subzuidifen, "æš‚æ— æ•°æ®");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
 		if (pStr2 == NULL) break;
@@ -559,7 +557,7 @@ ton-fill button-success\">Ò»¼ü×¢²á</a></div>";
 		if (pStr3 == NULL) break;
 		char m_subjunfen[128] = { 0 };
 		mid(m_subjunfen, pStr2, pStr3 - pStr2 - 19, 19);
-		if (atof(m_subjunfen) == 0) sprintf(m_subjunfen, "ÔİÎŞÊı¾İ");
+		if (atof(m_subjunfen) == 0) sprintf(m_subjunfen, "æš‚æ— æ•°æ®");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
 		if (pStr2 == NULL) break;
@@ -567,19 +565,19 @@ ton-fill button-success\">Ò»¼ü×¢²á</a></div>";
 		if (pStr3 == NULL) break;
 		char m_subchengji[256] = { 0 };
 		mid(m_subchengji, pStr2, pStr3 - pStr2 - 19, 19);
-		if (strstr(m_subchengji, "ÓÅĞã") != NULL)
+		if (strstr(m_subchengji, "ä¼˜ç§€") != NULL)
 		{
 			strcpy(m_subchengji,"95");
 		}
-		if (strstr(m_subchengji, "Á¼ºÃ") != NULL)
+		if (strstr(m_subchengji, "è‰¯å¥½") != NULL)
 		{
 			strcpy(m_subchengji, "85");
 		}
-		if (strstr(m_subchengji, "ÖĞµÈ") != NULL)
+		if (strstr(m_subchengji, "ä¸­ç­‰") != NULL)
 		{
 			strcpy(m_subchengji, "75");
 		}
-		if (strstr(m_subchengji, "¼°¸ñ") != NULL)
+		if (strstr(m_subchengji, "åŠæ ¼") != NULL)
 		{
 			if (atoi(m_subzuidifen) > 60)
 			{
@@ -591,7 +589,7 @@ ton-fill button-success\">Ò»¼ü×¢²á</a></div>";
 			}
 			
 		}
-		//if (atoi(m_subchengji) == 0) strcpy(m_subchengji, "ÔİÎŞÊı¾İ");
+		//if (atoi(m_subchengji) == 0) strcpy(m_subchengji, "æš‚æ— æ•°æ®");
 		if (atof(m_subchengji) < 60) 
 		{
 
@@ -608,20 +606,20 @@ ton-fill button-success\">Ò»¼ü×¢²á</a></div>";
 		if (pStr3 == NULL) break;
 		char m_submingci[128] = { 0 };
 		mid(m_submingci, pStr2, pStr3 - pStr2 - 19, 19);
-		if (atof(m_submingci) == 0) sprintf(m_submingci, "ÔİÎŞÊı¾İ");
+		if (atof(m_submingci) == 0) sprintf(m_submingci, "æš‚æ— æ•°æ®");
 
 		char m_StrTmp[10240] = { 0 };
 		sprintf(m_StrTmp, SCORE_TEMPLATE, m_subName, m_subchengji, m_subjunfen, m_subzuigaofen, m_subzuidifen,
 				m_submingci, m_subXuefen);
 		strcat(m_Output, m_StrTmp);
 
-		// £¨·ÖÊıxÑ§·Ö£©È«¶¼¼ÓÆğÀ´/×ÜÑ§·Ö = ¼ÓÈ¨·Ö£¬ÅÅ³ıÌåÓıºÍ¿Î³ÌÉè¼Æ
-		if (strstr(m_subName, "ÌåÓı") == NULL && strstr(m_subName, "¾üÊÂÑµÁ·") == NULL 
-			&& strstr(m_subName, "Êµ¼ù") == NULL)
+		// ï¼ˆåˆ†æ•°xå­¦åˆ†ï¼‰å…¨éƒ½åŠ èµ·æ¥/æ€»å­¦åˆ† = åŠ æƒåˆ†ï¼Œæ’é™¤ä½“è‚²å’Œè¯¾ç¨‹è®¾è®¡
+		if (strstr(m_subName, "ä½“è‚²") == NULL && strstr(m_subName, "å†›äº‹è®­ç»ƒ") == NULL 
+			&& strstr(m_subName, "å®è·µ") == NULL)
 		{
 			float m_xuefen = atof(m_subXuefen);
 			float m_chengji = atof(m_subchengji);
-			if (m_xuefen != 0) // ÅÅ0Ñ§·Ö...£¬²¢Í³¼Æ×ÜÑ§·Ö
+			if (m_xuefen != 0) // æ’0å­¦åˆ†...ï¼Œå¹¶ç»Ÿè®¡æ€»å­¦åˆ†
 			{
 				m_Total_xuefen += m_xuefen;
 			}
@@ -634,23 +632,23 @@ ton-fill button-success\">Ò»¼ü×¢²á</a></div>";
 				}
 			}
 		}
-		m_success = true; // ²éµ½Ò»¸öËãÒ»¸ö
+		m_success = true; // æŸ¥åˆ°ä¸€ä¸ªç®—ä¸€ä¸ª
 		pStr1 = strstr(pStr3, "<tr class=\"odd\" onMouseOut=\"this.className='even';\" onMouseOver=\"this.className='evenfocus';\">");
 	}
 
-	// ¼ÙÈç·¢ÉúÁË´íÎó
+	// å‡å¦‚å‘ç”Ÿäº†é”™è¯¯
 	if (!m_success) 
 	{
 		free(m_lpszQuery);
-		Error("<p>ÄÚ¸ö£¬·¢ÉúÒâÍâ´íÎóÀ²¡£</p>");
+		Error("<p>å†…ä¸ªï¼Œå‘ç”Ÿæ„å¤–é”™è¯¯å•¦ã€‚</p>");
 		return;
 	}
 
-	// Ìî³ä·µ»ØÒ³Ãæ
+	// å¡«å……è¿”å›é¡µé¢
 	if (m_Total_pointsxxuefen != 0 || m_Total_xuefen != 0)
 	{
 		char m_jiaquanfen[81920] = { 0 };
-		sprintf(m_jiaquanfen, "<div id=\"i_total\"><p>±¾Ñ§ÆÚ¼ÓÈ¨×ÛºÏ·Ö£¨ÆÀÓÅ¡¢ÅÅÃûÒÀ¾İ£¬¹©²Î¿¼£©£º</p><center>%.1f</center></div>", 
+		sprintf(m_jiaquanfen, "<div id=\"i_total\"><p>æœ¬å­¦æœŸåŠ æƒç»¼åˆåˆ†ï¼ˆè¯„ä¼˜ã€æ’åä¾æ®ï¼Œä¾›å‚è€ƒï¼‰ï¼š</p><center>%.1f</center></div>", 
 				m_Total_pointsxxuefen / m_Total_xuefen);
 		strcat(m_jiaquanfen, m_Output);
 		ZeroMemory(m_Output, 81920);
@@ -658,7 +656,7 @@ ton-fill button-success\">Ò»¼ü×¢²á</a></div>";
 	}
 
 	char m_query_time[512] = { 0 };
-	sprintf(m_query_time, "<center>±¾´Î²éÑ¯ºÄÊ± %.2f Ãë</center>", (double)((GetTickCount() - g_start_time) / 1000));
+	sprintf(m_query_time, "<center>æœ¬æ¬¡æŸ¥è¯¢è€—æ—¶ %.2f ç§’</center>", (double)((GetTickCount() - g_start_time) / 1000));
 	strcat(m_Output, m_query_time);
 	char m_lpszCompleteQuery[81920] = { 0 };
 	sprintf(m_lpszCompleteQuery, m_lpszQuery, m_Student, m_Student, m_Output);
@@ -670,7 +668,7 @@ ton-fill button-success\">Ò»¼ü×¢²á</a></div>";
 	fclose(g_fQueryCount);
 }
 
-// »ñÈ¡Ñ§ÉúĞÕÃû
+// è·å–å­¦ç”Ÿå§“å
 void get_student_name(char *p_lpszBuffer)
 {
 	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
@@ -689,8 +687,8 @@ void get_student_name(char *p_lpszBuffer)
 		return;
 	}
 
-	// À­È¡Ñ§ÉúĞÕÃû
-	char *pStr1 = strstr(m_rep_header, "<td class=\"fieldName\">ĞÕÃû:&nbsp;</td>");
+	// æ‹‰å–å­¦ç”Ÿå§“å
+	char *pStr1 = strstr(m_rep_header, "<td class=\"fieldName\">å§“å:&nbsp;</td>");
 	if (pStr1 == NULL)
 	{
 		free(m_rep_header);
@@ -712,7 +710,7 @@ void get_student_name(char *p_lpszBuffer)
 	free(m_rep_header);
 }
 
-// ½ÌÎñÏµÍ³µç×Ó×¢²á (GET /query.cgi?act=system_registration)
+// æ•™åŠ¡ç³»ç»Ÿç”µå­æ³¨å†Œ (GET /query.cgi?act=system_registration)
 int system_registration()
 {
 	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
@@ -724,7 +722,7 @@ int system_registration()
 
 	int m_iResult = 0;
 
-	// ·¢ËÍÇëÇó£¬»ñÈ¡µç×Ó×¢²áĞÅÏ¢¡£
+	// å‘é€è¯·æ±‚ï¼Œè·å–ç”µå­æ³¨å†Œä¿¡æ¯ã€‚
 	char * m_rep_header = (char *)malloc(10240);
 	ZeroMemory(m_rep_header, 10240);
 	char m_req[1024] = { 0 };
@@ -737,12 +735,12 @@ int system_registration()
 		return -1;
 	}
 
-	// ²éÕÒĞèÒªµç×Ó×¢²áµÄÑ§ÆÚĞÅÏ¢¡£
+	// æŸ¥æ‰¾éœ€è¦ç”µå­æ³¨å†Œçš„å­¦æœŸä¿¡æ¯ã€‚
 	char *pStr1 = strstr(m_rep_header, "selected>");
 	if (pStr1 == NULL)
 	{
 		free(m_rep_header);
-		Error("<p>Êı¾İ´íÎó¡£²»ºÃÒâË¼£¬×Ô¶¯×¢²áÊ§°Ü£¬ÀÍÇë´óÀĞÈ¥½ÌÎñÏµÍ³¿´¿´°É~ (1)</p>");
+		Error("<p>æ•°æ®é”™è¯¯ã€‚ä¸å¥½æ„æ€ï¼Œè‡ªåŠ¨æ³¨å†Œå¤±è´¥ï¼ŒåŠ³è¯·å¤§ä½¬å»æ•™åŠ¡ç³»ç»Ÿçœ‹çœ‹å§~ (1)</p>");
 		student_logout();
 		WSACleanup();
 		return -1;
@@ -752,7 +750,7 @@ int system_registration()
 	if (pStr2 == NULL)
 	{
 		free(m_rep_header);
-		Error("<p>Êı¾İ´íÎó¡£²»ºÃÒâË¼£¬×Ô¶¯×¢²áÊ§°Ü£¬ÀÍÇë´óÀĞÈ¥½ÌÎñÏµÍ³¿´¿´°É~ (2)</p>");
+		Error("<p>æ•°æ®é”™è¯¯ã€‚ä¸å¥½æ„æ€ï¼Œè‡ªåŠ¨æ³¨å†Œå¤±è´¥ï¼ŒåŠ³è¯·å¤§ä½¬å»æ•™åŠ¡ç³»ç»Ÿçœ‹çœ‹å§~ (2)</p>");
 		student_logout();
 		WSACleanup();
 		return -1;
@@ -762,7 +760,7 @@ int system_registration()
 	if (pStr2 == NULL)
 	{
 		free(m_rep_header);
-		Error("<p>Êı¾İ´íÎó¡£²»ºÃÒâË¼£¬×Ô¶¯×¢²áÊ§°Ü£¬ÀÍÇë´óÀĞÈ¥½ÌÎñÏµÍ³¿´¿´°É~ (3)</p>");
+		Error("<p>æ•°æ®é”™è¯¯ã€‚ä¸å¥½æ„æ€ï¼Œè‡ªåŠ¨æ³¨å†Œå¤±è´¥ï¼ŒåŠ³è¯·å¤§ä½¬å»æ•™åŠ¡ç³»ç»Ÿçœ‹çœ‹å§~ (3)</p>");
 		student_logout();
 		WSACleanup();
 		return -1;
@@ -772,17 +770,17 @@ int system_registration()
 	mid(m_regval, pStr1, pStr2 - pStr1 - 15, 15);
 	free(m_rep_header);
 
-	// Ìî³äµç×Ó×¢²áĞÅÏ¢
+	// å¡«å……ç”µå­æ³¨å†Œä¿¡æ¯
 	char m_post_reg_info[4096] = "zxjxjhh=";
 	strcat(m_post_reg_info, m_regval);
 	int m_post_reg_info_length = strlen(m_post_reg_info);
 
-	// Ìî³ä×¢²áÇëÇó
+	// å¡«å……æ³¨å†Œè¯·æ±‚
 	char m_post_req[8192] = { 0 };
 	sprintf(m_post_req, REQUEST_POST_REGISTER_INTERFACE, m_regval, CGI_HTTP_COOKIE, m_post_reg_info_length, 
 			m_post_reg_info);
 
-	// ¿ªÊ¼µç×Ó×¢²á
+	// å¼€å§‹ç”µå­æ³¨å†Œ
 	m_rep_header = (char *)malloc(10240);
 	ZeroMemory(m_rep_header, 10240);
 	if (!CrawlRequest(m_post_req, m_rep_header, 10240, &m_iResult))
@@ -793,21 +791,21 @@ int system_registration()
 		return -1;
 	}
 
-	// ¼ì²éÊÇ·ñ×¢²á³É¹¦¡£
-	pStr1 = strstr(m_rep_header, "×¢²á³É¹¦");
+	// æ£€æŸ¥æ˜¯å¦æ³¨å†ŒæˆåŠŸã€‚
+	pStr1 = strstr(m_rep_header, "æ³¨å†ŒæˆåŠŸ");
 	if (pStr1 == NULL)
 	{
 		free(m_rep_header);
 		student_logout();
 		WSACleanup();
-		Error("<p>²»ºÃÒâË¼£¬×Ô¶¯×¢²áÊ§°Ü£¬ÀÍÇë´óÀĞÈ¥½ÌÎñÏµÍ³¿´¿´°É~ (4)</p>");
+		Error("<p>ä¸å¥½æ„æ€ï¼Œè‡ªåŠ¨æ³¨å†Œå¤±è´¥ï¼ŒåŠ³è¯·å¤§ä½¬å»æ•™åŠ¡ç³»ç»Ÿçœ‹çœ‹å§~ (4)</p>");
 		return -1;
 	}
 
-	// ×¢²á³É¹¦ÁË¡£
+	// æ³¨å†ŒæˆåŠŸäº†ã€‚
 	free(m_rep_header);
 
-	// Îª¸Õµç×Ó×¢²áµÄÍ¬Ñ§²éÑ¯³É¼¨
+	// ä¸ºåˆšç”µå­æ³¨å†Œçš„åŒå­¦æŸ¥è¯¢æˆç»©
 	char QUERY_SCORE[512] = { 0 };
 	m_rep_header = (char *)malloc(81920);
 	sprintf(QUERY_SCORE, REQUEST_QUERY_SCORE, CGI_HTTP_COOKIE);
@@ -823,24 +821,24 @@ int system_registration()
 		student_logout();
 		free(m_rep_header);
 		cout << "Status: 500 Internal Server Error\n";
-		Error("<p>´Ó·şÎñÆ÷À­È¡·ÖÊıÊ§°Ü¡£</p>");
+		Error("<p>ä»æœåŠ¡å™¨æ‹‰å–åˆ†æ•°å¤±è´¥ã€‚</p>");
 		WSACleanup();
 		return -1;
 	}
 
-	// ÓÅ»¯½ÓÊÜ½á¹û£¬ÏÔÊ¾²éÑ¯Ò³Ãæ
+	// ä¼˜åŒ–æ¥å—ç»“æœï¼Œæ˜¾ç¤ºæŸ¥è¯¢é¡µé¢
 	parse_friendly_score(m_result);
 	free(m_rep_header);
 	
-	// ÍêÊÂ~
+	// å®Œäº‹~
 	WSACleanup();
 	return 0;
 }
 
-// µÇÂ¼Ñ§Éú
+// ç™»å½•å­¦ç”Ÿ
 bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 {
-	// ·¢ËÍµÇÂ½ÇëÇó¡£
+	// å‘é€ç™»é™†è¯·æ±‚ã€‚
 	int m_iResult = 0;
 	char * m_rep_body = (char *)malloc(40960);
 	ZeroMemory(m_rep_body, 40960);
@@ -848,7 +846,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	char *m_origin = "zjh1=&tips=&lx=&evalue=&eflag=&fs=&dzslh=&zjh=%s&mm=%s&v_yzm=%s";
 	char m_padding[1024] = { 0 };
 	sprintf(m_padding, m_origin, p_xuehao, p_password, p_captcha);
-	int m_ContentLength = strlen(m_padding); // TODO: ÕâÀï²»ÓÃ¼ÓÄªÃûÆäÃîµÄ½áÊø³¤¶È
+	int m_ContentLength = strlen(m_padding); // TODO: è¿™é‡Œä¸ç”¨åŠ è«åå…¶å¦™çš„ç»“æŸé•¿åº¦
 	sprintf(POST_LOGIN, REQUEST_LOGIN, m_ContentLength, CGI_HTTP_COOKIE, p_xuehao, p_password, p_captcha);
 	if (!CrawlRequest(POST_LOGIN, m_rep_body, 40960, &m_iResult))
 	{
@@ -856,61 +854,70 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		return false;
 	}
 
-	// À­È¡µÇÂ¼½á¹û¡£
+	// æ‹‰å–ç™»å½•ç»“æœã€‚
 	char *m_result = strstr(m_rep_body, "\r\n\r\n");
 	if (m_result == NULL)
 	{
 		WSACleanup();
 		free(m_rep_body);
 		cout << "Status: 500 Internal Server Error\n";
-		Error("<p>´Ó·şÎñÆ÷À­È¡µÇÂ¼½á¹ûÊ§°Ü¡£</p>");
+		Error("<p>ä»æœåŠ¡å™¨æ‹‰å–ç™»å½•ç»“æœå¤±è´¥ã€‚</p>");
 		return false;
 	}
 
-	// ´¦ÀíµÇÂ¼½á¹û¡£
-	char *m_login_not_auth = strstr(m_result, "Ö¤¼şºÅ");
+	// å¤„ç†ç™»å½•ç»“æœã€‚
+	char *m_login_not_auth = strstr(m_result, "è¯ä»¶å·");
 	if (m_login_not_auth != NULL)
 	{
 		WSACleanup();
 		free(m_rep_body);
 		cout << "Status: 403 Forbidden\n";
-		Error("<p>Ñ§ºÅ»òÃÜÂë²»¶Ô°¡£¬´óÀĞ¡£ TAT¡£</p><p>Ä¬ÈÏÃÜÂëÊÇ¾ÍÊÇÑ§ºÅÅ¶£¬Èç¹ûÄãĞŞ¸Ä¹ıÃÜÂë£¬Äã¶®µÄ~</p>");
+		Error("<p>è¯ä»¶å·æˆ–å¯†ç ä¸å¯¹å•Šï¼Œå¤§ä½¬ã€‚ TATã€‚</p>");
 		return false;
 	}
-	m_login_not_auth = strstr(m_result, "ÑéÖ¤Âë");
+	m_login_not_auth = strstr(m_result, "å¯†ç ä¸æ­£ç¡®");
 	if (m_login_not_auth != NULL)
 	{
 		WSACleanup();
 		free(m_rep_body);
 		cout << "Status: 403 Forbidden\n";
-		Error("<p>ÑéÖ¤Âë²»¶Ô°¡£¬´óÀĞ¡£ TAT¡£</p>");
+		Error("<p>å­¦å·æˆ–å¯†ç ä¸å¯¹å•Šï¼Œå¤§ä½¬ã€‚ TATã€‚</p>");
 		return false;
 	}
-	m_login_not_auth = strstr(m_result, "Êı¾İ¿â");
+	m_login_not_auth = strstr(m_result, "éªŒè¯ç é”™è¯¯");
 	if (m_login_not_auth != NULL)
 	{
 		WSACleanup();
 		free(m_rep_body);
 		cout << "Status: 403 Forbidden\n";
-		Error("<p>½ÌÎñÏµÍ³¾ıËµÊı¾İ¿â·±Ã¦ :P</p><p>¶ÔÓÚ<b>Êı¾İ¿âÅÜÂ·</b>ÎÊÌâ£¬ÄÇ¾ÍµÈµÈÏÈ¿©~</p>");
+		Error("<p>éªŒè¯ç ä¸å¯¹å•Šï¼Œå¤§ä½¬ã€‚ TATã€‚</p>");
 		return false;
 	}
-	char *m_login_success = strstr(m_result, "Ñ§·ÖÖÆ×ÛºÏ½ÌÎñ");
+	m_login_not_auth = strstr(m_result, "æ•°æ®åº“");
+	if (m_login_not_auth != NULL)
+	{
+		WSACleanup();
+		free(m_rep_body);
+		cout << "Status: 403 Forbidden\n";
+		Error("<p>æ•™åŠ¡ç³»ç»Ÿå›è¯´æ•°æ®åº“ç¹å¿™ :P</p><p>å¯¹äº<b>æ•°æ®åº“è·‘è·¯</b>é—®é¢˜ï¼Œé‚£å°±ç­‰ç­‰å…ˆå’¯~</p>");
+		return false;
+	}
+	char *m_login_success = strstr(m_result, "å­¦åˆ†åˆ¶ç»¼åˆæ•™åŠ¡");
 	if (m_login_success == NULL)
 	{
 		WSACleanup();
 		free(m_rep_body);
 		cout << "Status: 403 Forbidden\n";
-		Error("<p>ÌìÄÅ¡£·¢ÉúÁËÃÕÒ»°ãµÄÎÊÌâ£¡½ÌÎñÏµÍ³ÉñÒşÁË 0.0</p><p>½¨ÒéÄãÉÔºòÔÙÊÔÊÔ°É¡£</p>");
+		Error("<p>å¤©å‘ã€‚å‘ç”Ÿäº†è°œä¸€èˆ¬çš„é—®é¢˜ï¼æ•™åŠ¡ç³»ç»Ÿç¥éšäº† 0.0</p><p>å»ºè®®ä½ ç¨å€™å†è¯•è¯•å§ã€‚</p>");
 		return false;
 	}
 
-	// ÖÁ´Ë£¬Ñ§ÉúµÇÂ¼³É¹¦£¬ÊÍ·Å×ÊÔ´¡£
+	// è‡³æ­¤ï¼Œå­¦ç”Ÿç™»å½•æˆåŠŸï¼Œé‡Šæ”¾èµ„æºã€‚
 	free(m_rep_body);
 	return true;
 }
 
-// µÇ³öÑ§Éú
+// ç™»å‡ºå­¦ç”Ÿ
 void student_logout()
 {
 	if (strcmp(CGI_HTTP_COOKIE, "") == 0) return;
@@ -923,36 +930,36 @@ void student_logout()
 	free(m_outbuffer);
 }
 
-// ÃâÃÜ²éÑ¯Èë¿Ú (/QuickQuery.cgi)
+// å…å¯†æŸ¥è¯¢å…¥å£ (/QuickQuery.cgi)
 void parse_QuickQuery_Intro()
 {
 	bool m_need_update_cookie = false;
 	process_cookie(&m_need_update_cookie);
 
-	// ¶ÁÈëÒ³ÃæÎÄ¼ş
+	// è¯»å…¥é¡µé¢æ–‡ä»¶
 	FILE *m_file_query = fopen(CGI_PATH_TRANSLATED, "rb");
 	if (m_file_query == NULL)
 	{
 		if (m_need_update_cookie)
 			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-		Error("<p>´íÎó£ºÕÒ²»µ½ÃâÃÜ²éÑ¯Ä£°å¡£</p>");
+		Error("<p>é”™è¯¯ï¼šæ‰¾ä¸åˆ°å…å¯†æŸ¥è¯¢æ¨¡æ¿ã€‚</p>");
 		return;
 	}
-	fseek(m_file_query, 0, SEEK_END); // ÒÆµ½Î²
-	int m_file_query_length = ftell(m_file_query); // »ñÈ¡ÎÄ¼ş³¤¶È
-	fseek(m_file_query, 0, SEEK_SET); // ÖØĞÂÒÆ»ØÀ´
+	fseek(m_file_query, 0, SEEK_END); // ç§»åˆ°å°¾
+	int m_file_query_length = ftell(m_file_query); // è·å–æ–‡ä»¶é•¿åº¦
+	fseek(m_file_query, 0, SEEK_SET); // é‡æ–°ç§»å›æ¥
 	char *m_lpszQuery = (char *)malloc(m_file_query_length + 1);
 	ZeroMemory(m_lpszQuery, m_file_query_length + 1);
-	if (fread(m_lpszQuery, m_file_query_length, 1, m_file_query) != 1) // ½«Ó²ÅÌÊı¾İ¿½ÖÁÄÚ´æ
+	if (fread(m_lpszQuery, m_file_query_length, 1, m_file_query) != 1) // å°†ç¡¬ç›˜æ•°æ®æ‹·è‡³å†…å­˜
 	{
 		if (m_need_update_cookie)
 			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-		Error("<p>ÎŞ·¨¶ÁÈ¡ÃâÃÜ²éÑ¯Ä£°åÄÚÈİ¡£</p>");
+		Error("<p>æ— æ³•è¯»å–å…å¯†æŸ¥è¯¢æ¨¡æ¿å†…å®¹ã€‚</p>");
 		fclose(m_file_query);
 		free(m_lpszQuery);
 		return;
 	}
-	fclose(m_file_query); // ¹Ø±ÕÎÄ¼ş
+	fclose(m_file_query); // å…³é—­æ–‡ä»¶
 
 	int m_ilength = strlen(m_lpszQuery) + 512;
 	char *m_lpszCompleteQuery = (char *)malloc(m_ilength);
@@ -967,41 +974,41 @@ void parse_QuickQuery_Intro()
 	free(m_lpszCompleteQuery);
 }
 
-// ÃâÃÜ²éÑ¯½á¹û (/query.cgi?act=QuickQuery)
+// å…å¯†æŸ¥è¯¢ç»“æœ (/query.cgi?act=QuickQuery)
 void parse_QuickQuery_Result()
 {
 	bool m_need_update_cookie = false;
 	process_cookie(&m_need_update_cookie);
 
-	// ¶ÁÈë·ÖÊıÒ³ÃæÎÄ¼ş
+	// è¯»å…¥åˆ†æ•°é¡µé¢æ–‡ä»¶
 	FILE *m_file_query = fopen(CGI_PATH_TRANSLATED, "rb");
 	if (m_file_query == NULL)
 	{
-		Error("<p>´íÎó£ºÕÒ²»µ½·ÖÊıÒ³ÃæÄ£°å¡£</p>");
+		Error("<p>é”™è¯¯ï¼šæ‰¾ä¸åˆ°åˆ†æ•°é¡µé¢æ¨¡æ¿ã€‚</p>");
 		return;
 	}
-	fseek(m_file_query, 0, SEEK_END); // ÒÆµ½Î²
-	int m_file_query_length = ftell(m_file_query); // »ñÈ¡ÎÄ¼ş³¤¶È
-	fseek(m_file_query, 0, SEEK_SET); // ÖØĞÂÒÆ»ØÀ´
+	fseek(m_file_query, 0, SEEK_END); // ç§»åˆ°å°¾
+	int m_file_query_length = ftell(m_file_query); // è·å–æ–‡ä»¶é•¿åº¦
+	fseek(m_file_query, 0, SEEK_SET); // é‡æ–°ç§»å›æ¥
 	char *m_lpszQuery = (char *)malloc(m_file_query_length + 1);
 	ZeroMemory(m_lpszQuery, m_file_query_length + 1);
-	if (fread(m_lpszQuery, m_file_query_length, 1, m_file_query) != 1) // ½«Ó²ÅÌÊı¾İ¿½ÖÁÄÚ´æ
+	if (fread(m_lpszQuery, m_file_query_length, 1, m_file_query) != 1) // å°†ç¡¬ç›˜æ•°æ®æ‹·è‡³å†…å­˜
 	{
-		Error("<p>ÎŞ·¨¶ÁÈ¡·ÖÊıÒ³Ä£°åÄÚÈİ¡£</p>");
+		Error("<p>æ— æ³•è¯»å–åˆ†æ•°é¡µæ¨¡æ¿å†…å®¹ã€‚</p>");
 		fclose(m_file_query);
 		free(m_lpszQuery);
 		return;
 	}
-	fclose(m_file_query); // ¹Ø±ÕÎÄ¼ş
+	fclose(m_file_query); // å…³é—­æ–‡ä»¶
 
-	// »ñÈ¡ POST Êı¾İ¡£
+	// è·å– POST æ•°æ®ã€‚
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0)
 	{
 		cout << "Status: 500 Internal Server Error\n";
 		if (m_need_update_cookie)
 			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-		Error("<p>·¢Éú´íÎó£¬POST Êı¾İ³¤¶ÈÒì³£¡£</p>");
+		Error("<p>å‘ç”Ÿé”™è¯¯ï¼ŒPOST æ•°æ®é•¿åº¦å¼‚å¸¸ã€‚</p>");
 		WSACleanup();
 		return;
 	}
@@ -1011,12 +1018,12 @@ void parse_QuickQuery_Result()
 		cout << "Status: 500 Internal Server Error\n";
 		if (m_need_update_cookie)
 			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-		Error("<p>·¢Éú´íÎó£¬POST Êı¾İÀ­È¡Ê§°Ü¡£</p>");
+		Error("<p>å‘ç”Ÿé”™è¯¯ï¼ŒPOST æ•°æ®æ‹‰å–å¤±è´¥ã€‚</p>");
 		WSACleanup();
 		return;
 	}
 
-	// »ñÈ¡Ñ§ºÅ
+	// è·å–å­¦å·
 	char *pStr1 = strstr(m_post_data, "xh=");
 	if (pStr1 == NULL)
 	{
@@ -1025,7 +1032,7 @@ void parse_QuickQuery_Result()
 		cout << "Status: 500 Internal Server Error\n";
 		if (m_need_update_cookie)
 			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-		Error("<p>ÎŞ·¨»ñÈ¡Ñ§ºÅĞÅÏ¢¡£</p>");
+		Error("<p>æ— æ³•è·å–å­¦å·ä¿¡æ¯ã€‚</p>");
 		return;
 	}
 	char *pStr2 = strstr(pStr1 + 3, "&");
@@ -1049,7 +1056,7 @@ void parse_QuickQuery_Result()
 		cout << "Status: 500 Internal Server Error\n";
 		if (m_need_update_cookie)
 			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-		Error("<p>ÊäÈëµÄÑ§ºÅ¸öÊı´æÔÚÎÊÌâ£¬ÇëÈ·ÈÏ£¡</p>");
+		Error("<p>è¾“å…¥çš„å­¦å·ä¸ªæ•°å­˜åœ¨é—®é¢˜ï¼Œè¯·ç¡®è®¤ï¼</p>");
 		return;
 	}
 
@@ -1065,13 +1072,13 @@ void parse_QuickQuery_Result()
 				cout << "Status: 500 Internal Server Error\n";
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-				Error("<p>ÊäÈëµÄÑ§ºÅÖĞÓĞ³¤¶È´æÔÚÎÊÌâ£¬ÇëÈ·ÈÏ£¡</p>");
+				Error("<p>è¾“å…¥çš„å­¦å·ä¸­æœ‰é•¿åº¦å­˜åœ¨é—®é¢˜ï¼Œè¯·ç¡®è®¤ï¼</p>");
 				return;
 			}
 
 			char m_query_param[1024] = { 0 };
 			sprintf(m_query_param, "LS_XH=%s", m_xh[xh_index]);
-			strcat(m_query_param, "&resultPage=http%3A%2F%2F58.220.248.249%3A80%2FreportFiles%2Fcj%2Fcj_zwcjd.jsp%3F");
+			strcat(m_query_param, "&resultPage=http%3A%2F%2Fjw0.yzu.edu.cn%3A80%2FreportFiles%2Fcj%2Fcj_zwcjd.jsp%3F");
 			char m_query_request[2048] = { 0 };
 			sprintf(m_query_request, REQUEST_SET_REPORT_PARAMS, CGI_HTTP_COOKIE, strlen(m_query_param));
 			strcat(m_query_request, m_query_param);
@@ -1084,7 +1091,7 @@ void parse_QuickQuery_Result()
 				cout << "Status: 500 Internal Server Error\n";
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-				Error("<p>Í¶µİÃâÃÜ²éÑ¯ÇëÇóÊ§°Ü¡£</p><p>ÇëÈ·ÈÏ½ÌÎñÏµÍ³ÊÇ¿ÉÓÃµÄ¡£</p>");
+				Error("<p>æŠ•é€’å…å¯†æŸ¥è¯¢è¯·æ±‚å¤±è´¥ã€‚</p><p>è¯·ç¡®è®¤æ•™åŠ¡ç³»ç»Ÿæ˜¯å¯ç”¨çš„ã€‚</p>");
 				WSACleanup();
 				free(m_lpvBuffer);
 				return;
@@ -1096,7 +1103,7 @@ void parse_QuickQuery_Result()
 				cout << "Status: 500 Internal Server Error\n";
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-				Error("<p>»ñÈ¡±¨±íID´íÎó¡£(1)</p>");
+				Error("<p>è·å–æŠ¥è¡¨IDé”™è¯¯ã€‚(1)</p>");
 				WSACleanup();
 				free(m_lpvBuffer);
 				return;
@@ -1107,7 +1114,7 @@ void parse_QuickQuery_Result()
 				cout << "Status: 500 Internal Server Error\n";
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-				Error("<p>»ñÈ¡±¨±íID´íÎó¡£(2)</p>");
+				Error("<p>è·å–æŠ¥è¡¨IDé”™è¯¯ã€‚(2)</p>");
 				WSACleanup();
 				free(m_lpvBuffer);
 				return;
@@ -1127,7 +1134,7 @@ void parse_QuickQuery_Result()
 				cout << "Status: 500 Internal Server Error\n";
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-				Error("<p>Í¨¹ıIDÃâÃÜ²éÑ¯Ê§°Ü¡£</p><p>·¢ÉúÁËÌìÖªµÀµÄ´íÎó¡£</p>");
+				Error("<p>é€šè¿‡IDå…å¯†æŸ¥è¯¢å¤±è´¥ã€‚</p><p>å‘ç”Ÿäº†å¤©çŸ¥é“çš„é”™è¯¯ã€‚</p>");
 				WSACleanup();
 				free(m_lpvBuffer);
 				return;
@@ -1144,7 +1151,7 @@ void parse_QuickQuery_Result()
 						cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 					char m_Exception[512] = { 0 };
 					mid(m_Exception, pStr1 + 11, pStr2 - pStr1 - 11, 0);
-					char m_ExceptionMsg[512] = "<p><b>½ÌÎñÏµÍ³Å×³öÁËÈçÏÂ´íÎó...</b></p><p>";
+					char m_ExceptionMsg[512] = "<p><b>æ•™åŠ¡ç³»ç»ŸæŠ›å‡ºäº†å¦‚ä¸‹é”™è¯¯...</b></p><p>";
 					strcat(m_ExceptionMsg, m_Exception);
 					strcat(m_ExceptionMsg, "</p>");
 					Error(m_ExceptionMsg);
@@ -1162,7 +1169,7 @@ void parse_QuickQuery_Result()
 				cout << "Status: 500 Internal Server Error\n";
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-				Error("<p>ÃâÃÜ²éÑ¯·µ»Ø²ÎÊı´íÎó¡£(1)</p>");
+				Error("<p>å…å¯†æŸ¥è¯¢è¿”å›å‚æ•°é”™è¯¯ã€‚(1)</p>");
 				WSACleanup();
 				free(m_lpvBuffer);
 				return;
@@ -1173,7 +1180,7 @@ void parse_QuickQuery_Result()
 				cout << "Status: 500 Internal Server Error\n";
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-				Error("<p>ÃâÃÜ²éÑ¯·µ»Ø²ÎÊı´íÎó¡£(2)</p>");
+				Error("<p>å…å¯†æŸ¥è¯¢è¿”å›å‚æ•°é”™è¯¯ã€‚(2)</p>");
 				WSACleanup();
 				free(m_lpvBuffer);
 				return;
@@ -1191,19 +1198,19 @@ void parse_QuickQuery_Result()
 				cout << "Status: 500 Internal Server Error\n";
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-				Error("<p>½ÓÊÜ·ÖÊıĞÅÏ¢Ê§°Ü£¡</p>");
+				Error("<p>æ¥å—åˆ†æ•°ä¿¡æ¯å¤±è´¥ï¼</p>");
 				WSACleanup();
 				free(m_lpvBuffer);
 				return;
 			}
 
-			pStr1 = strstr(m_lpvBuffer, "ĞÕÃû\t");
+			pStr1 = strstr(m_lpvBuffer, "å§“å\t");
 			if (pStr1 == NULL)
 			{
 				cout << "Status: 500 Internal Server Error\n";
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-				Error("<p>Ñ§ÉúĞÕÃû»ñÈ¡Ê§°Ü£¡(1)</p>");
+				Error("<p>å­¦ç”Ÿå§“åè·å–å¤±è´¥ï¼(1)</p>");
 				WSACleanup();
 				free(m_lpvBuffer);
 				return;
@@ -1214,7 +1221,7 @@ void parse_QuickQuery_Result()
 				cout << "Status: 500 Internal Server Error\n";
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-				Error("<p>Ñ§ÉúĞÕÃû»ñÈ¡Ê§°Ü£¡(2)</p>");
+				Error("<p>å­¦ç”Ÿå§“åè·å–å¤±è´¥ï¼(2)</p>");
 				WSACleanup();
 				free(m_lpvBuffer);
 				return;
@@ -1227,7 +1234,7 @@ void parse_QuickQuery_Result()
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error, 
-					"<p><b>ßÀ£¬»ñÈ¡Ê§°ÜÁË¡£ÇëÈ·ÈÏËùÊäĞÅÏ¢ÊÇÕıÈ·µÄ¡£</b></p><p>·¢Éú´íÎóµÄÑ§ºÅ: %s</p>", 
+					"<p><b>å‘ƒï¼Œè·å–å¤±è´¥äº†ã€‚è¯·ç¡®è®¤æ‰€è¾“ä¿¡æ¯æ˜¯æ­£ç¡®çš„ã€‚</b></p><p>å‘ç”Ÿé”™è¯¯çš„å­¦å·: %s</p>", 
 					m_xh[xh_index]);
 				Error(m_friendly_error);
 				WSACleanup();
@@ -1243,7 +1250,7 @@ void parse_QuickQuery_Result()
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error,
-					"<p><b>»ñÈ¡ĞÅÏ¢Ê§°Ü£¬ÇëÈ·ÈÏÊäÈëÕıÈ·¡£</b></p><p>·¢Éú´íÎóµÄÑ§ºÅ: %s</p>",
+					"<p><b>è·å–ä¿¡æ¯å¤±è´¥ï¼Œè¯·ç¡®è®¤è¾“å…¥æ­£ç¡®ã€‚</b></p><p>å‘ç”Ÿé”™è¯¯çš„å­¦å·: %s</p>",
 					m_xh[xh_index]);
 				Error(m_friendly_error);
 				WSACleanup();
@@ -1255,7 +1262,7 @@ void parse_QuickQuery_Result()
 
 			pStr1 = NULL;
 			pStr2 = NULL;
-			pStr1 = strstr(m_lpvBuffer, "¿¼ÊÔÊ±¼ä\t\t\n");
+			pStr1 = strstr(m_lpvBuffer, "è€ƒè¯•æ—¶é—´\t\t\n");
 			if (pStr1 == NULL)
 			{
 				cout << "Status: 500 Internal Server Error\n";
@@ -1263,7 +1270,7 @@ void parse_QuickQuery_Result()
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error,
-					"<p><b>½ÓÊÜµ½µÄ±¨±í´æÔÚÎÊÌâ¡£</b></p><p>·¢Éú´íÎóµÄÑ§ºÅ: %s</p>",
+					"<p><b>æ¥å—åˆ°çš„æŠ¥è¡¨å­˜åœ¨é—®é¢˜ã€‚</b></p><p>å‘ç”Ÿé”™è¯¯çš„å­¦å·: %s</p>",
 					m_xh[xh_index]);
 				Error(m_friendly_error);
 				WSACleanup();
@@ -1278,7 +1285,7 @@ void parse_QuickQuery_Result()
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error,
-					"<p><b>ÊÕµ½µÄ±¨±í´óĞ¡´æÔÚÎÊÌâ¡£</b></p><p>·¢Éú´íÎóµÄÑ§ºÅ: %s</p>",
+					"<p><b>æ”¶åˆ°çš„æŠ¥è¡¨å¤§å°å­˜åœ¨é—®é¢˜ã€‚</b></p><p>å‘ç”Ÿé”™è¯¯çš„å­¦å·: %s</p>",
 					m_xh[xh_index]);
 				Error(m_friendly_error);
 				WSACleanup();
@@ -1310,7 +1317,7 @@ void parse_QuickQuery_Result()
 
 				char m_xf[64] = { 0 };
 				mid(m_xf, pStr1, pStr2 - pStr1, 0);
-				pStr1 = pStr2 + 1; // Ñ§·Ö
+				pStr1 = pStr2 + 1; // å­¦åˆ†
 				pStr2 = strstr(pStr1, "\t");
 				if (pStr2 == NULL)
 				{
@@ -1338,10 +1345,10 @@ void parse_QuickQuery_Result()
 
 				char m_lb[64] = { 0 };
 				mid(m_lb, pStr1, pStr2 - pStr1, 0);
-				if (strstr(m_lb, "ÖØĞŞ") != NULL)
+				if (strstr(m_lb, "é‡ä¿®") != NULL)
 				{
 					char m_kcmz_cx[256] = { 0 };
-					strcat(m_kcmz_cx, "[ÖØĞŞ] ");
+					strcat(m_kcmz_cx, "[é‡ä¿®] ");
 					strcat(m_kcmz_cx, m_kcmz);
 					strcpy(m_kcmz, m_kcmz_cx);
 				}
@@ -1383,7 +1390,7 @@ void parse_QuickQuery_Result()
 				cout << "Status: 500 Internal Server Error\n";
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-				Error("<p>±§Ç¸£¬ÃâÃÜ²éÑ¯Ê§°Ü£¬ÇëÉÔºóÔÙÊÔ¡£</p>");
+				Error("<p>æŠ±æ­‰ï¼Œå…å¯†æŸ¥è¯¢å¤±è´¥ï¼Œè¯·ç¨åå†è¯•ã€‚</p>");
 				WSACleanup();
 				return;
 			}
@@ -1431,12 +1438,12 @@ void parse_QuickQuery_Result()
 		}
 		cout << GLOBAL_HEADER;
 		char m_query_time[512] = { 0 };
-		sprintf(m_query_time, "<center>±¾´Î²éÑ¯ºÄÊ± %.2f Ãë</center>", (double)((GetTickCount() - g_start_time) / 1000));
+		sprintf(m_query_time, "<center>æœ¬æ¬¡æŸ¥è¯¢è€—æ—¶ %.2f ç§’</center>", (double)((GetTickCount() - g_start_time) / 1000));
 		strcat(m_list, m_query_time);
 		char m_outer[204800] = { 0 };
 		if (m_xhgs > 1)
 		{
-			sprintf(m_outer, m_lpszQuery, "¶àÈË²éÑ¯", "¶àÈË²éÑ¯", m_list);
+			sprintf(m_outer, m_lpszQuery, "å¤šäººæŸ¥è¯¢", "å¤šäººæŸ¥è¯¢", m_list);
 		}
 		else
 		{

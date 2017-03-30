@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "General.h"
 
 using namespace std;
@@ -9,87 +9,76 @@ char JSESSIONID[256] = {0};
 const char* GLOBAL_HEADER = "Cache-Control: no-cache\n\
 Pragma: no-cache\n\
 Expires: Thu, 16 Oct 1997 06:00:00 GMT\n\
-X-Powered-By: GuanglingScoreHelper\n\
+X-Powered-By: iEdon-URPScoreHelper\n\
 Content-Type: text/html; charset=gb2312\n\n";
 
-// Ê×Ò³ HTTP ÇëÇó
+// é¦–é¡µ HTTP è¯·æ±‚
 const char* REQUEST_HOME_PAGE = "\
 GET / HTTP/1.0\n\
-Host: 58.220.248.249\n\
-User-Agent: iEdon-GuanglingScoreHelper\n\
+User-Agent: iEdon-URPScoreHelper\n\
 Accept: */*\n\
 Connection: close\n\n";
 
-// Ê×Ò³ HTTP ÇëÇó£¨´ø COOKIE £©
+// é¦–é¡µ HTTP è¯·æ±‚ï¼ˆå¸¦ COOKIE ï¼‰
 const char* REQUEST_HOME_PAGE_WITH_COOKIE = "\
 GET / HTTP/1.0\n\
-Host: 58.220.248.249\n\
-User-Agent: iEdon-GuanglingScoreHelper\n\
+User-Agent: iEdon-URPScoreHelper\n\
 Accept: */*\n\
 Cookie: %s\n\
 Connection: close\n\n";
 
-// ÑéÖ¤Âë HTTP ÇëÇó
+// éªŒè¯ç  HTTP è¯·æ±‚
 const char* REQUEST_CAPTCHA = "\
 GET /validateCodeAction.do?random=0.%d HTTP/1.0\n\
-Host: 58.220.248.249\n\
-User-Agent: iEdon-GuanglingScoreHelper\n\
+User-Agent: iEdon-URPScoreHelper\n\
 Accept: */*\n\
-Referer: http://58.220.248.249/\n\
 Cookie: JSESSIONID=%s\n\
 Connection: close\n\n";
 
-// ÇëÇóµÇÂ½
+// è¯·æ±‚ç™»é™†
 const char * REQUEST_LOGIN = "\
 POST /loginAction.do HTTP/1.0\n\
-Host: 58.220.248.249\n\
-User-Agent: iEdon-GuanglingScoreHelper\n\
+User-Agent: iEdon-URPScoreHelper\n\
 Content-Length: %d\n\
 Cache-Control: max-age=0\n\
-Origin: http://58.220.248.249\n\
 Content-Type: application/x-www-form-urlencoded\n\
 Accept: */*\n\
-Referer: http://58.220.248.249/\n\
 Cookie: %s\n\
 Connection: close\n\n\
 zjh1=&tips=&lx=&evalue=&eflag=&fs=&dzslh=&zjh=%s&mm=%s&v_yzm=%s\
 ";
 
-// ÇëÇó²é·Ö
+// è¯·æ±‚æŸ¥åˆ†
 const char * REQUEST_QUERY_SCORE = "\
 GET /bxqcjcxAction.do HTTP/1.0\n\
-Host: 58.220.248.249\n\
-User-Agent: iEdon-GuanglingScoreHelper\n\
+User-Agent: iEdon-URPScoreHelper\n\
 Accept: */*\n\
 Cookie: %s\n\
 Connection: close\n\n\
 ";
 
-// °²È«µÇ³ö½ÌÎñÏµÍ³
+// å®‰å…¨ç™»å‡ºæ•™åŠ¡ç³»ç»Ÿ
 const char * REQUEST_LOGOUT = "\
 GET /logout.do HTTP/1.0\n\
-Host: 58.220.248.249\n\
-User-Agent: iEdon-GuanglingScoreHelper\n\
+User-Agent: iEdon-URPScoreHelper\n\
 Accept: */*\n\
 Cookie: %s\n\
 Connection: close\n\n\
 ";
 
-// »ñÈ¡µç×Ó×¢²áÒ³Ãæ
+// è·å–ç”µå­æ³¨å†Œé¡µé¢
 const char * REQUEST_GET_REGISTER_INTERFACE = "\
 GET /dzzcAction.do HTTP/1.0\n\
-Host: 58.220.248.249\n\
-User-Agent: iEdon-GuanglingScoreHelper\n\
+User-Agent: iEdon-URPScoreHelper\n\
 Accept: */*\n\
 Cookie: %s\n\
 Connection: close\n\n\
 ";
 
-// Ìá½»µç×Ó×¢²áÇëÇó
+// æäº¤ç”µå­æ³¨å†Œè¯·æ±‚
 const char * REQUEST_POST_REGISTER_INTERFACE = "\
 POST /dzzcAction.do?zc=zc&zxjxjhh=%s HTTP/1.0\n\
-Host: 58.220.248.249\n\
-User-Agent: iEdon-GuanglingScoreHelper\n\
+User-Agent: iEdon-URPScoreHelper\n\
 Accept: */*\n\
 Cookie: %s\n\
 Content-Length: %d\n\
@@ -99,40 +88,35 @@ Connection: close\n\n\
 
 const char * REQUEST_SET_REPORT_PARAMS =  "\
 POST /setReportParams HTTP/1.0\n\
-Host: 58.220.248.249\n\
-User-Agent: iEdon-GuanglingScoreHelper\n\
+User-Agent: iEdon-URPScoreHelper\n\
 Cookie: %s\n\
 Accept: */*\n\
 Content-Length: %d\n\
-Referer: http://58.220.248.249/reportFiles/cj/cj_zwcjd.jsp\n\
 Cache-Control: max-age=0\n\
-Origin: http://58.220.248.249\n\
 Content-Type: application/x-www-form-urlencoded\n\
 Connection: close\n\n";
 
 const char * REQUEST_REPORT_FILES = "\
 GET /reportFiles/cj/cj_zwcjd.jsp?&reportParamsId=%s HTTP/1.0\n\
-Host: 58.220.248.249\n\
-User-Agent: iEdon-GuanglingScoreHelper\n\
-Referer: http://58.220.248.249/reportFiles/cj/cj_zwcjd.jsp\n\
+User-Agent: iEdon-URPScoreHelper\n\
+Referer: /reportFiles/cj/cj_zwcjd.jsp\n\
 Cookie: %s\n\
 Accept: */*\n\
 Connection: close\n\n";
 
 const char * REQUEST_TXT_SCORES = "\
 GET /servlet/com.runqian.report.view.text.TextFileServlet?%s HTTP/1.0\n\
-Host: 58.220.248.249\n\
-User-Agent: iEdon-GuanglingScoreHelper\n\
-Referer: http://58.220.248.249/reportFiles/cj/cj_zwcjd.jsp?&reportParamsId=%s\n\
+User-Agent: iEdon-URPScoreHelper\n\
+Referer: /reportFiles/cj/cj_zwcjd.jsp?&reportParamsId=%s\n\
 Cookie: %s\n\
 Accept: */*\n\
 Connection: close\n\n";
 
-// ·ÖÊıÏÔÊ¾¿é
-const char *SCORE_TEMPLATE = "<div class=\"content-block-title\">%s</div><div class=\"list-block\"><ul><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">³É¼¨</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">Æ½¾ù·Ö</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">×î¸ß·Ö</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">×îµÍ·Ö</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">Ãû´Î</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">Ñ§·Ö</div><div class=\"item-after\">%s</div></div></li></ul></div>";
+// åˆ†æ•°æ˜¾ç¤ºå—
+const char *SCORE_TEMPLATE = "<div class=\"content-block-title\">%s</div><div class=\"list-block\"><ul><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">æˆç»©</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">å¹³å‡åˆ†</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">æœ€é«˜åˆ†</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">æœ€ä½åˆ†</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">åæ¬¡</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">å­¦åˆ†</div><div class=\"item-after\">%s</div></div></li></ul></div>";
 const char *QUICK_SCORE = "<li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">%s</div><div class=\"item-after\">%s</div></div></li>";
 
-// ´íÎóÒ³Ãæ³õÊ¼»¯
+// é”™è¯¯é¡µé¢åˆå§‹åŒ–
 char *ERROR_HTML = NULL;
 
 void Error( char *p_ErrMsg )

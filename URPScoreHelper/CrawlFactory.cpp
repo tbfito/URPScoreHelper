@@ -38,7 +38,7 @@ bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTo
 	// 连接广陵学院教务系统 Apache 服务器
 	sockaddr_in m_sockaddr;
 	m_sockaddr.sin_family = AF_INET;
-	m_sockaddr.sin_addr.S_un.S_addr = inet_addr("58.220.248.249");
+	m_sockaddr.sin_addr.S_un.S_addr = inet_addr(SERVER_IP);
 	m_sockaddr.sin_port = htons(80);
 
 	int m_iResult = connect(g_so, (sockaddr *)&m_sockaddr, sizeof(m_sockaddr));
@@ -51,7 +51,7 @@ bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTo
 		return false;
 	}
 
-	// 发送首页请求，相当于访问 http://58.220.248.249/ 。
+	// 发送首页请求，相当于访问 http://SERVER_IP/ 。
 	m_iResult = send(g_so, p_rq, strlen(p_rq), 0);
 	if (m_iResult != strlen(p_rq))
 	{
