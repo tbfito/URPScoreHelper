@@ -1,0 +1,19 @@
+#list_page td{font-family:"Arial";font-size:11px;text-decoration:none;color:#000000}
+#list_page table{background-color:#fff;width:100%;position:relative;margin:0 auto;border-collapse:separate;border-spacing:1px}
+#list_page table.title tr td{color:#000000;font-family:"Arial";font-size:11px;font-weight:bold;text-decoration:none;font-family:"Arial";height:24px}
+#list_page table.titleTop2{background-color:#ffffff;border:5px solid #ffffff}
+#list_page table.displayTag tr.even{background-color:#FFFFFF;font-family:"Arial";color:#000000;text-decoration:none;font-size:11px;height:20px}
+#list_page table.displayTag tr.evenfocus{background-color:#FFFBDD;font-family:"Arial";text-decoration:none;font-size:11px;height:20px}
+#list_page table.displayTag tr.odd{background-color:#FFFFFF;font-family:"Arial";color:#000000;text-decoration:none;font-size:11px;height:20px}
+#list_page table.displayTag tr.oddfocus{background-color:#FFFBDD;font-family:"Arial";text-decoration:none;font-size:11px;height:20px}
+#list_page table.displayTag tr.oddSelected{background-color:#FFFF97;font-family:"Arial";text-decoration:none;font-size:11px;height:20px}
+#list_page table.displayTag tr.evenSelected{background-color:#FFFF97;font-family:"Arial";text-decoration:none;font-size:11px;height:20px}
+#list_page table.displayTag tr td.sortable{background-color:#D7E7FF;font-family:"Arial";font-size:11px;font-weight:bold;color:#000000;text-decoration:none;text-align:center;padding-right:5px;padding-left:5px;height:20px;white-space:nowrap}
+#list_page table.displayTag th.sortable{background-color:#E1EDFF;font-family:"Arial";font-size:11px;font-weight:bold;color:#000000;text-decoration:none;text-align:center;padding-right:5px;padding-left:5px;height:20px;white-space:nowrap}
+#list_page table.displayTag{background-color:#238BD4}
+#list_page table.displayTag2{background-color:#ffffff}
+#list_page table.fieldsettop{border-right-width:0px;border-left-width:10px;border-right-style:solid;border-left-style:solid;border-right-color:#ffffff;border-left-color:#ffffff;border-top-width:8px;border-top-style:solid;border-top-color:#ffffff}
+#list_page .legend{font-family:"Arial";font-size:14px;font-weight:bold;color:#248CD5;text-decoration:none;background-color:#ffffff}
+#list_page table.titleTop3{background-color:#ffffff;border-top:5px solid #ffffff;border-bottom:5px solid #ffffff}
+#main_board {width:80%; margin:0 auto 20px;}
+#main_photo {border-radius:50%}

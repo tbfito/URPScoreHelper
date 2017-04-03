@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="stylesheet" href="css/sm.min.css">
 <link rel="stylesheet" href="css/sm-extend.min.css">
+<link rel="stylesheet" href="css/project.css">
 </head>
 <body>
 <div class="page-group">
@@ -27,6 +28,12 @@
 		</nav>
 		<canvas id="i_canvas" style="position:absolute;top:0;left:0;right:0;bottom:0"></canvas>
 		<div class="content" style="opacity: 0.75;z-index:9999">
+			<div class="buttons-tab">
+				<a href="query.cgi" class="button%s" title="本学期">本学期</a>
+				<a href="query.cgi?order=passed" class="button%s" title="已通过">已通过</a>
+				<a href="query.cgi?order=byplan" class="button%s" title="按专业">按专业</a>
+				<a href="query.cgi?order=failed" class="button%s" title="不及格">不及格</a>
+			</div>
 			  %s
 		</div>
 	</div>

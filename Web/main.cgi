@@ -28,85 +28,47 @@
 		</nav>
 		<div class="content">
 			<div class="content-block" style="overflow: hidden">
-				<p>
-					已成功完成 %ld 次查询操作
-				</p>
-				<p>
-					输入你的教务系统账号来查询成绩 :)
-				</p>
 				<canvas id="i_canvas" style="position:absolute;top:0;left:0;right:0;bottom:0"></canvas>
-				<form action="main.cgi" method="post">
-					<div class="list-block">
-						<ul style="opacity: 0.75;z-index:9999">
-							<li>
-							<div class="item-content">
-								<div class="item-media">
-									<i class="icon icon-form-name"></i>
-								</div>
-								<div class="item-inner">
-								<span class="icon icon-me">&nbsp;&nbsp;</span>
-									<div class="item-title label">
-										学号
-									</div>
-									<div class="item-input">
-										<input id="i_xh" name="xh" type="text" placeholder="请输入学号">
-									</div>
-								</div>
+				 <div class="card" style="opacity: 0.85;z-index:9999">
+					<div class="card-header">iEdon URP查分助手</div>
+					<div class="card-content">
+					  <div class="list-block media-list">
+						<ul>
+						  <li class="item-content">
+							<div class="item-media">
+							  <img id="main_photo" src="%s" width="72" height="72" />
 							</div>
-							</li>
-							<li>
-							<div class="item-content">
-								<div class="item-media">
-									<i class="icon icon-form-password"></i>
-								</div>
-								<div class="item-inner">
-								<span class="icon icon-edit">&nbsp;&nbsp;</span>
-									<div class="item-title label">
-										密码
-									</div>
-									<div class="item-input">
-										<input name="mm" id="i_mm" type="password" placeholder="默认与学号相同">
-									</div>
-								</div>
+							<div class="item-inner">
+							  <div class="item-title-row">
+								<div class="item-subtitle">学生信息：</div>
+							  </div>
+							  <div class="item-subtitle">%s</div>
+							  <div class="item-subtitle">%s</div>
 							</div>
-							</li>
-							<li>
-							<div class="item-content">
-								<div class="item-media">
-									<i class="icon icon-form-name"></i>
-								</div>
-								<div class="item-inner">
-								<span class="icon icon-picture">&nbsp;&nbsp;</span>
-									<div class="item-title label">
-										验证码
-									</div>
-									<div class="item-input">
-										<input name="yzm" id="i_yzm" type="text" placeholder="输入下方验证码">
-									</div>
-								</div>
-							</div>
-							</li>
-							<li class="align-top">
-							<div class="item-content">
-								<div class="item-media">
-									验证码图像：<a onclick="show_loading();" href="index.cgi" class="external" title="点击刷新"><img alt="" height="40" width="120" src="%s"/></a>
-								</div>
-							</div>
-							</li>
+						  </li>
+						  <li class="item-content">
+						  请查询类别：
+						  </li>
 						</ul>
-					</div>
-					<div class="content-block">
-						<div class="row">
+						<div id="main_board">
 							<div class="col-100">
-								<input style="z-index:9999" id="i_submit" type="submit" value="登录" class="button button-big button-fill button-success" />
+								<a style="z-index:9999;margin-top:10px" title="查询本学期 成绩+排名+GPA" onclick="show_loading();" class="button button-big button-success button-fill external" href="query.cgi">查询本学期 成绩+排名+GPA</a>
 							</div>
 							<div class="col-100">
-								<a style="z-index:9999;margin-top:10px" title="免密查询入口" onclick="show_loading();" class="button button-big button-fill external" href="QuickQuery.cgi">免密查询入口</a>
+								<a style="z-index:9999;margin-top:10px" title="各学期 已过科目+已修学分" onclick="show_loading();" class="button button-big button-fill external" href="query.cgi?order=passed">各学期 已过科目+已修学分</a>
+							</div>
+							<div class="col-100">
+								<a style="z-index:9999;margin-top:10px" title="按专业方案查询" onclick="show_loading();" class="button button-big button-dark button-fill external" href="query.cgi?order=byplan">按专业方案查询</a>
+							</div>
+							<div class="col-100">
+								<a style="z-index:9999;margin-top:10px" title="不及格成绩查询" onclick="show_loading();" class="button button-big button-danger button-fill external" href="query.cgi?order=failed">不及格成绩查询</a>
 							</div>
 						</div>
+					  </div>
 					</div>
-				</div>
-			</form>
+				   <div class="card-footer">
+					  <a href="index.cgi?act=logout" class="link external">退出登录</a>
+					</div>
 		</div>
 		<input id="about" style="display:none" value="<b>%s</b><br /><small>&copy; 2012-2017 iEdon Inside</br>编译于: %s %s<br />服务端环境: %s<br />QQ: 11595137<br />N加青年 · 提供</small>"/>
 	</div>

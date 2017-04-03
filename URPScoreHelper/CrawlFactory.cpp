@@ -66,19 +66,16 @@ bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTo
 
 	// 接受数据，写入缓冲区。
 	m_iResult = recv(g_so, p_lpvBuffer, p_iLength, 0); /* 此处会适当阻塞，接受服务器返回 */
-	if (m_iResult == SOCKET_ERROR)
+	while (m_iResult > 0)
 	{
-		closesocket(g_so);
-		WSACleanup();
-		// Fixed: compatibility.
-		//puts("Status: 500 Internal Server Error");
-		//char m_ErrMsg[1024] = { 0 };
-		//sprintf(m_ErrMsg, "<p>接受响应数据失败。</p>\r\n<p>错误代码： %d</p>", WSAGetLastError());
-		//Error(m_ErrMsg);
-		return false;
+		*p_iTotalRead += m_iResult;
+		m_iResult = recv(g_so, p_lpvBuffer + *p_iTotalRead, p_iLength - *p_iTotalRead, 0); /* 此处会适当阻塞，接受服务器返回 */
 	}
-
-	*p_iTotalRead = m_iResult;
+	if (m_iResult != SOCKET_ERROR)
+	{
+		*p_iTotalRead += m_iResult;
+	}
 	closesocket(g_so);
+	WSACleanup();
 	return true;
 }

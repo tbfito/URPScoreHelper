@@ -21,6 +21,11 @@ extern const char* REQUEST_POST_REGISTER_INTERFACE;
 extern const char* REQUEST_SET_REPORT_PARAMS;
 extern const char* REQUEST_REPORT_FILES;
 extern const char* REQUEST_TXT_SCORES;
+extern const char* REQUEST_PHOTO;
+extern const char* REQUEST_TOP;
+extern const char* GET_GRADE_BY_QBINFO;
+extern const char* GET_GRADE_BY_PLAN;
+extern const char* GET_GRADE_BY_FAILED;
 
 extern char* ERROR_HTML;
 extern char JSESSIONID[256];
