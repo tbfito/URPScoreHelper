@@ -47,7 +47,7 @@
 							</div>
 						  </li>
 						  <li class="item-content">
-						  请查询类别：
+						  请选择查询类别：
 						  </li>
 						</ul>
 						<div id="main_board">

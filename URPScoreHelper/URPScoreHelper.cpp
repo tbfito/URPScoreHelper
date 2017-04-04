@@ -170,7 +170,7 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri)
 {
 	int m_iResult = 0;
 
-	if (strcmp(CGI_HTTP_COOKIE, "") != 0) // 如果客户端已经拿到 JSESSIONID
+	if (strcmp(CGI_HTTP_COOKIE, "") != 0) // 如果客户端已经拿到 JSESSIONID，看看原 Cookie 是否过期、有效（即服务器是否设置了新 Cookie）
 	{
 		// 申请内存，并接受服务端返回数据。
 		char * m_rep_header = (char *)malloc(1024);
@@ -183,7 +183,6 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri)
 			return -1;
 		}
 
-		// 看看原 Cookie 是否过期、有效（即服务器是否设置了新 Cookie）。
 		char *pStr1 = strstr(m_rep_header, "JSESSIONID=");
 		if (pStr1 != NULL)
 		{
@@ -191,7 +190,6 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri)
 			if (pStr2 == NULL)
 			{
 				free(m_rep_header);
-				WSACleanup();
 				cout << "Status: 500 Internal Server Error\n";
 				Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 结尾失败。</p>");
 				return -1;
@@ -203,7 +201,19 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri)
 		}
 		else // 如果 Cookie 还能用，就获取它。
 		{
-			right(JSESSIONID, (char *)CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - 11);
+			char *pStr1 = strstr((char *)CGI_HTTP_COOKIE, "JSESSIONID=");
+			if (pStr1 != NULL)
+			{
+				char *pStr2 = strstr(pStr1 + 11, ";");
+				if (pStr2 == NULL) // 如果这条 Cookie 在最后一条
+				{
+					right(JSESSIONID, (char *)CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - (pStr1 - CGI_HTTP_COOKIE) - 11);
+				}
+				else
+				{
+					mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11);
+				}
+			}
 		}
 		free(m_rep_header);
 	}
@@ -222,8 +232,6 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri)
 		char *pStr1 = strstr(m_rep_header, "JSESSIONID=");
 		if (pStr1 == NULL)
 		{
-			closesocket(g_so);
-			WSACleanup();
 			cout << "Status: 500 Internal Server Error\n";
 			Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 标头失败。</p>");
 			return -1;
@@ -231,8 +239,6 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri)
 		char *pStr2 = strstr(pStr1 + 11, ";");
 		if (pStr2 == NULL)
 		{
-			closesocket(g_so);
-			WSACleanup();
 			cout << "Status: 500 Internal Server Error\n";
 			Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 结尾失败。</p>");
 			return -1;
@@ -242,7 +248,9 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri)
 		free(m_rep_header);
 		*p_need_update_cookie = true;
 	}
+
 	if (p_photo_uri == NULL) return 0; // p_photo_uri 指定了 NULL 代表不需要照片。
+
 	// 看看登录没
 	char *m_photo = (char *)malloc(40960);
 	ZeroMemory(m_photo, 40960);
@@ -268,12 +276,17 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri)
 		pStr1 += 4;
 		int m_photoLength = m_iResult - (pStr1 - m_photo);
 
-		char m_base64[102400] = { 0 };
+		char *m_base64 = (char *)malloc(m_photoLength * 2 + 1);
+		ZeroMemory(m_base64, m_photoLength * 2 + 1);
 		base64_encode((const unsigned char *)pStr1, m_base64, m_photoLength);
-		char m_PhotoDataURI[102423] = "data:image/jpg;base64,";
+		char *m_PhotoDataURI = (char *)malloc(m_photoLength * 2 + 1 + 24);
+		ZeroMemory(m_PhotoDataURI, m_photoLength * 2 + 1 + 24);
+		strcpy(m_PhotoDataURI, "data:image/jpg;base64,");
 		strcat(m_PhotoDataURI, m_base64);
 		strcpy(p_photo_uri, m_PhotoDataURI);
 		free(m_photo);
+		free(m_base64);
+		free(m_PhotoDataURI);
 	}
 	else
 	{
