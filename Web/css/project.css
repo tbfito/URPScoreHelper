@@ -1,6 +1,6 @@
 #list_page td{font-family:"Arial";font-size:11px;text-decoration:none;color:#000000}
 #list_page table{background-color:#fff;width:100%;position:relative;margin:0 auto;border-collapse:separate;border-spacing:1px}
-#list_page table.title tr td{color:#000000;font-family:"Arial";font-size:11px;font-weight:bold;text-decoration:none;font-family:"Arial";height:24px}
+#list_page table.title tr td{color:#000000;font-family:"Arial";font-size:14px;font-weight:bold;text-decoration:none;font-family:"Arial";height:24px;line-height: 0rem;padding:10px 0 6px 0}
 #list_page table.titleTop2{background-color:#ffffff;border:5px solid #ffffff}
 #list_page table.displayTag tr.even{background-color:#FFFFFF;font-family:"Arial";color:#000000;text-decoration:none;font-size:11px;height:20px}
 #list_page table.displayTag tr.evenfocus{background-color:#FFFBDD;font-family:"Arial";text-decoration:none;font-size:11px;height:20px}
