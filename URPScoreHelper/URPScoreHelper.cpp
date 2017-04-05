@@ -705,7 +705,7 @@ ton-fill button-success\">一键注册</a></div>";
 			WSACleanup();
 			free(m_rep_body);
 			cout << "Status: 500 Internal Server Error\n";
-			Error("<p><b>从服务器拉取分数失败。(BeginOfRet)</b></p><p>教务君可能月线繁忙 (:P 666) 请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
+			Error("<p><b>从服务器拉取分数失败。(BeginOfRet)</b></p><p>教务君可能月线繁忙，666 请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
 			return;
 		}
 		m_result += 92;
@@ -803,7 +803,7 @@ ton-fill button-success\">一键注册</a></div>";
 	if (pStr1 == NULL)
 	{
 		free(m_lpszQuery);
-		Error("<p><b>额，分数页面神隐了 0.0。</b></p><p>这可能是因为新的学期开始了，上次考试成绩存档了哦~ 或者可以试试免密查询功能。</p>");
+		Error("<p><b>额，分数页面神隐了 0.0。</b></p><p>这可能是因为新的学期开始了，上次考试成绩存档了哦~ 建议看看已通过课程成绩和按专业成绩，这里面可以看到历年成绩和所得学分哦~</p>");
 		return;
 	}
 

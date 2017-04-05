@@ -36,12 +36,10 @@
 						<ul>
 						  <li class="item-content">
 							<div class="item-media">
-							  <img id="main_photo" src="%s" width="72" height="72" />
+							  <img id="main_photo" src="%s" width="70" height="84" />
 							</div>
 							<div class="item-inner">
-							  <div class="item-title-row">
-								<div class="item-subtitle">学生信息：</div>
-							  </div>
+							  <div class="item-subtitle"><small>个人信息:</small></div>
 							  <div class="item-subtitle">%s</div>
 							  <div class="item-subtitle">%s</div>
 							</div>
@@ -86,6 +84,15 @@ var _mtac = {};
     mta.setAttribute("sid", "500426156");
     var s = document.getElementsByTagName("script")[0];
     s.parentNode.insertBefore(mta, s);
+})();
+</script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?0d875a45c1391fc4d011b286634b5283";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
 })();
 </script>
 </body>

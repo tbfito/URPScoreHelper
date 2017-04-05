@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="stylesheet" href="css/sm.min.css">
 <link rel="stylesheet" href="css/sm-extend.min.css">
+<link rel="stylesheet" href="css/project.css">
 </head>
 <body>
 <div class="page-group">
@@ -54,16 +55,16 @@
 					<div class="content-block">
 						<div class="row">
 							<div class="col-100">
-								<input onclick="return check();" style="z-index:9999" id="i_submit" type="submit" value="查询" class="button button-big button-fill button-success" />
+								<input onclick="return check();" style="z-index:9999" id="i_submit" type="submit" value="免密查询" class="button button-big button-fill button-success" />
 							</div>
 							<div class="col-100">
-								<a style="z-index:9999;margin-top:10px" onclick="show_loading();" title="加权分+排名 综合查询" class="button button-big button-fill external" href="index.cgi">加权分+排名 综合查询</a>
+								<a style="z-index:9999;margin-top:10px" onclick="show_loading();" title="&lt; 登录后综合查询" class="button button-big button-fill external" href="index.cgi">&lt; 登录后综合查询</a>
 							</div>
 						</div>
 					</div>
 				</div>
 			</form>
-			<center>已成功完成 %ld 次查询操作</center>
+			<center><p id="login_query">已成功完成&nbsp;&nbsp;<big>%ld</big>&nbsp;&nbsp;次查询操作</p></center>
 		</div>
 	</div>
 </div>

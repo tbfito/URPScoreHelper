@@ -5,6 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title>iEdon URP查分助手</title>
 <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+<meta name="Keywords" content="iEdon,URP查分助手,URPScoreHelper,广陵学院,广陵学院成绩查询,广陵学院教学评估,广陵学院一键评教,广陵学院URP综合教务系统,广陵学院注册中心">
+<meta name="description" content="由 iEdon 开发的 iEdon URP查分助手（iEdon URPScoreHelper），这里是扬州大学广陵学院助手页面，可以在这里查询成绩、排名以及GPA等多种教务信息。">
 <link rel="shortcut icon" href="/favicon.ico">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -28,12 +30,10 @@
 		</nav>
 		<div class="content">
 			<div class="content-block" style="overflow: hidden">
-				<p>
-					已成功完成 %ld 次查询操作
+				<p id="login_query">
+					已成功完成&nbsp;&nbsp;<big>%ld</big>&nbsp;&nbsp;次查询操作
 				</p>
-				<p>
-					输入你的教务系统账号来查询成绩 :)
-				</p>
+				输入你的教务系统账号来查询成绩 :)
 				<canvas id="i_canvas" style="position:absolute;top:0;left:0;right:0;bottom:0"></canvas>
 				<form action="main.cgi" method="post">
 					<div class="list-block">
@@ -44,7 +44,7 @@
 									<i class="icon icon-form-name"></i>
 								</div>
 								<div class="item-inner">
-								<span class="icon icon-me">&nbsp;&nbsp;</span>
+								<span class="icon icon-me"></span>
 									<div class="item-title label">
 										学号
 									</div>
@@ -60,7 +60,7 @@
 									<i class="icon icon-form-password"></i>
 								</div>
 								<div class="item-inner">
-								<span class="icon icon-edit">&nbsp;&nbsp;</span>
+								<span class="icon icon-edit"></span>
 									<div class="item-title label">
 										密码
 									</div>
@@ -76,7 +76,7 @@
 									<i class="icon icon-form-name"></i>
 								</div>
 								<div class="item-inner">
-								<span class="icon icon-picture">&nbsp;&nbsp;</span>
+								<span class="icon icon-picture"></span>
 									<div class="item-title label">
 										验证码
 									</div>
@@ -89,7 +89,7 @@
 							<li class="align-top">
 							<div class="item-content">
 								<div class="item-media">
-									验证码图像：<a onclick="show_loading();" href="index.cgi" class="external" title="点击刷新"><img alt="" height="40" width="120" src="%s"/></a>
+									<span id="login_hint">验证码图像</span><a onclick="show_loading();" href="index.cgi" class="external" title="点击刷新"><img id="login_captcha" alt="" height="40" width="120" src="%s"/></a>
 								</div>
 							</div>
 							</li>
@@ -124,6 +124,15 @@ var _mtac = {};
     mta.setAttribute("sid", "500426156");
     var s = document.getElementsByTagName("script")[0];
     s.parentNode.insertBefore(mta, s);
+})();
+</script>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?0d875a45c1391fc4d011b286634b5283";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
 })();
 </script>
 </body>
