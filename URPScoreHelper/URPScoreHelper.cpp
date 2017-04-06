@@ -653,7 +653,7 @@ ton-fill button-success\">一键注册</a></div>";
 			WSACleanup();
 			free(m_rep_body);
 			cout << "Status: 500 Internal Server Error\n";
-			Error("<p><b>从服务器拉取分数失败。(BeginOfRet)</b></p><p>教务君可能月线繁忙 (:P 666) 请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
+			Error("<p><b>从服务器拉取分数失败。(BeginOfRet)</b></p><p>教务君可能月线繁忙，666 请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
 			return;
 		}
 		m_result += 92;
@@ -757,7 +757,7 @@ ton-fill button-success\">一键注册</a></div>";
 			WSACleanup();
 			free(m_rep_body);
 			cout << "Status: 500 Internal Server Error\n";
-			Error("<p><b>从服务器拉取分数失败。(BeginOfRet)</b></p><p>教务君可能月线繁忙 (:P 666) 请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
+			Error("<p><b>从服务器拉取分数失败。(BeginOfRet)</b></p><p>教务君可能月线繁忙，666 请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
 			return;
 		}
 		m_result = strstr(m_result + 92, "<table width=\"100%\"  border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\">");
@@ -766,7 +766,7 @@ ton-fill button-success\">一键注册</a></div>";
 			WSACleanup();
 			free(m_rep_body);
 			cout << "Status: 500 Internal Server Error\n";
-			Error("<p><b>从服务器拉取分数失败。(BeginOfMid)</b></p><p>教务君可能月线繁忙 (:P 666) 请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
+			Error("<p><b>从服务器拉取分数失败。(MidOfRet-Table)</b></p><p>教务君可能月线繁忙，666 请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
 			return;
 		}
 		char m_lpszCompleteQuery[205100] = { 0 };
