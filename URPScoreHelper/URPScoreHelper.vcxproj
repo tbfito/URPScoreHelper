@@ -157,6 +157,7 @@
   <ItemGroup>
     <ClInclude Include="CrawlFactory.h" />
     <ClInclude Include="General.h" />
+    <ClInclude Include="OAuth2.h" />
     <ClInclude Include="URPScoreHelper.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -166,6 +167,7 @@
   <ItemGroup>
     <ClCompile Include="CrawlFactory.cpp" />
     <ClCompile Include="General.cpp" />
+    <ClCompile Include="OAuth2.cpp" />
     <ClCompile Include="URPScoreHelper.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -174,11 +176,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="StringHelper.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="html1.htm">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="URPScoreHelper.rc" />

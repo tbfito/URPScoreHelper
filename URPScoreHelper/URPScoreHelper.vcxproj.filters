@@ -39,6 +39,9 @@
     <ClInclude Include="URPScoreHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="OAuth2.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -56,9 +59,9 @@
     <ClCompile Include="URPScoreHelper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="html1.htm" />
+    <ClCompile Include="OAuth2.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="URPScoreHelper.rc">

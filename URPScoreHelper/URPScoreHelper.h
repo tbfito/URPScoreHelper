@@ -1,11 +1,16 @@
 #pragma once
+#ifndef URPSCOREHELPER_H
+#define URPSCOREHELPER_H
+const char *CGI_SCRIPT_NAME; // 脚本名字
 const char *CGI_REQUEST_METHOD; // 请求方法
 const char *CGI_CONTENT_LENGTH; // 数据长度
-const char *CGI_SCRIPT_NAME; // 脚本名称
 const char *CGI_QUERY_STRING; // 查询参数
 const char *CGI_PATH_TRANSLATED; // 脚本位置
 const char *CGI_HTTP_COOKIE; // Cookie
 const char *CGI_SERVER_SOFTWARE; // 服务器软件
+char *header;
+char *footer;
+char *error;
 
 FILE *g_fQueryCount;
 INT64 g_QueryCount;
@@ -23,6 +28,8 @@ void student_logout();
 bool student_login(char *p_xuehao, char *p_password, char *p_captcha);
 void parse_QuickQuery_Intro();
 void parse_QuickQuery_Result();
+bool LoadPageSrc();
+void OAuth2_Association(bool isPOST);
 
 typedef struct test_info
 {
@@ -31,3 +38,4 @@ typedef struct test_info
 	char lb[64] = {0};
 	int date = 0;
 };
+#endif

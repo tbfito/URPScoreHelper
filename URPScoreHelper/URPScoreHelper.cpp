@@ -6,6 +6,7 @@
 #include "StringHelper.h"
 #include "CrawlFactory.h"
 #include "URPScoreHelper.h"
+#include "OAuth2.h"
 #include "resource.h"
 
 using namespace std;
@@ -14,46 +15,6 @@ using namespace std;
 int main()
 {
 	g_start_time = GetTickCount();
-
-	// 查找资源
-	HRSRC hRsrc = FindResource(NULL, MAKEINTRESOURCE(IDR_HTML1), MAKEINTRESOURCE(RT_HTML));
-	if (NULL == hRsrc)
-	{
-		cout << "Status: 500 Internal Server Error\n"
-			<< GLOBAL_HEADER
-			<< "<p>FindResource() 失败！</p>";
-		return -1;
-	}
-
-	// 获取资源的大小
-	DWORD dwSize = SizeofResource(NULL, hRsrc);
-	if (0 == dwSize)
-	{
-		cout << "Status: 500 Internal Server Error\n"
-			<< GLOBAL_HEADER
-			<< "<p>SizeofResource() 失败！</p>";
-		return -1;
-	}
-
-	// 加载资源
-	HGLOBAL hGlobal = LoadResource(NULL, hRsrc);
-	if (NULL == hGlobal)
-	{
-		cout << "Status: 500 Internal Server Error\n"
-			<< GLOBAL_HEADER
-			<< "<p>LoadResource() 失败！</p>";
-		return -1;
-	}
-
-	// 锁定资源
-	ERROR_HTML = (char *)LockResource(hGlobal);
-	if (NULL == ERROR_HTML)
-	{
-		cout << "Status: 500 Internal Server Error\n"
-			<< GLOBAL_HEADER
-			<< "<p>LockResource() 失败！</p>";
-		return -1;
-	}
 
 	// 初始化 Socket 库。
 	if (!InitSocketLibrary())
@@ -101,6 +62,11 @@ int main()
 			return 0;
 		}
 
+		if (!LoadPageSrc())
+		{
+			return -1;
+		}
+
 		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0) // 如果是 GET 请求
 		{
 			if (strcmp(CGI_SCRIPT_NAME, "/") == 0 || strcmp(CGI_SCRIPT_NAME, "/index.cgi") == 0 || strcmp(CGI_SCRIPT_NAME, "/main.cgi") == 0)
@@ -112,6 +78,21 @@ int main()
 					return 0;
 				}
 				parse_index();
+				return 0;
+			}
+			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2.cgi") == 0)
+			{
+				OAuth2_process();
+				return 0;
+			}
+			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2CallBack.cgi") == 0)
+			{
+				OAuth2_CallBack();
+				return 0;
+			}
+			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.cgi") == 0)
+			{
+				OAuth2_Association(false);
 				return 0;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/query.cgi") == 0)
@@ -134,7 +115,7 @@ int main()
 
 			cout << "Status: 404 No Such CGI Page\n";
 			Error("<p>找不到该页面。</p>");
-			WSACleanup();
+			
 			
 			ZeroMemory(JSESSIONID, 256);
 			return -1;
@@ -157,12 +138,157 @@ int main()
 				parse_main(false, NULL, true);
 				return 0;
 			}
+			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.cgi") == 0)
+			{
+				OAuth2_Association(true);
+				return 0;
+			}
 		}
 
 	puts("Status: 500 Internal Server Error");
 	Error("<p>发生错误，未经处理的异常。</p>");
-	WSACleanup();
+	
 	return -1;
+}
+
+// 预加载头部和尾部页面(header.cgi, footer.cgi, error.cgi)
+bool LoadPageSrc()
+{
+	// 读入主页面文件
+	char *pStr = strstr((char *)CGI_PATH_TRANSLATED, "\\");
+	bool isUnixBasedPath = (pStr == NULL);
+	if (isUnixBasedPath)
+	{
+		pStr = strstr((char *)CGI_PATH_TRANSLATED, "/");
+	}
+	if (pStr == NULL)
+	{
+		return false;
+	}
+	char *Last = NULL;
+	while (pStr != NULL)
+	{
+		Last = pStr;
+		if (isUnixBasedPath)
+		{
+			pStr = strstr(pStr + 1, "/");
+		}
+		else
+		{
+			pStr = strstr(pStr + 1, "\\");
+		}
+	}
+	char *doc_root = new char[MAX_PATH];
+	memset(doc_root, 0, MAX_PATH);
+
+	mid(doc_root, (char *)CGI_PATH_TRANSLATED, Last - (char *)CGI_PATH_TRANSLATED + 1, 0);
+	char *file_root = new char[MAX_PATH];
+	memset(file_root, 0, MAX_PATH);
+
+	strcpy(file_root, doc_root);
+	strcat(file_root, "header.cgi");
+	FILE *m_file = fopen(file_root, "rb");
+	if (m_file == NULL)
+	{
+		cout << "Status: 500 Internal Server Error\n"
+			<< GLOBAL_HEADER
+			<< "<p>找不到 header.cgi 模板内容。</p>";
+		delete[]doc_root;
+		delete[]file_root;
+		return false;
+	}
+	fseek(m_file, 0, SEEK_END); // 移到尾
+	int m_file_length = ftell(m_file);
+	fseek(m_file, 0, SEEK_SET);
+	char *m_lpszHomepage = (char *)malloc(m_file_length + 1);
+	ZeroMemory(m_lpszHomepage, m_file_length + 1);
+	if (fread(m_lpszHomepage, m_file_length, 1, m_file) != 1)
+	{
+		cout << "Status: 500 Internal Server Error\n"
+			<< GLOBAL_HEADER
+			<< "<p>无法读取 header.cgi 模板内容。</p>";
+		fclose(m_file);
+		free(m_lpszHomepage);
+		delete[]doc_root;
+		delete[]file_root;
+		return false;
+	}
+	fclose(m_file);
+	header = m_lpszHomepage;
+
+	strcpy(file_root, doc_root);
+	strcat(file_root, "footer.cgi");
+	m_file = fopen(file_root, "rb");
+	if (m_file == NULL)
+	{
+		cout << "Status: 500 Internal Server Error\n"
+			<< GLOBAL_HEADER
+			<< "<p>找不到 footer.cgi 模板内容。</p>";
+		delete[]doc_root;
+		delete[]file_root;
+		return false;
+	}
+	fseek(m_file, 0, SEEK_END); // 移到尾
+	m_file_length = ftell(m_file);
+	fseek(m_file, 0, SEEK_SET);
+	m_lpszHomepage = (char *)malloc(m_file_length + 1);
+	ZeroMemory(m_lpszHomepage, m_file_length + 1);
+	if (fread(m_lpszHomepage, m_file_length, 1, m_file) != 1)
+	{
+		cout << "Status: 500 Internal Server Error\n"
+			 << GLOBAL_HEADER
+			 << "<p>无法读取 footer.cgi 模板内容。</p>";
+		fclose(m_file);
+		free(m_lpszHomepage);
+		delete[]doc_root;
+		delete[]file_root;
+		return false;
+	}
+	fclose(m_file);
+	footer = m_lpszHomepage;
+
+	strcpy(file_root, doc_root);
+	strcat(file_root, "error.cgi");
+	m_file = fopen(file_root, "rb");
+	if (m_file == NULL)
+	{
+		cout << "Status: 500 Internal Server Error\n"
+			<< GLOBAL_HEADER
+			<< "<p>找不到 error.cgi 模板内容。</p>";
+		delete[]doc_root;
+		delete[]file_root;
+		return false;
+	}
+	fseek(m_file, 0, SEEK_END); // 移到尾
+	m_file_length = ftell(m_file);
+	fseek(m_file, 0, SEEK_SET);
+	m_lpszHomepage = (char *)malloc(m_file_length + 1);
+	ZeroMemory(m_lpszHomepage, m_file_length + 1);
+	if (fread(m_lpszHomepage, m_file_length, 1, m_file) != 1)
+	{
+		cout << "Status: 500 Internal Server Error\n"
+			<< GLOBAL_HEADER
+			<< "<p>无法读取 error.cgi 模板内容。</p>";
+		fclose(m_file);
+		free(m_lpszHomepage);
+		delete[]doc_root;
+		delete[]file_root;
+		return false;
+	}
+	fclose(m_file);
+	error = m_lpszHomepage;
+
+	ERROR_HTML = (char *)malloc(strlen(error) + strlen("出错啦 - ") + strlen(SOFTWARE_NAME) + strlen(footer) + m_file_length + 1);
+	char title[256] = "出错啦 - ";
+	strcat(title, SOFTWARE_NAME);
+	sprintf(ERROR_HTML, header, title);
+	strcat(ERROR_HTML, error);
+	strcat(ERROR_HTML, footer);
+
+	free(error); // 只有 error 已经处理至 ERROR_HTML 可以释放，其余 header footer 需要常驻内存。
+	delete[]doc_root;
+	delete[]file_root;
+	return true;
 }
 
 // 处理 Cookie
@@ -306,7 +432,6 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 		{
 			cout << "Status: 500 Internal Server Error\n";
 			Error("<p>发生错误，POST 数据长度异常。</p>");
-			WSACleanup();
 			return -1;
 		}
 		char *m_post_data = (char *)malloc(m_post_length + 2);	// TORESEARCH
@@ -314,7 +439,6 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 		{
 			cout << "Status: 500 Internal Server Error\n";
 			Error("<p>发生错误，POST 数据拉取失败。</p>");
-			WSACleanup();
 			return -1;
 		}
 
@@ -322,7 +446,6 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 		char *pStr1 = strstr(m_post_data, "xh=");
 		if (pStr1 == NULL)
 		{
-			WSACleanup();
 			free(m_post_data);
 			cout << "Status: 500 Internal Server Error\n";
 			Error("<p>无法获取学号信息。</p>");
@@ -338,7 +461,6 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 		pStr1 = strstr(m_post_data, "mm=");
 		if (pStr1 == NULL)
 		{
-			WSACleanup();
 			free(m_post_data);
 			cout << "Status: 500 Internal Server Error\n";
 			Error("<p>无法获取密码信息。</p>");
@@ -354,7 +476,6 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 		pStr1 = strstr(m_post_data, "yzm=");
 		if (pStr1 == NULL)
 		{
-			WSACleanup();
 			free(m_post_data);
 			cout << "Status: 500 Internal Server Error\n";
 			Error("<p>无法获取验证码信息。</p>");
@@ -397,7 +518,6 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 		Error("<p>无法读取主页模板内容。</p>");
 		fclose(m_file_homepage);
 		free(m_lpszHomepage);
-		WSACleanup();
 		return -1;
 	}
 	fclose(m_file_homepage); // 关闭文件
@@ -406,25 +526,23 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 	get_student_name(m_student_name);
 	get_student_id(m_student_id);
 
-	// 填充网页模板
-	int m_iBufferSize = m_file_homepage_length + strlen(m_photo) + strlen(__DATE__) + strlen(__TIME__)
-		+ strlen(__FILE__) + strlen(CGI_SERVER_SOFTWARE); // 获得缓冲区长度
-
-	char *m_lpszCompleteHomepage = (char *)malloc(m_iBufferSize + 1);
-	ZeroMemory(m_lpszCompleteHomepage, m_iBufferSize + 1);
-
-	sprintf(m_lpszCompleteHomepage, m_lpszHomepage, m_photo,m_student_name, m_student_id,
-		__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
-
-	free(m_lpszHomepage);
-
 	// 输出网页
 	if (p_need_set_cookie)
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 
 	cout << GLOBAL_HEADER;
-	cout << m_lpszCompleteHomepage;
 
+	char title[256] = { 0 };
+	strcpy(title, m_student_name);
+	strcat(title, " - ");
+	strcat(title, SOFTWARE_NAME);
+
+	fprintf(stdout, header, title);
+	fprintf(stdout, m_lpszHomepage, m_photo, m_student_name, m_student_id,
+		__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+	cout << footer;
+
+	free(m_lpszHomepage);
 	free(m_photo);
 	return 0;
 }
@@ -457,6 +575,40 @@ int parse_index()
 		}
 	}
 
+	// 如果是微信登录回来，则自动填充账号密码。
+	char *m_xh = NULL;
+	char *m_mm = NULL;
+	char *pStr1 = strstr((char *)CGI_QUERY_STRING, "id=");
+	if (pStr1 != NULL)
+	{
+		char *pStr2 = strstr(pStr1 + 3, "&");
+		char *id = new char[strlen(CGI_QUERY_STRING)];
+		if (pStr2 == NULL)
+		{
+			right(id, pStr1 + 3, strlen(CGI_QUERY_STRING) - 3);
+		}
+		else
+		{
+			mid(id, pStr1 + 3, pStr2 - pStr1 - 3, 0);
+		}
+		m_xh = id;
+		pStr1 = strstr((char *)CGI_QUERY_STRING, "pass=");
+		if (pStr1 != NULL)
+		{
+			char *pStr2 = strstr(pStr1 + 5, "&");
+			char *pass = new char[strlen(CGI_QUERY_STRING)];
+			if (pStr2 == NULL)
+			{
+				right(pass, pStr1 + 5, strlen(CGI_QUERY_STRING) - 5);
+			}
+			else
+			{
+				mid(pass, pStr1 + 5, pStr2 - pStr1 - 5, 0);
+			}
+			m_mm = pass;
+		}
+	}
+
 	// 置随机数种子，并取得一个随机数，用于获取验证码。
 	srand((int)time(0));
 	int m_rand = rand();
@@ -473,10 +625,10 @@ int parse_index()
 	}
 
 	// 从返回数据流中获取验证码图片。
-	char *pStr1 = strstr(m_rep_body, "\r\n\r\n");
+	pStr1 = strstr(m_rep_body, "\r\n\r\n");
 	if (pStr1 == NULL)
 	{
-		WSACleanup();
+		
 		cout << "Status: 500 Internal Server Error\n";
 		Error("<p>无法分析验证码响应协议。</p>");
 		return -1;
@@ -485,9 +637,10 @@ int parse_index()
 	int m_CaptchaLength = m_iResult - (pStr1 - m_rep_body); // 验证码图片的大小
 
 	// 将验证码转化为 base64 编码后的 DataURL，浏览器直接显示，供用户查看。
-	char m_base64[8192] = { 0 };
+	char *m_base64 = new char[m_CaptchaLength * 2 + 1];
 	base64_encode((const unsigned char *)pStr1, m_base64, m_CaptchaLength);
-	char m_DataURL[10240] = "data:image/jpg;base64,";
+	char *m_DataURL = new char[m_CaptchaLength * 2 + 24];;
+	strcpy(m_DataURL, "data:image/jpg;base64,");
 	strcat(m_DataURL, m_base64);
 	free(m_rep_body);
 
@@ -510,33 +663,32 @@ int parse_index()
 		Error("<p>无法读取登录页模板内容。</p>");
 		fclose(m_file_homepage);
 		free(m_lpszHomepage);
-		WSACleanup();
 		return -1;
 	}
 	fclose(m_file_homepage); // 关闭文件
-
-	 // 填充网页模板
-	int m_iBufferSize = m_file_homepage_length + strlen(m_DataURL) + strlen(__DATE__) + strlen(__TIME__)
-						+ strlen(__FILE__) + strlen(CGI_SERVER_SOFTWARE); // 获得缓冲区长度
-
-	char *m_lpszCompleteHomepage = (char *)malloc(m_iBufferSize + 1);
-	ZeroMemory(m_lpszCompleteHomepage, m_iBufferSize + 1);
-
-	sprintf(m_lpszCompleteHomepage, m_lpszHomepage, g_QueryCount, m_DataURL, 
-			__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
-
-	free(m_lpszHomepage);
 
 	// 输出网页
 	if (m_need_update_cookie)
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 
 	cout << GLOBAL_HEADER;
-	cout << m_lpszCompleteHomepage;
 
-	// 释放资源
-	free(m_lpszCompleteHomepage);
-	WSACleanup();
+	fprintf(stdout, header, SOFTWARE_NAME);
+	if (m_xh == NULL || m_mm == NULL)
+	{
+		fprintf(stdout, m_lpszHomepage, g_QueryCount, "", "", m_DataURL,
+			__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+	}
+	else 
+	{
+		fprintf(stdout, m_lpszHomepage, g_QueryCount, m_xh, m_mm, m_DataURL,
+			__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+	}
+	cout << footer;
+
+	free(m_lpszHomepage);
+	delete[]m_base64;
+	delete[]m_DataURL;
 	return 0;
 }
 
@@ -565,14 +717,12 @@ int parse_query()
 	{
 		student_logout();
 		free(m_rep_body);
-		WSACleanup();
 		return -1;
 	}
 	char *m_result = strstr(m_rep_body, "\r\n\r\n");
 	if (m_result == NULL)
 	{
 		student_logout();
-		WSACleanup();
 		free(m_rep_body);
 		cout << "Status: 500 Internal Server Error\n";
 		Error("<p>从服务器拉取分数失败。</p>");
@@ -584,7 +734,7 @@ int parse_query()
 	free(m_rep_body);
 
 	// 处理完毕。
-	WSACleanup();
+	
 	return 0;
 }
 
@@ -644,26 +794,22 @@ ton-fill button-success\">一键注册</a></div>";
 		if (!CrawlRequest(Req, m_rep_body, 204800, &m_iResult))
 		{
 			free(m_rep_body);
-			WSACleanup();
 			return;
 		}
 		char *m_result = strstr(m_rep_body, "<body leftmargin=\"0\" topmargin=\"0\" marginwidth=\"0\" marginheight=\"0\" style=\"overflow:auto;\">");
 		if (m_result == NULL)
 		{
-			WSACleanup();
 			free(m_rep_body);
 			cout << "Status: 500 Internal Server Error\n";
 			Error("<p><b>从服务器拉取分数失败。(BeginOfRet)</b></p><p>教务君可能月线繁忙，666 请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
 			return;
 		}
 		m_result += 92;
-		char m_lpszCompleteQuery[205100] = { 0 };
 		char *m_prep = (char *)malloc(205200);
 		strcpy(m_prep, "<div id=\"list_page\">");
 		char *m_end_body = strstr(m_result, "</body>");
 		if (m_result == NULL)
 		{
-			WSACleanup();
 			free(m_rep_body);
 			cout << "Status: 500 Internal Server Error\n";
 			Error("<p>从服务器拉取分数失败。(EndOfBodyNotFound)</p>");
@@ -676,8 +822,16 @@ ton-fill button-success\">一键注册</a></div>";
 		*(m_end_body + 5) = '>';
 		*(m_end_body + 6) = '\0';
 		strcat(m_prep, m_result);
-		sprintf(m_lpszCompleteQuery, m_lpszQuery, m_Student, m_Student, "", " active", "", "", m_prep);
-		cout << m_lpszCompleteQuery;
+
+		char title[256] = { 0 };
+		strcpy(title, m_Student);
+		strcat(title, "的各科通过成绩 - ");
+		strcat(title, SOFTWARE_NAME);
+
+		fprintf(stdout, header, title);
+		fprintf(stdout, m_lpszQuery, m_Student, "", " active", "", "", m_prep);
+		cout << footer;
+
 		fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
 		fclose(g_fQueryCount);
 		free(m_lpszQuery);
@@ -696,26 +850,22 @@ ton-fill button-success\">一键注册</a></div>";
 		if (!CrawlRequest(Req, m_rep_body, 204800, &m_iResult))
 		{
 			free(m_rep_body);
-			WSACleanup();
 			return;
 		}
 		char *m_result = strstr(m_rep_body, "<body leftmargin=\"0\" topmargin=\"0\" marginwidth=\"0\" marginheight=\"0\" style=\"overflow:auto;\">");
 		if (m_result == NULL)
 		{
-			WSACleanup();
 			free(m_rep_body);
 			cout << "Status: 500 Internal Server Error\n";
 			Error("<p><b>从服务器拉取分数失败。(BeginOfRet)</b></p><p>教务君可能月线繁忙，666 请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
 			return;
 		}
 		m_result += 92;
-		char m_lpszCompleteQuery[205100] = { 0 };
 		char *m_prep = (char *)malloc(205200);
 		strcpy(m_prep, "<div id=\"list_page\">");
 		char *m_end_body = strstr(m_result, "</body>");
 		if (m_result == NULL)
 		{
-			WSACleanup();
 			free(m_rep_body);
 			cout << "Status: 500 Internal Server Error\n";
 			Error("<p>从服务器拉取分数失败。(EndOfBodyNotFound)</p>");
@@ -728,8 +878,16 @@ ton-fill button-success\">一键注册</a></div>";
 		*(m_end_body + 5) = '>';
 		*(m_end_body + 6) = '\0';
 		strcat(m_prep, m_result);
-		sprintf(m_lpszCompleteQuery, m_lpszQuery, m_Student, m_Student, "", "", " active", "", m_prep);
-		cout << m_lpszCompleteQuery;
+
+		char title[256] = { 0 };
+		strcpy(title, m_Student);
+		strcat(title, "的专业方案成绩 - ");
+		strcat(title, SOFTWARE_NAME);
+
+		fprintf(stdout, header, title);
+		fprintf(stdout, m_lpszQuery, m_Student, "", "", " active", "", m_prep);
+		cout << footer;
+
 		fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
 		fclose(g_fQueryCount);
 		free(m_lpszQuery);
@@ -748,13 +906,11 @@ ton-fill button-success\">一键注册</a></div>";
 		if (!CrawlRequest(Req, m_rep_body, 204800, &m_iResult))
 		{
 			free(m_rep_body);
-			WSACleanup();
 			return;
 		}
 		char *m_result = strstr(m_rep_body, "<table width=\"100%\"  border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\">");
 		if (m_result == NULL)
 		{
-			WSACleanup();
 			free(m_rep_body);
 			cout << "Status: 500 Internal Server Error\n";
 			Error("<p><b>从服务器拉取分数失败。(BeginOfRet)</b></p><p>教务君可能月线繁忙，666 请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
@@ -763,19 +919,17 @@ ton-fill button-success\">一键注册</a></div>";
 		m_result = strstr(m_result + 92, "<table width=\"100%\"  border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\">");
 		if (m_result == NULL)
 		{
-			WSACleanup();
+			
 			free(m_rep_body);
 			cout << "Status: 500 Internal Server Error\n";
 			Error("<p><b>从服务器拉取分数失败。(MidOfRet-Table)</b></p><p>教务君可能月线繁忙，666 请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
 			return;
 		}
-		char m_lpszCompleteQuery[205100] = { 0 };
 		char *m_prep = (char *)malloc(205200);
 		strcpy(m_prep, "<div id=\"list_page\">");
 		char *m_end_body = strstr(m_result, "</body>");
 		if (m_result == NULL)
 		{
-			WSACleanup();
 			free(m_rep_body);
 			cout << "Status: 500 Internal Server Error\n";
 			Error("<p>从服务器拉取分数失败。(EndOfBodyNotFound)</p>");
@@ -788,8 +942,16 @@ ton-fill button-success\">一键注册</a></div>";
 		*(m_end_body + 5) = '>';
 		*(m_end_body + 6) = '\0';
 		strcat(m_prep, m_result);
-		sprintf(m_lpszCompleteQuery, m_lpszQuery, m_Student, m_Student, "", "", "", " active", m_prep);
-		cout << m_lpszCompleteQuery;
+
+		char title[256] = { 0 };
+		strcpy(title, m_Student);
+		strcat(title, "的不及格成绩 - ");
+		strcat(title, SOFTWARE_NAME);
+
+		fprintf(stdout, header, title);
+		fprintf(stdout, m_lpszQuery, m_Student, "", "", "", " active", m_prep);
+		cout << footer;
+
 		fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
 		fclose(g_fQueryCount);
 		free(m_lpszQuery);
@@ -803,7 +965,7 @@ ton-fill button-success\">一键注册</a></div>";
 	if (pStr1 == NULL)
 	{
 		free(m_lpszQuery);
-		Error("<p><b>额，分数页面神隐了 0.0。</b></p><p>这可能是因为新的学期开始了，上次考试成绩存档了哦~ 建议看看已通过课程成绩和按专业成绩，这里面可以看到历年成绩和所得学分哦~</p>");
+		Error("<p><b>额，分数页面神隐了 0.0。</b></p><p>这可能是因为新的学期开始了，上次考试成绩存档了哦~</p><p>建议看看已通过课程成绩和按专业成绩，这里面可以看到历年成绩和所得学分哦~</p>");
 		return;
 	}
 
@@ -964,11 +1126,19 @@ ton-fill button-success\">一键注册</a></div>";
 	char m_query_time[512] = { 0 };
 	sprintf(m_query_time, "<center>本次查询耗时 %.2f 秒</center>", (double)((GetTickCount() - g_start_time) / 1000));
 	strcat(m_Output, m_query_time);
-	char m_lpszCompleteQuery[81920] = { 0 };
-	sprintf(m_lpszCompleteQuery, m_lpszQuery, m_Student, m_Student, " active", "", "", "", m_Output);
-	
-	cout << GLOBAL_HEADER << m_lpszCompleteQuery;
 
+	cout << GLOBAL_HEADER;
+
+	char title[256] = { 0 };
+	strcpy(title, m_Student);
+	strcat(title, "的本期成绩 - ");
+	strcat(title, SOFTWARE_NAME);
+
+	fprintf(stdout, header, title);
+	fprintf(stdout, m_lpszQuery, m_Student, " active", "", "", "", m_Output);
+
+	cout << footer;
+	
 	free(m_lpszQuery);
 	fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
 	fclose(g_fQueryCount);
@@ -1073,7 +1243,7 @@ int system_registration()
 	{
 		free(m_rep_header);
 		student_logout();
-		WSACleanup();
+		
 		return -1;
 	}
 
@@ -1084,7 +1254,7 @@ int system_registration()
 		free(m_rep_header);
 		Error("<p>数据错误。不好意思，自动注册失败，劳请大佬去教务系统看看吧~ (1)</p>");
 		student_logout();
-		WSACleanup();
+		
 		return -1;
 	}
 	pStr1 -= 70;
@@ -1094,7 +1264,7 @@ int system_registration()
 		free(m_rep_header);
 		Error("<p>数据错误。不好意思，自动注册失败，劳请大佬去教务系统看看吧~ (2)</p>");
 		student_logout();
-		WSACleanup();
+		
 		return -1;
 	}
 	pStr1 = pStr2;
@@ -1104,7 +1274,7 @@ int system_registration()
 		free(m_rep_header);
 		Error("<p>数据错误。不好意思，自动注册失败，劳请大佬去教务系统看看吧~ (3)</p>");
 		student_logout();
-		WSACleanup();
+		
 		return -1;
 	}
 
@@ -1129,7 +1299,7 @@ int system_registration()
 	{
 		student_logout();
 		free(m_rep_header);
-		WSACleanup();
+		
 		return -1;
 	}
 
@@ -1139,7 +1309,7 @@ int system_registration()
 	{
 		free(m_rep_header);
 		student_logout();
-		WSACleanup();
+		
 		Error("<p>不好意思，自动注册失败，劳请大佬去教务系统看看吧~ (4)</p>");
 		return -1;
 	}
@@ -1154,7 +1324,7 @@ int system_registration()
 	if (!CrawlRequest(QUERY_SCORE, m_rep_header, 81920, &m_iResult))
 	{
 		free(m_rep_header);
-		WSACleanup();
+		
 		return -1;
 	}
 	char *m_result = strstr(m_rep_header, "\r\n\r\n");
@@ -1164,7 +1334,7 @@ int system_registration()
 		free(m_rep_header);
 		cout << "Status: 500 Internal Server Error\n";
 		Error("<p>从服务器拉取分数失败。</p>");
-		WSACleanup();
+		
 		return -1;
 	}
 
@@ -1173,7 +1343,7 @@ int system_registration()
 	free(m_rep_header);
 	
 	// 完事~
-	WSACleanup();
+	
 	return 0;
 }
 
@@ -1200,7 +1370,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	char *m_result = strstr(m_rep_body, "\r\n\r\n");
 	if (m_result == NULL)
 	{
-		WSACleanup();
+		
 		free(m_rep_body);
 		cout << "Status: 500 Internal Server Error\n";
 		Error("<p>从服务器拉取登录结果失败。</p>");
@@ -1211,7 +1381,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	char *m_login_not_auth = strstr(m_result, "证件号");
 	if (m_login_not_auth != NULL)
 	{
-		WSACleanup();
+		
 		free(m_rep_body);
 		cout << "Status: 403 Forbidden\n";
 		Error("<p>证件号或密码不对啊，大佬。 TAT。</p>");
@@ -1220,7 +1390,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	m_login_not_auth = strstr(m_result, "密码不正确");
 	if (m_login_not_auth != NULL)
 	{
-		WSACleanup();
+		
 		free(m_rep_body);
 		cout << "Status: 403 Forbidden\n";
 		Error("<p>学号或密码不对啊，大佬。 TAT。</p>");
@@ -1229,7 +1399,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	m_login_not_auth = strstr(m_result, "验证码错误");
 	if (m_login_not_auth != NULL)
 	{
-		WSACleanup();
+		
 		free(m_rep_body);
 		cout << "Status: 403 Forbidden\n";
 		Error("<p>验证码不对啊，大佬。 TAT。</p>");
@@ -1238,7 +1408,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	m_login_not_auth = strstr(m_result, "数据库");
 	if (m_login_not_auth != NULL)
 	{
-		WSACleanup();
+		
 		free(m_rep_body);
 		cout << "Status: 403 Forbidden\n";
 		Error("<p>教务系统君说数据库繁忙 :P</p><p>对于<b>数据库跑路</b>问题，那就等等先咯~</p>");
@@ -1247,7 +1417,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	char *m_login_success = strstr(m_result, "学分制综合教务");
 	if (m_login_success == NULL)
 	{
-		WSACleanup();
+		
 		free(m_rep_body);
 		cout << "Status: 403 Forbidden\n";
 		Error("<p>天呐。发生了谜一般的问题！教务系统神隐了 0.0</p><p>建议你稍候再试试吧。</p>");
@@ -1303,17 +1473,20 @@ void parse_QuickQuery_Intro()
 	}
 	fclose(m_file_query); // 关闭文件
 
-	int m_ilength = strlen(m_lpszQuery) + 512;
-	char *m_lpszCompleteQuery = (char *)malloc(m_ilength);
-	ZeroMemory(m_lpszCompleteQuery, m_ilength);
-	sprintf(m_lpszCompleteQuery, m_lpszQuery, g_QueryCount);
-
 	if (m_need_update_cookie)
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-	cout << GLOBAL_HEADER << m_lpszCompleteQuery;
+	cout << GLOBAL_HEADER;
+
+	char title[512] = { 0 };
+	strcat(title, "免密成绩查询 - ");
+	strcat(title, SOFTWARE_NAME);
+
+	fprintf(stdout, header, title);
+	fprintf(stdout, m_lpszQuery, g_QueryCount);
+
+	cout << footer;
 
 	free(m_lpszQuery);
-	free(m_lpszCompleteQuery);
 }
 
 // 免密查询结果 (/query.cgi?act=QuickQuery)
@@ -1351,7 +1524,7 @@ void parse_QuickQuery_Result()
 		if (m_need_update_cookie)
 			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 		Error("<p>发生错误，POST 数据长度异常。</p>");
-		WSACleanup();
+		
 		return;
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);	// TORESEARCH
@@ -1361,7 +1534,7 @@ void parse_QuickQuery_Result()
 		if (m_need_update_cookie)
 			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 		Error("<p>发生错误，POST 数据拉取失败。</p>");
-		WSACleanup();
+		
 		return;
 	}
 
@@ -1369,7 +1542,7 @@ void parse_QuickQuery_Result()
 	char *pStr1 = strstr(m_post_data, "xh=");
 	if (pStr1 == NULL)
 	{
-		WSACleanup();
+		
 		free(m_post_data);
 		cout << "Status: 500 Internal Server Error\n";
 		if (m_need_update_cookie)
@@ -1393,7 +1566,7 @@ void parse_QuickQuery_Result()
 	pStr2 = NULL;
 	if (m_xhgs > 5 || m_xhgs <= 0)
 	{
-		WSACleanup();
+		
 		free(m_post_data);
 		cout << "Status: 500 Internal Server Error\n";
 		if (m_need_update_cookie)
@@ -1410,7 +1583,7 @@ void parse_QuickQuery_Result()
 		{
 			if (strlen(m_xh[xh_index]) != 9)
 			{
-				WSACleanup();
+				
 				cout << "Status: 500 Internal Server Error\n";
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
@@ -1434,7 +1607,7 @@ void parse_QuickQuery_Result()
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 				Error("<p>投递免密查询请求失败。</p><p>请确认教务系统是可用的。</p>");
-				WSACleanup();
+				
 				free(m_lpvBuffer);
 				return;
 			}
@@ -1446,7 +1619,7 @@ void parse_QuickQuery_Result()
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 				Error("<p>获取报表ID错误。(1)</p>");
-				WSACleanup();
+				
 				free(m_lpvBuffer);
 				return;
 			}
@@ -1457,7 +1630,7 @@ void parse_QuickQuery_Result()
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 				Error("<p>获取报表ID错误。(2)</p>");
-				WSACleanup();
+				
 				free(m_lpvBuffer);
 				return;
 			}
@@ -1477,7 +1650,7 @@ void parse_QuickQuery_Result()
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 				Error("<p>通过ID免密查询失败。</p><p>发生了天知道的错误。</p>");
-				WSACleanup();
+				
 				free(m_lpvBuffer);
 				return;
 			}
@@ -1497,7 +1670,7 @@ void parse_QuickQuery_Result()
 					strcat(m_ExceptionMsg, m_Exception);
 					strcat(m_ExceptionMsg, "</p>");
 					Error(m_ExceptionMsg);
-					WSACleanup();
+					
 					free(m_lpvBuffer);
 					return;
 				}
@@ -1512,7 +1685,7 @@ void parse_QuickQuery_Result()
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 				Error("<p>免密查询返回参数错误。(1)</p>");
-				WSACleanup();
+				
 				free(m_lpvBuffer);
 				return;
 			}
@@ -1523,7 +1696,7 @@ void parse_QuickQuery_Result()
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 				Error("<p>免密查询返回参数错误。(2)</p>");
-				WSACleanup();
+				
 				free(m_lpvBuffer);
 				return;
 			}
@@ -1541,7 +1714,7 @@ void parse_QuickQuery_Result()
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 				Error("<p>接受分数信息失败！</p>");
-				WSACleanup();
+				
 				free(m_lpvBuffer);
 				return;
 			}
@@ -1553,7 +1726,7 @@ void parse_QuickQuery_Result()
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 				Error("<p>学生姓名获取失败！(1)</p>");
-				WSACleanup();
+				
 				free(m_lpvBuffer);
 				return;
 			}
@@ -1564,7 +1737,7 @@ void parse_QuickQuery_Result()
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 				Error("<p>学生姓名获取失败！(2)</p>");
-				WSACleanup();
+				
 				free(m_lpvBuffer);
 				return;
 			}
@@ -1579,7 +1752,7 @@ void parse_QuickQuery_Result()
 					"<p><b>呃，获取失败了。请确认所输信息是正确的。</b></p><p>发生错误的学号: %s</p>", 
 					m_xh[xh_index]);
 				Error(m_friendly_error);
-				WSACleanup();
+				
 				free(m_lpvBuffer);
 				return;
 			}
@@ -1595,7 +1768,7 @@ void parse_QuickQuery_Result()
 					"<p><b>获取信息失败，请确认输入正确。</b></p><p>发生错误的学号: %s</p>",
 					m_xh[xh_index]);
 				Error(m_friendly_error);
-				WSACleanup();
+				
 				free(m_lpvBuffer);
 				return;
 			}
@@ -1615,7 +1788,7 @@ void parse_QuickQuery_Result()
 					"<p><b>接受到的报表存在问题。</b></p><p>发生错误的学号: %s</p>",
 					m_xh[xh_index]);
 				Error(m_friendly_error);
-				WSACleanup();
+				
 				free(m_lpvBuffer);
 				return;
 			}
@@ -1630,7 +1803,7 @@ void parse_QuickQuery_Result()
 					"<p><b>收到的报表大小存在问题。</b></p><p>发生错误的学号: %s</p>",
 					m_xh[xh_index]);
 				Error(m_friendly_error);
-				WSACleanup();
+				
 				free(m_lpvBuffer);
 				return;
 			}
@@ -1733,7 +1906,7 @@ void parse_QuickQuery_Result()
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 				Error("<p>抱歉，免密查询失败，请稍后再试。</p>");
-				WSACleanup();
+				
 				return;
 			}
 
@@ -1778,21 +1951,287 @@ void parse_QuickQuery_Result()
 			}
 			strcat(m_list, "</ul></div>");
 		}
+
 		cout << GLOBAL_HEADER;
+
 		char m_query_time[512] = { 0 };
 		sprintf(m_query_time, "<center>本次查询耗时 %.2f 秒</center>", (double)((GetTickCount() - g_start_time) / 1000));
 		strcat(m_list, m_query_time);
-		char m_outer[204800] = { 0 };
+
 		if (m_xhgs > 1)
 		{
-			sprintf(m_outer, m_lpszQuery, "多人查询", "多人查询", "\" style=\"display:none", "\" style=\"display:none", "\" style=\"display:none", "\" style=\"display:none", m_list);
+			char title[512] = { 0 };
+			strcat(title, "多人查询 - 免密成绩查询 - ");
+			strcat(title, SOFTWARE_NAME);
+
+			fprintf(stdout, header, title);
+			fprintf(stdout, m_lpszQuery, "多人查询", "\" style=\"display:none", "\" style=\"display:none", "\" style=\"display:none", "\" style=\"display:none", m_list);
 		}
 		else
 		{
-			sprintf(m_outer, m_lpszQuery, m_xxmz, m_xxmz, "\" style=\"display:none", "\" style=\"display:none", "\" style=\"display:none", "\" style=\"display:none", m_list);
+			char title[512] = { 0 };
+			strcat(title, m_xxmz);
+			strcat(title, " - 免密成绩查询 - ");
+			strcat(title, SOFTWARE_NAME);
+
+			fprintf(stdout, header, title);
+			fprintf(stdout, m_lpszQuery, m_xxmz, "\" style=\"display:none", "\" style=\"display:none", "\" style=\"display:none", "\" style=\"display:none", m_list);
 		}
-		cout << m_outer;
+		cout << footer;
 		g_QueryCount = g_QueryCount + m_xhgs;
 		fprintf(g_fQueryCount, "%ld", g_QueryCount);
 		fclose(g_fQueryCount);
+}
+
+// 微信账号绑定入口
+void OAuth2_Association(bool isPOST)
+{
+	char *CGI_QUERY_STRING = getenv("QUERY_STRING");
+	if (CGI_QUERY_STRING == NULL)
+	{
+		cout << "Status: 500 Internal Server Error\n";
+		Error("参数错误 (Null QUERY_STRING)");
+		return;
+	}
+	char *pStr1 = strstr(CGI_QUERY_STRING, "openid=");
+	if (pStr1 == NULL)
+	{
+		cout << "Status: 500 Internal Server Error\n";
+		Error("鉴权失败 (Null openid)");
+		return;
+	}
+	char *pStr2 = strstr(pStr1 + 7, "&");
+	char *openid = new char[strlen(CGI_QUERY_STRING)];
+	if (pStr2 == NULL)
+	{
+		right(openid, pStr1 + 7, strlen(CGI_QUERY_STRING) - 7);
+	}
+	else
+	{
+		mid(openid, pStr1 + 7, pStr2 - pStr1 - 7, 0);
+	}
+	if (!isPOST)
+	{
+		int m_iResult = 0;
+		bool m_need_update_cookie = false;
+		char *m_photo = (char *)malloc(102424);
+		ZeroMemory(m_photo, 102424);
+		process_cookie(&m_need_update_cookie, m_photo);
+
+		if (strlen(m_photo) != 0) // 如果都登录了？那就踢到主页面去。
+		{
+			if (strcmp(CGI_SCRIPT_NAME, "/main.cgi") == 0)
+			{
+				parse_main(m_need_update_cookie, m_photo, false);
+				delete[]openid;
+				return;
+			}
+			cout << "Status: 302 Found\nLocation: main.cgi\n" << GLOBAL_HEADER;
+			delete[]openid;
+			return;
+		}
+
+		// 置随机数种子，并取得一个随机数，用于获取验证码。
+		srand((int)time(0));
+		int m_rand = rand();
+		char Captcha[256] = { 0 };
+		sprintf(Captcha, REQUEST_CAPTCHA, m_rand, JSESSIONID);
+
+		// 发送验证码请求，获取验证码数据。
+		char * m_rep_body = (char *)malloc(8192);
+		ZeroMemory(m_rep_body, 8192);
+		if (!CrawlRequest(Captcha, m_rep_body, 8192, &m_iResult))
+		{
+			free(m_rep_body);
+			delete[]openid;
+			return;
+		}
+
+		// 从返回数据流中获取验证码图片。
+		char *pStr1 = strstr(m_rep_body, "\r\n\r\n");
+		if (pStr1 == NULL)
+		{
+			cout << "Status: 500 Internal Server Error\n";
+			Error("<p>无法分析验证码响应协议。</p>");
+			delete[]openid;
+			return;
+		}
+		pStr1 += 4; // 指针后移四位，指向 jpg 开始位置。
+		int m_CaptchaLength = m_iResult - (pStr1 - m_rep_body); // 验证码图片的大小
+
+		// 将验证码转化为 base64 编码后的 DataURL，浏览器直接显示，供用户查看。
+		char *m_base64 = new char[m_CaptchaLength * 2 + 1];
+		base64_encode((const unsigned char *)pStr1, m_base64, m_CaptchaLength);
+		char *m_DataURL = new char[m_CaptchaLength * 2 + 24];;
+		strcpy(m_DataURL, "data:image/jpg;base64,");
+		strcat(m_DataURL, m_base64);
+		free(m_rep_body);
+
+		// 读入主页面文件
+		FILE *m_file_homepage = fopen(CGI_PATH_TRANSLATED, "rb");
+		if (m_file_homepage == NULL)
+		{
+			cout << "Status: 500 Internal Server Error\n";
+			Error("<p>错误：找不到绑定页面模板。</p>");
+			delete[]openid;
+			return;
+		}
+		fseek(m_file_homepage, 0, SEEK_END); // 移到尾
+		int m_file_homepage_length = ftell(m_file_homepage); // 获取文件长度
+		fseek(m_file_homepage, 0, SEEK_SET); // 重新移回来
+		char *m_lpszHomepage = (char *)malloc(m_file_homepage_length + 1);
+		ZeroMemory(m_lpszHomepage, m_file_homepage_length + 1);
+		if (fread(m_lpszHomepage, m_file_homepage_length, 1, m_file_homepage) != 1) // 将硬盘数据拷至内存
+		{
+			cout << "Status: 500 Internal Server Error\n";
+			Error("<p>无法读取绑定页模板内容。</p>");
+			fclose(m_file_homepage);
+			free(m_lpszHomepage);
+			delete[]openid;
+			return;
+		}
+		fclose(m_file_homepage); // 关闭文件
+
+								 // 输出网页
+		if (m_need_update_cookie)
+			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+
+		cout << GLOBAL_HEADER;
+
+		char title[256] = { 0 };
+		strcat(title, "微信用户绑定 - ");
+		strcat(title, SOFTWARE_NAME);
+		fprintf(stdout, header, title);
+
+		fprintf(stdout, m_lpszHomepage, "感谢使用微信登录，请先绑定自己的学号吧 :)", openid, openid, m_DataURL,
+			__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+
+		cout << footer;
+
+		free(m_lpszHomepage);
+		delete[]m_base64;
+		delete[]m_DataURL;
+	}
+	else // 提交账号密码验证码，打算登录绑定了
+	{
+		// 获取 POST 数据。
+		int m_post_length = atoi(CGI_CONTENT_LENGTH);
+		if (m_post_length <= 0)
+		{
+			cout << "Status: 500 Internal Server Error\n";
+			Error("<p>发生错误，POST 数据长度异常。</p>");
+			delete[]openid;
+			return;
+		}
+		char *m_post_data = (char *)malloc(m_post_length + 2);	// TORESEARCH
+		if (fgets(m_post_data, m_post_length + 1, stdin) == NULL)
+		{
+			cout << "Status: 500 Internal Server Error\n";
+			Error("<p>发生错误，POST 数据拉取失败。</p>");
+			delete[]openid;
+			return;
+		}
+
+		// 获取学号
+		char *pStr1 = strstr(m_post_data, "xh=");
+		if (pStr1 == NULL)
+		{
+			free(m_post_data);
+			cout << "Status: 500 Internal Server Error\n";
+			Error("<p>无法获取学号信息。</p>");
+			delete[]openid;
+			return;
+		}
+		char *pStr2 = strstr(pStr1 + 3, "&");
+		char m_xuehao[128] = { 0 };
+		mid(m_xuehao, pStr1, pStr2 - pStr1 - 3, 3);
+		pStr1 = NULL;
+		pStr2 = NULL;
+
+		// 获取密码
+		pStr1 = strstr(m_post_data, "mm=");
+		if (pStr1 == NULL)
+		{
+			free(m_post_data);
+			cout << "Status: 500 Internal Server Error\n";
+			Error("<p>无法获取密码信息。</p>");
+			delete[]openid;
+			return;
+		}
+		pStr2 = strstr(pStr1 + 3, "&");
+		char m_password[128] = { 0 };
+		mid(m_password, pStr1, pStr2 - pStr1 - 3, 3);
+		pStr1 = NULL;
+		pStr2 = NULL;
+
+		// 获取验证码
+		pStr1 = strstr(m_post_data, "yzm=");
+		if (pStr1 == NULL)
+		{
+			free(m_post_data);
+			cout << "Status: 500 Internal Server Error\n";
+			Error("<p>无法获取验证码信息。</p>");
+			delete[]openid;
+			return;
+		}
+		char m_captcha[128] = { 0 };
+		right(m_captcha, pStr1 + 4, 4);
+
+		if (!student_login(m_xuehao, m_password, m_captcha))
+		{
+			free(m_post_data);
+			delete[]openid;
+			return;
+		}
+		// 这里表示登录成功，应该写入数据库了。
+		sqlite3 * db = NULL;
+		int db_ret = sqlite3_open("URPScoreHelper.db", &db);
+		if (db_ret != SQLITE_OK)
+		{
+			cout << "Status: 500 Internal Server Error\n";
+			Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
+			delete[]openid;
+			return;
+		}
+
+		// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
+		char *query = new char[strlen("INSERT INTO URPScoreHelper (id, password, openid) VALUES (") + 36 + 36 + 128 + 1];
+		memset(query, 0, strlen("INSERT INTO URPScoreHelper (id, password, openid) VALUES (") + 36 + 36 + 128 + 1);
+		strcpy(query, "INSERT INTO URPScoreHelper (id, password, openid) VALUES ('");
+		strcat(query, m_xuehao);
+		strcat(query, "', '");
+		strcat(query, m_password);
+		strcat(query, "', '");
+		strcat(query, openid);
+		strcat(query, "');");
+
+		char **db_Result = NULL;
+		sqlite3_stmt *stmt;
+		db_ret = sqlite3_prepare(db, query, strlen(query), &stmt, 0);
+
+		if (db_ret != SQLITE_OK)
+		{
+			cout << "Status: 500 Internal Server Error\n";
+			char Err_Msg[1024] = "<b>很抱歉，微信绑定失败。</b><p>数据库错误 (";
+			strcat(Err_Msg, sqlite3_errmsg(db));
+			strcat(Err_Msg, ")</p><p>但是别方吖，还可以正常登录的。</p>");
+			Error(Err_Msg);
+			sqlite3_finalize(stmt);
+			sqlite3_close(db);
+			delete[]openid;
+			delete[]query;
+			return;
+		}
+
+		sqlite3_step(stmt);
+		sqlite3_finalize(stmt);
+		sqlite3_close(db);
+
+		cout << "Status: 302 Found\n";
+		cout << "Location: main.cgi\n";
+		cout << GLOBAL_HEADER;
+	}
+
+	delete[]openid;
+	return;
 }

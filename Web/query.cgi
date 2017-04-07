@@ -1,18 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="gb2312">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>%s的成绩 - iEdon URP查分助手</title>
-<meta name="viewport" content="initial-scale=1, maximum-scale=1">
-<link rel="shortcut icon" href="/favicon.ico">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<link rel="stylesheet" href="css/sm.min.css">
-<link rel="stylesheet" href="css/sm-extend.min.css">
-<link rel="stylesheet" href="css/project.css">
-</head>
-<body>
 <div class="page-group">
 	<div class="page">
 		<header class="bar bar-nav">
@@ -38,9 +23,3 @@
 		</div>
 	</div>
 </div>
-<script type='text/javascript' src='js/zepto.min.js' charset='utf-8'></script>
-<script type='text/javascript' src='js/sm.min.js' charset='utf-8'></script>
-<script type='text/javascript' src='js/sm-extend.min.js' charset='utf-8'></script>
-<script type='text/javascript' src='js/URPScoreHelper.js' charset='gb2312'></script>
-</body>
-</html>
