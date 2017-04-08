@@ -14,6 +14,7 @@ using namespace std;
 // 入口函数
 int main()
 {
+	LoadConfig();
 	g_start_time = GetTickCount();
 
 	// 初始化 Socket 库。
@@ -299,6 +300,17 @@ bool LoadPageSrc()
 	delete[]doc_root;
 	delete[]file_root;
 	return true;
+}
+
+// 加载配置
+void LoadConfig()
+{
+	SERVER = (char *)malloc(256);
+	OAUTH2_APPID = (char *)malloc(1024);
+	OAUTH2_SECRET = (char *)malloc(1024);
+	GetPrivateProfileStringA("Config", "server", "127.0.0.1", SERVER, 256, "config.ini");
+	GetPrivateProfileStringA("Config", "OAUTH2_APPID", "NULL", OAUTH2_APPID, 1024, "config.ini");
+	GetPrivateProfileStringA("Config", "OAUTH2_SECRET", "NULL", OAUTH2_SECRET, 1024, "config.ini");
 }
 
 // 处理 Cookie
@@ -598,14 +610,14 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 	if (id == NULL)
 	{
 		fprintf(stdout, m_lpszHomepage, SOFTWARE_NAME, m_photo, m_student_name, m_student_id,
-				"block", "none", "", "",
-				__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+				"block", "none", "",
+				SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 	}
 	else
 	{
-		fprintf(stdout, m_lpszHomepage, SOFTWARE_NAME, m_photo, m_student_name, m_student_id, "none", "block",
-				m_student_id, m_student_id,
-				__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+		fprintf(stdout, m_lpszHomepage, SOFTWARE_NAME, m_photo, m_student_name, m_student_id,
+				"none", "block", m_student_id,
+				SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 	}
 	cout << footer;
 
@@ -745,13 +757,13 @@ int parse_index()
 	{
 		fprintf(stdout, m_lpszHomepage, g_QueryCount, 
 						"输入你的教务系统账号来查询成绩 :)", "block", "", "", m_DataURL, "block", "none",
-						__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+						SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 	}
 	else 
 	{
 		fprintf(stdout, m_lpszHomepage, g_QueryCount, 
 						"微信登录成功，输入验证码继续吧 :)", "none", m_xh, m_mm, m_DataURL, "none", "block",
-						__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+						SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 	}
 	cout << footer;
 
@@ -2267,13 +2279,13 @@ void OAuth2_Association(bool isPOST)
 		{
 			fprintf(stdout, m_lpszHomepage, "感谢使用微信登录，请先绑定自己的学号吧 :)",
 				openid, "", m_DataURL,
-				__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+				SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 		}
 		else
 		{
 			fprintf(stdout, m_lpszHomepage, "感谢使用微信登录，请输入密码来确认 :)",
 				openid, stid, m_DataURL,
-				__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+				SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 		}
 		cout << footer;
 

@@ -1,8 +1,6 @@
 #pragma once
 
-#define SERVER_IP "58.220.248.249"
-#define SOFTWARE_NAME "iEdon URP查分助手"
-//#define SERVER_IP "10.191.0.24"
+#define SOFTWARE_NAME "唯扬小助手"
 
 // 公开给外部使用的变量
 extern SOCKET g_so;
@@ -27,6 +25,10 @@ extern const char* REQUEST_TOP;
 extern const char* GET_GRADE_BY_QBINFO;
 extern const char* GET_GRADE_BY_PLAN;
 extern const char* GET_GRADE_BY_FAILED;
+
+extern char *SERVER;
+extern char *OAUTH2_APPID;
+extern char *OAUTH2_SECRET;
 
 extern char* ERROR_HTML;
 extern char JSESSIONID[256];

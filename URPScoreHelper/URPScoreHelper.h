@@ -1,6 +1,7 @@
 #pragma once
 #ifndef URPSCOREHELPER_H
 #define URPSCOREHELPER_H
+
 const char *CGI_SCRIPT_NAME; // 脚本名字
 const char *CGI_REQUEST_METHOD; // 请求方法
 const char *CGI_CONTENT_LENGTH; // 数据长度
@@ -30,6 +31,7 @@ void parse_QuickQuery_Intro();
 void parse_QuickQuery_Result();
 bool LoadPageSrc();
 void OAuth2_Association(bool isPOST);
+void LoadConfig();
 
 typedef struct test_info
 {
