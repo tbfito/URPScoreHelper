@@ -31,7 +31,7 @@
 										学号
 									</div>
 									<div class="item-input">
-										<input id="i_xh" name="xh" type="text" placeholder="请输入学号">
+										<input id="i_xh" name="xh" type="text" placeholder="请输入学号" value="%s">
 									</div>
 								</div>
 							</div>
@@ -71,7 +71,7 @@
 							<li class="align-top">
 							<div class="item-content">
 								<div class="item-media">
-									<span id="login_hint">验证码图像</span><a onclick="show_loading();" href="OAuth2Assoc.cgi?openid=%s" class="external" title="点击刷新"><img id="login_captcha" alt="" height="40" width="120" src="%s"/></a>
+									<span id="login_hint">验证码图像</span><a href="javascript:void(0);" onclick="show_loading();window.location.reload();" class="external" title="点击刷新"><img id="login_captcha" alt="" height="40" width="120" src="%s"/></a>
 								</div>
 							</div>
 							</li>

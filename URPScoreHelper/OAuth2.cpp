@@ -18,6 +18,26 @@ void OAuth2_process()
 		Error("错误：缺少 HTTP_HOST 环境变量，请检查 CGI 接口设定。");
 		return;
 	}
+	char *CGI_QUERY_STRING = getenv("QUERY_STRING");
+	char *stid = NULL;
+	if (CGI_QUERY_STRING != NULL)
+	{
+		char *pStr1 = strstr(CGI_QUERY_STRING, "stid=");
+		if (pStr1 != NULL)
+		{
+			char *pStr2 = strstr(pStr1 + 5, "&");
+			char *sid = new char[strlen(CGI_QUERY_STRING)];
+			if (pStr2 == NULL)
+			{
+				right(sid, pStr1 + 5, strlen(CGI_QUERY_STRING) - 5);
+			}
+			else
+			{
+				mid(sid, pStr1 + 5, pStr2 - pStr1 - 5, 0);
+			}
+			stid = sid;
+		}
+	}
 	char *CGI_HTTPS = getenv("HTTPS");
 	if (CGI_HTTPS != NULL && strcmp(CGI_HTTPS, "") != 0
 		&& strcmp(CGI_HTTPS, "off") != 0
@@ -35,9 +55,24 @@ void OAuth2_process()
 	char *m_UrlEncodedDomain = url_encode(m_Domain, strlen(m_Domain), &m_UrlEncodedLength);
 	strcpy(m_Domain, m_UrlEncodedDomain);
 	free(m_UrlEncodedDomain);
-	char *m_lpszURL = new char[strlen(OAUTH2_AUTHENTICATION) + strlen(OAUTH2_APPID) + strlen(m_Domain) + 1];
-	sprintf(m_lpszURL, OAUTH2_AUTHENTICATION, OAUTH2_APPID, m_Domain);
-	
+
+	char *m_lpszURL = NULL;
+	if (stid == NULL)
+	{
+		m_lpszURL = new char[strlen(OAUTH2_AUTHENTICATION) + strlen(OAUTH2_APPID) + strlen(m_Domain) + 5];
+		sprintf(m_lpszURL, OAUTH2_AUTHENTICATION, OAUTH2_APPID, m_Domain, "NONE");
+	}
+	else if(strlen(stid) == 0)
+	{
+		m_lpszURL = new char[strlen(OAUTH2_AUTHENTICATION) + strlen(OAUTH2_APPID) + strlen(m_Domain) + 5];
+		sprintf(m_lpszURL, OAUTH2_AUTHENTICATION, OAUTH2_APPID, m_Domain, "NONE");
+	}
+	else
+	{
+		m_lpszURL = new char[strlen(OAUTH2_AUTHENTICATION) + strlen(OAUTH2_APPID) + strlen(m_Domain) + strlen(stid) + 1];
+		sprintf(m_lpszURL, OAUTH2_AUTHENTICATION, OAUTH2_APPID, m_Domain, stid);
+	}
+
 	cout << "Status: 302 Found\n";
 	cout << "Location: " << m_lpszURL << '\n';
 	cout << GLOBAL_HEADER;
@@ -161,7 +196,7 @@ void OAuth2_CallBack()
 		return;
 	}
 	mid(openid, pStr1 + 10, pStr2 - pStr1 - 10, 0);
-	// cout << GLOBAL_HEADER << html << "<br /><br />" << access_token << "<br />" << openid; 成功拿到 access_token 和 openid
+	//  成功拿到 access_token 和 openid
 
 	sqlite3 * db = NULL;
 	int db_ret = sqlite3_open("URPScoreHelper.db", &db);
@@ -218,8 +253,30 @@ void OAuth2_CallBack()
 
 	if (id == NULL || password == NULL) // 无记录，跳转至 OAuth2Assoc.cgi
 	{
+		pStr1 = strstr(CGI_QUERY_STRING, "state=");
+		char id[36] = { 0 };
+		if (pStr1 != NULL)
+		{
+			pStr2 = strstr(pStr1 + 6, "&");
+			if (pStr2 == NULL)
+			{
+				right(id, pStr1 + 6, strlen(CGI_QUERY_STRING) - 6);
+			}
+			else
+			{
+				mid(id, pStr1 + 6, pStr2 - pStr1 - 6, 0);
+			}
+		}
+
 		cout << "Status: 302 Found\n";
-		cout << "Location: OAuth2Assoc.cgi?openid=" << openid << "\n";
+		if (strcmp(id, "NONE") == 0)
+		{
+			cout << "Location: OAuth2Assoc.cgi?openid=" << openid << "\n";
+		}
+		else
+		{
+			cout << "Location: OAuth2Assoc.cgi?openid=" << openid << "&stid=" << id << "\n";
+		}
 		cout << GLOBAL_HEADER;
 		free(html);
 		sqlite3_finalize(stmt);

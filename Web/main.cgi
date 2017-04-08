@@ -15,7 +15,7 @@
 			<div class="content-block" style="overflow: hidden">
 				<canvas id="i_canvas" style="position:absolute;top:0;left:0;right:0;bottom:0"></canvas>
 				 <div class="card" style="opacity: 0.85;z-index:9999">
-					<div class="card-header">iEdon URP查分助手</div>
+					<div class="card-header">%s</div>
 					<div class="card-content">
 					  <div class="list-block media-list">
 						<ul>
@@ -27,6 +27,8 @@
 							  <div class="item-subtitle"><small>个人信息:</small></div>
 							  <div class="item-subtitle">%s</div>
 							  <div class="item-subtitle">%s</div>
+							  <div class="item-subtitle" style="display:%s"><a href="index.cgi?act=requestAssoc" class="external">绑定微信帐号</a></div>
+							  <div class="item-subtitle" style="display:%s"><span style="color:#4cd964" class="icon icon-emoji">&nbsp;微信已绑定</span><a href="javascript:void(0);" onclick="window.confirm('你确定要解除该学号与微信帐户的关联吗？')?this.href='OAuth2Assoc.cgi?release=%s':this.href='javascript:void(0);';">解除绑定</a></div>
 							</div>
 						  </li>
 						  <li class="item-content">
@@ -49,7 +51,7 @@
 						</div>
 					  </div>
 					</div>
-				   <div class="card-footer">
+					<div class="card-footer">
 					  <a href="index.cgi?act=logout" class="link external">退出登录</a>
 					</div>
 		</div>

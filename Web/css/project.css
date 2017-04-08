@@ -21,5 +21,5 @@
 #main_board {width:80%; margin:0 auto 20px;}
 #login_captcha,#main_photo {box-shadow:0 1px 3px rgba(0, 0, 0, 0.22);border-radius:5px}
 #login_query{font-family: 'LeagueGothic', Impact;margin-top:0px}
-#login_captcha,#login_hint{margin-left:1em}
+#login_captcha{margin-left:2em;margin-top:8px}
 .item-inner span{margin-right:10px}

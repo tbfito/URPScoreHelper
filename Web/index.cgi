@@ -16,11 +16,11 @@
 				<p id="login_query">
 					已成功完成&nbsp;&nbsp;<big>%ld</big>&nbsp;&nbsp;次查询操作
 				</p>
-				输入你的教务系统账号来查询成绩 :)
+				%s
 				<canvas id="i_canvas" style="position:absolute;top:0;left:0;right:0;bottom:0"></canvas>
 				<form action="main.cgi" method="post">
 					<div class="list-block">
-						<ul style="opacity: 0.75;z-index:9999">
+						<ul style="opacity: 0.75;z-index:9999;display:%s">
 							<li>
 							<div class="item-content">
 								<div class="item-media">
@@ -53,46 +53,58 @@
 								</div>
 							</div>
 							</li>
+						</ul>
+						<ul style="opacity: 0.75;z-index:9999">
 							<li>
-							<div class="item-content">
-								<div class="item-media">
-									<i class="icon icon-form-name"></i>
-								</div>
-								<div class="item-inner">
-								<span class="icon icon-picture"></span>
-									<div class="item-title label">
-										验证码
-									</div>
-									<div class="item-input">
-										<input name="yzm" id="i_yzm" type="text" placeholder="输入下方验证码">
+								<div class="item-content">
+									<div class="item-media"></div>
+									<div class="item-inner">
+										<div class="item-title label">
+											验证码图像
+										</div>
+										<div class="item-input">
+											<a onclick="show_loading();window.location.reload();" class="external" title="点击刷新"><img id="login_captcha" alt="" height="40" width="120" src="%s"/></a>
+										</div>
 									</div>
 								</div>
-							</div>
 							</li>
-							<li class="align-top">
-							<div class="item-content">
-								<div class="item-media">
-									<span id="login_hint">验证码图像</span><a onclick="show_loading();" href="index.cgi" class="external" title="点击刷新"><img id="login_captcha" alt="" height="40" width="120" src="%s"/></a>
+							<li>
+								<div class="item-content">
+									<div class="item-media">
+										<i class="icon icon-form-name"></i>
+									</div>
+									<div class="item-inner">
+									<span class="icon icon-picture"></span>
+										<div class="item-title label">
+											验证码
+										</div>
+										<div class="item-input">
+											<input name="yzm" id="i_yzm" type="text" placeholder="输入上方验证码">
+										</div>
+									</div>
 								</div>
-							</div>
 							</li>
 						</ul>
 					</div>
 					<div class="content-block">
-						<div class="row">
+						<div class="row" style="display:%s">
 							<div class="col-50">
 								<input style="z-index:9999" id="i_submit" type="submit" value="登录" class="button button-big button-fill button-success" />
 							</div>
 							<div class="col-50">
-								<a style="z-index:9999;" title="使用微信登录" onclick="show_loading();" class="button button-big button-fill button-success external" href="OAuth2.cgi">使用微信登录</a>
+								<a style="z-index:9999;" title="微信快速登录" onclick="show_loading();" class="button button-big button-fill button-success external" href="OAuth2.cgi">微信快速登录</a>
 							</div>
 							<div class="col-100">
 								<a style="z-index:9999;margin-top:10px" title="免密查询入口" onclick="show_loading();" class="button button-big button-fill external" href="QuickQuery.cgi">免密查询入口</a>
 							</div>
 						</div>
+						<div class="row" style="display:%s">
+							<div class="col-100">
+								<input style="z-index:9999" id="i_submit" type="submit" value="继续" class="button button-big button-fill" />
+							</div>
+						</div>
 					</div>
-				</div>
-			</form>
+				</form>
 		</div>
 		<input id="about" style="display:none" value="<b>%s</b><br /><small>&copy; 2012-2017 iEdon Inside</br>编译于: %s %s<br />服务端环境: %s<br />QQ: 11595137<br />N加青年 · 提供</small>"/>
 	</div>

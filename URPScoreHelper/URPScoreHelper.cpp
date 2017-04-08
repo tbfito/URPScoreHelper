@@ -77,6 +77,16 @@ int main()
 					cout << "Status: 302 Found\n" << "Location: index.cgi\n" << GLOBAL_HEADER;
 					return 0;
 				}
+				if (strcmp(CGI_QUERY_STRING, "act=requestAssoc") == 0)
+				{
+					bool m_need_update_cookie = false;
+					process_cookie(&m_need_update_cookie, NULL);
+					char student_id[36] = { 0 };
+					get_student_id(student_id);
+					student_logout();
+					cout << "Status: 302 Found\n" << "Location: OAuth2.cgi?stid="<< student_id << "\n" << GLOBAL_HEADER;
+					return 0;
+				}
 				parse_index();
 				return 0;
 			}
@@ -537,9 +547,66 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 	strcat(title, " - ");
 	strcat(title, SOFTWARE_NAME);
 
+	sqlite3 * db = NULL;
+	int db_ret = sqlite3_open("URPScoreHelper.db", &db);
+	if (db_ret != SQLITE_OK)
+	{
+		cout << "Status: 500 Internal Server Error\n";
+		Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
+		return -1;
+	}
+
+	// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
+	char *query = new char[strlen("SELECT id FROM URPScoreHelper WHERE id='") + 36 + 1];
+	memset(query, 0, strlen("SELECT id FROM URPScoreHelper WHERE id='") + 36 + 1);
+	strcpy(query, "SELECT id FROM URPScoreHelper WHERE id='");
+	strcat(query, m_student_id);
+	strcat(query, "';");
+
+	char **db_Result = NULL;
+	sqlite3_stmt *stmt;
+	db_ret = sqlite3_prepare(db, query, strlen(query), &stmt, 0);
+
+	if (db_ret != SQLITE_OK)
+	{
+		cout << "Status: 500 Internal Server Error\n";
+		char Err_Msg[512] = "<b>数据库准备失败！请确认数据库合法性。</b><p>(";
+		strcat(Err_Msg, sqlite3_errmsg(db));
+		strcat(Err_Msg, ")</p>");
+		Error(Err_Msg);
+		sqlite3_finalize(stmt);
+		sqlite3_close(db);
+		delete[]query;
+		free(m_lpszHomepage);
+		free(m_photo);
+		return -1;
+	}
+
+	const unsigned char *id = NULL;
+
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+	{
+		id = sqlite3_column_text(stmt, 0);
+		break;
+	}
+
+	sqlite3_finalize(stmt);
+	sqlite3_close(db);
+	delete[]query;
+
 	fprintf(stdout, header, title);
-	fprintf(stdout, m_lpszHomepage, m_photo, m_student_name, m_student_id,
-		__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+	if (id == NULL)
+	{
+		fprintf(stdout, m_lpszHomepage, SOFTWARE_NAME, m_photo, m_student_name, m_student_id,
+				"block", "none", "", "",
+				__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+	}
+	else
+	{
+		fprintf(stdout, m_lpszHomepage, SOFTWARE_NAME, m_photo, m_student_name, m_student_id, "none", "block",
+				m_student_id, m_student_id,
+				__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+	}
 	cout << footer;
 
 	free(m_lpszHomepage);
@@ -676,13 +743,15 @@ int parse_index()
 	fprintf(stdout, header, SOFTWARE_NAME);
 	if (m_xh == NULL || m_mm == NULL)
 	{
-		fprintf(stdout, m_lpszHomepage, g_QueryCount, "", "", m_DataURL,
-			__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+		fprintf(stdout, m_lpszHomepage, g_QueryCount, 
+						"输入你的教务系统账号来查询成绩 :)", "block", "", "", m_DataURL, "block", "none",
+						__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 	}
 	else 
 	{
-		fprintf(stdout, m_lpszHomepage, g_QueryCount, m_xh, m_mm, m_DataURL,
-			__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+		fprintf(stdout, m_lpszHomepage, g_QueryCount, 
+						"微信登录成功，输入验证码继续吧 :)", "none", m_xh, m_mm, m_DataURL, "none", "block",
+						__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 	}
 	cout << footer;
 
@@ -1983,7 +2052,7 @@ void parse_QuickQuery_Result()
 		fclose(g_fQueryCount);
 }
 
-// 微信账号绑定入口
+// 微信账号绑定入口与解绑逻辑 (/OAuth2Assoc.cgi)
 void OAuth2_Association(bool isPOST)
 {
 	char *CGI_QUERY_STRING = getenv("QUERY_STRING");
@@ -1993,7 +2062,82 @@ void OAuth2_Association(bool isPOST)
 		Error("参数错误 (Null QUERY_STRING)");
 		return;
 	}
-	char *pStr1 = strstr(CGI_QUERY_STRING, "openid=");
+
+	// 解除绑定逻辑
+	char *pStr1 = strstr(CGI_QUERY_STRING, "release=");
+	if (pStr1 != NULL)
+	{
+		char student_id[36] = { 0 };
+		get_student_id(student_id);
+		if (student_id == NULL)
+		{
+			cout << "Status: 500 Internal Server Error\n";
+			Error("非法操作！ (尚未登录)");
+			return;
+		}
+		char *pStr2 = strstr(pStr1 + 8, "&");
+		char *releaseid = new char[strlen(CGI_QUERY_STRING)];
+		if (pStr2 == NULL)
+		{
+			right(releaseid, pStr1 + 8, strlen(CGI_QUERY_STRING) - 8);
+		}
+		else
+		{
+			mid(releaseid, pStr1 + 8, pStr2 - pStr1 - 8, 0);
+		}
+		if (strcmp(releaseid, student_id) != 0)
+		{
+			cout << "Status: 500 Internal Server Error\n";
+			Error("非法操作！ (身份错误)");
+			return;
+		}
+
+		sqlite3 * db = NULL;
+		int db_ret = sqlite3_open("URPScoreHelper.db", &db);
+		if (db_ret != SQLITE_OK)
+		{
+			cout << "Status: 500 Internal Server Error\n";
+			Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
+			return;
+		}
+
+		// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
+		char *query = new char[strlen("DELETE FROM URPScoreHelper WHERE id='") + 36 + 1];
+		memset(query, 0, strlen("DELETE FROM URPScoreHelper WHERE id='") + 36 + 1);
+		strcpy(query, "DELETE FROM URPScoreHelper WHERE id='");
+		strcat(query, student_id);
+		strcat(query, "';");
+
+		char **db_Result = NULL;
+		sqlite3_stmt *stmt;
+		db_ret = sqlite3_prepare(db, query, strlen(query), &stmt, 0);
+
+		if (db_ret != SQLITE_OK)
+		{
+			cout << "Status: 500 Internal Server Error\n";
+			char Err_Msg[512] = "<b>解除绑定失败，请稍后再试。</b><p>(";
+			strcat(Err_Msg, sqlite3_errmsg(db));
+			strcat(Err_Msg, ")</p>");
+			Error(Err_Msg);
+			sqlite3_finalize(stmt);
+			sqlite3_close(db);
+			delete[]query;
+			return;
+		}
+
+		while (sqlite3_step(stmt) == SQLITE_ROW)
+		{
+			break;
+		}
+
+		sqlite3_finalize(stmt);
+		sqlite3_close(db);
+		delete[]query;
+		cout << "Status: 302 Found\nLocation: main.cgi\n" << GLOBAL_HEADER;
+		return;
+	}
+
+	pStr1 = strstr(CGI_QUERY_STRING, "openid=");
 	if (pStr1 == NULL)
 	{
 		cout << "Status: 500 Internal Server Error\n";
@@ -2029,6 +2173,22 @@ void OAuth2_Association(bool isPOST)
 			cout << "Status: 302 Found\nLocation: main.cgi\n" << GLOBAL_HEADER;
 			delete[]openid;
 			return;
+		}
+
+		// 如果传进 sid，则自动填写学号。
+		pStr1 = strstr(CGI_QUERY_STRING, "stid=");
+		char stid[36] = { 0 };
+		if (pStr1 != NULL)
+		{
+			pStr2 = strstr(pStr1 + 5, "&");
+			if (pStr2 == NULL)
+			{
+				right(stid, pStr1 + 5, strlen(CGI_QUERY_STRING) - 5);
+			}
+			else
+			{
+				mid(stid, pStr1 + 5, pStr2 - pStr1 - 5, 0);
+			}
 		}
 
 		// 置随机数种子，并取得一个随机数，用于获取验证码。
@@ -2092,7 +2252,7 @@ void OAuth2_Association(bool isPOST)
 		}
 		fclose(m_file_homepage); // 关闭文件
 
-								 // 输出网页
+		// 输出网页
 		if (m_need_update_cookie)
 			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 
@@ -2103,9 +2263,18 @@ void OAuth2_Association(bool isPOST)
 		strcat(title, SOFTWARE_NAME);
 		fprintf(stdout, header, title);
 
-		fprintf(stdout, m_lpszHomepage, "感谢使用微信登录，请先绑定自己的学号吧 :)", openid, openid, m_DataURL,
-			__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
-
+		if (strlen(stid) == 0)
+		{
+			fprintf(stdout, m_lpszHomepage, "感谢使用微信登录，请先绑定自己的学号吧 :)",
+				openid, "", m_DataURL,
+				__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+		}
+		else
+		{
+			fprintf(stdout, m_lpszHomepage, "感谢使用微信登录，请输入密码来确认 :)",
+				openid, stid, m_DataURL,
+				__FILE__, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+		}
 		cout << footer;
 
 		free(m_lpszHomepage);
