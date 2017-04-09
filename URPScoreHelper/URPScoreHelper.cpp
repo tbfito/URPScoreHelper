@@ -661,7 +661,7 @@ int parse_index()
 		}
 	}
 
-	// 如果是微信登录回来，则自动填充账号密码。
+	// 如果是QQ登录回来，则自动填充账号密码。
 	char *m_xh = NULL;
 	char *m_mm = NULL;
 	char *pStr1 = strstr((char *)CGI_QUERY_STRING, "id=");
@@ -769,7 +769,7 @@ int parse_index()
 	else 
 	{
 		fprintf(stdout, m_lpszHomepage, g_QueryCount, 
-						"微信登录成功，输入验证码继续吧 :)", "none", m_xh, m_mm, m_DataURL, "none", "block",
+						"QQ登录成功，输入验证码继续吧 :)", "none", m_xh, m_mm, m_DataURL, "none", "block",
 						SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 	}
 	cout << footer;
@@ -2071,7 +2071,7 @@ void parse_QuickQuery_Result()
 		fclose(g_fQueryCount);
 }
 
-// 微信账号绑定入口与解绑逻辑 (/OAuth2Assoc.cgi)
+// QQ账号绑定入口与解绑逻辑 (/OAuth2Assoc.cgi)
 void OAuth2_Association(bool isPOST)
 {
 	char *CGI_QUERY_STRING = getenv("QUERY_STRING");
@@ -2278,19 +2278,19 @@ void OAuth2_Association(bool isPOST)
 		cout << GLOBAL_HEADER;
 
 		char title[256] = { 0 };
-		strcat(title, "微信用户绑定 - ");
+		strcat(title, "QQ用户绑定 - ");
 		strcat(title, SOFTWARE_NAME);
 		fprintf(stdout, header, title);
 
 		if (strlen(stid) == 0)
 		{
-			fprintf(stdout, m_lpszHomepage, "感谢使用微信登录，请先绑定自己的学号吧 :)",
+			fprintf(stdout, m_lpszHomepage, "感谢使用QQ登录，请先绑定自己的学号吧 :)",
 				openid, "", m_DataURL,
 				SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 		}
 		else
 		{
-			fprintf(stdout, m_lpszHomepage, "感谢使用微信登录，请输入密码来确认 :)",
+			fprintf(stdout, m_lpszHomepage, "感谢使用QQ登录，请输入密码来确认 :)",
 				openid, stid, m_DataURL,
 				SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 		}
@@ -2400,7 +2400,7 @@ void OAuth2_Association(bool isPOST)
 		if (db_ret != SQLITE_OK)
 		{
 			cout << "Status: 500 Internal Server Error\n";
-			char Err_Msg[1024] = "<b>很抱歉，微信绑定失败。</b><p>数据库错误 (";
+			char Err_Msg[1024] = "<b>很抱歉，QQ绑定失败。</b><p>数据库错误 (";
 			strcat(Err_Msg, sqlite3_errmsg(db));
 			strcat(Err_Msg, ")</p><p>但是别方吖，还可以正常登录的。</p>");
 			Error(Err_Msg);

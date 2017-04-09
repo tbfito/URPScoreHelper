@@ -1,8 +1,8 @@
 
 		<script type='text/javascript' src='js/zepto.min.js' charset='utf-8'></script>
+		<script type='text/javascript' src='js/URPScoreHelper.js' charset='gb2312'></script>
 		<script type='text/javascript' src='js/sm.min.js' charset='utf-8'></script>
 		<script type='text/javascript' src='js/sm-extend.min.js' charset='utf-8'></script>
-		<script type='text/javascript' src='js/URPScoreHelper.js' charset='gb2312'></script>
 		<script>
 			var _mtac = {};
 			(function() {
@@ -18,7 +18,7 @@
 			var _hmt = _hmt || [];
 			(function() {
 			  var hm = document.createElement("script");
-			  hm.src = "https://hm.baidu.com/hm.js?0d875a45c1391fc4d011b286634b5283";
+			  hm.src = "https://hm.baidu.com/hm.js?5ac40a5cba8e98cc9e67e36514f830ab";
 			  var s = document.getElementsByTagName("script")[0]; 
 			  s.parentNode.insertBefore(hm, s);
 			})();

@@ -1,7 +1,7 @@
 <div class="page-group">
 	<div class="page">
 		<header class="bar bar-nav">
-		<button class="button button-link button-nav pull-left"><span class="icon icon-share"></span>&nbsp;&nbsp;<a onclick="return show_about();">关于</a></button>
+		<button class="button button-link button-nav pull-left"><span class="icon icon-share"></span>&nbsp;&nbsp;<a class="except" onclick="return show_about();">关于</a></button>
 		<button class="button button-link button-nav pull-right"><a href="Comments.html">吐槽</a>&nbsp;&nbsp;<span class="icon icon-message"></span></button>
 		<h1 class="title">N加青年 广陵查分助手</h1>
 		</header>
@@ -63,7 +63,7 @@
 											验证码图像
 										</div>
 										<div class="item-input">
-											<a onclick="show_loading();window.location.reload();" class="external" title="点击刷新"><img id="login_captcha" alt="" height="40" width="120" src="%s"/></a>
+											<a onclick="window.location.reload();" title="点击刷新"><img id="login_captcha" alt="" height="40" width="120" src="%s"/></a>
 										</div>
 									</div>
 								</div>
@@ -92,10 +92,10 @@
 								<input style="z-index:9999" id="i_submit" type="submit" value="登录" class="button button-big button-fill button-success" />
 							</div>
 							<div class="col-50">
-								<a style="z-index:9999;" title="微信快速登录" onclick="show_loading();" class="button button-big button-fill button-success external" href="OAuth2.cgi">微信快速登录</a>
+								<a style="z-index:9999;" title="QQ快速登录" class="button button-big button-fill button-success external" href="OAuth2.cgi">QQ快速登录</a>
 							</div>
 							<div class="col-100">
-								<a style="z-index:9999;margin-top:10px" title="免密查询入口" onclick="show_loading();" class="button button-big button-fill external" href="QuickQuery.cgi">免密查询入口</a>
+								<a style="z-index:9999;margin-top:10px" title="免密查询入口" class="button button-big button-fill external" href="QuickQuery.cgi">免密查询入口</a>
 							</div>
 						</div>
 						<div class="row" style="display:%s">

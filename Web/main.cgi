@@ -1,7 +1,7 @@
 <div class="page-group">
 	<div class="page">
 		<header class="bar bar-nav">
-		<button class="button button-link button-nav pull-left"><span class="icon icon-share"></span>&nbsp;&nbsp;<a onclick="return show_about();">关于</a></button>
+		<button class="button button-link button-nav pull-left"><span class="icon icon-share"></span>&nbsp;&nbsp;<a class="except" onclick="return show_about();">关于</a></button>
 		<button class="button button-link button-nav pull-right"><a href="Comments.html">吐槽</a>&nbsp;&nbsp;<span class="icon icon-message"></span></button>
 		<h1 class="title">N加青年 广陵查分助手</h1>
 		</header>
@@ -27,8 +27,8 @@
 							  <div class="item-subtitle"><small>个人信息:</small></div>
 							  <div class="item-subtitle">%s</div>
 							  <div class="item-subtitle">%s</div>
-							  <div class="item-subtitle" style="display:%s"><a href="index.cgi?act=requestAssoc" class="external">绑定微信帐号</a></div>
-							  <div class="item-subtitle" style="display:%s"><span style="color:#4cd964" class="icon icon-emoji">&nbsp;微信已绑定</span><a href="javascript:void(0);" onclick="window.confirm('你确定要解除该学号与微信帐户的关联吗？')?this.href='OAuth2Assoc.cgi?release=%s':this.href='javascript:void(0);';">解除绑定</a></div>
+							  <div class="item-subtitle" style="display:%s"><a href="index.cgi?act=requestAssoc">绑定QQ帐号</a></div>
+							  <div class="item-subtitle" style="display:%s"><span style="color:#4cd964" class="icon icon-emoji">&nbsp;QQ已绑定</span><a href="javascript:void(0);" onclick="window.confirm('你确定要解除该学号与QQ帐户的关联吗？')?this.href='OAuth2Assoc.cgi?release=%s':this.href='javascript:window.location.reload();';">解除绑定</a></div>
 							</div>
 						  </li>
 						  <li class="item-content">
@@ -37,22 +37,22 @@
 						</ul>
 						<div id="main_board">
 							<div class="col-100">
-								<a style="z-index:9999;margin-top:10px" title="查询本学期 成绩+排名+GPA" onclick="show_loading();" class="button button-big button-success button-fill external" href="query.cgi">查询本学期 成绩+排名+GPA</a>
+								<a style="z-index:9999;margin-top:10px" title="查询本学期 成绩+排名+GPA" class="button button-big button-success button-fill external" href="query.cgi">查询本学期 成绩+排名+GPA</a>
 							</div>
 							<div class="col-100">
-								<a style="z-index:9999;margin-top:10px" title="各学期 已过科目+已修学分" onclick="show_loading();" class="button button-big button-fill external" href="query.cgi?order=passed">各学期 已过科目+已修学分</a>
+								<a style="z-index:9999;margin-top:10px" title="各学期 已过科目+已修学分" class="button button-big button-fill external" href="query.cgi?order=passed">各学期 已过科目+已修学分</a>
 							</div>
 							<div class="col-100">
-								<a style="z-index:9999;margin-top:10px" title="按专业方案查询" onclick="show_loading();" class="button button-big button-dark button-fill external" href="query.cgi?order=byplan">按专业方案查询</a>
+								<a style="z-index:9999;margin-top:10px" title="按专业方案查询" class="button button-big button-dark button-fill external" href="query.cgi?order=byplan">按专业方案查询</a>
 							</div>
 							<div class="col-100">
-								<a style="z-index:9999;margin-top:10px" title="不及格成绩查询" onclick="show_loading();" class="button button-big button-danger button-fill external" href="query.cgi?order=failed">不及格成绩查询</a>
+								<a style="z-index:9999;margin-top:10px" title="不及格成绩查询" class="button button-big button-danger button-fill external" href="query.cgi?order=failed">不及格成绩查询</a>
 							</div>
 						</div>
 					  </div>
 					</div>
 					<div class="card-footer">
-					  <a href="index.cgi?act=logout" class="link external">退出登录</a>
+					  <a href="index.cgi?act=logout" class="link">退出登录</a>
 					</div>
 		</div>
 		<input id="about" style="display:none" value="<b>%s</b><br /><small>&copy; 2012-2017 iEdon Inside</br>编译于: %s %s<br />服务端环境: %s<br />QQ: 11595137<br />N加青年 · 提供</small>"/>

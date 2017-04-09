@@ -1,9 +1,9 @@
 <div class="page-group">
 	<div class="page">
 		<header class="bar bar-nav">
-		<button class="button button-link button-nav pull-left"><span class="icon icon-share"></span>&nbsp;&nbsp;<a onclick="return show_about();">关于</a></button>
+		<button class="button button-link button-nav pull-left"><span class="icon icon-share"></span>&nbsp;&nbsp;<a class="except" onclick="return show_about();">关于</a></button>
 		<button class="button button-link button-nav pull-right"><a href="Comments.html">吐槽</a>&nbsp;&nbsp;<span class="icon icon-message"></span></button>
-		<h1 class="title">微信用户绑定</h1>
+		<h1 class="title">QQ用户绑定</h1>
 		</header>
 		<nav class="bar bar-tab">
 		<a class="tab-item external active" href="index.cgi">
@@ -71,7 +71,7 @@
 							<li class="align-top">
 							<div class="item-content">
 								<div class="item-media">
-									<span id="login_hint">验证码图像</span><a href="javascript:void(0);" onclick="show_loading();window.location.reload();" class="external" title="点击刷新"><img id="login_captcha" alt="" height="40" width="120" src="%s"/></a>
+									<span id="login_hint">验证码图像</span><a href="javascript:void(0);" onclick="window.location.reload();" title="点击刷新"><img id="login_captcha" alt="" height="40" width="120" src="%s"/></a>
 								</div>
 							</div>
 							</li>

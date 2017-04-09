@@ -7,24 +7,7 @@
 using namespace std;
 int shift = 0;
 
-void getRedirectUri(char *CGI_HTTP_HOST, char *m_Domain)
-{
-	char *CGI_HTTPS = getenv("HTTPS");
-	if (CGI_HTTPS != NULL && strcmp(CGI_HTTPS, "") != 0
-		&& strcmp(CGI_HTTPS, "off") != 0
-		&& strcmp(CGI_HTTPS, "0") != 0)
-	{
-		strcpy(m_Domain, "https://");
-	}
-	else
-	{
-		strcpy(m_Domain, "http://");
-	}
-	strcat(m_Domain, CGI_HTTP_HOST);
-	strcat(m_Domain, "/OAuth2CallBack.cgi");
-}
-
-// 处理QQ登录入口请求
+// 处理微信登录入口请求
 void OAuth2_process()
 {
 	char m_Domain[512] = { 0 };
@@ -55,7 +38,19 @@ void OAuth2_process()
 			stid = sid;
 		}
 	}
-	getRedirectUri(CGI_HTTP_HOST, m_Domain);
+	char *CGI_HTTPS = getenv("HTTPS");
+	if (CGI_HTTPS != NULL && strcmp(CGI_HTTPS, "") != 0
+		&& strcmp(CGI_HTTPS, "off") != 0
+		&& strcmp(CGI_HTTPS, "0") != 0)
+	{
+		strcpy(m_Domain, "https://");
+	}
+	else
+	{
+		strcpy(m_Domain, "http://");
+	}
+	strcat(m_Domain, CGI_HTTP_HOST);
+	strcat(m_Domain, "/OAuth2CallBack.cgi");
 	int m_UrlEncodedLength;
 	char *m_UrlEncodedDomain = url_encode(m_Domain, strlen(m_Domain), &m_UrlEncodedLength);
 	strcpy(m_Domain, m_UrlEncodedDomain);
@@ -83,20 +78,10 @@ void OAuth2_process()
 	cout << GLOBAL_HEADER;
 }
 
-// QQ授权回调
+// 微信授权回调
 void OAuth2_CallBack()
 {
 	char *CGI_QUERY_STRING = getenv("QUERY_STRING");
-	char m_Domain[512] = { 0 };
-	char *CGI_HTTP_HOST = getenv("HTTP_HOST");
-	if (CGI_HTTP_HOST == NULL)
-	{
-		cout << "Status: 500 Internal Server Error\n";
-		Error("错误：缺少 HTTP_HOST 环境变量，请检查 CGI 接口设定。");
-		return;
-	}
-	getRedirectUri(CGI_HTTP_HOST, m_Domain);
-
 	if (CGI_QUERY_STRING == NULL)
 	{
 		cout << "Status: 500 Internal Server Error\n";
@@ -124,10 +109,9 @@ void OAuth2_CallBack()
 	char *access_token_req = new char[strlen(OAUTH2_ACCESS_TOKEN) +
 		strlen(OAUTH2_APPID) +
 		strlen(OAUTH2_SECRET) +
-		+ strlen(m_Domain)
-		+ strlen(code) + 1];
+		strlen(code) + 1];
 
-	sprintf(access_token_req, OAUTH2_ACCESS_TOKEN, OAUTH2_APPID, OAUTH2_SECRET, code, m_Domain);
+	sprintf(access_token_req, OAUTH2_ACCESS_TOKEN, OAUTH2_APPID, OAUTH2_SECRET, code);
 
 	CURL* curl = curl_easy_init();
 
@@ -159,7 +143,7 @@ void OAuth2_CallBack()
 		return;
 	}
 
-	pStr1 = strstr(html, "access_token=");
+	pStr1 = strstr(html, "{\"access_token\":\"");
 	if (pStr1 == NULL)
 	{
 		cout << "Status: 500 Internal Server Error\n";
@@ -170,7 +154,7 @@ void OAuth2_CallBack()
 		return;
 	}
 
-	pStr2 = strstr(pStr1 + 14, "&");
+	pStr2 = strstr(pStr1 + 18, "\"");
 	if (pStr2 == NULL)
 	{
 		cout << "Status: 500 Internal Server Error\n";
@@ -183,83 +167,35 @@ void OAuth2_CallBack()
 
 	char *access_token = new char[strlen(html)];
 	memset(access_token, 0, strlen(html));
-	mid(access_token, pStr1 + 13, pStr2 - pStr1 - 13, 0);
-
-	/*pStr1 = strstr(html, "\"social_uid\": ");
-	if (pStr1 == NULL)
-	{
-		cout << "Status: 500 Internal Server Error\n";
-		Error(html);
-		free(html);
-		delete[]access_token_req;
-		delete[]code;
-		return;
-	}
-
-	pStr2 = strstr(pStr1 + 15, ",");
-	if (pStr2 == NULL)
-	{
-		cout << "Status: 500 Internal Server Error\n";
-		Error("获取 access_token 失败！(Json_right)");
-		free(html);
-		delete[]access_token_req;
-		delete[]code;
-		return;
-	}
+	mid(access_token, pStr1 + 17, pStr2 - pStr1 - 17, 0);
 
 	char *openid = new char[strlen(html)];
 	memset(openid, 0, strlen(html));
-	mid(openid, pStr1 + 14, pStr2 - pStr1 - 14, 0);*/
-	free(html);
-
-	html = (char *)malloc(1024);
-	memset(html, 0, 1024);
-	char openid_req[512] = { 0 };
-	sprintf(openid_req, OAUTH2_GET_OPENID, access_token);
-	shift = 0;
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
-	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 15);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, html);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_receive);
-	curl_easy_setopt(curl, CURLOPT_URL,openid_req);
-	ret = curl_easy_perform(curl);
-
-	if (ret != CURLE_OK)
-	{
-		cout << "Status: 500 Internal Server Error\n";
-		Error("curl 操作失败！");
-		free(html);
-		delete[]access_token_req;
-		delete[]code;
-		return;
-	}
-
 	pStr1 = strstr(html, "\"openid\":\"");
 	if (pStr1 == NULL)
 	{
 		cout << "Status: 500 Internal Server Error\n";
-		Error(html);
+		Error("获取用户 openid 失败！(Json_left)");
 		free(html);
+		delete[]access_token;
 		delete[]access_token_req;
+		delete[]openid;
 		delete[]code;
 		return;
 	}
-
-	pStr2 = strstr(pStr1 + 11, "\"");
+	pStr2 = strstr(pStr1 + 10, "\"");
 	if (pStr2 == NULL)
 	{
 		cout << "Status: 500 Internal Server Error\n";
-		Error("获取 access_token 失败！(Json_right)");
+		Error("获取用户 openid 失败！(Json_right)");
 		free(html);
+		delete[]access_token;
 		delete[]access_token_req;
+		delete[]openid;
 		delete[]code;
 		return;
 	}
-
-	char *openid = new char[strlen(html)];
-	memset(openid, 0, strlen(html));
 	mid(openid, pStr1 + 10, pStr2 - pStr1 - 10, 0);
-
 	//  成功拿到 access_token 和 openid
 
 	sqlite3 * db = NULL;

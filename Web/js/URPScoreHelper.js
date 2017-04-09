@@ -1,4 +1,15 @@
+
+function show_loading() {
+	$.showPreloader('请稍候');
+	setTimeout(function () {
+		$.hidePreloader();
+	}, 10000);
+}
+
 $(function () {
+	$(document).on("click", "a:not(.except)", function(e) {
+		show_loading();
+	});
 		$(document).on("click", "#i_submit", function(e) {
 				document.oncontextmenu=new Function("event.returnValue=false;");
 				   var r1 = document.getElementById("i_xh").value;
@@ -19,9 +30,9 @@ $(function () {
 					$.toast("(⊙o⊙) 验证码还没输呢。");
 					return false;
 				}
-				show_querying();
-				function show_querying() {
-					$.showPreloader('O(∩_∩)O 正在查询');
+				show_logging();
+				function show_logging() {
+					$.showPreloader('O(∩_∩)O 正在登录');
 					setTimeout(function () {
 						$.hidePreloader();
 					}, 10000);
@@ -126,17 +137,11 @@ $(function () {
 						
 					}
 					draw();
-				}, 16);
+				}, 48);
 		});
-		
 		$.init();
 });
-function show_loading() {
-	$.showPreloader('请稍候');
-	setTimeout(function () {
-		$.hidePreloader();
-	}, 10000);
-}
+$.config = {router: false}
 function show_about() {
 	var r1 = document.getElementById("about").value;
 	$.alert(r1);

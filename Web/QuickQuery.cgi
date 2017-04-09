@@ -43,7 +43,7 @@
 								<input onclick="return check();" style="z-index:9999" id="i_submit" type="submit" value="免密查询" class="button button-big button-fill button-success" />
 							</div>
 							<div class="col-100">
-								<a style="z-index:9999;margin-top:10px" onclick="show_loading();" title="&lt; 登录后综合查询" class="button button-big button-fill external" href="index.cgi">&lt; 登录后综合查询</a>
+								<a style="z-index:9999;margin-top:10px" title="&lt; 登录后综合查询" class="button button-big button-fill external" href="index.cgi">&lt; 登录后综合查询</a>
 							</div>
 						</div>
 					</div>
