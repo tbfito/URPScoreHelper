@@ -320,7 +320,7 @@ void LoadConfig()
 	free(Dir);
 }
 
-// 处理 Cookie
+// 处理 Cookie、照片
 int process_cookie(bool *p_need_update_cookie, char *p_photo_uri)
 {
 	int m_iResult = 0;
@@ -431,11 +431,11 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri)
 		pStr1 += 4;
 		int m_photoLength = m_iResult - (pStr1 - m_photo);
 
-		char *m_base64 = (char *)malloc(m_photoLength * 2 + 1);
-		ZeroMemory(m_base64, m_photoLength * 2 + 1);
+		char *m_base64 = (char *)malloc(m_photoLength * 3 + 1);
+		ZeroMemory(m_base64, m_photoLength * 3 + 1);
 		base64_encode((const unsigned char *)pStr1, m_base64, m_photoLength);
-		char *m_PhotoDataURI = (char *)malloc(m_photoLength * 2 + 1 + 24);
-		ZeroMemory(m_PhotoDataURI, m_photoLength * 2 + 1 + 24);
+		char *m_PhotoDataURI = (char *)malloc(m_photoLength * 3 + 1 + 24);
+		ZeroMemory(m_PhotoDataURI, m_photoLength * 3 + 1 + 24);
 		strcpy(m_PhotoDataURI, "data:image/jpg;base64,");
 		strcat(m_PhotoDataURI, m_base64);
 		strcpy(p_photo_uri, m_PhotoDataURI);
@@ -463,7 +463,7 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 			Error("<p>发生错误，POST 数据长度异常。</p>");
 			return -1;
 		}
-		char *m_post_data = (char *)malloc(m_post_length + 2);	// TORESEARCH
+		char *m_post_data = (char *)malloc(m_post_length + 2);
 		if (fgets(m_post_data, m_post_length + 1, stdin) == NULL)
 		{
 			cout << "Status: 500 Internal Server Error\n";
@@ -576,9 +576,9 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 	}
 
 	// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
-	char *query = new char[strlen("SELECT id FROM URPScoreHelper WHERE id='") + 36 + 1];
-	memset(query, 0, strlen("SELECT id FROM URPScoreHelper WHERE id='") + 36 + 1);
-	strcpy(query, "SELECT id FROM URPScoreHelper WHERE id='");
+	char *query = new char[strlen("SELECT openid FROM URPScoreHelper WHERE id='") + 128 + 1];
+	memset(query, 0, strlen("SELECT openid FROM URPScoreHelper WHERE id='") + 128 + 1);
+	strcpy(query, "SELECT openid FROM URPScoreHelper WHERE id='");
 	strcat(query, m_student_id);
 	strcat(query, "';");
 
@@ -601,11 +601,11 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 		return -1;
 	}
 
-	const unsigned char *id = NULL;
+	const unsigned char *openid = NULL;
 
 	while (sqlite3_step(stmt) == SQLITE_ROW)
 	{
-		id = sqlite3_column_text(stmt, 0);
+		openid = sqlite3_column_text(stmt, 0);
 		break;
 	}
 
@@ -614,17 +614,17 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 	delete[]query;
 
 	fprintf(stdout, header, title);
-	if (id == NULL)
+	if (openid == NULL)
 	{
 		fprintf(stdout, m_lpszHomepage, SOFTWARE_NAME, m_photo, m_student_name, m_student_id,
-				"block", "none", "",
-				SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+			"block", "none", "",
+			SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 	}
 	else
 	{
 		fprintf(stdout, m_lpszHomepage, SOFTWARE_NAME, m_photo, m_student_name, m_student_id,
-				"none", "block", m_student_id,
-				SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+			"none", "block", m_student_id,
+			SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 	}
 	cout << footer;
 
@@ -1512,7 +1512,88 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		return false;
 	}
 
+	// 这里表示登录成功，应该写入数据库了。
+	sqlite3 * db = NULL;
+	int db_ret = sqlite3_open("URPScoreHelper.db", &db);
+	if (db_ret != SQLITE_OK)
+	{
+		student_logout();
+		cout << "Status: 500 Internal Server Error\n";
+		Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
+		return false;
+	}
+
+	// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
+	char *query = new char[strlen("SELECT id FROM URPScoreHelper WHERE id='") + 128 + 1];
+	memset(query, 0, strlen("SELECT id FROM URPScoreHelper WHERE id='") + 128 + 1);
+	strcpy(query, "SELECT id FROM URPScoreHelper WHERE id='");
+	strcat(query, p_xuehao);
+	strcat(query, "';");
+
+	char **db_Result = NULL;
+	sqlite3_stmt *stmt;
+	db_ret = sqlite3_prepare(db, query, strlen(query), &stmt, 0);
+
+	if (db_ret != SQLITE_OK)
+	{
+		student_logout();
+		cout << "Status: 500 Internal Server Error\n";
+		char Err_Msg[512] = "<b>数据库准备失败！请确认数据库合法性。</b><p>(";
+		strcat(Err_Msg, sqlite3_errmsg(db));
+		strcat(Err_Msg, ")</p>");
+		Error(Err_Msg);
+		sqlite3_finalize(stmt);
+		sqlite3_close(db);
+		delete[]query;
+		return false;
+	}
+
+	const unsigned char *id = NULL;
+
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+	{
+		id = sqlite3_column_text(stmt, 0);
+		break;
+	}
+
+	sqlite3_step(stmt);
+	sqlite3_finalize(stmt);
+	delete[]query;
+
+	if (id == NULL) // 无记录，则写入数据库
+	{
+		char *query = new char[strlen("INSERT INTO URPScoreHelper (id, password, openid) VALUES (") + 36 + 36 + 128 + 1];
+		memset(query, 0, strlen("INSERT INTO URPScoreHelper (id, password, openid) VALUES (") + 36 + 36 + 128 + 1);
+		strcpy(query, "INSERT INTO URPScoreHelper (id, password, openid) VALUES ('");
+		strcat(query, p_xuehao);
+		strcat(query, "', '");
+		strcat(query, p_password);
+		strcat(query, "', NULL);");
+
+		char **db_Result = NULL;
+		sqlite3_stmt *stmt;
+		db_ret = sqlite3_prepare(db, query, strlen(query), &stmt, 0);
+
+		if (db_ret != SQLITE_OK)
+		{
+			student_logout();
+			cout << "Status: 500 Internal Server Error\n";
+			char Err_Msg[1024] = "<b>很抱歉，登录失败。</b><p>数据库错误 (";
+			strcat(Err_Msg, sqlite3_errmsg(db));
+			strcat(Err_Msg, ")</p>");
+			Error(Err_Msg);
+			sqlite3_finalize(stmt);
+			sqlite3_close(db);
+			delete[]query;
+			return false;
+		}
+		sqlite3_step(stmt);
+		sqlite3_finalize(stmt);
+		delete[]query;
+	}
+
 	// 至此，学生登录成功，释放资源。
+	sqlite3_close(db);
 	free(m_rep_body);
 	return true;
 }
@@ -2121,9 +2202,14 @@ void OAuth2_Association(bool isPOST)
 		}
 
 		// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
-		char *query = new char[strlen("DELETE FROM URPScoreHelper WHERE id='") + 36 + 1];
+		/*char *query = new char[strlen("DELETE FROM URPScoreHelper WHERE id='") + 36 + 1];
 		memset(query, 0, strlen("DELETE FROM URPScoreHelper WHERE id='") + 36 + 1);
 		strcpy(query, "DELETE FROM URPScoreHelper WHERE id='");
+		strcat(query, student_id);
+		strcat(query, "';");*/
+		char *query = new char[strlen("UPDATE URPScoreHelper SET openid=NULL") + 128 + strlen(" WHERE id='") + 36 + 3 + 1];
+		memset(query, 0, strlen("UPDATE URPScoreHelper SET openid=NULL") + 128 + strlen(" WHERE id='") + 36 + 3 + 1);
+		strcpy(query, "UPDATE URPScoreHelper SET openid=NULL WHERE id='");
 		strcat(query, student_id);
 		strcat(query, "';");
 
@@ -2194,7 +2280,7 @@ void OAuth2_Association(bool isPOST)
 			return;
 		}
 
-		// 如果传进 sid，则自动填写学号。
+		// 如果传进 sid，则自动填写学号、并且从数据库中拿密码。
 		pStr1 = strstr(CGI_QUERY_STRING, "stid=");
 		char stid[36] = { 0 };
 		if (pStr1 != NULL)
@@ -2208,6 +2294,61 @@ void OAuth2_Association(bool isPOST)
 			{
 				mid(stid, pStr1 + 5, pStr2 - pStr1 - 5, 0);
 			}
+		}
+
+		char pass[512] = {0};
+		if (strlen(stid) != 0)
+		{
+			sqlite3 * db = NULL;
+			int db_ret = sqlite3_open("URPScoreHelper.db", &db);
+			if (db_ret != SQLITE_OK)
+			{
+				cout << "Status: 500 Internal Server Error\n";
+				Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
+				delete[]openid;
+				return;
+			}
+
+			// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
+			char *query = new char[strlen("SELECT password FROM URPScoreHelper WHERE id='") + 128 + 1];
+			memset(query, 0, strlen("SELECT password FROM URPScoreHelper WHERE id='") + 128 + 1);
+			strcpy(query, "SELECT password FROM URPScoreHelper WHERE id='");
+			strcat(query, stid);
+			strcat(query, "';");
+
+			char **db_Result = NULL;
+			sqlite3_stmt *stmt;
+			db_ret = sqlite3_prepare(db, query, strlen(query), &stmt, 0);
+
+			if (db_ret != SQLITE_OK)
+			{
+				cout << "Status: 500 Internal Server Error\n";
+				char Err_Msg[512] = "<b>数据库准备失败！请确认数据库合法性。</b><p>(";
+				strcat(Err_Msg, sqlite3_errmsg(db));
+				strcat(Err_Msg, ")</p>");
+				Error(Err_Msg);
+				sqlite3_finalize(stmt);
+				sqlite3_close(db);
+				delete[]openid;
+				delete[]query;
+				return;
+			}
+
+			const unsigned char *password = NULL;
+
+			while (sqlite3_step(stmt) == SQLITE_ROW)
+			{
+				password = sqlite3_column_text(stmt, 0);
+				break;
+			}
+			if (password != NULL)
+			{
+				strcpy(pass, (const char *)password);
+			}
+			sqlite3_step(stmt);
+			sqlite3_finalize(stmt);
+			sqlite3_close(db);
+			delete[]query;
 		}
 
 		// 置随机数种子，并取得一个随机数，用于获取验证码。
@@ -2285,13 +2426,19 @@ void OAuth2_Association(bool isPOST)
 		if (strlen(stid) == 0)
 		{
 			fprintf(stdout, m_lpszHomepage, "感谢使用QQ登录，请先绑定自己的学号吧 :)",
-				openid, "", m_DataURL,
+				openid, "block", "", "block", pass, m_DataURL,
+				SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+		}
+		else if(strlen(pass) == 0)
+		{
+			fprintf(stdout, m_lpszHomepage, "感谢使用QQ登录，请输入学号对应密码来继续操作 :)",
+				openid, "none", stid, "block", pass, m_DataURL,
 				SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 		}
 		else
 		{
-			fprintf(stdout, m_lpszHomepage, "感谢使用QQ登录，请输入密码来确认 :)",
-				openid, stid, m_DataURL,
+			fprintf(stdout, m_lpszHomepage, "感谢使用QQ登录，请输入验证码来继续操作 :)",
+				openid, "none", stid, "none", pass, m_DataURL,
 				SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 		}
 		cout << footer;
@@ -2383,15 +2530,13 @@ void OAuth2_Association(bool isPOST)
 		}
 
 		// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
-		char *query = new char[strlen("INSERT INTO URPScoreHelper (id, password, openid) VALUES (") + 36 + 36 + 128 + 1];
-		memset(query, 0, strlen("INSERT INTO URPScoreHelper (id, password, openid) VALUES (") + 36 + 36 + 128 + 1);
-		strcpy(query, "INSERT INTO URPScoreHelper (id, password, openid) VALUES ('");
-		strcat(query, m_xuehao);
-		strcat(query, "', '");
-		strcat(query, m_password);
-		strcat(query, "', '");
+		char *query = new char[strlen("UPDATE URPScoreHelper SET openid='") + 128 + strlen(" WHERE id='") + 36 + 1 + 1];
+		memset(query, 0, strlen("UPDATE URPScoreHelper SET openid='") + 128 + strlen(" WHERE id='") + 36 + 1 + 1);
+		strcpy(query, "UPDATE URPScoreHelper SET openid='");
 		strcat(query, openid);
-		strcat(query, "');");
+		strcat(query, "' WHERE id='");
+		strcat(query, m_xuehao);
+		strcat(query, "';");
 
 		char **db_Result = NULL;
 		sqlite3_stmt *stmt;

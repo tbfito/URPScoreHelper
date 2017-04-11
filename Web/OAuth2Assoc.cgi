@@ -20,7 +20,7 @@
 				<form action="OAuth2Assoc.cgi?openid=%s" method="post">
 					<div class="list-block">
 						<ul style="opacity: 0.75;z-index:9999">
-							<li>
+							<li style="display:%s">
 							<div class="item-content">
 								<div class="item-media">
 									<i class="icon icon-form-name"></i>
@@ -36,7 +36,7 @@
 								</div>
 							</div>
 							</li>
-							<li>
+							<li style="display:%s">
 							<div class="item-content">
 								<div class="item-media">
 									<i class="icon icon-form-password"></i>
@@ -47,7 +47,7 @@
 										密码
 									</div>
 									<div class="item-input">
-										<input name="mm" id="i_mm" type="password" placeholder="默认与学号相同">
+										<input name="mm" id="i_mm" type="password" placeholder="默认与学号相同" value="%s">
 									</div>
 								</div>
 							</div>
