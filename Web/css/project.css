@@ -1,3 +1,4 @@
+#list_page{background-color:#FFF}
 #list_page td{font-size:12px;text-decoration:none;color:#000000}
 #list_page table{table-layout:fixed;word-wrap:break-word;background-color:#fff;width:100%;position:relative;margin:0 auto;border-collapse:separate;border-spacing:1px}
 #list_page table.title tr td{color:#000000;font-size:14px;font-weight:bold;text-decoration:none;height:24px;line-height:0rem;padding:10px 0 26px 0;float:left}
@@ -21,5 +22,6 @@
 #main_board {width:80%; margin:0 auto 20px;}
 #login_captcha,#main_photo {box-shadow:0 1px 3px rgba(0, 0, 0, 0.22);border-radius:5px}
 #login_query{font-family: 'LeagueGothic', Impact;margin-top:0px}
-#login_captcha{margin-left:2em;margin-top:8px}
+#login_captcha{margin-left:2em;margin-top:8px;word-wrap:normal}
+#list_page #user{width:96%;table-layout:auto;}
 .item-inner span{margin-right:10px}

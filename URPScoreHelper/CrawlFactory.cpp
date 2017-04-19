@@ -35,7 +35,7 @@ bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTo
 		return false;
 	}
 
-	// 连接广陵学院教务系统 Apache 服务器
+	// 连接学院教务系统 Apache 服务器
 	sockaddr_in m_sockaddr;
 	m_sockaddr.sin_family = AF_INET;
 	m_sockaddr.sin_addr.S_un.S_addr = inet_addr(SERVER);

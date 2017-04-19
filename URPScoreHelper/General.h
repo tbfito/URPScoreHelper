@@ -25,6 +25,7 @@ extern const char* REQUEST_TOP;
 extern const char* GET_GRADE_BY_QBINFO;
 extern const char* GET_GRADE_BY_PLAN;
 extern const char* GET_GRADE_BY_FAILED;
+extern const char* GET_SMALL_TEST_SCORE;
 
 extern char *SERVER;
 extern char *OAUTH2_APPID;

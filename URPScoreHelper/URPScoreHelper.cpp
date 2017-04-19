@@ -871,7 +871,67 @@ ton-fill button-success\">一键注册</a></div>";
 		Error(m_output_str);
 		return;
 	}
+	if (strcmp(CGI_QUERY_STRING, "order=tests") == 0)
+	{
+		int m_iResult = 0;
+		char Req[512] = { 0 };
+		char *m_rep_body = (char *)malloc(204800);
+		sprintf(Req, GET_SMALL_TEST_SCORE, CGI_HTTP_COOKIE);
+		if (!CrawlRequest(Req, m_rep_body, 204800, &m_iResult))
+		{
+			free(m_rep_body);
+			return;
+		}
+		char *m_result = strstr(m_rep_body, "<table cellpadding=\"0\" width=\"100%\" class=\"displayTag\" cellspacing=\"1\" border=\"0\" id=\"user\">");
+		if (m_result == NULL)
+		{
+			free(m_rep_body);
+			cout << "Status: 500 Internal Server Error\n";
+			Error("<p><b>从服务器拉取分数失败。(BeginOfTable)</b></p><p>教务君可能月线繁忙，666 请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
+			return;
+		}
+		m_result += 93;
+		char *m_prep = (char *)malloc(205900);
+		strcpy(m_prep, "<div id=\"list_page\">");
+		char *m_end_body = strstr(m_result, "</table>");
+		if (m_result == NULL)
+		{
+			free(m_rep_body);
+			cout << "Status: 500 Internal Server Error\n";
+			Error("<p>从服务器拉取分数失败。(EndOfBodyNotFound)</p>");
+			return;
+		}
+		m_result -= 93;
+		cout << GLOBAL_HEADER;
+		char m_before[512] = { 0 };
+		sprintf(m_before, "<a name=\"qb_731\"></a><table width=\"100%%\" border=\"0\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td class=\"Linetop\"></td></tr></tbody></table><table width=\"100%%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\"><tbody><tr><td width=\"100%%\"><table border=\"0\" align=\"left\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td>&nbsp;</td><td valign=\"middle\">&nbsp;<b>%s</b> &nbsp;</td></tr></tbody></table></td></tr></tbody></table>", "成绩清单（月考/期中/补考/缓考/清考）");
+		*(m_end_body + 8) = '<';
+		*(m_end_body + 9) = '/';
+		*(m_end_body + 10) = 'd';
+		*(m_end_body + 11) = 'i';
+		*(m_end_body + 12) = 'v';
+		*(m_end_body + 13) = '>';
+		*(m_end_body + 14) = '\0';
 
+		strcat(m_prep, m_before);
+		strcat(m_prep, m_result);
+
+		char title[256] = { 0 };
+		strcpy(title, m_Student);
+		strcat(title, "的考试成绩 - ");
+		strcat(title, SOFTWARE_NAME);
+
+		fprintf(stdout, header, title);
+		fprintf(stdout, m_lpszQuery, m_Student, "", "", "", "", m_prep);
+		cout << footer;
+
+		fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
+		fclose(g_fQueryCount);
+		free(m_lpszQuery);
+		free(m_prep);
+		// free(m_result); BUG CAN NOT RELEASE!
+		return;
+	}
 	if (strcmp(CGI_QUERY_STRING, "order=passed") == 0)
 	{
 		//free(p_lpszScore);
@@ -1611,7 +1671,7 @@ void student_logout()
 	free(m_outbuffer);
 }
 
-// 免密查询入口 (/QuickQuery.cgi)
+// 快速查询入口 (/QuickQuery.cgi)
 void parse_QuickQuery_Intro()
 {
 	bool m_need_update_cookie = false;
