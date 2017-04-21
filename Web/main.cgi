@@ -6,7 +6,7 @@
 		<h1 class="title">N加青年 广陵查分助手</h1>
 		</header>
 		<nav class="bar bar-tab">
-		<a class="tab-item external active" href="index.cgi">
+		<a class="tab-item active" href="index.cgi">
 		<span class="icon icon-star"></span>
 		<span class="tab-label">成绩查询</span>
 		</a>
@@ -37,16 +37,19 @@
 						</ul>
 						<div id="main_board">
 							<div class="col-100">
-								<a style="z-index:9999;margin-top:10px" title="查询本学期 成绩+排名+GPA" class="button button-big button-success button-fill external" href="query.cgi">查询本学期 成绩+排名+GPA</a>
+								<a style="z-index:9999;margin-top:10px" title="查询本学期 成绩+排名+GPA" class="button button-big button-success button-fill" href="query.cgi">本学期 成绩+排名+GPA</a>
 							</div>
 							<div class="col-100">
-								<a style="z-index:9999;margin-top:10px" title="各学期 已过科目+已修学分" class="button button-big button-fill external" href="query.cgi?order=passed">各学期 已过科目+已修学分</a>
+								<a style="z-index:9999;margin-top:10px" title="月考/期中/补考/缓考/清考" class="button button-big button-warning button-fill" href="query.cgi?order=tests">本学期 月考/期中/补缓清考</a>
 							</div>
 							<div class="col-100">
-								<a style="z-index:9999;margin-top:10px" title="按专业方案查询" class="button button-big button-dark button-fill external" href="query.cgi?order=byplan">按专业方案查询</a>
+								<a style="z-index:9999;margin-top:10px" title="各学期 已过科目+已修学分" class="button button-big button-fill" href="query.cgi?order=passed">各学期 已过科目+已修学分</a>
 							</div>
 							<div class="col-100">
-								<a style="z-index:9999;margin-top:10px" title="不及格成绩查询" class="button button-big button-danger button-fill external" href="query.cgi?order=failed">不及格成绩查询</a>
+								<a style="z-index:9999;margin-top:10px" title="按专业方案查询" class="button button-big button-dark button-fill" href="query.cgi?order=byplan">按专业方案查询</a>
+							</div>
+							<div class="col-100">
+								<a style="z-index:9999;margin-top:10px" title="不及格成绩查询" class="button button-big button-danger button-fill" href="query.cgi?order=failed">不及格成绩查询</a>
 							</div>
 						</div>
 					  </div>

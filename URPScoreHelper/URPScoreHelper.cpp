@@ -1350,6 +1350,7 @@ void get_student_id(char *p_lpszBuffer)
 	if (!CrawlRequest(GET_TOP, m_rep_header, 8192, &m_iResult))
 	{
 		free(m_rep_header);
+		strcpy(p_lpszBuffer, "\0");
 		return;
 	}
 
@@ -1358,12 +1359,14 @@ void get_student_id(char *p_lpszBuffer)
 	if (pStr1 == NULL)
 	{
 		free(m_rep_header);
+		strcpy(p_lpszBuffer, "\0");
 		return;
 	}
 	char *pStr2 = strstr(pStr1 + 8, "(");
 	if (pStr2 == NULL)
 	{
 		free(m_rep_header);
+		strcpy(p_lpszBuffer, "\0");
 		return;
 	}
 	mid(p_lpszBuffer, pStr1, pStr2 - pStr1 - 9, 9);
@@ -1541,7 +1544,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		
 		free(m_rep_body);
 		cout << "Status: 403 Forbidden\n";
-		Error("<p>学号或密码不对啊，大佬。 TAT。</p>");
+		Error("<p><b>学号或密码不对啊。</b></p><p>如果你曾修改过教务系统的账号密码，请使用新密码再试一试。</p>");
 		return false;
 	}
 	m_login_not_auth = strstr(m_result, "验证码错误");
@@ -1622,13 +1625,17 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 
 	if (id == NULL) // 无记录，则写入数据库
 	{
-		char *query = new char[strlen("INSERT INTO URPScoreHelper (id, password, openid) VALUES (") + 36 + 36 + 128 + 1];
-		memset(query, 0, strlen("INSERT INTO URPScoreHelper (id, password, openid) VALUES (") + 36 + 36 + 128 + 1);
-		strcpy(query, "INSERT INTO URPScoreHelper (id, password, openid) VALUES ('");
+		char *query = new char[strlen("INSERT INTO URPScoreHelper (id, password, openid, lastlogin) VALUES (") + 36 + 36 + 64 + 128 + 1];
+		memset(query, 0, strlen("INSERT INTO URPScoreHelper (id, password, openid, lastlogin) VALUES (") + 36 + 36 + 64 + 128 + 1);
+		strcpy(query, "INSERT INTO URPScoreHelper (id, password, openid, lastlogin) VALUES ('");
 		strcat(query, p_xuehao);
 		strcat(query, "', '");
 		strcat(query, p_password);
-		strcat(query, "', NULL);");
+		strcat(query, "', NULL, '");
+		char m_time[128] = { 0 };
+		get_time(m_time);
+		strcat(query, m_time);
+		strcat(query, "');");
 
 		char **db_Result = NULL;
 		sqlite3_stmt *stmt;
@@ -1648,6 +1655,57 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 			return false;
 		}
 		sqlite3_step(stmt);
+		sqlite3_finalize(stmt);
+		delete[]query;
+	}
+	else // 为成功登录的学生更新记录
+	{
+		sqlite3 * db = NULL;
+		int db_ret = sqlite3_open("URPScoreHelper.db", &db);
+		if (db_ret != SQLITE_OK)
+		{
+			student_logout();
+			cout << "Status: 500 Internal Server Error\n";
+			Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
+			return false;
+		}
+
+		// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128) text lastlogin(64)。
+		char *query = new char[strlen("UPDATE URPScoreHelper SET password=") + 128 + strlen(" lastlogin= WHERE id='") + 64 + 36 + 3 + 1];
+		memset(query, 0, strlen("UPDATE URPScoreHelper SET password=") + 128 + strlen(" lastlogin= WHERE id='") + 64 + 36 + 3 + 1);
+		strcpy(query, "UPDATE URPScoreHelper SET password='");
+		char m_time[128] = { 0 };
+		get_time(m_time);
+		strcat(query, p_password);
+		strcat(query, "', lastlogin='");
+		strcat(query, m_time);
+		strcat(query, "' WHERE id = '");
+		strcat(query, p_xuehao);
+		strcat(query, "';");
+
+		char **db_Result = NULL;
+		sqlite3_stmt *stmt;
+		db_ret = sqlite3_prepare(db, query, strlen(query), &stmt, 0);
+
+		if (db_ret != SQLITE_OK)
+		{
+			student_logout();
+			cout << "Status: 500 Internal Server Error\n";
+			char Err_Msg[512] = "<b>登录数据库记录失败，请稍后再试。</b><p>(";
+			strcat(Err_Msg, sqlite3_errmsg(db));
+			strcat(Err_Msg, ")</p>");
+			Error(Err_Msg);
+			sqlite3_finalize(stmt);
+			sqlite3_close(db);
+			delete[]query;
+			return false;
+		}
+
+		while (sqlite3_step(stmt) == SQLITE_ROW)
+		{
+			break;
+		}
+
 		sqlite3_finalize(stmt);
 		delete[]query;
 	}
