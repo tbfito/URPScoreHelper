@@ -1501,6 +1501,11 @@ int system_registration()
 // 登录学生
 bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 {
+	int len = url_decode(p_password, strlen(p_password));
+	char temp[128];
+	left(temp, p_password, len);
+	strcpy(p_password, temp);
+
 	// 发送登陆请求。
 	int m_iResult = 0;
 	char * m_rep_body = (char *)malloc(40960);
