@@ -2861,7 +2861,6 @@ void parse_teaching_evaluation()
 	{
 		strcpy(out_head, "<div class=\"content-block-title\"><p>嗯，你都评价好啦。真是好宝宝 O(∩_∩)O</div>");
 		need_eval = false;
-		return;
 	}
 
 	outer.append(out_head);
@@ -2869,7 +2868,7 @@ void parse_teaching_evaluation()
 
 	fprintf(stdout,
 		m_lpszTechEvalPage,
-		"<p style=\"padding-left:2em\">老师这么辛苦，给个赞呗。你懂的 :-)</p>",
+		need_eval ? "" : "<p style=\"padding-left:2em\">老师这么辛苦，给个赞呗。你懂的 :-)</p>",
 		need_eval ? "block" : "none"
 		, outer.c_str());
 	cout << footer;
