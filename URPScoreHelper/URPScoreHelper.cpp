@@ -3015,7 +3015,7 @@ void teaching_evaluation()
 
 	string outer;
 	char out_head[1024] = { 0 };
-
+	char last[64] = {0};
 	if (to_eval && counts)
 	{
 		for (int i = 0; i < counts; i++)
@@ -3027,9 +3027,9 @@ void teaching_evaluation()
 				int post_size = pre_post.size();
 				m_iResult = 0;
 				char TEACH_EVAL[8192] = { 0 };
-				char *m_rep_body = (char *)malloc(4096);
+				char *m_rep_body = (char *)malloc(204800);
 				sprintf(TEACH_EVAL, POST_PRE_TEACH_EVAL, post_size, CGI_HTTP_COOKIE, pre_post.c_str());
-				if (!CrawlRequest(TEACH_EVAL, m_rep_body, 4096, &m_iResult))
+				if (!CrawlRequest(TEACH_EVAL, m_rep_body, 204800, &m_iResult))
 				{
 					free(m_rep_body);
 					return;
@@ -3044,10 +3044,64 @@ void teaching_evaluation()
 					Error((char *)err_msg.c_str());
 					return;
 				}
+
+				m_result = strstr(m_result, "<input type=\"radio\" name=\"");
+				string rank = "&";
+				while (m_result != NULL)
+				{
+					char *p1 = strstr(m_result + 26, "\"");
+					if (p1 == NULL)
+					{
+						free(m_rep_body);
+						cout << "Status: 500 Internal Server Error\n";
+						string err_msg = "<p>呃，出错了呢</p><p>很抱歉，在评估《";
+						err_msg = err_msg + te[i].name + "》课程时出现了错误。</p><p>(名称条目引号闭合失败)</p>";
+						Error((char *)err_msg.c_str());
+						return;
+					}
+					char num[64] = { 0 };
+					mid(num, m_result + 26, p1 - m_result - 26, 0);
+					if (strcmp(last, num) == 0)
+					{
+						m_result = strstr(m_result + 26, "<input type=\"radio\" name=\"");
+						continue;
+					}
+					else 
+					{
+						strcpy(last, num);
+					}
+					char *p2 = strstr(p1 + 1, "value=\"");
+					if (p2 == NULL)
+					{
+						free(m_rep_body);
+						cout << "Status: 500 Internal Server Error\n";
+						string err_msg = "<p>呃，出错了呢</p><p>很抱歉，在评估《";
+						err_msg = err_msg + te[i].name + "》课程时出现了错误。</p><p>(值条目引号开启失败)</p>";
+						Error((char *)err_msg.c_str());
+						return;
+					}
+					char *p3 = strstr(p2 + 7, "\"");
+					if (p2 == NULL)
+					{
+						free(m_rep_body);
+						cout << "Status: 500 Internal Server Error\n";
+						string err_msg = "<p>呃，出错了呢</p><p>很抱歉，在评估《";
+						err_msg = err_msg + te[i].name + "》课程时出现了错误。</p><p>(值条目引号闭合失败)</p>";
+						Error((char *)err_msg.c_str());
+						return;
+					}
+
+					char val[64] = { 0 };
+					mid(val, p2 + 7, p3 - p2 - 7, 0);
+					rank = rank + num + "=" + val + "&";
+
+					m_result = strstr(p3, "<input type=\"radio\" name=\"");
+				}
+
 				free(m_rep_body);
 
 				string post_data = "wjbm=";
-				post_data = post_data + te[i].wjbm + "&bpr=" + te[i].bpr + "&pgnr=" + te[i].pgnr + "&xumanyzg=zg&wjbz=&0000000004=5_0.95&0000000006=5_0.95&0000000007=5_0.95&0000000008=5_0.95&0000000009=5_0.95&0000000010=5_0.95&0000000011=5_0.95&0000000012=5_0.95&0000000013=5_0.95&0000000014=5_0.95&0000000015=5_0.95&0000000016=5_0.95&0000000017=5_0.95&0000000018=5_0.95&0000000029=5_0.95&0000000030=5_0.95&0000000031=5_0.95&0000000032=5_0.95&0000000033=5_0.95&0000000034=5_0.95&zgpj=";
+				post_data = post_data + te[i].wjbm + "&bpr=" + te[i].bpr + "&pgnr=" + te[i].pgnr + "&xumanyzg=zg&wjbz=" + rank + "zgpj=";
 				post_data += zgpj;
 
 				post_size = post_data.size();
@@ -3061,8 +3115,7 @@ void teaching_evaluation()
 					free(m_rep_body);
 					return;
 				}
-				cout << "Content-Type: text/plain\n\n" << m_rep_body;
-				return;
+
 				m_result = strstr(m_rep_body, "成功");
 				if (m_result == NULL)
 				{
