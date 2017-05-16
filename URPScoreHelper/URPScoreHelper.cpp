@@ -2868,7 +2868,7 @@ void parse_teaching_evaluation()
 
 	fprintf(stdout,
 		m_lpszTechEvalPage,
-		need_eval ? "" : "<p style=\"padding-left:2em\">老师这么辛苦，给个赞呗。你懂的 :-)</p>",
+		need_eval ? "<p style=\"padding-left:2em\">老师这么辛苦，给个赞呗。你懂的 :-)</p>" : "",
 		need_eval ? "block" : "none"
 		, outer.c_str());
 	cout << footer;
