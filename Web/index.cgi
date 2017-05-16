@@ -3,7 +3,7 @@
 		<header class="bar bar-nav">
 		<button class="button button-link button-nav pull-left"><span class="icon icon-share"></span>&nbsp;&nbsp;<a class="except" onclick="return show_about();">关于</a></button>
 		<button class="button button-link button-nav pull-right"><a href="Comments.html">吐槽</a>&nbsp;&nbsp;<span class="icon icon-message"></span></button>
-		<h1 class="title">N加青年 广陵查分助手</h1>
+		<h1 class="title">N加青年 扬大查分助手</h1>
 		</header>
 		<nav class="bar bar-tab">
 		<a class="tab-item external active" href="index.cgi">
@@ -14,7 +14,7 @@
 		<div class="content">
 			<div class="content-block" style="overflow: hidden">
 				<p id="login_query">
-					已成功完成&nbsp;&nbsp;<big>%ld</big>&nbsp;&nbsp;次查询操作
+					已帮助&nbsp;&nbsp;<big>%ld</big>&nbsp;&nbsp;位小伙伴们进行了&nbsp;&nbsp;<big>%d</big>&nbsp;&nbsp;次查询
 				</p>
 				%s
 				<canvas id="i_canvas" style="position:absolute;top:0;left:0;right:0;bottom:0"></canvas>
@@ -94,9 +94,9 @@
 							<div class="col-50">
 								<a style="z-index:9999;" title="QQ快速登录" class="button button-big button-fill button-success external" href="OAuth2.cgi">QQ快速登录</a>
 							</div>
-							<div class="col-100">
+							<!--<div class="col-100">
 								<a style="z-index:9999;margin-top:10px" title="免密查询入口" class="button button-big button-fill external" href="QuickQuery.cgi">免密查询入口</a>
-							</div>
+							</div>-->
 						</div>
 						<div class="row" style="display:%s">
 							<div class="col-100">
@@ -105,6 +105,7 @@
 						</div>
 					</div>
 				</form>
+				<center><p>苏ICP备15008822号-1</p></center>
 		</div>
 		<input id="about" style="display:none" value="<b>%s</b><br /><small>&copy; 2012-2017 iEdon Inside</br>编译于: %s %s<br />服务端环境: %s<br />QQ: 11595137<br />N加青年 · 提供</small>"/>
 	</div>

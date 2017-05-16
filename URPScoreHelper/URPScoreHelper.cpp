@@ -332,6 +332,48 @@ void LoadConfig()
 	GetPrivateProfileStringA("Config", "OAUTH2_APPID", "NULL", OAUTH2_APPID, 1024, Dir);
 	GetPrivateProfileStringA("Config", "OAUTH2_SECRET", "NULL", OAUTH2_SECRET, 1024, Dir);
 	free(Dir);
+
+	sqlite3 * db = NULL;
+	int db_ret = sqlite3_open("URPScoreHelper.db", &db);
+	if (db_ret != SQLITE_OK)
+	{
+		cout << "Status: 500 Internal Server Error\n";
+		Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
+		return;
+	}
+
+	char *query = "SELECT COUNT(*) FROM URPScoreHelper;";
+
+	char **db_Result = NULL;
+	sqlite3_stmt *stmt;
+	db_ret = sqlite3_prepare(db, query, strlen(query), &stmt, 0);
+
+	if (db_ret != SQLITE_OK)
+	{
+		cout << "Status: 500 Internal Server Error\n";
+		char Err_Msg[512] = "<b>解除绑定失败，请稍后再试。</b><p>(";
+		strcat(Err_Msg, sqlite3_errmsg(db));
+		strcat(Err_Msg, ")</p>");
+		Error(Err_Msg);
+		sqlite3_finalize(stmt);
+		sqlite3_close(db);
+		delete[]query;
+		return;
+	}
+
+	const unsigned char *counts = NULL;
+	g_users = 0;
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+	{
+		counts = sqlite3_column_text(stmt, 0);
+		break;
+	}
+	if (counts != NULL)
+	{
+		g_users = atoi((const char *)counts);
+	}
+	sqlite3_finalize(stmt);
+	sqlite3_close(db);
 }
 
 // 处理 Cookie、照片
@@ -776,13 +818,13 @@ int parse_index()
 	fprintf(stdout, header, SOFTWARE_NAME);
 	if (m_xh == NULL || m_mm == NULL)
 	{
-		fprintf(stdout, m_lpszHomepage, g_QueryCount, 
-						"输入你的教务系统账号来查询成绩 :)", "block", "", "", m_DataURL, "block", "none",
+		fprintf(stdout, m_lpszHomepage, g_users, g_QueryCount, 
+						"输入你的教务系统账号来登录吧 :)", "block", "", "", m_DataURL, "block", "none",
 						SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 	}
 	else 
 	{
-		fprintf(stdout, m_lpszHomepage, g_QueryCount, 
+		fprintf(stdout, m_lpszHomepage, g_users, g_QueryCount,
 						"QQ登录成功，输入验证码继续吧 :)", "none", m_xh, m_mm, m_DataURL, "none", "block",
 						SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 	}
@@ -1788,7 +1830,7 @@ void parse_QuickQuery_Intro()
 	strcat(title, SOFTWARE_NAME);
 
 	fprintf(stdout, header, title);
-	fprintf(stdout, m_lpszQuery, g_QueryCount);
+	fprintf(stdout, m_lpszQuery, g_users, g_QueryCount);
 
 	cout << footer;
 

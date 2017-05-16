@@ -16,6 +16,7 @@ char *error;
 FILE *g_fQueryCount;
 INT64 g_QueryCount;
 clock_t g_start_time;
+int g_users;
 
 int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login);
 int process_cookie(bool *p_need_update_cookie, char *p_photo_uri);

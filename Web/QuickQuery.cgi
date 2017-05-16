@@ -49,7 +49,7 @@
 					</div>
 				</div>
 			</form>
-			<center><p id="login_query">已成功完成&nbsp;&nbsp;<big>%ld</big>&nbsp;&nbsp;次查询操作</p></center>
+			<center><p id="login_query">已帮助&nbsp;&nbsp;<big>%ld</big>&nbsp;&nbsp;位小伙伴们进行了&nbsp;&nbsp;<big>%d</big>&nbsp;&nbsp;次查询</p></center>
 		</div>
 	</div>
 </div>
