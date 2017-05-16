@@ -45,8 +45,7 @@ Content-Type: application/x-www-form-urlencoded\n\
 Accept: */*\n\
 Cookie: %s\n\
 Connection: close\n\n\
-zjh1=&tips=&lx=&evalue=&eflag=&fs=&dzslh=&zjh=%s&mm=%s&v_yzm=%s\
-";
+zjh1=&tips=&lx=&evalue=&eflag=&fs=&dzslh=&zjh=%s&mm=%s&v_yzm=%s";
 
 // 请求查分
 const char * REQUEST_QUERY_SCORE = "\
@@ -54,8 +53,7 @@ GET /bxqcjcxAction.do HTTP/1.0\n\
 User-Agent: iEdon-URPScoreHelper\n\
 Accept: */*\n\
 Cookie: %s\n\
-Connection: close\n\n\
-";
+Connection: close\n\n";
 
 // 安全登出教务系统
 const char * REQUEST_LOGOUT = "\
@@ -63,8 +61,7 @@ GET /logout.do HTTP/1.0\n\
 User-Agent: iEdon-URPScoreHelper\n\
 Accept: */*\n\
 Cookie: %s\n\
-Connection: close\n\n\
-";
+Connection: close\n\n";
 
 // 获取电子注册页面
 const char * REQUEST_GET_REGISTER_INTERFACE = "\
@@ -72,8 +69,7 @@ GET /dzzcAction.do HTTP/1.0\n\
 User-Agent: iEdon-URPScoreHelper\n\
 Accept: */*\n\
 Cookie: %s\n\
-Connection: close\n\n\
-";
+Connection: close\n\n";
 
 // 提交电子注册请求
 const char * REQUEST_POST_REGISTER_INTERFACE = "\
@@ -82,9 +78,7 @@ User-Agent: iEdon-URPScoreHelper\n\
 Accept: */*\n\
 Cookie: %s\n\
 Content-Length: %d\n\
-Connection: close\n\n\
-%s\
-";
+Connection: close\n\n%s";
 
 const char * REQUEST_SET_REPORT_PARAMS =  "\
 POST /setReportParams HTTP/1.0\n\
@@ -153,6 +147,33 @@ User-Agent: iEdon-URPScoreHelper\n\
 Cookie: %s\n\
 Accept: */*\n\
 Connection: close\n\n";
+
+const char * GET_TEACH_EVAL_LIST = "\
+GET /jxpgXsAction.do?oper=listWj&pageSize=200 HTTP/1.0\n\
+User-Agent: iEdon-URPScoreHelper\n\
+Cookie: %s\n\
+Accept: */*\n\
+Connection: close\n\n";
+
+const char * POST_TEACH_EVAL = "\
+POST /jxpgXsAction.do?oper=wjpg HTTP/1.0\n\
+User-Agent: iEdon-URPScoreHelper\n\
+Content-Length: %d\n\
+Cache-Control: max-age=0\n\
+Content-Type: application/x-www-form-urlencoded\n\
+Accept: */*\n\
+Cookie: %s\n\
+Connection: close\n\n%s";
+
+const char * POST_PRE_TEACH_EVAL = "\
+POST /jxpgXsAction.do HTTP/1.0\n\
+User-Agent: iEdon-URPScoreHelper\n\
+Content-Length: %d\n\
+Cache-Control: max-age=0\n\
+Content-Type: application/x-www-form-urlencoded\n\
+Accept: */*\n\
+Cookie: %s\n\
+Connection: close\n\n%s";
 
 // 分数显示块
 const char *SCORE_TEMPLATE = "<div class=\"content-block-title\">%s</div><div class=\"list-block\"><ul><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">成绩</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">平均分</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">最高分</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">最低分</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">名次</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">学分</div><div class=\"item-after\">%s</div></div></li></ul></div>";

@@ -3,7 +3,7 @@
 <head>
 <meta charset="gb2312">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>留言板 - iEdon URP查分助手</title>
+<title>留言板 - 唯扬小助手</title>
 <meta name="viewport" content="initial-scale=1, maximum-scale=1">
 <link rel="shortcut icon" href="/favicon.ico">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -29,7 +29,7 @@
 		<div class="content" style="opacity: 0.75;z-index:9999">
 		<div class="content-block" style="overflow: hidden">
 			<b>说明：</b><br />
-			<small>各位亲们，我是广陵学院的宅一枚，本查询工具是我利用业余时间使用 C++ 写的，旨在方便大家查询自己的成绩。希望大家喜欢！</small>
+			<small>各位亲们，我是广陵学院的学生，本查询工具是我利用业余时间使用 C++ 写的，旨在方便大家查询自己的成绩。希望大家喜欢！</small>
 			<br /><br />
 			<b>免责申明:</b><br />
 			<small>
@@ -38,22 +38,18 @@
 			</small>
 			<p>有什么想法和槽点都留下来吧，谢谢~</p>
 			<div class="external">
-				<!-- 多说评论框 start -->
-				<div class="ds-thread" data-thread-key="1" data-title="留言板 - 广陵学院教务系统" data-url="https://home.iedon.com/Comments.html"></div>
-				<!-- 多说评论框 end -->
-				<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
-				<script type="text/javascript">
-				var duoshuoQuery = {short_name:"glxycf"};
-					(function() {
-						var ds = document.createElement('script');
-						ds.type = 'text/javascript';ds.async = true;
-						ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-						ds.charset = 'UTF-8';
-						(document.getElementsByTagName('head')[0] 
-						 || document.getElementsByTagName('body')[0]).appendChild(ds);
-					})();
-					</script>
-				<!-- 多说公共JS代码 end -->
+				<div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+				<script src="https://img1.cache.netease.com/f2e/tie/yun/sdk/loader.js"></script>
+				<script>
+				  var cloudTieConfig = {
+					url: document.location.href, 
+					sourceId: "",
+					productKey: "d6d8e1908d684c82a6154ee32f52dc61",
+					target: "cloud-tie-wrapper"
+				  };
+				  var yunManualLoad = true;
+				  Tie.loader("aHR0cHM6Ly9hcGkuZ2VudGllLjE2My5jb20vbW9iaWxlL2xpdmVzY3JpcHQuaHRtbA==", true);
+				</script>
 			</div>
 		</div>
 	</div>

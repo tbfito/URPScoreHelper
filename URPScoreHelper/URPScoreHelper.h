@@ -32,6 +32,8 @@ void parse_QuickQuery_Result();
 bool LoadPageSrc();
 void OAuth2_Association(bool isPOST);
 void LoadConfig();
+void parse_teaching_evaluation();
+void teaching_evaluation();
 
 typedef struct test_info
 {
@@ -39,5 +41,18 @@ typedef struct test_info
 	char cj[64] = {0};
 	char lb[64] = {0};
 	int date = 0;
-};
+} test_info;
+
+typedef struct teach_eval
+{
+	char wjbm[64] = { 0 };
+	char bpr[64] = { 0 };
+	char pgnr[64] = { 0 };
+	char name[256] = { 0 };
+	char wjmc[1024] = { 0 };
+	char bprm[1024] = { 0 };
+	char pgnrm[1024] = { 0 };
+	bool evaled = false;
+} teach_eval;
+
 #endif

@@ -7,3 +7,4 @@ static int htoi(char *s);
 char * url_encode(char const *s, int len, int *new_length);
 int url_decode(char *str, int len);
 void get_time(char *lpszTime);
+int split(char dst[][128], char* str, const char* spliter);

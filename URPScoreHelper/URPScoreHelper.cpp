@@ -124,6 +124,12 @@ int main()
 				return 0;
 			}
 
+			if (strcmp(CGI_SCRIPT_NAME, "/TeachEval.cgi") == 0)
+			{
+				parse_teaching_evaluation();
+				return 0;
+			}
+
 			cout << "Status: 404 No Such CGI Page\n";
 			Error("<p>找不到该页面。</p>");
 			
@@ -153,6 +159,14 @@ int main()
 			{
 				OAuth2_Association(true);
 				return 0;
+			}
+			if (strcmp(CGI_SCRIPT_NAME, "/TeachEval.cgi") == 0)
+			{
+				if (strcmp(CGI_QUERY_STRING, "act=Evaluate") == 0)
+				{
+					teaching_evaluation();
+					return 0;
+				}
 			}
 		}
 
@@ -2689,5 +2703,380 @@ void OAuth2_Association(bool isPOST)
 	}
 
 	delete[]openid;
+	return;
+}
+
+// 教学评估页面 (/TeachEval.cgi)
+void parse_teaching_evaluation()
+{
+	bool m_need_update_cookie = false;
+	char *m_photo = (char *)malloc(102424);
+	ZeroMemory(m_photo, 102424);
+	process_cookie(&m_need_update_cookie, m_photo);
+
+	if (strlen(m_photo) == 0) // 还没登陆就丢去登陆。
+	{
+		cout << "Status: 302 Found\nLocation: index.cgi\n" << GLOBAL_HEADER;
+		return;
+	}
+	free(m_photo);
+
+	// 检查是否需要教学评估
+	int m_iResult = 0;
+	char TEACH_EVAL[512] = { 0 };
+	char *m_rep_body = (char *)malloc(81920);
+	sprintf(TEACH_EVAL, GET_TEACH_EVAL_LIST, CGI_HTTP_COOKIE);
+	if (!CrawlRequest(TEACH_EVAL, m_rep_body, 81920, &m_iResult))
+	{
+		student_logout();
+		free(m_rep_body);
+		return;
+	}
+	char *m_result = strstr(m_rep_body, "学生评估问卷列表");
+	if (m_result == NULL)
+	{
+		student_logout();
+		free(m_rep_body);
+		cout << "Status: 500 Internal Server Error\n";
+		Error("<p>从服务器拉取教学评估信息失败。</p>");
+		return;
+	}
+
+	m_result = strstr(m_rep_body, "非教学评估时期，或评估时间已过");
+	if (m_result != NULL)
+	{
+		free(m_rep_body);
+		cout << "Status: 500 Internal Server Error\n";
+		Error("<p><b>啊哦，出错误啦</b></p><p>非教学评估时期，或评估时间已过。</p>");
+		return;
+	}
+
+	int counts = 0;
+	teach_eval te[200];
+	char *m_result1 = strstr(m_rep_body, "<td align=\"center\">是</td>");
+	m_result = strstr(m_rep_body, "<img name=\"");
+
+	while (m_result != NULL)
+	{
+		if (m_result1 != NULL)
+		{
+			te[counts].evaled = true;
+		}
+		char *m_result2 = strstr(m_result + 11, "\"");
+
+		if (m_result2 == NULL)
+		{
+			student_logout();
+			free(m_rep_body);
+			cout << "Status: 500 Internal Server Error\n";
+			Error("<p>从服务器拉取待评列表失败。</p>");
+			return;
+		}
+		char img_txt[128] = { 0 };
+		mid(img_txt, m_result + 11, m_result2 - m_result - 11, 0);
+		char dst[10][128] = {0};
+
+		int split_ret = split(dst, img_txt, "#@");
+
+		if (split_ret != 6)
+		{
+			student_logout();
+			free(m_rep_body);
+			cout << "Status: 500 Internal Server Error\n";
+			Error("<p>评教条目数目分割失败。</p>");
+			return;
+		}
+
+		strcpy(te[counts].wjbm, dst[0]);
+		strcpy(te[counts].bpr, dst[1]);
+		strcpy(te[counts].pgnr, dst[5]);
+		strcpy(te[counts].name, dst[4]);
+
+		counts++;
+		m_result1 = strstr(m_result, "<td align=\"center\">是</td>");
+		m_result = strstr(m_result + 11, "<img name=\"");
+	}
+	// 处理完毕。
+	free(m_rep_body);
+
+	int to_eval = 0;
+	string to_eval_list = "<div class=\"list-block\"><ul>";
+	for (int i = 0; i < counts; i++)
+	{
+			to_eval_list += "<li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">";
+			to_eval_list += te[i].name;
+			to_eval_list += "</div><div class=\"item-after\">";
+			if (te[i].evaled == false)
+			{
+				to_eval_list += "未评价";
+				to_eval++;
+			}
+			else
+			{
+				to_eval_list += "<b style=\"color:#00a70e\">已评价</b>";
+			}
+			to_eval_list += "</div></div></li>";
+	}
+	to_eval_list += "</ul></div>";
+
+	// 读入页面文件
+	FILE *m_file_teach_eval_page = fopen(CGI_PATH_TRANSLATED, "rb");
+	if (m_file_teach_eval_page == NULL)
+	{
+		cout << "Status: 500 Internal Server Error\n";
+		Error("<p>错误：找不到教学评估页面模板。</p>");
+		return;
+	}
+	fseek(m_file_teach_eval_page, 0, SEEK_END); // 移到尾
+	int m_file_teach_eval_page_length = ftell(m_file_teach_eval_page); // 获取文件长度
+	fseek(m_file_teach_eval_page, 0, SEEK_SET); // 重新移回来
+	char *m_lpszTechEvalPage = (char *)malloc(m_file_teach_eval_page_length + 1);
+	ZeroMemory(m_lpszTechEvalPage, m_file_teach_eval_page_length + 1);
+	if (fread(m_lpszTechEvalPage, m_file_teach_eval_page_length, 1, m_file_teach_eval_page) != 1) // 将硬盘数据拷至内存
+	{
+		cout << "Status: 500 Internal Server Error\n";
+		Error("<p>无法读取教学评估模板内容。</p>");
+		fclose(m_file_teach_eval_page);
+		free(m_lpszTechEvalPage);
+		return;
+	}
+	fclose(m_file_teach_eval_page); // 关闭文件
+
+	string outer;
+	char out_head[1024] = { 0 };
+
+	cout << GLOBAL_HEADER;
+
+	string title = "一键评教 - ";
+	title += SOFTWARE_NAME;
+	fprintf(stdout, header, title.c_str());
+	bool need_eval = true;
+	if (to_eval && counts)
+	{
+		sprintf(out_head, 
+			"<div class=\"content-block-title\">嗯，当前还有 %d 门课程需要评估，总共 %d 门。</div>", 
+			to_eval, counts);
+	}
+	else
+	{
+		strcpy(out_head, "<div class=\"content-block-title\"><p>嗯，你都评价好啦。真是好宝宝 O(∩_∩)O</div>");
+		need_eval = false;
+		return;
+	}
+
+	outer.append(out_head);
+	outer.append(to_eval_list);
+
+	fprintf(stdout,
+		m_lpszTechEvalPage,
+		"<p style=\"padding-left:2em\">老师这么辛苦，给个赞呗。你懂的 :-)</p>",
+		need_eval ? "block" : "none"
+		, outer.c_str());
+	cout << footer;
+
+	free(m_lpszTechEvalPage);
+}
+
+// 教学评估流程 (POST /TeachEval.cgi?act=Evaluate)
+void teaching_evaluation()
+{
+	bool m_need_update_cookie = false;
+	char *m_photo = (char *)malloc(102424);
+	ZeroMemory(m_photo, 102424);
+	process_cookie(&m_need_update_cookie, m_photo);
+
+	if (strlen(m_photo) == 0) // 还没登陆就丢去登陆。
+	{
+		cout << "Status: 302 Found\nLocation: index.cgi\n" << GLOBAL_HEADER;
+		return;
+	}
+	free(m_photo);
+
+	// 获取 POST 数据。
+	int m_post_length = atoi(CGI_CONTENT_LENGTH);
+	if (m_post_length <= 0)
+	{
+		cout << "Status: 500 Internal Server Error\n";
+		Error("<p>发生错误，POST 数据长度异常。</p>");
+		return;
+	}
+	char *m_post_data = (char *)malloc(m_post_length + 2);
+	if (fgets(m_post_data, m_post_length + 1, stdin) == NULL)
+	{
+		cout << "Status: 500 Internal Server Error\n";
+		Error("<p>发生错误，POST 数据拉取失败。</p>");
+		return;
+	}
+	// 获取主观评价
+	char *pStr1 = strstr(m_post_data, "nr=");
+	if (pStr1 == NULL)
+	{
+		free(m_post_data);
+		cout << "Status: 500 Internal Server Error\n";
+		Error("<p>无法获取主观评价内容。</p>");
+		return;
+	}
+
+	char zgpj[1024] = { 0 };
+	left(zgpj, pStr1 + 3, m_post_length - 3);
+	free(m_post_data);
+
+	// 检查是否需要教学评估
+	int m_iResult = 0;
+	char TEACH_EVAL[512] = { 0 };
+	char *m_rep_body = (char *)malloc(81920);
+	sprintf(TEACH_EVAL, GET_TEACH_EVAL_LIST, CGI_HTTP_COOKIE);
+	if (!CrawlRequest(TEACH_EVAL, m_rep_body, 81920, &m_iResult))
+	{
+		student_logout();
+		free(m_rep_body);
+		return;
+	}
+	char *m_result = strstr(m_rep_body, "学生评估问卷列表");
+	if (m_result == NULL)
+	{
+		student_logout();
+		free(m_rep_body);
+		cout << "Status: 500 Internal Server Error\n";
+		Error("<p>从服务器拉取教学评估信息失败。</p>");
+		return;
+	}
+
+	m_result = strstr(m_rep_body, "非教学评估时期，或评估时间已过");
+	if (m_result != NULL)
+	{
+		free(m_rep_body);
+		cout << "Status: 500 Internal Server Error\n";
+		Error("<p><b>啊哦，出错误啦</b></p><p>非教学评估时期，或评估时间已过。</p>");
+		return;
+	}
+
+	int counts = 0;
+	teach_eval te[200];
+	char *m_result1 = strstr(m_rep_body, "<td align=\"center\">是</td>");
+	m_result = strstr(m_rep_body, "<img name=\"");
+
+	while (m_result != NULL)
+	{
+		if (m_result1 != NULL)
+		{
+			te[counts].evaled = true;
+		}
+		char *m_result2 = strstr(m_result + 11, "\"");
+
+		if (m_result2 == NULL)
+		{
+			student_logout();
+			free(m_rep_body);
+			cout << "Status: 500 Internal Server Error\n";
+			Error("<p>从服务器拉取待评列表失败。</p>");
+			return;
+		}
+		char img_txt[128] = { 0 };
+		mid(img_txt, m_result + 11, m_result2 - m_result - 11, 0);
+		char dst[10][128] = { 0 };
+
+		int split_ret = split(dst, img_txt, "#@");
+
+		if (split_ret != 6)
+		{
+			student_logout();
+			free(m_rep_body);
+			cout << "Status: 500 Internal Server Error\n";
+			Error("<p>评教条目数目分割失败。</p>");
+			return;
+		}
+
+		strcpy(te[counts].wjbm, dst[0]);
+		strcpy(te[counts].bpr, dst[1]);
+		strcpy(te[counts].pgnr, dst[5]);
+		strcpy(te[counts].name, dst[4]);
+		int new_len;
+		char *tmp = url_encode(dst[3], strlen(dst[3]), &new_len);
+		left(te[counts].wjmc, tmp, new_len);
+		tmp = url_encode(dst[2], strlen(dst[2]), &new_len);
+		left(te[counts].bprm, tmp, new_len);
+		tmp = url_encode(dst[4], strlen(dst[4]), &new_len);
+		left(te[counts].pgnrm, tmp, new_len);
+
+		counts++;
+		m_result1 = strstr(m_result, "<td align=\"center\">是</td>");
+		m_result = strstr(m_result + 11, "<img name=\"");
+	}
+	// 处理完毕。
+	free(m_rep_body);
+
+	int to_eval = 0;
+	for (int i = 0; i < counts; i++)
+	{
+		if (te[i].evaled == false)
+			to_eval++;
+	}
+
+	string outer;
+	char out_head[1024] = { 0 };
+
+	if (to_eval && counts)
+	{
+		for (int i = 0; i < counts; i++)
+		{
+			if (te[i].evaled == false)
+			{
+				string pre_post = "wjbm=";
+				pre_post = pre_post + te[i].wjbm + "&bpr=" + te[i].bpr + "&pgnr=" + te[i].pgnr + "&oper=wjShow&wjmc=" + te[i].wjmc + "&bprm=" + te[i].bprm + "&pgnrm=" + te[i].pgnrm + "&wjbz=null&pageSize=20&page=1&currentPage=1&pageNo=";
+				int post_size = pre_post.size();
+				m_iResult = 0;
+				char TEACH_EVAL[8192] = { 0 };
+				char *m_rep_body = (char *)malloc(4096);
+				sprintf(TEACH_EVAL, POST_PRE_TEACH_EVAL, post_size, CGI_HTTP_COOKIE, pre_post.c_str());
+				if (!CrawlRequest(TEACH_EVAL, m_rep_body, 4096, &m_iResult))
+				{
+					free(m_rep_body);
+					return;
+				}
+				char *m_result = strstr(m_rep_body, "问卷评估页面");
+				if (m_result == NULL)
+				{
+					free(m_rep_body);
+					cout << "Status: 500 Internal Server Error\n";
+					string err_msg = "<p>呃，出错了呢</p><p>很抱歉，在评估《";
+					err_msg = err_msg + te[i].name + "》课程时出现了错误。</p><p>(进入详细页面失败)</p>";
+					Error((char *)err_msg.c_str());
+					return;
+				}
+				free(m_rep_body);
+
+				string post_data = "wjbm=";
+				post_data = post_data + te[i].wjbm + "&bpr=" + te[i].bpr + "&pgnr=" + te[i].pgnr + "&xumanyzg=zg&wjbz=&0000000004=5_0.95&0000000006=5_0.95&0000000007=5_0.95&0000000008=5_0.95&0000000009=5_0.95&0000000010=5_0.95&0000000011=5_0.95&0000000012=5_0.95&0000000013=5_0.95&0000000014=5_0.95&0000000015=5_0.95&0000000016=5_0.95&0000000017=5_0.95&0000000018=5_0.95&0000000029=5_0.95&0000000030=5_0.95&0000000031=5_0.95&0000000032=5_0.95&0000000033=5_0.95&0000000034=5_0.95&zgpj=";
+				post_data += zgpj;
+
+				post_size = post_data.size();
+				// 检查是否需要教学评估
+				m_iResult = 0;
+				memset(TEACH_EVAL, 0, sizeof(TEACH_EVAL));
+				m_rep_body = (char *)malloc(4096);
+				sprintf(TEACH_EVAL, POST_TEACH_EVAL, post_size, CGI_HTTP_COOKIE, post_data.c_str());
+				if (!CrawlRequest(TEACH_EVAL, m_rep_body, 4096, &m_iResult))
+				{
+					free(m_rep_body);
+					return;
+				}
+				cout << "Content-Type: text/plain\n\n" << m_rep_body;
+				return;
+				m_result = strstr(m_rep_body, "成功");
+				if (m_result == NULL)
+				{
+					free(m_rep_body);
+					cout << "Status: 500 Internal Server Error\n";
+					string err_msg = "<p>呃，出错了呢</p><p>很抱歉，在评估《";
+					err_msg = err_msg + te[i].name + "》课程时出现了错误。</p>";
+					Error((char *)err_msg.c_str());
+					return;
+				}
+				free(m_rep_body);
+			}
+		}
+	}
+	cout << "Status: 302 Found\nLocation: TeachEval.cgi\n" << GLOBAL_HEADER;
 	return;
 }

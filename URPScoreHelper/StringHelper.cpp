@@ -1,7 +1,7 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "StringHelper.h"
 
-// È¡ÎÄ±¾×ó±ß
+// å–æ–‡æœ¬å·¦è¾¹
 char * left(char *dst, char *src, int n)
 {
 	char	*p = src;
@@ -11,30 +11,30 @@ char * left(char *dst, char *src, int n)
 		n = len;
 	while (n--)
 		*(q++) = *(p++);
-	*(q++) = '\0';                                  /*ÓĞ±ØÒªÂğ£¿ºÜÓĞ±ØÒª*/
+	*(q++) = '\0';                                  /*æœ‰å¿…è¦å—ï¼Ÿå¾ˆæœ‰å¿…è¦*/
 	return(dst);
 }
 
-// È¡ÎÄ±¾ÖĞ¼ä
-char * mid(char *dst, char *src, int n, int m)        /*nÎª³¤¶È£¬mÎªÎ»ÖÃ*/
+// å–æ–‡æœ¬ä¸­é—´
+char * mid(char *dst, char *src, int n, int m)        /*nä¸ºé•¿åº¦ï¼Œmä¸ºä½ç½®*/
 {
 	char	*p = src;
 	char	*q = dst;
 	int	len = strlen(src);
 	if (n > len)
-		n = len - m;                            /*´ÓµÚm¸öµ½×îºó*/
+		n = len - m;                            /*ä»ç¬¬mä¸ªåˆ°æœ€å*/
 	if (m < 0)
-		m = 0;                                  /*´ÓµÚÒ»¸ö¿ªÊ¼*/
+		m = 0;                                  /*ä»ç¬¬ä¸€ä¸ªå¼€å§‹*/
 	if (m > len)
 		return(NULL);
 	p += m;
 	while (n--)
 		*(q++) = *(p++);
-	*(q++) = '\0';                                  /*ÓĞ±ØÒªÂğ£¿ºÜÓĞ±ØÒª*/
+	*(q++) = '\0';                                  /*æœ‰å¿…è¦å—ï¼Ÿå¾ˆæœ‰å¿…è¦*/
 	return(dst);
 }
 
-// È¡ÎÄ±¾ÓÒ±ß
+// å–æ–‡æœ¬å³è¾¹
 char * right(char *dst, char *src, int n)
 {
 	char	*p = src;
@@ -42,12 +42,12 @@ char * right(char *dst, char *src, int n)
 	int	len = strlen(src);
 	if (n > len)
 		n = len;
-	p += (len - n); /*´ÓÓÒ±ßµÚn¸ö×Ö·û¿ªÊ¼£¬µ½0½áÊø£¬ºÜÇÉ°¡*/
+	p += (len - n); /*ä»å³è¾¹ç¬¬nä¸ªå­—ç¬¦å¼€å§‹ï¼Œåˆ°0ç»“æŸï¼Œå¾ˆå·§å•Š*/
 	while (*(q++) = *(p++))
 		;
 	return(dst);
 }
-// ½«×Ö·û´®ÖĞÖ¸¶¨×Ó×Ö·û´®ÓÃÖ¸¶¨×Ö·û´®´úÌæ£¬targ_str ÊÇ±»Ìæ»»µÄ£¬valÊÇÌæ»»µÄ×Ö·û´®
+// å°†å­—ç¬¦ä¸²ä¸­æŒ‡å®šå­å­—ç¬¦ä¸²ç”¨æŒ‡å®šå­—ç¬¦ä¸²ä»£æ›¿ï¼Œtarg_str æ˜¯è¢«æ›¿æ¢çš„ï¼Œvalæ˜¯æ›¿æ¢çš„å­—ç¬¦ä¸²
 void replace_string(char * source_str, char * targ_str, char *val)
 {
 	char temp_sstr[513], result[513];
@@ -172,4 +172,18 @@ void get_time(char *lpszTime)
 	tm_now = localtime(&now);
 	sprintf(lpszTime , "%d-%02d-%02d %02d:%02d:%02d\n",
 		tm_now->tm_year + 1900, tm_now->tm_mon + 1, tm_now->tm_mday, tm_now->tm_hour, tm_now->tm_min, tm_now->tm_sec);
+}
+
+// å°†strå­—ç¬¦ä»¥spliteråˆ†å‰²,å­˜äºdstä¸­ï¼Œå¹¶è¿”å›å­å­—ç¬¦ä¸²æ•°é‡
+int split(char dst[][128], char* str, const char* spliter)
+{
+	int n = 0;
+	char *result = NULL;
+	result = strtok(str, spliter);
+	while (result != NULL)
+	{
+		strcpy(dst[n++], result);
+		result = strtok(NULL, spliter);
+	}
+	return n;
 }

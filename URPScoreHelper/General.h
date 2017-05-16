@@ -26,6 +26,9 @@ extern const char* GET_GRADE_BY_QBINFO;
 extern const char* GET_GRADE_BY_PLAN;
 extern const char* GET_GRADE_BY_FAILED;
 extern const char* GET_SMALL_TEST_SCORE;
+extern const char* GET_TEACH_EVAL_LIST;
+extern const char* POST_TEACH_EVAL;
+extern const char* POST_PRE_TEACH_EVAL;
 
 extern char *SERVER;
 extern char *OAUTH2_APPID;
