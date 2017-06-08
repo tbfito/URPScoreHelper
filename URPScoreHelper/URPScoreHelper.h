@@ -35,6 +35,8 @@ void OAuth2_Association(bool isPOST);
 void LoadConfig();
 void parse_teaching_evaluation();
 void teaching_evaluation();
+void parse_change_password();
+void do_change_password();
 
 typedef struct test_info
 {

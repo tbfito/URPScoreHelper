@@ -175,6 +175,13 @@ Accept: */*\n\
 Cookie: %s\n\
 Connection: close\n\n%s";
 
+const char * REQ_CHANGE_PASSWORD = "\
+GET /modifyPassWordAction.do?pwd=%s HTTP/1.0\n\
+User-Agent: iEdon-URPScoreHelper\n\
+Cookie: %s\n\
+Accept: */*\n\
+Connection: close\n\n";
+
 // 分数显示块
 const char *SCORE_TEMPLATE = "<div class=\"content-block-title\">%s</div><div class=\"list-block\"><ul><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">成绩</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">平均分</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">最高分</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">最低分</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">名次</div><div class=\"item-after\">%s</div></div></li><li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">学分</div><div class=\"item-after\">%s</div></div></li></ul></div>";
 const char *QUICK_SCORE = "<li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">%s</div><div class=\"item-after\">%s</div></div></li>";

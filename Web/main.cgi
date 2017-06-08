@@ -2,8 +2,8 @@
 	<div class="page">
 		<header class="bar bar-nav">
 		<button class="button button-link button-nav pull-left"><span class="icon icon-share"></span>&nbsp;&nbsp;<a class="except" onclick="return show_about();">关于</a></button>
-		<button class="button button-link button-nav pull-right"><a href="Comments.html">吐槽</a>&nbsp;&nbsp;<span class="icon icon-message"></span></button>
-		<h1 class="title">N加青年 扬大查分助手</h1>
+		<button class="button button-link button-nav pull-right"><a href="Comments.html">交流</a>&nbsp;&nbsp;<span class="icon icon-message"></span></button>
+		<h1 class="title">N加青年 广陵查分助手</h1>
 		</header>
 		<nav class="bar bar-tab">
 		<a class="tab-item active" href="index.cgi">
@@ -27,8 +27,8 @@
 							  <div class="item-subtitle"><small>个人信息:</small></div>
 							  <div class="item-subtitle">%s</div>
 							  <div class="item-subtitle">%s</div>
-							  <div class="item-subtitle" style="display:%s"><a href="index.cgi?act=requestAssoc">绑定QQ帐号</a></div>
-							  <div class="item-subtitle" style="display:%s"><span style="color:#4cd964" class="icon icon-emoji">&nbsp;QQ已绑定</span><a href="javascript:void(0);" onclick="window.confirm('你确定要解除该学号与QQ帐户的关联吗？')?this.href='OAuth2Assoc.cgi?release=%s':this.href='javascript:window.location.reload();';">解除绑定</a></div>
+							  <div class="item-subtitle" style="display:%s"><a href="index.cgi?act=requestAssoc">绑定QQ帐号</a> | <a href="/changePassword.cgi">修改密码</a></div>
+							  <div class="item-subtitle" style="display:%s"><span style="color:#4cd964" class="icon icon-emoji">&nbsp;QQ已绑定</span><a href="javascript:void(0);" onclick="window.confirm('你确定要解除该学号与QQ帐户的关联吗？')?this.href='OAuth2Assoc.cgi?release=%s':this.href='javascript:window.location.reload();';">解除绑定</a> | <a href="/changePassword.cgi">修改密码</a></div>
 							</div>
 						  </li>
 						  <li class="item-content">

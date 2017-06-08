@@ -130,6 +130,11 @@ int main()
 				return 0;
 			}
 
+			if (strcmp(CGI_SCRIPT_NAME, "/changePassword.cgi") == 0)
+			{
+				parse_change_password();
+				return 0;
+			}
 			cout << "Status: 404 No Such CGI Page\n";
 			Error("<p>找不到该页面。</p>");
 			
@@ -140,6 +145,11 @@ int main()
 
 		if (strcmp(CGI_REQUEST_METHOD, "POST") == 0) // 如果是 POST 请求
 		{
+			if (strcmp(CGI_SCRIPT_NAME, "/changePassword.cgi") == 0)
+			{
+				do_change_password();
+				return 0;
+			}
 			if (strcmp(CGI_SCRIPT_NAME, "/query.cgi") == 0)
 			{
 				if (strcmp(CGI_QUERY_STRING, "act=QuickQuery") == 0)
@@ -3173,4 +3183,193 @@ void teaching_evaluation()
 	}
 	cout << "Status: 302 Found\nLocation: TeachEval.cgi\n" << GLOBAL_HEADER;
 	return;
+}
+
+// 修改密码页面 (/changePassword.cgi)
+void parse_change_password()
+{
+	bool m_need_update_cookie = false;
+	char *m_photo = (char *)malloc(102424);
+	ZeroMemory(m_photo, 102424);
+	process_cookie(&m_need_update_cookie, m_photo);
+
+	if (strlen(m_photo) == 0) // 还没登陆就丢去登陆。
+	{
+		cout << "Status: 302 Found\nLocation: index.cgi\n" << GLOBAL_HEADER;
+		return;
+	}
+	free(m_photo);
+
+	// 读入页面文件
+	FILE *m_file_query = fopen(CGI_PATH_TRANSLATED, "rb");
+	if (m_file_query == NULL)
+	{
+		if (m_need_update_cookie)
+			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+		Error("<p>错误：找不到修改密码模板。</p>");
+		return;
+	}
+	fseek(m_file_query, 0, SEEK_END); // 移到尾
+	int m_file_query_length = ftell(m_file_query); // 获取文件长度
+	fseek(m_file_query, 0, SEEK_SET); // 重新移回来
+	char *m_lpszQuery = (char *)malloc(m_file_query_length + 1);
+	ZeroMemory(m_lpszQuery, m_file_query_length + 1);
+	if (fread(m_lpszQuery, m_file_query_length, 1, m_file_query) != 1) // 将硬盘数据拷至内存
+	{
+		if (m_need_update_cookie)
+			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+		Error("<p>无法读取修改密码模板内容。</p>");
+		fclose(m_file_query);
+		free(m_lpszQuery);
+		return;
+	}
+	fclose(m_file_query); // 关闭文件
+
+	if (m_need_update_cookie)
+		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+	cout << GLOBAL_HEADER;
+
+	char title[512] = { 0 };
+	strcat(title, "修改密码 - ");
+	strcat(title, SOFTWARE_NAME);
+
+	fprintf(stdout, header, title);
+	fprintf(stdout, m_lpszQuery, g_users, g_QueryCount);
+
+	cout << footer;
+
+	free(m_lpszQuery);
+}
+
+// 修改密码 (POST /changePassword.cgi)
+void do_change_password() //(POST /changePassword.cgi)
+{
+	// modifyPassWordAction.do?pwd=
+	bool m_need_update_cookie = false;
+	char *m_photo = (char *)malloc(102424);
+	ZeroMemory(m_photo, 102424);
+	process_cookie(&m_need_update_cookie, m_photo);
+
+	if (strlen(m_photo) == 0) // 还没登陆就丢去登陆。
+	{
+		cout << "Status: 302 Found\nLocation: index.cgi\n" << GLOBAL_HEADER;
+		return;
+	}
+	free(m_photo);
+
+	// 获取 POST 数据。
+	int m_post_length = atoi(CGI_CONTENT_LENGTH);
+	if (m_post_length <= 0 || m_post_length > 127)
+	{
+		cout << "Status: 500 Internal Server Error\n";
+		Error("<p>发生错误，POST 数据长度异常。</p>");
+		return;
+	}
+	char *m_post_data = (char *)malloc(m_post_length + 2);
+	if (fgets(m_post_data, m_post_length + 1, stdin) == NULL)
+	{
+		cout << "Status: 500 Internal Server Error\n";
+		Error("<p>发生错误，POST 数据拉取失败。</p>");
+		return;
+	}
+	// 获取新密码
+	char *pStr1 = strstr(m_post_data, "mm=");
+	if (pStr1 == NULL)
+	{
+		free(m_post_data);
+		cout << "Status: 500 Internal Server Error\n";
+		Error("<p>发生了错误，无法获取 POST 数据。</p>");
+		return;
+	}
+
+	char pwd[128] = { 0 };
+	left(pwd, pStr1 + 3, m_post_length - 3);
+	int len = url_decode(pwd, strlen(pwd));
+	char temp[128];
+	left(temp, pwd, len);
+	strcpy(pwd, temp);
+	free(m_post_data);
+
+	if (len > 10 || len <= 0)
+	{
+		cout << "Status: 500 Internal Server Error\n";
+		Error("<p>新密码长度不能超过10个字符！</p>");
+		return;
+	}
+
+	int m_iResult = 0;
+	char * m_rep_header = (char *)malloc(1024);
+	ZeroMemory(m_rep_header, 1024);
+	char GET_RET[1024] = { 0 };
+	sprintf(GET_RET, REQ_CHANGE_PASSWORD, pwd, CGI_HTTP_COOKIE);
+	if (!CrawlRequest(GET_RET, m_rep_header, 1024, &m_iResult))
+	{
+		free(m_rep_header);
+		return;
+	}
+
+	// 拉取改密结果
+	pStr1 = strstr(m_rep_header, "成功");
+	if (pStr1 == NULL)
+	{
+		free(m_rep_header);
+		cout << "Status: 500 Internal Server Error\n";
+		Error("<p>密码修改失败，请确认是否输入了非法字符，或请稍后再试。</p>");
+		return;
+	}
+	free(m_rep_header);
+
+	sqlite3 * db = NULL;
+	int db_ret = sqlite3_open("URPScoreHelper.db", &db);
+	if (db_ret != SQLITE_OK)
+	{
+		student_logout();
+		cout << "Status: 500 Internal Server Error\n";
+		Error("密码修改成功，但打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
+		return;
+	}
+
+	// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128) text lastlogin(64)。
+	char *query = new char[strlen("UPDATE URPScoreHelper SET password=") + 128 + strlen(" lastlogin= WHERE id='") + 64 + 36 + 3 + 1];
+	memset(query, 0, strlen("UPDATE URPScoreHelper SET password=") + 128 + strlen(" lastlogin= WHERE id='") + 64 + 36 + 3 + 1);
+	strcpy(query, "UPDATE URPScoreHelper SET password='");
+	char m_time[128] = { 0 };
+	get_time(m_time);
+	strcat(query, pwd);
+	strcat(query, "', lastlogin='");
+	strcat(query, m_time);
+	strcat(query, "' WHERE id = '");
+	char id[128] = { 0 };
+	get_student_id(id);
+	strcat(query, id);
+	strcat(query, "';");
+
+	char **db_Result = NULL;
+	sqlite3_stmt *stmt;
+	db_ret = sqlite3_prepare(db, query, strlen(query), &stmt, 0);
+
+	if (db_ret != SQLITE_OK)
+	{
+		student_logout();
+		cout << "Status: 500 Internal Server Error\n";
+		char Err_Msg[512] = "<b>密码修改成功，但登录数据库记录失败，请稍后再试。</b><p>(";
+		strcat(Err_Msg, sqlite3_errmsg(db));
+		strcat(Err_Msg, ")</p>");
+		Error(Err_Msg);
+		sqlite3_finalize(stmt);
+		sqlite3_close(db);
+		delete[]query;
+		return;
+	}
+
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+	{
+		break;
+	}
+
+	sqlite3_finalize(stmt);
+	delete[]query;
+
+	student_logout();
+	cout << "Status: 302 Found\nLocation: index.cgi\n" << GLOBAL_HEADER;
 }
