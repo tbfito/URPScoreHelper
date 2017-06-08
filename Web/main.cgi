@@ -26,9 +26,9 @@
 							<div class="item-inner">
 							  <div class="item-subtitle"><small>个人信息:</small></div>
 							  <div class="item-subtitle">%s</div>
-							  <div class="item-subtitle">%s</div>
-							  <div class="item-subtitle" style="display:%s"><a href="index.cgi?act=requestAssoc">绑定QQ帐号</a> | <a href="/changePassword.cgi">修改密码</a></div>
-							  <div class="item-subtitle" style="display:%s"><span style="color:#4cd964" class="icon icon-emoji">&nbsp;QQ已绑定</span><a href="javascript:void(0);" onclick="window.confirm('你确定要解除该学号与QQ帐户的关联吗？')?this.href='OAuth2Assoc.cgi?release=%s':this.href='javascript:window.location.reload();';">解除绑定</a> | <a href="/changePassword.cgi">修改密码</a></div>
+							  <div class="item-subtitle">%s | <a href="/changePassword.cgi">修改密码</a></div>
+							  <div class="item-subtitle" style="display:%s"><a href="index.cgi?act=requestAssoc">绑定QQ帐号</a></div>
+							  <div class="item-subtitle" style="display:%s"><span style="color:#4cd964" class="icon icon-emoji">&nbsp;QQ已绑定</span><a href="javascript:void(0);" onclick="window.confirm('你确定要解除该学号与QQ帐户的关联吗？')?this.href='OAuth2Assoc.cgi?release=%s':this.href='javascript:window.location.reload();';">解除绑定</a></div>
 							</div>
 						  </li>
 						  <li class="item-content">
