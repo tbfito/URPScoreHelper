@@ -75,10 +75,10 @@ bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTo
 	ioctlsocket(g_so, FIONBIO, &ul);
 	if(!ret)
 	{
+		int errid = WSAGetLastError();
 		closesocket(g_so);
 		WSACleanup();
-		puts("Status: 500 Internal Server Error");
-		int errid = WSAGetLastError();
+		//puts("Status: 500 Internal Server Error");
 		char buff[10] = { 0 };
 		_itoa(errid, buff,10);
 		std::string err_msg("<p><b>连接学校服务器失败！</b></p><p>OS代码: (");
@@ -87,8 +87,8 @@ bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTo
 		char *wsamsg = (char *)malloc(MAX_PATH);
 		FormatMessageA(4096, NULL, errid, NULL, wsamsg, MAX_PATH, NULL);
 		err_msg.append(wsamsg);
-		if (errid = 0)
-			err_msg.append("连接超时");
+		if (errid == 0)
+			err_msg.append("/ 连接超时");
 		err_msg.append("</p><p>可能学校服务器挂了，我能怎么办，我也很绝望？</p>");
 		free(wsamsg);
 		Error((char *)err_msg.c_str());
