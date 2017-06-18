@@ -2,7 +2,6 @@
 	<div class="page">
 		<header class="bar bar-nav">
 		<button class="button button-link button-nav pull-left"><span class="icon icon-share"></span>&nbsp;&nbsp;<a class="except" onclick="return show_about();">关于</a></button>
-		<button class="button button-link button-nav pull-right"><a href="Comments.html">交流</a>&nbsp;&nbsp;<span class="icon icon-message"></span></button>
 		<h1 class="title">唯扬小助手</h1>
 		</header>
 		<nav class="bar bar-tab">
