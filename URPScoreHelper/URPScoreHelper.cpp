@@ -400,7 +400,7 @@ void LoadConfig()
 }
 
 // 处理 Cookie、照片
-int process_cookie(bool *p_need_update_cookie, char *p_photo_uri)
+int process_cookie(bool *p_need_update_cookie, char *p_photo_uri, bool no_error_page)
 {
 	int m_iResult = 0;
 
@@ -411,7 +411,7 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri)
 		ZeroMemory(m_rep_header, 1024);
 		char m_req_homepage_cookie[2048] = { 0 };
 		sprintf(m_req_homepage_cookie, REQUEST_HOME_PAGE_WITH_COOKIE, CGI_HTTP_COOKIE);
-		if (!CrawlRequest(m_req_homepage_cookie, m_rep_header, 1024, &m_iResult))
+		if (!CrawlRequest(m_req_homepage_cookie, m_rep_header, 1024, &m_iResult, no_error_page))
 		{
 			free(m_rep_header);
 			return -1;
@@ -424,8 +424,11 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri)
 			if (pStr2 == NULL)
 			{
 				free(m_rep_header);
-				cout << "Status: 500 Internal Server Error\n";
-				Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 结尾失败。</p>");
+				if (!no_error_page)
+				{
+					cout << "Status: 500 Internal Server Error\n";
+					Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 结尾失败。</p>");
+				}
 				return -1;
 			}
 			mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11); // 成功获得新 Session ID。
@@ -456,7 +459,7 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri)
 		// 申请内存，并接受服务端返回数据。
 		char * m_rep_header = (char *)malloc(1024);
 		ZeroMemory(m_rep_header, 1024);
-		if (!CrawlRequest(REQUEST_HOME_PAGE, m_rep_header, 1024, &m_iResult))
+		if (!CrawlRequest(REQUEST_HOME_PAGE, m_rep_header, 1024, &m_iResult, no_error_page))
 		{
 			free(m_rep_header);
 			return -1;
@@ -466,15 +469,21 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri)
 		char *pStr1 = strstr(m_rep_header, "JSESSIONID=");
 		if (pStr1 == NULL)
 		{
-			cout << "Status: 500 Internal Server Error\n";
-			Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 标头失败。</p>");
+			if (!no_error_page)
+			{
+				cout << "Status: 500 Internal Server Error\n";
+				Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 标头失败。</p>");
+			}
 			return -1;
 		}
 		char *pStr2 = strstr(pStr1 + 11, ";");
 		if (pStr2 == NULL)
 		{
-			cout << "Status: 500 Internal Server Error\n";
-			Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 结尾失败。</p>");
+			if (!no_error_page)
+			{
+				cout << "Status: 500 Internal Server Error\n";
+				Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 结尾失败。</p>");
+			}
 			return -1;
 		}
 		mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11); // 成功获得 Session ID。
@@ -493,7 +502,7 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri)
 	strcat(Jsess, JSESSIONID);
 	sprintf(REQ_PHOTO, REQUEST_PHOTO, Jsess);
 
-	if (!CrawlRequest(REQ_PHOTO, m_photo, 40960, &m_iResult))
+	if (!CrawlRequest(REQ_PHOTO, m_photo, 40960, &m_iResult, no_error_page))
 	{
 		free(m_photo);
 		return -1;
@@ -828,7 +837,7 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.cgi)
 	bool m_need_update_cookie = false;
 	char *m_photo = (char *)malloc(102424);
 	ZeroMemory(m_photo, 102424);
-	process_cookie(&m_need_update_cookie, m_photo);
+	process_cookie(&m_need_update_cookie, m_photo, true);
 	
 	if (m_need_update_cookie)
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
@@ -844,11 +853,11 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.cgi)
 	char * m_rep_body = (char *)malloc(8192);
 	ZeroMemory(m_rep_body, 8192);
 	int m_iResult = 0;
-	if (!CrawlRequest(Captcha, m_rep_body, 8192, &m_iResult))
+	if (!CrawlRequest(Captcha, m_rep_body, 8192, &m_iResult, true))
 	{
 		cout << "Status: 500 Internal Server Error\n";
-		cout << "Content-Type: text/plain\nX-Powered-By: iEdon-URPScoreHelper\n\n";
-		cout << "验证码获取失败。";
+		cout << "Content-Type: text/plain; charset=gb2312\nX-Powered-By: iEdon-URPScoreHelper\n\n";
+		cout << "无法获取验证码，教务系统可能挂了";
 		free(m_rep_body);
 		return;
 	}
@@ -857,9 +866,8 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.cgi)
 	char *pStr1 = strstr(m_rep_body, "\r\n\r\n");
 	if (pStr1 == NULL)
 	{
-
 		cout << "Status: 500 Internal Server Error\n";
-		cout << "Content-Type: text/plain\nX-Powered-By: iEdon-URPScoreHelper\n\n";
+		cout << "Content-Type: text/plain; charset=gb2312\nX-Powered-By: iEdon-URPScoreHelper\n\n";
 		cout << "无法分析验证码响应协议。";
 		return;
 	}

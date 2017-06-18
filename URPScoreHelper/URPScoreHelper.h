@@ -19,7 +19,7 @@ clock_t g_start_time;
 int g_users;
 
 int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login);
-int process_cookie(bool *p_need_update_cookie, char *p_photo_uri);
+int process_cookie(bool *p_need_update_cookie, char *p_photo_uri, bool no_error_page = false);
 int parse_index();
 int parse_query();
 void parse_friendly_score(char *p_lpszScore);

@@ -16,7 +16,7 @@ bool InitSocketLibrary()
 	return true;
 }
 
-bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTotalRead)
+bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTotalRead, bool no_error_page)
 {
 	// 创建 IPv4 TCP 套接字对象。
 	g_so = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -78,20 +78,23 @@ bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTo
 		int errid = WSAGetLastError();
 		closesocket(g_so);
 		WSACleanup();
-		//puts("Status: 500 Internal Server Error");
-		char buff[10] = { 0 };
-		_itoa(errid, buff,10);
-		std::string err_msg("<p><b>连接学校服务器失败！</b></p><p>OS代码: (");
-		err_msg.append(buff);
-		err_msg.append(") ");
-		char *wsamsg = (char *)malloc(MAX_PATH);
-		FormatMessageA(4096, NULL, errid, NULL, wsamsg, MAX_PATH, NULL);
-		err_msg.append(wsamsg);
-		if (errid == 0)
-			err_msg.append("/ 连接超时");
-		err_msg.append("</p><p>可能学校服务器挂了，我能怎么办，我也很绝望？</p>");
-		free(wsamsg);
-		Error((char *)err_msg.c_str());
+		if (!no_error_page)
+		{
+			puts("Status: 500 Internal Server Error");
+			char buff[10] = { 0 };
+			_itoa(errid, buff, 10);
+			std::string err_msg("<p><b>连接学校服务器失败！</b></p><p>OS代码: (");
+			err_msg.append(buff);
+			err_msg.append(") ");
+			char *wsamsg = (char *)malloc(MAX_PATH);
+			FormatMessageA(4096, NULL, errid, NULL, wsamsg, MAX_PATH, NULL);
+			err_msg.append(wsamsg);
+			if (errid == 0)
+				err_msg.append("/ 连接超时");
+			err_msg.append("</p><p>可能学校服务器挂了，我能怎么办，我也很绝望？</p>");
+			free(wsamsg);
+			Error((char *)err_msg.c_str());
+		}
 		return false;
 	}
 	// 发送首页请求，相当于访问 http://SERVER_IP/ 。
@@ -100,10 +103,13 @@ bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTo
 	{
 		closesocket(g_so);
 		WSACleanup();
-		puts("Status: 500 Internal Server Error");
-		char m_ErrMsg[1024] = { 0 };
-		sprintf(m_ErrMsg, "<p>无法向教务系统投递请求。</p>\r\n<p>错误代码： %d</p>", WSAGetLastError());
-		Error(m_ErrMsg);
+		if (!no_error_page)
+		{
+			puts("Status: 500 Internal Server Error");
+			char m_ErrMsg[1024] = { 0 };
+			sprintf(m_ErrMsg, "<p>无法向教务系统投递请求。</p>\r\n<p>错误代码： %d</p>", WSAGetLastError());
+			Error(m_ErrMsg);
+		}
 		return false;
 	}
 
