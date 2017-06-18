@@ -190,7 +190,7 @@ function check() {
 		$.toast("(⊙o⊙) 总得输入些什么吧？");
 		return false;
 	}
-	$.showPreloader('O(∩_∩)O 正在查询');
+	$.showPreloader('O(∩_∩)O 请稍候');
 	setTimeout(function () {
 		$.hidePreloader();
 	}, 10000);

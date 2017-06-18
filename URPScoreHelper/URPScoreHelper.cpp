@@ -70,7 +70,7 @@ int main()
 
 		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0) // 如果是 GET 请求
 		{
-			if (strcmp(CGI_SCRIPT_NAME, "/") == 0 || strcmp(CGI_SCRIPT_NAME, "/index.cgi") == 0 || strcmp(CGI_SCRIPT_NAME, "/main.cgi") == 0)
+			if (strcmp(CGI_SCRIPT_NAME, "/") == 0 || strcmp(CGI_SCRIPT_NAME, "/index.cgi") == 0)
 			{
 				if (strcmp(CGI_QUERY_STRING, "act=logout") == 0)
 				{
@@ -89,6 +89,12 @@ int main()
 					return 0;
 				}
 				parse_index();
+				return 0;
+			}
+			if (strcmp(CGI_SCRIPT_NAME, "/main.cgi") == 0)
+			{
+				bool need_update_cookie = false;
+				parse_main(need_update_cookie, NULL, false);
 				return 0;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2.cgi") == 0)
@@ -135,6 +141,13 @@ int main()
 				parse_change_password();
 				return 0;
 			}
+
+			if (strcmp(CGI_SCRIPT_NAME, "/captcha.cgi") == 0)
+			{
+				parse_ajax_captcha();
+				return 0;
+			}
+
 			cout << "Status: 404 No Such CGI Page\n";
 			Error("<p>找不到该页面。</p>");
 			
@@ -702,7 +715,7 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 // 处理主页面请求 (GET / /index.cgi)
 int parse_index()
 {
-	int m_iResult = 0;
+	/*int m_iResult = 0;
 	bool m_need_update_cookie = false;
 	char *m_photo = (char *)malloc(102424);
 	ZeroMemory(m_photo, 102424);
@@ -725,7 +738,7 @@ int parse_index()
 			cout << "Status: 302 Found\nLocation: index.cgi\n" << GLOBAL_HEADER;
 			return 0;
 		}
-	}
+	}*/
 
 	// 如果是QQ登录回来，则自动填充账号密码。
 	char *m_xh = NULL;
@@ -761,41 +774,6 @@ int parse_index()
 		}
 	}
 
-	// 置随机数种子，并取得一个随机数，用于获取验证码。
-	srand((int)time(0));
-	int m_rand = rand();
-	char Captcha[256] = { 0 };
-	sprintf(Captcha, REQUEST_CAPTCHA, m_rand, JSESSIONID);
-
-	// 发送验证码请求，获取验证码数据。
-	char * m_rep_body = (char *)malloc(8192);
-	ZeroMemory(m_rep_body, 8192);
-	if (!CrawlRequest(Captcha, m_rep_body, 8192, &m_iResult))
-	{
-		free(m_rep_body);
-		return -1;
-	}
-
-	// 从返回数据流中获取验证码图片。
-	pStr1 = strstr(m_rep_body, "\r\n\r\n");
-	if (pStr1 == NULL)
-	{
-		
-		cout << "Status: 500 Internal Server Error\n";
-		Error("<p>无法分析验证码响应协议。</p>");
-		return -1;
-	}
-	pStr1 += 4; // 指针后移四位，指向 jpg 开始位置。
-	int m_CaptchaLength = m_iResult - (pStr1 - m_rep_body); // 验证码图片的大小
-
-	// 将验证码转化为 base64 编码后的 DataURL，浏览器直接显示，供用户查看。
-	char *m_base64 = new char[m_CaptchaLength * 2 + 1];
-	base64_encode((const unsigned char *)pStr1, m_base64, m_CaptchaLength);
-	char *m_DataURL = new char[m_CaptchaLength * 2 + 24];;
-	strcpy(m_DataURL, "data:image/jpg;base64,");
-	strcat(m_DataURL, m_base64);
-	free(m_rep_body);
-
 	// 读入主页面文件
 	FILE *m_file_homepage = fopen(CGI_PATH_TRANSLATED, "rb");
 	if (m_file_homepage == NULL)
@@ -819,9 +797,9 @@ int parse_index()
 	}
 	fclose(m_file_homepage); // 关闭文件
 
-	// 输出网页
+	/*// 输出网页
 	if (m_need_update_cookie)
-		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";*/
 
 	cout << GLOBAL_HEADER;
 
@@ -829,21 +807,78 @@ int parse_index()
 	if (m_xh == NULL || m_mm == NULL)
 	{
 		fprintf(stdout, m_lpszHomepage, g_users, g_QueryCount, 
-						"输入你的教务系统账号来登录吧 :)", "block", "", "", m_DataURL, "block", "none",
+						"输入你的教务系统账号来登录吧 :)", "block", "", "", "block", "none",
 						SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 	}
 	else 
 	{
 		fprintf(stdout, m_lpszHomepage, g_users, g_QueryCount,
-						"QQ登录成功，输入验证码继续吧 :)", "none", m_xh, m_mm, m_DataURL, "none", "block",
+						"QQ登录成功，输入验证码继续吧 :)", "none", m_xh, m_mm, "none", "block",
 						SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 	}
 	cout << footer;
 
 	free(m_lpszHomepage);
+	return 0;
+}
+
+// 处理验证码 Ajax 请求
+void parse_ajax_captcha() //(AJAX: GET /captcha.cgi)
+{
+	bool m_need_update_cookie = false;
+	char *m_photo = (char *)malloc(102424);
+	ZeroMemory(m_photo, 102424);
+	process_cookie(&m_need_update_cookie, m_photo);
+	
+	if (m_need_update_cookie)
+		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+	free(m_photo);
+	
+	// 置随机数种子，并取得一个随机数，用于获取验证码。
+	srand((int)time(0));
+	int m_rand = rand();
+	char Captcha[256] = { 0 };
+	sprintf(Captcha, REQUEST_CAPTCHA, m_rand, JSESSIONID);
+
+	// 发送验证码请求，获取验证码数据。
+	char * m_rep_body = (char *)malloc(8192);
+	ZeroMemory(m_rep_body, 8192);
+	int m_iResult = 0;
+	if (!CrawlRequest(Captcha, m_rep_body, 8192, &m_iResult))
+	{
+		cout << "Status: 500 Internal Server Error\n";
+		cout << "Content-Type: text/plain\nX-Powered-By: iEdon-URPScoreHelper\n\n";
+		cout << "验证码获取失败。";
+		free(m_rep_body);
+		return;
+	}
+
+	// 从返回数据流中获取验证码图片。
+	char *pStr1 = strstr(m_rep_body, "\r\n\r\n");
+	if (pStr1 == NULL)
+	{
+
+		cout << "Status: 500 Internal Server Error\n";
+		cout << "Content-Type: text/plain\nX-Powered-By: iEdon-URPScoreHelper\n\n";
+		cout << "无法分析验证码响应协议。";
+		return;
+	}
+	pStr1 += 4; // 指针后移四位，指向 jpg 开始位置。
+	int m_CaptchaLength = m_iResult - (pStr1 - m_rep_body); // 验证码图片的大小
+
+	// 将验证码转化为 base64 编码后的 DataURL，浏览器直接显示，供用户查看。
+	char *m_base64 = new char[m_CaptchaLength * 2 + 1];
+	base64_encode((const unsigned char *)pStr1, m_base64, m_CaptchaLength);
+	char *m_DataURL = new char[m_CaptchaLength * 2 + 24];;
+	strcpy(m_DataURL, "data:image/jpg;base64,");
+	strcat(m_DataURL, m_base64);
+	free(m_rep_body);
+
+	cout << "Content-Type: text/plain\nX-Powered-By: iEdon-URPScoreHelper\n\n";
+	cout << m_DataURL;
+
 	delete[]m_base64;
 	delete[]m_DataURL;
-	return 0;
 }
 
 // 处理查询页面请求 (GET /query.cgi)
@@ -2540,42 +2575,6 @@ void OAuth2_Association(bool isPOST)
 			delete[]query;
 		}
 
-		// 置随机数种子，并取得一个随机数，用于获取验证码。
-		srand((int)time(0));
-		int m_rand = rand();
-		char Captcha[256] = { 0 };
-		sprintf(Captcha, REQUEST_CAPTCHA, m_rand, JSESSIONID);
-
-		// 发送验证码请求，获取验证码数据。
-		char * m_rep_body = (char *)malloc(8192);
-		ZeroMemory(m_rep_body, 8192);
-		if (!CrawlRequest(Captcha, m_rep_body, 8192, &m_iResult))
-		{
-			free(m_rep_body);
-			delete[]openid;
-			return;
-		}
-
-		// 从返回数据流中获取验证码图片。
-		char *pStr1 = strstr(m_rep_body, "\r\n\r\n");
-		if (pStr1 == NULL)
-		{
-			cout << "Status: 500 Internal Server Error\n";
-			Error("<p>无法分析验证码响应协议。</p>");
-			delete[]openid;
-			return;
-		}
-		pStr1 += 4; // 指针后移四位，指向 jpg 开始位置。
-		int m_CaptchaLength = m_iResult - (pStr1 - m_rep_body); // 验证码图片的大小
-
-		// 将验证码转化为 base64 编码后的 DataURL，浏览器直接显示，供用户查看。
-		char *m_base64 = new char[m_CaptchaLength * 2 + 1];
-		base64_encode((const unsigned char *)pStr1, m_base64, m_CaptchaLength);
-		char *m_DataURL = new char[m_CaptchaLength * 2 + 24];;
-		strcpy(m_DataURL, "data:image/jpg;base64,");
-		strcat(m_DataURL, m_base64);
-		free(m_rep_body);
-
 		// 读入主页面文件
 		FILE *m_file_homepage = fopen(CGI_PATH_TRANSLATED, "rb");
 		if (m_file_homepage == NULL)
@@ -2615,26 +2614,23 @@ void OAuth2_Association(bool isPOST)
 		if (strlen(stid) == 0)
 		{
 			fprintf(stdout, m_lpszHomepage, "感谢使用QQ登录，请先绑定自己的学号吧 :)",
-				openid, "block", "", "block", pass, m_DataURL,
+				openid, "block", "", "block", pass,
 				SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 		}
 		else if(strlen(pass) == 0)
 		{
 			fprintf(stdout, m_lpszHomepage, "感谢使用QQ登录，请输入学号对应密码来继续操作 :)",
-				openid, "none", stid, "block", pass, m_DataURL,
+				openid, "none", stid, "block", pass,
 				SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 		}
 		else
 		{
 			fprintf(stdout, m_lpszHomepage, "感谢使用QQ登录，请输入验证码来继续操作 :)",
-				openid, "none", stid, "none", pass, m_DataURL,
+				openid, "none", stid, "none", pass,
 				SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
 		}
 		cout << footer;
-
 		free(m_lpszHomepage);
-		delete[]m_base64;
-		delete[]m_DataURL;
 	}
 	else // 提交账号密码验证码，打算登录绑定了
 	{
@@ -2647,7 +2643,7 @@ void OAuth2_Association(bool isPOST)
 			delete[]openid;
 			return;
 		}
-		char *m_post_data = (char *)malloc(m_post_length + 2);	// TORESEARCH
+		char *m_post_data = (char *)malloc(m_post_length + 2);
 		if (fgets(m_post_data, m_post_length + 1, stdin) == NULL)
 		{
 			cout << "Status: 500 Internal Server Error\n";

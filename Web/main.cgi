@@ -3,7 +3,7 @@
 		<header class="bar bar-nav">
 		<button class="button button-link button-nav pull-left"><span class="icon icon-share"></span>&nbsp;&nbsp;<a class="except" onclick="return show_about();">关于</a></button>
 		<button class="button button-link button-nav pull-right"><a href="Comments.html">交流</a>&nbsp;&nbsp;<span class="icon icon-message"></span></button>
-		<h1 class="title">N加青年 广陵查分助手</h1>
+		<h1 class="title">唯扬小助手</h1>
 		</header>
 		<nav class="bar bar-tab">
 		<a class="tab-item active" href="index.cgi">
@@ -36,10 +36,10 @@
 						  </li>
 						</ul>
 						<ul>
-							<li style="width:50%%;float:left;padding:0 6px 4px 6px"><a style="z-index:9999;margin-top:10px;" class="button button-big button-success button-fill" href="query.cgi">期末排名GPA</a></li>
+							<li style="width:50%%;float:left;padding:0 6px 4px 6px"><a style="z-index:9999;margin-top:10px;" class="button button-big button-success button-fill" href="query.cgi">本学期成绩</a></li>
 							<li style="width:50%%;float:left;padding:0 6px 4px 6px"><a style="z-index:9999;margin-top:10px;background-color: #ec4dbc !important" class="button button-big button-warning button-fill" href="TeachEval.cgi">一键评教</a></li>
 							<li style="width:50%%;float:left;padding:0 6px 4px 6px"><a style="z-index:9999;margin-top:10px" class="button button-big button-warning button-fill" href="query.cgi?order=tests">月中补缓清考</a></li>
-							<li style="width:50%%;float:left;padding:0 6px 4px 6px"><a style="z-index:9999;margin-top:10px" class="button button-big button-fill" href="query.cgi?order=passed">已过科目(总)</a></li>
+							<li style="width:50%%;float:left;padding:0 6px 4px 6px"><a style="z-index:9999;margin-top:10px" class="button button-big button-fill" href="query.cgi?order=passed">已过科目</a></li>
 							<li style="width:50%%;float:left;padding:0 6px 4px 6px"><a style="z-index:9999;margin-top:10px" class="button button-big button-dark button-fill" href="query.cgi?order=byplan">专业方案</a></li>
 							<li style="width:50%%;float:left;padding:0 6px 4px 6px"><a style="z-index:9999;margin-top:10px" class="button button-big button-danger button-fill" href="query.cgi?order=failed">挂科查询</a></li>
 						</ul>

@@ -30,12 +30,12 @@
 <div class="page-group">
 	<div class="page">
 		<header class="bar bar-nav">
-		<button class="button button-link button-nav pull-left"><span class="icon icon-left"></span><a href="index.cgi">返回</a></button>
+		<button class="button button-link button-nav pull-left"><span class="icon icon-left"></span><a href="main.cgi">返回</a></button>
 		<button class="button button-link button-nav pull-right"><a href="Comments.html">吐槽</a>&nbsp;&nbsp;<span class="icon icon-message"></span></button>
 		<h1 class="title">教务密码修改</h1>
 		</header>
 		<nav class="bar bar-tab">
-		<a class="tab-item external active" href="index.cgi">
+		<a class="tab-item external active" href="main.cgi">
 		<span class="icon icon-star"></span>
 		<span class="tab-label">教务密码修改</span>
 		</a>
@@ -78,13 +78,13 @@
 								<input onclick="return check_password();" style="z-index:9999" type="submit" value="确认修改" class="button button-big button-fill button-success" />
 							</div>
 							<div class="col-100">
-								<a style="z-index:9999;margin-top:10px" title="&lt; 不整了，回去" class="button button-big button-fill external" href="index.cgi">&lt; 不整了，回去</a>
+								<a style="z-index:9999;margin-top:10px" title="&lt; 不整了，回去" class="button button-big button-fill external" href="main.cgi">&lt; 不整了，回去</a>
 							</div>
 						</div>
 					</div>
 				</div>
 			</form>
-			<center><p id="login_query">已帮助&nbsp;&nbsp;<big>%ld</big>&nbsp;&nbsp;位小伙伴们进行了&nbsp;&nbsp;<big>%d</big>&nbsp;&nbsp;次查询</p></center>
+			<center><p id="login_query">共&nbsp;&nbsp;<big>%ld</big>&nbsp;&nbsp;位同学进行了&nbsp;&nbsp;<big>%d</big>&nbsp;&nbsp;次查询</p></center>
 		</div>
 	</div>
 </div>

@@ -71,7 +71,7 @@
 							<li class="align-top">
 							<div class="item-content">
 								<div class="item-media">
-									<span id="login_hint">验证码图像</span><a href="javascript:void(0);" onclick="window.location.reload();" title="点击刷新"><img id="login_captcha" alt="" height="40" width="120" src="%s"/></a>
+									<span id="login_hint">验证码图像</span><a onclick="get_captcha();" title="点击刷新" class="except"><img id="login_captcha" alt="" height="40" width="120" src="img/refresh.png"/></a>
 								</div>
 							</div>
 							</li>
@@ -90,3 +90,73 @@
 		<input id="about" style="display:none" value="<b>%s</b><br /><small>&copy; 2012-2017 iEdon Inside</br>编译于: %s %s<br />服务端环境: %s<br />QQ: 11595137<br />N加青年 · 提供</small>"/>
 	</div>
 </div>
+<script type="text/javascript">
+function createxmlHttpRequest() {
+	if (window.ActiveXObject) {
+		return new ActiveXObject("Microsoft.XMLHTTP");
+	} else if (window.XMLHttpRequest) {
+		return new XMLHttpRequest();
+	}
+}
+
+function convertData(data) {
+	if (typeof data === 'object') {
+		var convertResult = "";
+		for (var c in data) {
+			convertResult += c + "=" + data[c] + "&";
+		}
+		convertResult = convertResult.substring(0, convertResult.length - 1);
+		return convertResult;
+	} else {
+		return data;
+	}
+}
+function ajax() {
+	var ajaxData = {
+		type: arguments[0].type || "GET",
+		url: arguments[0].url || "",
+		async: arguments[0].async || "true",
+		data: arguments[0].data || null,
+		dataType: arguments[0].dataType || "text",
+		contentType: arguments[0].contentType || "application/x-www-form-urlencoded",
+		beforeSend: arguments[0].beforeSend ||
+		function() {},
+		success: arguments[0].success ||
+		function() {},
+		error: arguments[0].error ||
+		function() {}
+	}
+	ajaxData.beforeSend();
+	var xhr = createxmlHttpRequest();
+	xhr.responseType = ajaxData.dataType;
+	xhr.open(ajaxData.type, ajaxData.url, ajaxData.async);
+	xhr.setRequestHeader("Content-Type", ajaxData.contentType);
+	xhr.send(convertData(ajaxData.data));
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4) {
+			if (xhr.status == 200) {
+				ajaxData.success(xhr.responseText)
+			} else {
+				ajaxData.error(xhr.responseText)
+			}
+		}
+	}
+}
+function get_captcha() {
+	ajax({
+		type: "GET",
+		url: "captcha.cgi",
+		beforeSend: function() {
+			document.getElementById("login_captcha").src = "img/loading.gif";
+		},
+		success: function(msg) {
+			document.getElementById("login_captcha").src = msg;
+		},
+		error: function(msg) {
+			document.getElementById("login_captcha").src = "img/refresh.png";
+			$.toast(msg);
+		}
+	})
+}
+get_captcha();
+</script>

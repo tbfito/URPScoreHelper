@@ -37,6 +37,7 @@ void parse_teaching_evaluation();
 void teaching_evaluation();
 void parse_change_password();
 void do_change_password();
+void parse_ajax_captcha();
 
 typedef struct test_info
 {

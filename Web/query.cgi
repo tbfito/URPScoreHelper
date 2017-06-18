@@ -2,11 +2,11 @@
 	<div class="page">
 		<header class="bar bar-nav">
 		<button class="button button-link button-nav pull-left">
-		<span class="icon icon-left"></span><a href="index.cgi">返回</a></button>
+		<span class="icon icon-left"></span><a href="main.cgi">返回</a></button>
 		<h1 class="title">查询成绩 · %s</h1>
 		</header>
 		<nav class="bar bar-tab">
-		<a class="tab-item external active" href="index.cgi">
+		<a class="tab-item external active" href="main.cgi">
 		<span class="icon icon-star"></span>
 		<span class="tab-label">成绩查询</span>
 		</a>
