@@ -1631,8 +1631,9 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	sprintf(m_padding, m_origin, p_xuehao, p_password, p_captcha);
 	int m_ContentLength = strlen(m_padding); // TODO: 这里不用加莫名其妙的结束长度
 	sprintf(POST_LOGIN, REQUEST_LOGIN, m_ContentLength, CGI_HTTP_COOKIE, p_xuehao, p_password, p_captcha);
-	if (!CrawlRequest(POST_LOGIN, m_rep_body, 40960, &m_iResult))
+	if (!CrawlRequest(POST_LOGIN, m_rep_body, 40960, &m_iResult, true))
 	{
+		cout << "Status: 302 Found\nX-Powered-By: iEdon-URPScoreHelper\nLocation: index.cgi\n\n";
 		free(m_rep_body);
 		return false;
 	}

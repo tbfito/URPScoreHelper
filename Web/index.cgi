@@ -94,9 +94,9 @@
 							<div class="col-50">
 								<a style="z-index:9999;" title="QQ快速登录" class="button button-big button-fill button-success external" href="OAuth2.cgi">QQ快速登录</a>
 							</div>
-							<!--<div class="col-100">
+							<div class="col-100">
 								<a style="z-index:9999;margin-top:10px" title="免密查询入口" class="button button-big button-fill external" href="QuickQuery.cgi">免密查询入口</a>
-							</div>-->
+							</div>
 						</div>
 						<div class="row" style="display:%s">
 							<div class="col-100">
