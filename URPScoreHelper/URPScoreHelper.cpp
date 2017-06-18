@@ -534,6 +534,7 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri, bool no_error_
 	else
 	{
 		free(m_photo);
+		return 1;
 	}
 	return 0;
 }
@@ -614,7 +615,12 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 	{
 		m_photo = (char *)malloc(102424);
 		ZeroMemory(m_photo, 102424);
-		process_cookie(&p_need_set_cookie, m_photo);
+		int ret = process_cookie(&p_need_set_cookie, m_photo);
+		if (ret == 1)
+		{
+			cout << "Status: 302 Found\nX-Powered-By: iEdon-URPScoreHelper\nLocation: index.cgi\n\n";
+			return -1;
+		}
 	}
 	// 读入主页面文件
 	FILE *m_file_homepage = fopen(CGI_PATH_TRANSLATED, "rb");
