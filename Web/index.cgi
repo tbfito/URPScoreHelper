@@ -94,9 +94,9 @@
 							<div class="col-50">
 								<a style="z-index:9999;" title="QQ快速登录" class="button button-big button-fill button-success external" href="OAuth2.cgi">QQ快速登录</a>
 							</div>
-							<div class="col-100">
+							<!--<div class="col-100">
 								<a style="z-index:9999;margin-top:10px" title="免密查询入口" class="button button-big button-fill external" href="QuickQuery.cgi">免密查询入口</a>
-							</div>
+							</div>-->
 						</div>
 						<div class="row" style="display:%s">
 							<div class="col-100">
@@ -171,6 +171,7 @@ function get_captcha() {
 		},
 		success: function(msg) {
 			document.getElementById("login_captcha").src = msg;
+			ocr_captcha(msg);
 		},
 		error: function(msg) {
 			document.getElementById("login_captcha").src = "img/refresh.png";
@@ -179,4 +180,16 @@ function get_captcha() {
 	})
 }
 get_captcha();
+function ocr_captcha(dataURI) {
+	ajax({
+		type: "POST",
+		url: "http://api.iedon.com/captcha_ocr/ocr.php",
+		data:{"pic":dataURI}, 
+		success: function(msg) {
+			if(msg != null && msg.length != 0) {
+				document.getElementById("i_yzm").value = msg;
+			}
+		},
+	})
+}
 </script>

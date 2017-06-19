@@ -151,6 +151,7 @@ function get_captcha() {
 		},
 		success: function(msg) {
 			document.getElementById("login_captcha").src = msg;
+			ocr_captcha(msg);
 		},
 		error: function(msg) {
 			document.getElementById("login_captcha").src = "img/refresh.png";
@@ -159,4 +160,16 @@ function get_captcha() {
 	})
 }
 get_captcha();
+function ocr_captcha(dataURI) {
+	ajax({
+		type: "POST",
+		url: "http://api.iedon.com/captcha_ocr/ocr.php",
+		data:{"pic":dataURI}, 
+		success: function(msg) {
+			if(msg != null && msg.length != 0) {
+				document.getElementById("i_yzm").value = msg;
+			}
+		},
+	})
+}
 </script>
