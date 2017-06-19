@@ -1,6 +1,10 @@
 #pragma once
 
 #define SOFTWARE_NAME "唯扬小助手"
+#ifdef ZeroMemory
+#undef ZeroMemory
+#endif
+#define ZeroMemory(Destination,Length) memset((Destination),0,(Length))
 
 // 公开给外部使用的变量
 extern SOCKET g_so;
