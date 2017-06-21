@@ -43,3 +43,4 @@ extern char* ERROR_HTML;
 extern char JSESSIONID[256];
 extern void Error(char *p_ErrMsg);
 extern char * base64_encode(const unsigned char * bindata, char * base64, int binlength);
+float cj2jd(float cj);

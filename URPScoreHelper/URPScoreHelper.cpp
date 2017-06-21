@@ -1241,6 +1241,7 @@ ton-fill button-success\">一键注册</a></div>";
 
 	double m_Total_xuefen = 0.0;
 	double m_Total_pointsxxuefen = 0.0;
+	double m_Total_jidian = 0.0;
 
 	while (pStr1 != NULL) 
 	{
@@ -1320,6 +1321,10 @@ ton-fill button-success\">一键注册</a></div>";
 			}
 			
 		}
+		if (strstr(m_subchengji, "不及格") != NULL)
+		{
+				strcpy(m_subchengji, "55");
+		}
 		//if (atoi(m_subchengji) == 0) strcpy(m_subchengji, "暂无数据");
 		if (atof(m_subchengji) < 60) 
 		{
@@ -1339,30 +1344,35 @@ ton-fill button-success\">一键注册</a></div>";
 		mid(m_submingci, pStr2, pStr3 - pStr2 - 19, 19);
 		//if (atof(m_submingci) == 0) sprintf(m_submingci, "暂无数据");
 
-		char m_StrTmp[10240] = { 0 };
-		sprintf(m_StrTmp, SCORE_TEMPLATE, m_subName, m_subchengji, m_subjunfen, m_subzuigaofen, m_subzuidifen,
-				m_submingci, m_subXuefen);
-		strcat(m_Output, m_StrTmp);
-
 		// （分数x学分）全都加起来/总学分 = 加权分，排除体育和课程设计
+		float m_xuefen = atof(m_subXuefen);
+		float m_chengji = atof(m_subchengji);
+		float m_kcxfjd = m_xuefen * cj2jd(m_chengji);
 		if (strstr(m_subName, "体育") == NULL && strstr(m_subName, "军事训练") == NULL 
 			&& strstr(m_subName, "实践") == NULL)
 		{
-			float m_xuefen = atof(m_subXuefen);
-			float m_chengji = atof(m_subchengji);
-			if (m_xuefen != 0) // 排0学分...，并统计总学分
+			m_Total_xuefen += m_xuefen;
+			double m_pointsxxuefen = m_xuefen * m_chengji;
+			if (m_pointsxxuefen != 0)
 			{
-				m_Total_xuefen += m_xuefen;
+				m_Total_pointsxxuefen += m_pointsxxuefen;
 			}
-			if (m_chengji != 0)
+			m_Total_jidian += m_kcxfjd;
+			/*if (m_chengji != 0)
 			{
 				double m_pointsxxuefen = m_xuefen * m_chengji;
 				if (m_pointsxxuefen != 0)
 				{
 					m_Total_pointsxxuefen += m_pointsxxuefen;
 				}
-			}
+			}*/
 		}
+
+		char m_StrTmp[10240] = { 0 };
+		sprintf(m_StrTmp, SCORE_TEMPLATE, m_subName, m_subchengji, m_subjunfen, m_subzuigaofen, m_subzuidifen,
+			m_submingci, m_subXuefen, m_kcxfjd);
+		strcat(m_Output, m_StrTmp);
+
 		m_success = true; // 查到一个算一个
 		pStr1 = strstr(pStr3, "<tr class=\"odd\" onMouseOut=\"this.className='even';\" onMouseOver=\"this.className='evenfocus';\">");
 	}
@@ -1379,8 +1389,8 @@ ton-fill button-success\">一键注册</a></div>";
 	if (m_Total_pointsxxuefen != 0 || m_Total_xuefen != 0)
 	{
 		char m_jiaquanfen[81920] = { 0 };
-		sprintf(m_jiaquanfen, "<div id=\"i_total\"><p>本学期加权综合分（评优、排名依据，供参考）：</p><center>%.1f</center></div>", 
-				m_Total_pointsxxuefen / m_Total_xuefen);
+		sprintf(m_jiaquanfen, "<div id=\"i_total\"><p>加权平均分 / GPA(平均绩点)：</p><center>%.1f&nbsp;&nbsp;&nbsp;&nbsp;%.1f</center></div>",
+				m_Total_pointsxxuefen / m_Total_xuefen, m_Total_jidian / m_Total_xuefen);
 		strcat(m_jiaquanfen, m_Output);
 		ZeroMemory(m_Output, 81920);
 		strcpy(m_Output, m_jiaquanfen);
@@ -1394,7 +1404,7 @@ ton-fill button-success\">一键注册</a></div>";
 
 	char title[256] = { 0 };
 	strcpy(title, m_Student);
-	strcat(title, "的本期成绩 - ");
+	strcat(title, "的本学期成绩 - ");
 	strcat(title, SOFTWARE_NAME);
 
 	fprintf(stdout, header, title);
