@@ -343,15 +343,18 @@ bool LoadPageSrc()
 void LoadConfig()
 {
 	SERVER = (char *)malloc(256);
+	SERVER_PORT = (char *)malloc(128);
 	OAUTH2_APPID = (char *)malloc(1024);
 	OAUTH2_SECRET = (char *)malloc(1024);
 	memset(SERVER, 0, 256);
+	memset(SERVER_PORT, 0, 128);
 	memset(OAUTH2_APPID, 0, 1024);
 	memset(OAUTH2_SECRET, 0, 1024);
 	char *Dir = (char *)malloc(260);
 	GetCurrentDirectoryA(260, Dir);
 	strcat(Dir, "\\config.ini");
 	GetPrivateProfileStringA("Config", "server", "127.0.0.1", SERVER, 256, Dir);
+	GetPrivateProfileStringA("Config", "port", "80", SERVER_PORT, 128, Dir);
 	GetPrivateProfileStringA("Config", "OAUTH2_APPID", "NULL", OAUTH2_APPID, 1024, Dir);
 	GetPrivateProfileStringA("Config", "OAUTH2_SECRET", "NULL", OAUTH2_SECRET, 1024, Dir);
 	free(Dir);

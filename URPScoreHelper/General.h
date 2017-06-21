@@ -36,6 +36,7 @@ extern const char* POST_PRE_TEACH_EVAL;
 extern const char* REQ_CHANGE_PASSWORD;
 
 extern char *SERVER;
+extern char *SERVER_PORT;
 extern char *OAUTH2_APPID;
 extern char *OAUTH2_SECRET;
 

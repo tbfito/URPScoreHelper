@@ -39,7 +39,7 @@ bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTo
 	sockaddr_in m_sockaddr;
 	m_sockaddr.sin_family = AF_INET;
 	m_sockaddr.sin_addr.S_un.S_addr = inet_addr(SERVER);
-	m_sockaddr.sin_port = htons(80);
+	m_sockaddr.sin_port = htons(atoi(SERVER_PORT));
 
 	int error = -1;
 	int len = sizeof(int);

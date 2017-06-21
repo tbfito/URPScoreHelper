@@ -186,6 +186,7 @@ const char *QUICK_SCORE = "<li class=\"item-content\"><div class=\"item-media\">
 // 错误页面和配置初始化
 char *ERROR_HTML = NULL;
 char *SERVER = NULL;
+char *SERVER_PORT = NULL;
 char *OAUTH2_APPID = NULL;
 char *OAUTH2_SECRET = NULL;
 
