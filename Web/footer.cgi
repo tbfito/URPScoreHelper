@@ -1,8 +1,4 @@
 
-		<script type='text/javascript' src='js/zepto.min.js' charset='utf-8'></script>
-		<script type='text/javascript' src='js/URPScoreHelper.js' charset='gb2312'></script>
-		<script type='text/javascript' src='js/sm.min.js' charset='utf-8'></script>
-		<script type='text/javascript' src='js/sm-extend.min.js' charset='utf-8'></script>
 		<script type='text/javascript'>removeCell();</script>
 		<script>
 			var _mtac = {};

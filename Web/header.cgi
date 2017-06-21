@@ -13,5 +13,9 @@
 <link rel="stylesheet" href="css/sm.min.css">
 <link rel="stylesheet" href="css/sm-extend.min.css">
 <link rel="stylesheet" href="css/project.css">
+<script type='text/javascript' src='js/zepto.min.js' charset='utf-8'></script>
+<script type='text/javascript' src='js/URPScoreHelper.js' charset='gb2312'></script>
+<script type='text/javascript' src='js/sm.min.js' charset='utf-8'></script>
+<script type='text/javascript' src='js/sm-extend.min.js' charset='utf-8'></script>
 </head>
 <body>
