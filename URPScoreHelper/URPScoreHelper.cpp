@@ -979,8 +979,8 @@ void parse_friendly_score(char *p_lpszScore)
 		free(m_lpszQuery);
 		cout << "Status: 403 Forbidden\n";
 
-		char *m_original_str = "<p><b>亲爱的%s，系统君说你本学期还没有电子注册 0.0</b></p><p>我可以施展法术，\
-一键帮你在教务系统注册哦~</p><p>--&gt; 点按下方按钮，直达查分界面 :P &lt;--</p>\
+		char *m_original_str = "<p><b>亲爱的%s，系统君说你本学期还没有电子注册 0.0</b></p><p>不注册的话，是查不了成绩的哦！</p><p>我可以施展法术，\
+<b>一键帮你在教务系统注册哦~</b></p><p>--&gt; 点按下方按钮，自动注册，直达查分界面 :P &lt;--</p>\
 <div class=\"col-100\"><a href=\"query.cgi?act=system_registration\" class=\"button button-big but\
 ton-fill button-success\">一键注册</a></div>";
 
@@ -2014,7 +2014,8 @@ void parse_QuickQuery_Result()
 
 			char m_query_param[1024] = { 0 };
 			sprintf(m_query_param, "LS_XH=%s", m_xh[xh_index]);
-			strcat(m_query_param, "&resultPage=http%3A%2F%2Fjw0.yzu.edu.cn%3A80%2FreportFiles%2Fcj%2Fcj_zwcjd.jsp%3F");
+			//useless strcat(m_query_param, "&resultPage=http%3A%2F%2Fjw0.yzu.edu.cn%3A80%2FreportFiles%2Fcj%2Fcj_zwcjd.jsp%3F");
+			strcat(m_query_param, "&resultPage=%3F"); // this is ok.
 			char m_query_request[2048] = { 0 };
 			sprintf(m_query_request, REQUEST_SET_REPORT_PARAMS, CGI_HTTP_COOKIE, strlen(m_query_param));
 			strcat(m_query_request, m_query_param);
@@ -2354,7 +2355,7 @@ void parse_QuickQuery_Result()
 
 			for (int i = 0; i < m_index; i++)
 			{
-				if (m_interval > 90)
+				if (m_interval >= 3) // 如果两次成绩相隔大于3个月，则显示当期成绩
 				{
 					if (m_test_info[i].date == m_max_date)
 					{
