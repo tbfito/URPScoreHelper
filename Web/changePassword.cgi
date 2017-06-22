@@ -6,7 +6,7 @@
 			$.toast("(⊙o⊙) 总得输入些什么吧？");
 			return false;
 		}
-		if(r1.length > 10)
+		if(r1.length > 12)
 		{
 			$.toast("(⊙o⊙) 密码太长，破系统记不住");
 			return false;
@@ -52,23 +52,35 @@
 					<div class="list-block">
 						<ul style="opacity: 0.75;z-index:9999">
 							<li>
-							<div class="item-content">
-								<div class="item-media">
-									<i class="icon icon-form-name"></i>
-								</div>
-								<div class="item-inner">
-									<div class="item-title label">
-										新密码
+								<div class="item-content">
+									<div class="item-media">
+										<i class="icon icon-form-name"></i>
 									</div>
-									<div class="item-input">
-										<input name="mm" type="password" placeholder="最长12位" id="i_xhs">
+									<div class="item-inner">
+										<div class="item-title label">
+											新密码
+										</div>
+										<div class="item-input">
+											<input name="mm" type="password" placeholder="最长12位" id="i_xhs">
+										</div>
 									</div>
-									<label class="label-switch">
-											<input type="checkbox" id="i_chk">
-											<div class="checkbox"></div>
-									</label>
 								</div>
-							</div>
+							</li>
+							<li>
+								<div class="item-content">
+									<div class="item-media">
+										<i class="icon icon-form-name"></i>
+									</div>
+									<div class="item-inner">
+										<div class="item-title label">
+											确认输入无误
+										</div>
+										<label class="label-switch">
+												<input type="checkbox" id="i_chk">
+												<div class="checkbox"></div>
+										</label>
+									</div>
+								</div>
 							</li>
 						</ul>
 					</div>
