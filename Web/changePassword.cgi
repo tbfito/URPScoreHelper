@@ -11,9 +11,9 @@
 			$.toast("(⊙o⊙) 密码太长，破系统记不住");
 			return false;
 		}
-		var patrn=/^(\w){6,10}$/;
+		var patrn=/^(\w){6,12}$/;
 		if (!patrn.exec(r1)){
-			$.toast("只能输入6-10个字母、数字、下划线");
+			$.toast("只能输入6-12个字母、数字、下划线");
 			return false;
 		}
 		if(!document.getElementById("i_chk").checked){
@@ -46,7 +46,7 @@
 					<b>使用须知</b><small> | Xiu Xiu is more healthy.</small>
 				</p>
 				<p><small><b>为什么要修改密码？</b>众所周知，教务系统采用的默认密码等于学号，这给外界信息贩子带来了绝佳的机会。一旦穷举学号爬完学生数据，不法分子可以获得学生的一切信息（姓名、学号、证件照、专业、身份证、家庭住址等）进行敲诈、勒索。更有黑客会搜集这些信息录入社工库，那后果将会不堪设想。<b>对于广陵学院</b>，直接将教务系统暴露在公网，其数据安全性岌岌可危，另外，广陵学院会定期重置学生密码。所以，每年修改一次教务密码是必要的。这也是为什么小助手在广陵会启用HTTPS加密的原因之一。</small></p>
-				<p><small><b>警告：</b>你将要修改密码，请仔细核对输入信息，修改后的密码请务必妥善保存。如果你忘记修改后的密码，我们将无能为力，届时只能求助学校教务部门。我们不承担任何风险责任。密码限制长度为10位，修改成功后，需要重新登录。</small></p>
+				<p><small><b>警告：</b>你将要修改密码，请仔细核对输入信息，修改后的密码请务必妥善保存。如果你忘记修改后的密码，我们将无能为力，届时只能求助学校教务部门。我们不承担任何风险责任。密码限制长度为12位，修改成功后，需要重新登录。</small></p>
 				<canvas id="i_canvas" style="position:absolute;top:0;left:0;right:0;bottom:0"></canvas>
 				<form action="changePassword.cgi" method="post">
 					<div class="list-block">
@@ -61,7 +61,7 @@
 										新密码
 									</div>
 									<div class="item-input">
-										<input name="mm" type="password" placeholder="最长10位" id="i_xhs">
+										<input name="mm" type="password" placeholder="最长12位" id="i_xhs">
 									</div>
 									<label class="label-switch">
 											<input type="checkbox" id="i_chk">

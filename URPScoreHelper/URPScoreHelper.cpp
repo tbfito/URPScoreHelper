@@ -549,7 +549,7 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 	{
 		// 获取 POST 数据。
 		int m_post_length = atoi(CGI_CONTENT_LENGTH);
-		if (m_post_length <= 0)
+		if (m_post_length <= 0 || m_post_length > 127)
 		{
 			cout << "Status: 500 Internal Server Error\n";
 			Error("<p>发生错误，POST 数据长度异常。</p>");
@@ -3314,10 +3314,10 @@ void do_change_password() //(POST /changePassword.cgi)
 	strcpy(pwd, temp);
 	free(m_post_data);
 
-	if (len > 10 || len <= 0)
+	if (len > 12 || len <= 0)
 	{
 		cout << "Status: 500 Internal Server Error\n";
-		Error("<p>新密码长度不能超过10个字符！</p>");
+		Error("<p>新密码长度不能超过12个字符！</p>");
 		return;
 	}
 
