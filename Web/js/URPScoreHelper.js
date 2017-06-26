@@ -98,34 +98,6 @@ function getQueryString(name) {
         return null;
     }
 }
-function removeCell(){
-	/*if(document.getElementById("user") != undefined) {
-	　　for(var i=0;i<document.getElementById("user").rows.length;i++){
-			document.getElementById("user").rows[i].deleteCell(0);
-			document.getElementById("user").rows[i].deleteCell(0);
-	　　　　document.getElementById("user").rows[i].deleteCell(1);
-	　　}
-		if(getQueryString("order") == "passed")
-		{
-			document.getElementsByClassName("sortable")[0].style.width="60%";
-			return;
-		}
-		if(getQueryString("order") == "byplan")
-		{
-			document.getElementsByClassName("sortable")[0].style.width="45%";
-			document.getElementsByClassName("sortable")[4].style.width="25%";
-			return;
-		}
-		if(getQueryString("order") == "failed")
-		{
-			document.getElementsByClassName("sortable")[0].style.width="25%";
-			document.getElementsByClassName("sortable")[1].style.width="5%";
-			document.getElementsByClassName("sortable")[2].style.width="5%";
-			document.getElementsByClassName("sortable")[3].style.width="5%";
-			return;
-		}
-	}*/
-}
 $(function () {
 	$(document).on("click", "a:not(.except)", function(e) {
 		show_loading();

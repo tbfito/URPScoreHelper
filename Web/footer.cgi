@@ -1,5 +1,3 @@
-
-		<script type='text/javascript'>removeCell();</script>
 		<script>
 			var _mtac = {};
 			(function() {
