@@ -5,18 +5,11 @@
 		<button class="button button-link button-nav pull-right"><a href="Comments.html">吐槽</a>&nbsp;&nbsp;<span class="icon icon-message"></span></button>
 		<h1 class="title">QQ用户绑定</h1>
 		</header>
-		<nav class="bar bar-tab">
-		<a class="tab-item external active" href="index.cgi">
-		<span class="icon icon-star"></span>
-		<span class="tab-label">成绩查询</span>
-		</a>
-		</nav>
 		<div class="content">
 			<div class="content-block" style="overflow: hidden">
 				<p id="login_query">
 					%s
 				</p>
-				<canvas id="i_canvas" style="position:absolute;top:0;left:0;right:0;bottom:0"></canvas>
 				<form action="OAuth2Assoc.cgi?openid=%s" method="post">
 					<div class="list-block">
 						<ul style="opacity: 0.75;z-index:9999">

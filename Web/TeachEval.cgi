@@ -5,13 +5,6 @@
 		<span class="icon icon-left"></span><a href="main.cgi">返回</a></button>
 		<h1 class="title">一键教学评估</h1>
 		</header>
-		<nav class="bar bar-tab">
-		<a class="tab-item external active" href="main.cgi">
-		<span class="icon icon-star"></span>
-		<span class="tab-label">一键教学评估</span>
-		</a>
-		</nav>
-		<canvas id="i_canvas" style="position:absolute;top:0;left:0;right:0;bottom:0"></canvas>
 		<div class="content" style="opacity: 0.75;z-index:9999">
 			  %s
 			  <form action="TeachEval.cgi?act=Evaluate" method="post" style="display:%s">

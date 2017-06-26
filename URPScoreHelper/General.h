@@ -11,6 +11,8 @@ extern SOCKET g_so;
 
 extern const char* GLOBAL_HEADER;
 extern const char* SCORE_TEMPLATE;
+extern const char* BEFORE_TEMPLATE;
+extern const char* AFTER_TEMPLATE;
 extern const char* QUICK_SCORE;
 
 extern const char* REQUEST_HOME_PAGE;

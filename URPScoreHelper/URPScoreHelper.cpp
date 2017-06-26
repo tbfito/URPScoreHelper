@@ -326,7 +326,7 @@ bool LoadPageSrc()
 	fclose(m_file);
 	error = m_lpszHomepage;
 
-	ERROR_HTML = (char *)malloc(strlen(error) + strlen("出错啦 - ") + strlen(SOFTWARE_NAME) + strlen(footer) + m_file_length + 1);
+	ERROR_HTML = (char *)malloc(strlen(error) + strlen("出错啦 - ") + strlen(SOFTWARE_NAME) + strlen(header) + strlen(footer) + m_file_length + 1);
 	char title[256] = "出错啦 - ";
 	strcat(title, SOFTWARE_NAME);
 	sprintf(ERROR_HTML, header, title);
@@ -1236,7 +1236,7 @@ ton-fill button-success\">一键注册</a></div>";
 	}
 
 	bool m_success = false;
-	char m_Output[81920] = { 0 };
+	string  m_Output(BEFORE_TEMPLATE);
 	char *pStr2 = NULL;
 	char *pStr3 = NULL;
 
@@ -1248,6 +1248,7 @@ ton-fill button-success\">一键注册</a></div>";
 
 	while (pStr1 != NULL) 
 	{
+		bool isPassed = true;
 		pStr2 = pStr1;
 		for (int i = 0; i < 3; i++)
 		{
@@ -1327,6 +1328,7 @@ ton-fill button-success\">一键注册</a></div>";
 		if (strstr(m_subchengji, "不及格") != NULL)
 		{
 				strcpy(m_subchengji, "55");
+				isPassed = false;
 		}
 		//if (atoi(m_subchengji) == 0) strcpy(m_subchengji, "暂无数据");
 		if (atof(m_subchengji) < 60) 
@@ -1337,6 +1339,10 @@ ton-fill button-success\">一键注册</a></div>";
 			strcat(m_completecj, "</b>");
 			ZeroMemory(m_subchengji, 256);
 			strcpy(m_subchengji, m_completecj);
+			if (atof(m_subchengji) != 0 || atof(m_subzuidifen) != 0 || atof(m_subzuigaofen) != 0 || atof(m_subjunfen) != 0)
+			{
+				isPassed = false;
+			}
 		}
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
@@ -1371,10 +1377,10 @@ ton-fill button-success\">一键注册</a></div>";
 			}*/
 		}
 
-		char m_StrTmp[10240] = { 0 };
-		sprintf(m_StrTmp, SCORE_TEMPLATE, m_subName, m_subchengji, m_subjunfen, m_subzuigaofen, m_subzuidifen,
+		char m_StrTmp[8192] = { 0 };
+		sprintf(m_StrTmp, SCORE_TEMPLATE, isPassed ? "": "background-color: rgb(255, 0, 0);color:#fff", m_subName, m_subchengji, m_subjunfen, m_subzuigaofen, m_subzuidifen,
 			m_submingci, m_subXuefen, m_kcxfjd);
-		strcat(m_Output, m_StrTmp);
+		m_Output.append(m_StrTmp);
 
 		m_success = true; // 查到一个算一个
 		pStr1 = strstr(pStr3, "<tr class=\"odd\" onMouseOut=\"this.className='even';\" onMouseOver=\"this.className='evenfocus';\">");
@@ -1388,20 +1394,20 @@ ton-fill button-success\">一键注册</a></div>";
 		return;
 	}
 
+	m_Output.append(AFTER_TEMPLATE);
+
 	// 填充返回页面
 	if (m_Total_pointsxxuefen != 0 || m_Total_xuefen != 0)
 	{
-		char m_jiaquanfen[81920] = { 0 };
+		char m_jiaquanfen[2048] = { 0 };
 		sprintf(m_jiaquanfen, "<div id=\"i_total\"><p>加权平均分 / GPA(平均绩点)：</p><center>%.1f&nbsp;&nbsp;&nbsp;&nbsp;%.1f</center></div>",
 				m_Total_pointsxxuefen / m_Total_xuefen, m_Total_jidian / m_Total_xuefen);
-		strcat(m_jiaquanfen, m_Output);
-		ZeroMemory(m_Output, 81920);
-		strcpy(m_Output, m_jiaquanfen);
+		m_Output.insert(0, m_jiaquanfen);
 	}
 
 	char m_query_time[512] = { 0 };
-	sprintf(m_query_time, "<center>本次查询耗时 %.2f 秒</center>", (double)((GetTickCount() - g_start_time) / 1000));
-	strcat(m_Output, m_query_time);
+	sprintf(m_query_time, "<br /><center>本次查询耗时 %.2f 秒</center>", (double)((GetTickCount() - g_start_time) / 1000));
+	m_Output.append(m_query_time);
 
 	cout << GLOBAL_HEADER;
 
@@ -1411,7 +1417,7 @@ ton-fill button-success\">一键注册</a></div>";
 	strcat(title, SOFTWARE_NAME);
 
 	fprintf(stdout, header, title);
-	fprintf(stdout, m_lpszQuery, m_Student, " active", "", "", "", m_Output);
+	fprintf(stdout, m_lpszQuery, m_Student, " active", "", "", "", m_Output.c_str());
 
 	cout << footer;
 	

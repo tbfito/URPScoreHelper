@@ -4,15 +4,8 @@
 		<button class="button button-link button-nav pull-left"><span class="icon icon-share"></span>&nbsp;&nbsp;<a class="except" onclick="return show_about();">关于</a></button>
 		<h1 class="title">唯扬小助手</h1>
 		</header>
-		<nav class="bar bar-tab">
-		<a class="tab-item active" href="index.cgi">
-		<span class="icon icon-star"></span>
-		<span class="tab-label">成绩查询</span>
-		</a>
-		</nav>
 		<div class="content">
 			<div class="content-block" style="overflow: hidden">
-				<canvas id="i_canvas" style="position:absolute;top:0;left:0;right:0;bottom:0"></canvas>
 				 <div class="card" style="opacity: 0.85;z-index:9999">
 					<div class="card-header">%s</div>
 					<div class="card-content">
