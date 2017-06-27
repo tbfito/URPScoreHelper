@@ -1358,7 +1358,10 @@ ton-fill button-success\">一键注册</a></div>";
 		if (strstr(m_subName, "体育") == NULL && strstr(m_subName, "军事训练") == NULL 
 			&& strstr(m_subName, "实践") == NULL)
 		{
-			m_Total_xuefen += m_xuefen;
+			if (m_chengji != 0 || atof(m_subzuidifen) != 0 || atof(m_subzuigaofen) != 0 || atof(m_subjunfen) != 0)
+			{
+				m_Total_xuefen += m_xuefen;
+			}
 			double m_pointsxxuefen = m_xuefen * m_chengji;
 			if (m_pointsxxuefen != 0)
 			{
