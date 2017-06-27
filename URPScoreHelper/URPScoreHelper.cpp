@@ -843,11 +843,12 @@ int parse_index()
 // 处理验证码 Ajax 请求
 void parse_ajax_captcha() //(AJAX: GET /captcha.cgi)
 {
+	cout << "Cache-Control: no-cache\nPragma: no-cache\nExpires: -1\n";
 	bool m_need_update_cookie = false;
 	char *m_photo = (char *)malloc(102424);
 	ZeroMemory(m_photo, 102424);
 	process_cookie(&m_need_update_cookie, m_photo, true);
-	
+
 	if (m_need_update_cookie)
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
 	free(m_photo);
