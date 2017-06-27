@@ -88,6 +88,7 @@ function ocr_captcha(dataURI) {
 					return;
 				}
 				msg.replace("l", "1");
+				msg.replace("I", "1");
 				msg.replace("O", "0");
 				document.getElementById("i_yzm").value = msg;
 			}
