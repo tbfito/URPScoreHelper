@@ -1406,7 +1406,7 @@ ton-fill button-success\">一键注册</a></div>";
 	if (m_Total_pointsxxuefen != 0 || m_Total_xuefen != 0)
 	{
 		char m_jiaquanfen[2048] = { 0 };
-		sprintf(m_jiaquanfen, "<div id=\"i_total\"><p>加权平均分 / GPA(平均绩点)：</p><center>%.1f&nbsp;&nbsp;&nbsp;&nbsp;%.1f</center></div>",
+		sprintf(m_jiaquanfen, "<div id=\"i_total\"><p>加权平均分 / GPA(平均绩点)：</p><center>%.1f&nbsp;&nbsp;&nbsp;&nbsp;%.2f</center></div>",
 				m_Total_pointsxxuefen / m_Total_xuefen, m_Total_jidian / m_Total_xuefen);
 		m_Output.insert(0, m_jiaquanfen);
 	}
