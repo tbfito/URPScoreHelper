@@ -1228,11 +1228,10 @@ ton-fill button-success\">一键注册</a></div>";
 
 	// 定位到第一项成绩
 	char *pStr1 = strstr(p_lpszScore,"<tr class=\"odd\" onMouseOut=\"this.className='even';\" onMouseOver=\"this.className='evenfocus';\">");
+	bool hasChengji = true;
 	if (pStr1 == NULL)
 	{
-		free(m_lpszQuery);
-		Error("<p><b>额，分数页面神隐了 0.0。</b></p><p>这可能是因为新的学期开始了，上次考试成绩存档了哦~</p><p>建议看看已通过课程成绩和按专业成绩，这里面可以看到历年成绩和所得学分哦~</p>");
-		return;
+		hasChengji = false;
 	}
 
 	bool m_success = false;
@@ -1378,7 +1377,7 @@ ton-fill button-success\">一键注册</a></div>";
 		}
 
 		char m_StrTmp[8192] = { 0 };
-		sprintf(m_StrTmp, SCORE_TEMPLATE, isPassed ? "": "background-color: rgb(255, 0, 0);color:#fff", m_subName, m_subchengji, m_subjunfen, m_subzuigaofen, m_subzuidifen,
+		sprintf(m_StrTmp, SCORE_TEMPLATE, isPassed ? "": "background-color: rgb(255, 0, 0, 0.5);color:#fff", m_subName, m_subchengji, m_subjunfen, m_subzuigaofen, m_subzuidifen,
 			m_submingci, m_subXuefen, m_kcxfjd);
 		m_Output.append(m_StrTmp);
 
@@ -1393,7 +1392,12 @@ ton-fill button-success\">一键注册</a></div>";
 		Error("<p>内个，发生意外错误啦。</p>");
 		return;
 	}
-
+	if (hasChengji == false)
+	{
+		char m_StrTmp[8192] = { 0 };
+		sprintf(m_StrTmp, SCORE_TEMPLATE, "", "本学期还未出成绩", "", "", "", "","", "", "");
+		m_Output.append(m_StrTmp);
+	}
 	m_Output.append(AFTER_TEMPLATE);
 
 	// 填充返回页面
