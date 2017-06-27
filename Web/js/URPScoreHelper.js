@@ -76,6 +76,19 @@ function ocr_captcha(dataURI) {
 		data:{"pic":dataURI}, 
 		success: function(msg) {
 			if(msg != null && msg.length != 0) {
+				if(msg == '__ERROR')
+				{
+					get_captcha();
+					return;
+				}
+				var patrn=/^(\w){4,4}$/;
+				if (!patrn.exec(msg))
+				{
+					get_captcha();
+					return;
+				}
+				msg.replace("l", "1");
+				msg.replace("O", "0");
 				document.getElementById("i_yzm").value = msg;
 			}
 		},
