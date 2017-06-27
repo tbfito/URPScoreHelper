@@ -621,7 +621,7 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 		int ret = process_cookie(&p_need_set_cookie, m_photo);
 		if (ret == 1)
 		{
-			cout << "Status: 302 Found\nX-Powered-By: iEdon-URPScoreHelper\nLocation: index.cgi\n\n";
+			cout << "Status: 302 Found\nX-Powered-By: iEdon-URPScoreHelper\nLocation: index.cgi\n" << GLOBAL_HEADER;
 			return -1;
 		}
 	}
@@ -1657,7 +1657,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	sprintf(POST_LOGIN, REQUEST_LOGIN, m_ContentLength, CGI_HTTP_COOKIE, p_xuehao, p_password, p_captcha);
 	if (!CrawlRequest(POST_LOGIN, m_rep_body, 40960, &m_iResult, true))
 	{
-		cout << "Status: 302 Found\nX-Powered-By: iEdon-URPScoreHelper\nLocation: index.cgi\n\n";
+		cout << "Status: 302 Found\nX-Powered-By: iEdon-URPScoreHelper\nLocation: index.cgi\n" << GLOBAL_HEADER;
 		free(m_rep_body);
 		return false;
 	}
