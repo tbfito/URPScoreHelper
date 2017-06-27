@@ -978,8 +978,6 @@ void parse_friendly_score(char *p_lpszScore)
 	if (m_query_not_reg != NULL)
 	{
 		free(m_lpszQuery);
-		cout << "Status: 403 Forbidden\n";
-
 		char *m_original_str = "<p><b>亲爱的%s，系统君说你本学期还没有电子注册 0.0</b></p><p>不注册的话，是查不了成绩的哦！</p><p>我可以施展法术，\
 <b>一键帮你在教务系统注册哦~</b></p><p>--&gt; 点按下方按钮，自动注册，直达查分界面 :P &lt;--</p>\
 <div class=\"col-100\"><a href=\"query.cgi?act=system_registration\" class=\"button button-big but\

@@ -250,5 +250,5 @@ float cj2jd(float cj)
 {
 	if (cj <= 59)
 		return 0;
-	return ((((int)cj % 60) / 10) + 1.0);
+	return ((((int)cj % 60) / 10.0) + 1.0);
 }
