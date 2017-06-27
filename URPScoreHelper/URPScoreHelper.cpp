@@ -1377,7 +1377,7 @@ ton-fill button-success\">一键注册</a></div>";
 		}
 
 		char m_StrTmp[8192] = { 0 };
-		sprintf(m_StrTmp, SCORE_TEMPLATE, isPassed ? "": "background-color: rgb(255, 0, 0, 0.5);color:#fff", m_subName, m_subchengji, m_subjunfen, m_subzuigaofen, m_subzuidifen,
+		sprintf(m_StrTmp, SCORE_TEMPLATE, isPassed ? "": "background-color: rgba(255, 0, 0, 0.5);color:#fff", m_subName, m_subchengji, m_subjunfen, m_subzuigaofen, m_subzuidifen,
 			m_submingci, m_subXuefen, m_kcxfjd);
 		m_Output.append(m_StrTmp);
 
