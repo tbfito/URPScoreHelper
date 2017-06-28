@@ -26,12 +26,24 @@
 	.content{width:100%}
 }
 #login_captcha{border-left:1px solid #e5e5e5}
-#i_total p{padding-left:20px;margin-bottom:-5px}
-#i_total center{margin:0 auto;font-family:'LeagueGothic',Impact;font-weight:bold;font-size:3em;color:#0092bf}
+.i_page-title{font-size:16px;text-align:center;background-color:#01a9da;position:relative;height:160px;overflow:hidden}
+.i_page-navbar{line-height:40px;color:#fff;font-size:16px;text-align:center;background-color:#03a9f4;position:relative;height:40px;overflow:hidden}
+.i_page-navbar a.return {width: 62px;padding-left: 0;text-indent: 8px;left:0}
+.i_page-navbar a {position: absolute;margin: 5px 6px;display: inline-block;padding-left: 15px;line-height: 30px;font-size: 14px;right: 0;color: #fff;width: 70px}
+.i_header{margin-left:5%}
+.i_user-photo-container{margin-top:32px;float: left}
+.i_user-info-container{float:left;margin:44px 0 0 16px;line-height:20px}
+.i_user-info-container{text-align:left;color:#fff}
+.i_user-info-container h1{font-size:1.2em;font-weight:normal}
+.i_user-info-container p,.i_user-info-container a{font-size:14px}
+.i_user-info-container a{color:#fff}
+.i_user-photo{border-radius:50%;border:4px solid #6cc8e2;box-shadow:0 0 10px #6cc8e2;}
+#i_total p{padding:10px 0 0 20px}
+#i_total center{margin:0 auto;font-family:'LeagueGothic',Impact;font-size:3em;color:#0092bf}
 #list_page{background-color:#FFF}
 #list_page td{font-size:12px;text-decoration:none;color:#000000}
 #list_page table{table-layout:fixed;word-wrap:break-word;background-color:#fff;width:100%;position:relative;margin:0 auto;border-collapse:separate;border-spacing:1px}
-#list_page table.title tr td{color:#000000;font-size:14px;font-weight:bold;text-decoration:none;height:24px;line-height:0rem;padding:10px 0 26px 0;float:left}
+#list_page table.title tr td{color:#000000;font-size:14px;font-weight:bold;text-decoration:none;height:24px;line-height:0rem;padding-top:10px;float:left}
 #list_page table.titleTop2{background-color:#ffffff;border:5px solid #ffffff}
 #list_page table.displayTag tr.even{background-color:#FFFFFF;color:#000000;text-decoration:none;font-size:12px;height:20px}
 #list_page table.displayTag tr.evenfocus{background-color:#FFFBDD;text-decoration:none;font-size:12px;height:20px}
@@ -49,6 +61,5 @@
 #list_page table .infoBg4,#list_page table .infoBg5{display:none}
 #tblView  tr td{width:50% !important}
 #list_page table.titleTop3{background-color:#ffffff;border-top:5px solid #ffffff;border-bottom:5px solid #ffffff}
-#main_board {width:80%; margin:0 auto 20px;}
 #list_page #user{width:96%;table-layout:auto;}
 .item-inner span{margin-right:10px}

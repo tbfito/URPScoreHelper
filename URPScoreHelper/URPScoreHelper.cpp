@@ -631,15 +631,13 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 
 	if (openid == NULL)
 	{
-		fprintf(stdout, m_lpszHomepage.c_str(), SOFTWARE_NAME, m_photo, m_student_name, m_student_id,
-			"flex", "none", "",
-			SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+		fprintf(stdout, m_lpszHomepage.c_str(), m_photo, m_student_name, m_student_id,
+			"inline-block", "none", "");
 	}
 	else
 	{
-		fprintf(stdout, m_lpszHomepage.c_str(), SOFTWARE_NAME, m_photo, m_student_name, m_student_id,
-			"none", "flex", m_student_id,
-			SOFTWARE_NAME, __DATE__, __TIME__, CGI_SERVER_SOFTWARE);
+		fprintf(stdout, m_lpszHomepage.c_str(), m_photo, m_student_name, m_student_id,
+			"none", "inline-block", m_student_id);
 	}
 
 	cout << footer.c_str();
@@ -909,7 +907,7 @@ ton-fill button-success\">一键注册</a></div>");
 		title += SOFTWARE_NAME;
 
 		fprintf(stdout, header.c_str(), title.c_str());
-		fprintf(stdout, m_lpszQuery.c_str(), m_Student, "", "", "", "", m_prep);
+		fprintf(stdout, m_lpszQuery.c_str(), m_Student, m_prep);
 		cout << footer.c_str();
 
 		fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
@@ -963,7 +961,7 @@ ton-fill button-success\">一键注册</a></div>");
 		title += SOFTWARE_NAME;
 
 		fprintf(stdout, header.c_str(), title.c_str());
-		fprintf(stdout, m_lpszQuery.c_str(), m_Student, "", " active", "", "", m_prep);
+		fprintf(stdout, m_lpszQuery.c_str(), m_Student, m_prep);
 		cout << footer.c_str();
 
 		fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
@@ -1017,7 +1015,7 @@ ton-fill button-success\">一键注册</a></div>");
 		title += SOFTWARE_NAME;
 
 		fprintf(stdout, header.c_str(), title.c_str());
-		fprintf(stdout, m_lpszQuery.c_str(), m_Student, "", "", " active", "", m_prep);
+		fprintf(stdout, m_lpszQuery.c_str(), m_Student, m_prep);
 		cout << footer.c_str();
 
 		fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
@@ -1079,7 +1077,7 @@ ton-fill button-success\">一键注册</a></div>");
 		title += SOFTWARE_NAME;
 
 		fprintf(stdout, header.c_str(), title.c_str());
-		fprintf(stdout, m_lpszQuery.c_str(), m_Student, "", "", "", " active", m_prep);
+		fprintf(stdout, m_lpszQuery.c_str(), m_Student, m_prep);
 		cout << footer.c_str();
 
 		fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
@@ -1286,7 +1284,7 @@ ton-fill button-success\">一键注册</a></div>");
 	title += SOFTWARE_NAME;
 
 	fprintf(stdout, header.c_str(), title.c_str());
-	fprintf(stdout, m_lpszQuery.c_str(), m_Student, " active", "", "", "", m_Output.c_str());
+	fprintf(stdout, m_lpszQuery.c_str(), m_Student, m_Output.c_str());
 
 	cout << footer.c_str();
 
@@ -1903,13 +1901,7 @@ void parse_QuickQuery_Result()
 					cout << "Status: 500 Internal Server Error\n";
 					if (m_need_update_cookie)
 						cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-					char m_Exception[512] = { 0 };
-					mid(m_Exception, pStr1 + 11, pStr2 - pStr1 - 11, 0);
-					char m_ExceptionMsg[512] = "<p><b>教务系统抛出了如下错误...</b></p><p>";
-					strcat(m_ExceptionMsg, m_Exception);
-					strcat(m_ExceptionMsg, "</p>");
-					Error(m_ExceptionMsg);
-					
+					Error("教务系统出错了，请稍后重试~");
 					free(m_lpvBuffer);
 					return;
 				}
@@ -2012,7 +2004,7 @@ void parse_QuickQuery_Result()
 				return;
 			}
 			char m_xxmz_html[128] = { 0 };
-			sprintf(m_xxmz_html, "<div class=\"content-block-title\">%s</div>", m_xxmz);
+			sprintf(m_xxmz_html, "<div class=\"weui-cells__title\">%s</div>", m_xxmz);
 
 			pStr1 = NULL;
 			pStr2 = NULL;
@@ -2051,7 +2043,7 @@ void parse_QuickQuery_Result()
 			pStr2 = strstr(pStr1, "\t\t\t\t");
 			bool m_success = true;
 			strcat(m_list, m_xxmz_html);
-			strcat(m_list, "<div class=\"list-block\"><ul>");
+			strcat(m_list, "<div class=\"weui-cells\">");
 			test_info m_test_info[256];
 			int m_index = 0;
 
@@ -2188,13 +2180,13 @@ void parse_QuickQuery_Result()
 					strcat(m_list, m_temp);
 				}
 			}
-			strcat(m_list, "</ul></div>");
+			strcat(m_list, "</div>");
 		}
 
 		cout << GLOBAL_HEADER;
 
 		char m_query_time[512] = { 0 };
-		sprintf(m_query_time, "<center>本次查询耗时 %.2f 秒</center>", (double)((GetTickCount() - g_start_time) / 1000));
+		sprintf(m_query_time, "<br /><center>本次查询耗时 %.2f 秒</center>", (double)((GetTickCount() - g_start_time) / 1000));
 		strcat(m_list, m_query_time);
 
 		if (m_xhgs > 1)
@@ -2203,7 +2195,7 @@ void parse_QuickQuery_Result()
 			title += SOFTWARE_NAME;
 
 			fprintf(stdout, header.c_str(), title.c_str());
-			fprintf(stdout, m_lpszQuery.c_str(), "多人查询", "\" style=\"display:none", "\" style=\"display:none", "\" style=\"display:none", "\" style=\"display:none", m_list);
+			fprintf(stdout, m_lpszQuery.c_str(), "多人查询", m_list);
 		}
 		else
 		{
@@ -2212,7 +2204,7 @@ void parse_QuickQuery_Result()
 			title += SOFTWARE_NAME;
 
 			fprintf(stdout, header.c_str(), title.c_str());
-			fprintf(stdout, m_lpszQuery.c_str(), m_xxmz, "\" style=\"display:none", "\" style=\"display:none", "\" style=\"display:none", "\" style=\"display:none", m_list);
+			fprintf(stdout, m_lpszQuery.c_str(), m_xxmz, m_list);
 		}
 		cout << footer.c_str();
 		g_QueryCount = g_QueryCount + m_xhgs;
@@ -2600,7 +2592,7 @@ void parse_teaching_evaluation()
 	{
 		free(m_rep_body);
 		cout << "Status: 500 Internal Server Error\n";
-		Error("<p><b>啊哦，出错误啦</b></p><p>非教学评估时期，或评估时间已过。</p>");
+		Error("<p>学校还未开放评教呢，或者来晚了哦</p>");
 		return;
 	}
 
@@ -2653,12 +2645,12 @@ void parse_teaching_evaluation()
 	free(m_rep_body);
 
 	int to_eval = 0;
-	std::string to_eval_list = "<div class=\"list-block\"><ul>";
+	std::string to_eval_list = "<div class=\"weui-cells\">";
 	for (int i = 0; i < counts; i++)
 	{
-			to_eval_list += "<li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">";
+			to_eval_list += "<div class=\"weui-cell\"><div class=\"weui-cell__bd\"><p>";
 			to_eval_list += te[i].name;
-			to_eval_list += "</div><div class=\"item-after\">";
+			to_eval_list += "</p></div><div class=\"weui-cell__ft\">";
 			if (te[i].evaled == false)
 			{
 				to_eval_list += "未评价";
@@ -2668,9 +2660,9 @@ void parse_teaching_evaluation()
 			{
 				to_eval_list += "<b style=\"color:#00a70e\">已评价</b>";
 			}
-			to_eval_list += "</div></div></li>";
+			to_eval_list += "</div></div>";
 	}
-	to_eval_list += "</ul></div>";
+	to_eval_list += "</div>";
 
 	std::string m_lpszTeachEvalPage = ReadTextFileToMem(CGI_PATH_TRANSLATED);
 
@@ -2686,12 +2678,12 @@ void parse_teaching_evaluation()
 	if (to_eval && counts)
 	{
 		sprintf(out_head, 
-			"<div class=\"content-block-title\">嗯，当前还有 %d 门课程需要评估，总共 %d 门。</div>", 
+			"<div class=\"weui-cells__title\">嗯，当前还有 %d 门课程需要评估，总共 %d 门。</div>", 
 			to_eval, counts);
 	}
 	else
 	{
-		strcpy(out_head, "<div class=\"content-block-title\"><p>嗯，你都评价好啦。真是好宝宝 O(∩_∩)O</div>");
+		strcpy(out_head, "<div class=\"weui-cells__title\"><p>嗯，你都评价好啦。真是好宝宝 O(∩_∩)O</div>");
 		need_eval = false;
 	}
 
@@ -2700,7 +2692,7 @@ void parse_teaching_evaluation()
 
 	fprintf(stdout,
 		m_lpszTeachEvalPage.c_str(),
-		need_eval ? "<p style=\"padding-left:2em\">老师很辛苦，给个赞呗。默认全好评，你懂的 :)</p>" : "",
+		need_eval ? "老师很辛苦，给个赞呗。默认全好评，你懂的 :)" : "",
 		need_eval ? "block" : "none"
 		, outer.c_str());
 	cout << footer.c_str();
@@ -2988,7 +2980,7 @@ void parse_change_password()
 	title += SOFTWARE_NAME;
 
 	fprintf(stdout, header.c_str(), title.c_str());
-	fprintf(stdout, m_lpszQuery.c_str(), g_users, g_QueryCount);
+	fprintf(stdout, m_lpszQuery.c_str());
 
 	cout << footer.c_str();
 }
@@ -3102,10 +3094,10 @@ void do_change_password() //(POST /changePassword.cgi)
 	{
 		student_logout();
 		cout << "Status: 500 Internal Server Error\n";
-		char Err_Msg[512] = "<b>密码修改成功，但登录数据库记录失败，请稍后再试。(请使用新密码登录)</b><p>(";
-		strcat(Err_Msg, sqlite3_errmsg(db));
-		strcat(Err_Msg, ")</p>");
-		Error(Err_Msg);
+		std::string Err_Msg("<b>密码修改成功，但登录数据库记录失败，请稍后再试。(请使用新密码登录)</b><p>(");
+		Err_Msg += sqlite3_errmsg(db);
+		Err_Msg += ")</p>";
+		Error(Err_Msg.c_str());
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
 		return;

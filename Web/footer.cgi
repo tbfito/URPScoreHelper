@@ -5,14 +5,14 @@
 	</script>
 	<div class="weui-footer">
 		<p class="weui-footer__links">
-			<a href="/" class="weui-footer__link">唯扬小助手</a>
+			<a href="main.cgi" class="weui-footer__link">唯扬小助手</a>
 		</p>
 		<p class="weui-footer__text">Copyright &copy; 2012-2017 iEdon Inside</p>
 	</div>
 	<br />
-	<script src="js/jquery.min.js"></script>
-	<script src="js/jquery-weui.min.js"></script>
-	<script src="js/URPScoreHelper.js"></script>
+	<script charset="utf-8" src="js/jquery.min.js"></script>
+	<script charset="utf-8" src="js/jquery-weui.min.js"></script>
+	<script charset="gb2312" src="js/URPScoreHelper.js"></script>
 	<script>
 		var _mtac = {};
 		(function() {

@@ -98,10 +98,6 @@ function ocr_captcha(dataURI) {
 		},
 	})
 }
-
-function show_loading() {
-	$.showLoading("请稍候");
-}
 function getQueryString(name) {
 	var i;
     var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", i); // 匹配目标参数
@@ -126,6 +122,43 @@ function checkRows() {
 	var rows = document.getElementById("i_xh").value.split(/\r?\n|\r/).length;
 	document.getElementById("i_xhhs").innerHTML = rows;
 }
+function getcharnum() {
+	var nums = document.getElementById("i_jxpg").value.length;
+	document.getElementById("i_xhhs").innerHTML = nums;
+}
+function logout() {
+		$.confirm("确认要退出系统吗？", function() {
+			$.showLoading("正在登出...");
+			window.location.href = "index.cgi?act=logout";
+		}, function() {
+		});
+}
+function releaseAssoc(id) {
+	$.confirm("确定要解除学号与QQ号的关联吗？", function() {
+		$.showLoading("正在解绑...");
+		window.location.href = "OAuth2Assoc.cgi?release="+id;
+	}, function() {
+	});
+}
+function check_password() {
+		var r1 = document.getElementById("i_xhs").value;
+		if(r1=="")
+		{
+			$.toast("请输入新密码","cancel");
+			return false;
+		}
+		var patrn=/^(\w){6,12}$/;
+		if (!patrn.exec(r1)){
+			$.toast("只能输入6-12个字母、数字、下划线", "text");
+			return false;
+		}
+		if(!document.getElementById("i_chk").checked){
+			$.toast("滑动右边开关来确认输入无误 :-)", "text");
+			return false;
+		}
+		$.showLoading("正在修改");
+		return true;
+}
 $(function () {
 	get_captcha();
 		$(document).on("click", "#i_submit", function(e) {
@@ -134,6 +167,7 @@ $(function () {
 				   var r2 = document.getElementById("i_mm");
 				   var r3 = document.getElementById("i_yzm");
 				   var r4 = document.getElementById("weuiAgree");
+				   var r5 = document.getElementById("i_jxpj");
 				if(r1 != undefined && r1.value=="")
 				{
 					$.toast("学号还没输呢","cancel");
@@ -152,6 +186,11 @@ $(function () {
 				if(r4 != undefined && !r4.checked)
 				{
 					$.toast("必须同意条款哦","cancel");
+					return false;
+				}
+				if(r5 != undefined && r5.value=="")
+				{
+					$.toast("没写主观评价啊","cancel");
 					return false;
 				}
 				$.showLoading("请稍候");
