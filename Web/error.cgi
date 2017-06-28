@@ -4,11 +4,11 @@
 	  <div class="weui-msg__text-area">
 		<h2 class="weui-msg__title">提示信息</h2>
 		<div class="weui-msg__desc">%s</div>
-	  </div>
-	  <div class="weui-msg__opr-area">
-		<p class="weui-btn-area">
-		  <a href="main.cgi" class="weui-btn weui-btn_default">返回主页</a>
-		</p>
+		<div class="weui-msg__opr-area">
+			<p class="weui-btn-area">
+			  <a href="main.cgi" class="weui-btn weui-btn_default">返回主页</a>
+			</p>
+	    </div>
 	  </div>
 	</div>
 </div>

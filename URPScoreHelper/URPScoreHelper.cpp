@@ -849,10 +849,9 @@ void parse_friendly_score(char *p_lpszScore)
 	char *m_query_not_reg = strstr(p_lpszScore, "没有注册");
 	if (m_query_not_reg != NULL)
 	{
-		std::string m_original_str ("<p><b>亲爱的%s，系统君说你本学期还没有电子注册 0.0</b></p><p>不注册的话，是查不了成绩的哦！</p><p>我可以施展法术，\
+		std::string m_original_str ("<p><b>亲爱的%s，您本学期还没有电子注册</b></p><p>不注册的话，是查不了成绩的哦！</p><p>我可以施展法术，\
 <b>一键帮你在教务系统注册哦~</b></p><p>--&gt; 点按下方按钮，自动注册，直达查分界面 :P &lt;--</p>\
-<div class=\"col-100\"><a href=\"query.cgi?act=system_registration\" class=\"button button-big but\
-ton-fill button-success\">一键注册</a></div>");
+<div class=\"weui-msg__opr-area\"><p class=\"weui-btn-area\"><a style=\"color:#fff\" href=\"query.cgi?act=system_registration\" class=\"weui-btn weui-btn_primary\">一键注册</a></p></div>");
 		m_original_str = strformat(m_original_str.c_str(), m_Student);
 		Error(m_original_str.c_str());
 		return;
