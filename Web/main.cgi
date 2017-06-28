@@ -10,7 +10,7 @@
 						<div style="padding-top:5px">
 							<a href="/changePassword.cgi">修改密码</a> | <a style="display:%s" href="index.cgi?act=requestAssoc">绑定QQ帐号</a>
 							<div style="display:%s">
-								<span style="color:rgb(0, 255, 90)">&nbsp;QQ已绑定</span> | <a href="javascript:void(0);" onclick="releaseAssoc('%s');">解除绑定</a>
+								<span style="color:rgb(0, 255, 90)">QQ已绑定</span> | <a href="javascript:void(0);" onclick="releaseAssoc('%s');">解除绑定</a>
 							</div>
 						</div>
 					</div>
