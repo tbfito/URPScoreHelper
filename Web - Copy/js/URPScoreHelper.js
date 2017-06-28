@@ -52,21 +52,18 @@ function ajax() {
 }
 
 function get_captcha() {
-	var obj = document.getElementById("login_captcha");
-	if(obj == undefined)
-		return;
 	ajax({
 		type: "GET",
 		url: "captcha.cgi",
 		beforeSend: function() {
-			obj.src = "img/loading.gif";
+			document.getElementById("login_captcha").src = "img/loading.gif";
 		},
 		success: function(msg) {
-			obj.src = msg;
+			document.getElementById("login_captcha").src = msg;
 			ocr_captcha(msg);
 		},
 		error: function(msg) {
-			obj.src = "img/refresh.png";
+			document.getElementById("login_captcha").src = "img/refresh.png";
 			$.toast(msg);
 		}
 	})
@@ -100,7 +97,10 @@ function ocr_captcha(dataURI) {
 }
 
 function show_loading() {
-	$.showLoading("请稍候");
+	$.showPreloader('请稍候');
+	setTimeout(function () {
+		$.hidePreloader();
+	}, 10000);
 }
 function getQueryString(name) {
 	var i;
@@ -112,48 +112,55 @@ function getQueryString(name) {
         return null;
     }
 }
-function autofill() {
-	obj = document.getElementById("i_xh");
-	if(obj.value=="")
-	{
-		$.toast("学号还没输呢","cancel");
-		return false;
-	}
-	$.toptip("已自动填入密码，密码与学号相同方可用", 3000, 'success');
-	document.getElementById("i_mm").value = obj.value;
-}
-function checkRows() {
-	var rows = document.getElementById("i_xh").value.split(/\r?\n|\r/).length;
-	document.getElementById("i_xhhs").innerHTML = rows;
-}
 $(function () {
-	get_captcha();
+	$(document).on("click", "a:not(.except)", function(e) {
+		show_loading();
+	});
 		$(document).on("click", "#i_submit", function(e) {
 				document.oncontextmenu=new Function("event.returnValue=false;");
-				   var r1 = document.getElementById("i_xh");
-				   var r2 = document.getElementById("i_mm");
-				   var r3 = document.getElementById("i_yzm");
-				   var r4 = document.getElementById("weuiAgree");
-				if(r1 != undefined && r1.value=="")
+				   var r1 = document.getElementById("i_xh").value;
+				   var r2 = document.getElementById("i_mm").value;
+				   var r3 = document.getElementById("i_yzm").value;
+				if(r1=="")
 				{
-					$.toast("学号还没输呢","cancel");
+					$.toast("(⊙o⊙) 学号还没输呢。");
 					return false;
 				}
-				if(r2 != undefined && r2.value=="")
+				if(r2=="")
 				{
-					$.toast("密码还没输呢","cancel");
+					$.toast("(⊙o⊙) 密码还没输呢。");
 					return false;
 				}
-				if(r3 != undefined && r3.value=="")
+				if(r3=="")
 				{
-					$.toast("验证码还没输呢","cancel");
+					$.toast("(⊙o⊙) 验证码还没输呢。");
 					return false;
 				}
-				if(r4 != undefined && !r4.checked)
-				{
-					$.toast("必须同意条款哦","cancel");
-					return false;
-				}
-				$.showLoading("请稍候");
+				show_logging();
+				function show_logging() {
+					$.showPreloader('O(∩_∩)O 正在登录');
+					setTimeout(function () {
+						$.hidePreloader();
+					}, 10000);
+				 }
 		});
+		$.init();
 });
+$.config = {router: false}
+function show_about() {
+	var r1 = document.getElementById("about").value;
+	$.alert(r1);
+}
+function check() {
+	var r1 = document.getElementById("i_xhs").value;
+	if(r1=="")
+	{
+		$.toast("(⊙o⊙) 总得输入些什么吧？");
+		return false;
+	}
+	$.showPreloader('O(∩_∩)O 请稍候');
+	setTimeout(function () {
+		$.hidePreloader();
+	}, 10000);
+	return true;
+}

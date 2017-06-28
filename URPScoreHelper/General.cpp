@@ -189,24 +189,29 @@ const char *SCORE_TEMPLATE = "<tr class=\"even\" onmouseout=\"this.className='ev
 const char *QUICK_SCORE = "<li class=\"item-content\"><div class=\"item-media\"><i class=\"icon icon-f7\"></i></div><div class=\"item-inner\"><div class=\"item-title\">%s</div><div class=\"item-after\">%s</div></div></li>";
 
 // 错误页面和配置初始化
-char *ERROR_HTML = NULL;
+std::string ERROR_HTML;
 char *SERVER = NULL;
 char *SERVER_PORT = NULL;
 char *OAUTH2_APPID = NULL;
 char *OAUTH2_SECRET = NULL;
 
-void Error( char *p_ErrMsg )
+/*
+输出错误页面
+@Params: char* error message
+@Return: none
+*/
+void Error(const char *p_ErrMsg)
 {
-	int m_PageSize = strlen(ERROR_HTML) + strlen(p_ErrMsg) + 1;
-	char *m_ErrPage = (char *)malloc(m_PageSize);
-	ZeroMemory(m_ErrPage, m_PageSize);
-	sprintf(m_ErrPage, ERROR_HTML, p_ErrMsg);
-	cout << GLOBAL_HEADER << m_ErrPage;
-	free(m_ErrPage);
+	std::string output = strformat(ERROR_HTML.c_str(), p_ErrMsg);
+	cout << GLOBAL_HEADER << output.c_str();
 }
 
+/*
+BASE64 编码
+@Params: source bin, in buffer, in length
+@Return char* base64 code
+*/
 const char * base64char = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
 char * base64_encode(const unsigned char * bindata, char * base64, int binlength)
 {
 	int i, j;
@@ -246,9 +251,70 @@ char * base64_encode(const unsigned char * bindata, char * base64, int binlength
 	return base64;
 }
 
+
+/*
+将文本文件读入内存
+@Params: const char* file path
+@Return: std::string filedata
+*/
+std::string ReadTextFileToMem(const char *lpszLocalPath)
+{
+	std::string fdata;
+	FILE *m_file = fopen(lpszLocalPath, "rb");
+	if (m_file == NULL)
+	{
+		return fdata;
+	}
+	fseek(m_file, 0, SEEK_END); // 移到尾
+	int m_file_length = ftell(m_file); // 取得长度
+	fseek(m_file, 0, SEEK_SET); // 移到首
+	char *m_lpszfdata = (char *)malloc(m_file_length + 1);
+	ZeroMemory(m_lpszfdata, m_file_length + 1);
+	if (fread(m_lpszfdata, m_file_length, 1, m_file) != 1)
+	{
+		fclose(m_file);
+		return fdata;
+	}
+	fclose(m_file);
+	fdata.append(m_lpszfdata);
+	free(m_lpszfdata);
+	return fdata;
+}
+
+/*
+将成绩转化为绩点
+@Params: float cj
+@Return: float jidian point
+*/
 float cj2jd(float cj)
 {
 	if (cj <= 59)
 		return 0;
 	return ((((int)cj % 60) / 10.0) + 1.0);
+}
+
+/*
+实现 std::string 的格式化功能
+@Params: const char *format
+@Return: std::string
+*/
+std::string strformat(const char *format, ...)
+{
+	va_list arg_list;
+	va_start(arg_list, format);
+	// SUSv2 version doesn't work for buf NULL/size 0, so try printing
+	// into a small buffer that avoids the double-rendering and alloca path too...
+	char short_buf[256];
+	const size_t needed = vsnprintf(short_buf, sizeof(short_buf), format, arg_list) + 1;
+	if (needed <= sizeof(short_buf))
+	{
+		std::string str(short_buf);
+		return str;
+	}
+
+	// need more space...
+	char* p = static_cast<char*>(alloca(needed));
+	vsnprintf(p, needed, format, arg_list);
+	std::string str(p);
+	return str;
 }

@@ -42,8 +42,10 @@ extern char *SERVER_PORT;
 extern char *OAUTH2_APPID;
 extern char *OAUTH2_SECRET;
 
-extern char* ERROR_HTML;
+extern std::string ERROR_HTML;
 extern char JSESSIONID[256];
-extern void Error(char *p_ErrMsg);
-extern char * base64_encode(const unsigned char * bindata, char * base64, int binlength);
+void Error(const char *p_ErrMsg);
+char * base64_encode(const unsigned char * bindata, char * base64, int binlength);
+std::string ReadTextFileToMem(const char *lpszLocalPath);
+std::string strformat(const char *format, ...);
 float cj2jd(float cj);

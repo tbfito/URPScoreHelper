@@ -9,12 +9,13 @@ const char *CGI_QUERY_STRING; // 查询参数
 const char *CGI_PATH_TRANSLATED; // 脚本位置
 const char *CGI_HTTP_COOKIE; // Cookie
 const char *CGI_SERVER_SOFTWARE; // 服务器软件
-char *header;
-char *footer;
-char *error;
+
+std::string header;
+std::string footer;
+std::string error;
 
 FILE *g_fQueryCount;
-INT64 g_QueryCount;
+unsigned long long g_QueryCount;
 clock_t g_start_time;
 int g_users;
 

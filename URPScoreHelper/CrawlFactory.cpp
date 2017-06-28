@@ -128,3 +128,46 @@ bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTo
 	WSACleanup();
 	return true;
 }
+
+/*
+bool CurlCrawl(const char *url, bool isPOST = false, const char *postdata = "", const char *cookie = "", struct curl_slist *list = NULL)
+{
+	CURL* curl = curl_easy_init();
+	if (curl == NULL)
+	{
+		return false;
+	}
+
+	char* html = (char *)malloc(1024);
+	memset(html, 0, 1024);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, false);
+	if (isPOST)
+	{
+		curl_easy_setopt(curl, CURLOPT_POST, 1);
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postdata);
+	}
+	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, html);
+	curl_easy_setopt(curl, CURLOPT_COOKIE, cookie);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_receive);
+	curl_easy_setopt(curl, CURLOPT_URL, url);
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, "iEdon-URPScoreHelper");
+	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+	CURLcode ret = curl_easy_perform(curl);
+
+	if (ret != CURLE_OK)
+	{
+		return false;
+	}
+}
+int shift = 0;
+size_t curl_receive(void *buffer, size_t size, size_t nmemb, char *html)
+{
+	int resize = size * nmemb;
+	html = (char *)realloc(html, resize + shift + 1);
+	memcpy(html + shift, (char *)buffer, resize);
+	shift += resize;
+	return resize;
+}
+*/

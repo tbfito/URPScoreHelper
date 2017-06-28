@@ -81,6 +81,7 @@ void OAuth2_process()
 	cout << "Status: 302 Found\n";
 	cout << "Location: " << m_lpszURL << '\n';
 	cout << GLOBAL_HEADER;
+	delete[]m_lpszURL;
 }
 
 // QQ授权回调
@@ -277,15 +278,13 @@ void OAuth2_CallBack()
 	}
 
 	// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
-	char *query = new char[strlen("SELECT id, password FROM URPScoreHelper WHERE openid='") + 128 + 1];
-	memset(query, 0, strlen("SELECT id, password FROM URPScoreHelper WHERE openid='") + 128 + 1);
-	strcpy(query, "SELECT id, password FROM URPScoreHelper WHERE openid='");
-	strcat(query, openid);
-	strcat(query, "';");
+	std::string query("SELECT id, password FROM URPScoreHelper WHERE openid='");
+	query += openid;
+	query += "';";
 
 	char **db_Result = NULL;
 	sqlite3_stmt *stmt;
-	db_ret = sqlite3_prepare(db, query, strlen(query), &stmt, 0);
+	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
 
 	if (db_ret != SQLITE_OK)
 	{
@@ -300,7 +299,6 @@ void OAuth2_CallBack()
 		delete[]access_token;
 		delete[]access_token_req;
 		delete[]openid;
-		delete[]query;
 		delete[]code;
 		return;
 	}
@@ -348,7 +346,6 @@ void OAuth2_CallBack()
 		delete[]access_token;
 		delete[]access_token_req;
 		delete[]openid;
-		delete[]query;
 		delete[]code;
 		return;
 	}
@@ -362,7 +359,6 @@ void OAuth2_CallBack()
 	delete[]access_token;
 	delete[]access_token_req;
 	delete[]openid;
-	delete[]query;
 	delete[]code;
 	free(html);
 	curl_easy_cleanup(curl);
