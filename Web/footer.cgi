@@ -1,8 +1,3 @@
-	<!--WAPฐๆ-->
-	<div class="content" id="SOHUCS" sid="COMMENTS" ></div>
-	<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" 
-	src="http://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=cyt4tiNNC&conf=prod_e775fafab508641476182f98d67ee4b6">
-	</script>
 	<div class="weui-footer">
 		<p class="weui-footer__links">
 			<a href="main.cgi" class="weui-footer__link">ฮจั๏ะกึ๚สึ</a>
