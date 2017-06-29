@@ -7,7 +7,7 @@
 using namespace std;
 int shift = 0;
 
-void getRedirectUri(char *CGI_HTTP_HOST, char *m_Domain)
+void getRedirectUri(char *http_host, char *m_Domain)
 {
 	if (CGI_HTTPS != NULL && strcmp(CGI_HTTPS, "") != 0
 		&& strcmp(CGI_HTTPS, "off") != 0
@@ -19,7 +19,7 @@ void getRedirectUri(char *CGI_HTTP_HOST, char *m_Domain)
 	{
 		strcpy(m_Domain, "http://");
 	}
-	strcat(m_Domain, CGI_HTTP_HOST);
+	strcat(m_Domain, http_host);
 	strcat(m_Domain, "/OAuth2CallBack.fcgi");
 }
 
@@ -76,7 +76,7 @@ void OAuth2_process()
 	}
 
 	cout << "Status: 302 Found\r\n";
-	cout << "Location: " << m_lpszURL << '\r\n';
+	cout << "Location: " << m_lpszURL << "\r\n";
 	cout << GLOBAL_HEADER;
 	delete[]m_lpszURL;
 }
