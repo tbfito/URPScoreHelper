@@ -87,7 +87,6 @@ void OAuth2_CallBack()
 	char m_Domain[512] = { 0 };
 	if (CGI_HTTP_HOST == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\r\n";
 		Error("错误：缺少 HTTP_HOST 环境变量，请检查 CGI 接口设定。");
 		return;
 	}
@@ -95,14 +94,12 @@ void OAuth2_CallBack()
 
 	if (CGI_QUERY_STRING == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\r\n";
 		Error("鉴权失败 (Null QUERY_STRING)");
 		return;
 	}
 	char *pStr1 = strstr(CGI_QUERY_STRING, "code=");
 	if (pStr1 == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\r\n";
 		Error("鉴权失败 (Null Code)");
 		return;
 	}
@@ -129,7 +126,6 @@ void OAuth2_CallBack()
 
 	if (curl == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\r\n";
 		Error("无法初始化 libcurl。");
 		delete[]access_token_req;
 		delete[]code;
@@ -147,7 +143,6 @@ void OAuth2_CallBack()
 
 	if (ret != CURLE_OK)
 	{
-		cout << "Status: 500 Internal Server Error\r\n";
 		Error("curl 操作失败！");
 		free(html);
 		delete[]access_token_req;
@@ -158,7 +153,6 @@ void OAuth2_CallBack()
 	pStr1 = strstr(html, "access_token=");
 	if (pStr1 == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\r\n";
 		Error(html);
 		free(html);
 		delete[]access_token_req;
@@ -169,7 +163,6 @@ void OAuth2_CallBack()
 	pStr2 = strstr(pStr1 + 14, "&");
 	if (pStr2 == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\r\n";
 		Error("获取 access_token 失败！(Json_right)");
 		free(html);
 		delete[]access_token_req;
