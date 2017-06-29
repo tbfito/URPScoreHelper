@@ -2,14 +2,6 @@
 #ifndef URPSCOREHELPER_H
 #define URPSCOREHELPER_H
 
-char *CGI_SCRIPT_NAME; // 脚本名字
-char *CGI_REQUEST_URI; // 请求URI
-char *CGI_REQUEST_METHOD; // 请求方法
-char *CGI_CONTENT_LENGTH; // 数据长度
-char *CGI_QUERY_STRING; // 查询参数
-char *CGI_PATH_TRANSLATED; // 脚本位置
-char *CGI_HTTP_COOKIE; // Cookie
-
 std::string header;
 std::string footer;
 std::string error;

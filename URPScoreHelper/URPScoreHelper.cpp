@@ -23,29 +23,36 @@
 using namespace std;
 
 FCGX_Request request; //全局可以使用的请求
+char *CGI_SCRIPT_NAME; // 脚本名字
+char *CGI_REQUEST_URI; // 请求URI
+char *CGI_REQUEST_METHOD; // 请求方法
+char *CGI_CONTENT_LENGTH; // 数据长度
+char *CGI_QUERY_STRING; // 查询参数
+char *CGI_PATH_TRANSLATED; // 脚本位置
+char *CGI_HTTP_COOKIE; // Cookie
+char *CGI_HTTP_HOST;
+char *CGI_HTTPS;
 
 // 入口函数 (FastCGI 处理循环)
-int main()
+int main(int argc, const char* argv[])
 {
 	LoadConfig();
+	InitSocketLibrary();
+	FCGX_Init();
+	static char *emptystr = "";
 
-	streambuf * cin_streambuf = cin.rdbuf();
-	streambuf * cout_streambuf = cout.rdbuf();
-	streambuf * cerr_streambuf = cerr.rdbuf();
-
-	// 初始化 Socket 库。
-	if (!InitSocketLibrary())
+	int FCGX_SocketId = 0;
+	if (argc == 3)
 	{
-		cout << "Status: 500 Internal Server Error\r\n"
-			<< GLOBAL_HEADER
-			<< "<p>Socket 初始化失败！</p>";
-		return -1;
+		if (strcmp(argv[1], "-p") == 0)
+		{
+			FCGX_SocketId = FCGX_OpenSocket(argv[2], 5);
+			if (FCGX_SocketId == -1)
+				FCGX_SocketId = 0;
+		}
 	}
 
-	FCGX_Init();
-	FCGX_InitRequest(&request, 0, 0);
-
-	char *emptystr = "";
+	FCGX_InitRequest(&request, FCGX_SocketId, 0);
 
 	while (FCGX_Accept_r(&request) == 0) {
 			g_start_time = GetTickCount();
@@ -65,6 +72,8 @@ int main()
 			CGI_QUERY_STRING = FCGX_GetParam("QUERY_STRING", request.envp); // 查询参数
 			CGI_PATH_TRANSLATED = FCGX_GetParam("PATH_TRANSLATED", request.envp); // 脚本位置
 			CGI_HTTP_COOKIE = FCGX_GetParam("HTTP_COOKIE", request.envp); // Cookie
+			CGI_HTTPS = FCGX_GetParam("HTTPS", request.envp);
+			CGI_HTTP_HOST = FCGX_GetParam("HTTP_HOST", request.envp);
 
 			if (!LoadPageSrc())
 			{
@@ -235,7 +244,7 @@ int main()
 						FCGX_Finish_r(&request);
 						continue;
 		}
-		cerr << "Please run in FastCGI mode.";
+		cout << SOFTWARE_NAME << endl << SOFTWARE_COPYRIGHT << endl << endl << "\tOptions: [-p :port_number]" << endl;
 		return 0;
 }
 
@@ -2244,7 +2253,6 @@ void parse_QuickQuery_Result()
 // QQ账号绑定入口与解绑逻辑 (/OAuth2Assoc.cgi)
 void OAuth2_Association(bool isPOST)
 {
-	char *CGI_QUERY_STRING = getenv("QUERY_STRING");
 	if (CGI_QUERY_STRING == NULL)
 	{
 		cout << "Status: 500 Internal Server Error\r\n";

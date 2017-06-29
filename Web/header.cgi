@@ -10,5 +10,6 @@
 <link rel="stylesheet" href="css/weui.min.css">
 <link rel="stylesheet" href="css/jquery-weui.min.css">
 <link rel="stylesheet" href="css/project.css">
+<link rel="shortcut icon" href="URPScoreHelper.ico">
 </head>
 <body ontouchstart>

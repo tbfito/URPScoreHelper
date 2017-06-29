@@ -2,32 +2,20 @@
 #include "General.h"
 #include "CrawlFactory.h"
 
-bool InitSocketLibrary()
+void InitSocketLibrary()
 {
 	// 初始化 Windows Socket 库。
 	WSADATA WSAData;
 	int m_dwRet = WSAStartup(MAKEWORD(2, 2), &WSAData);
-	if (m_dwRet != 0)
-	{
-		std::cout << "Status: 500 Internal Server Error";
-		Error("<p>无法初始化 Windows Socket。</p>");
-		return false;
-	}
-	return true;
 }
 
 bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTotalRead, bool no_error_page)
 {
 	// 创建 IPv4 TCP 套接字对象。
 	g_so = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (WSAGetLastError() == WSANOTINITIALISED) // 没有初始化或因 WSACleanup() 已清理环境
-	{
-		InitSocketLibrary(); // 再次初始化
-		g_so = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	}
+
 	if (g_so == INVALID_SOCKET)
 	{
-		WSACleanup();
 		char m_ErrMsg[1024] = { 0 };
 		std::cout << "Status: 500 Internal Server Error\r\n";
 		sprintf(m_ErrMsg, "<p>无法创建 Socket。</p>\r\n<p>错误代码： %d</p>", WSAGetLastError());
@@ -77,7 +65,6 @@ bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTo
 	{
 		int errid = WSAGetLastError();
 		closesocket(g_so);
-		WSACleanup();
 		if (!no_error_page)
 		{
 			std::cout << "Status: 500 Internal Server Error\r\n";
@@ -102,7 +89,6 @@ bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTo
 	if (m_iResult != strlen(p_rq))
 	{
 		closesocket(g_so);
-		WSACleanup();
 		if (!no_error_page)
 		{
 			std::cout << "Status: 500 Internal Server Error\r\n";
@@ -126,7 +112,6 @@ bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTo
 	}
 
 	closesocket(g_so);
-	WSACleanup();
 	return true;
 }
 

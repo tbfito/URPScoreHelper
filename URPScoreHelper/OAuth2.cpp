@@ -9,7 +9,6 @@ int shift = 0;
 
 void getRedirectUri(char *CGI_HTTP_HOST, char *m_Domain)
 {
-	char *CGI_HTTPS = getenv("HTTPS");
 	if (CGI_HTTPS != NULL && strcmp(CGI_HTTPS, "") != 0
 		&& strcmp(CGI_HTTPS, "off") != 0
 		&& strcmp(CGI_HTTPS, "0") != 0)
@@ -28,14 +27,12 @@ void getRedirectUri(char *CGI_HTTP_HOST, char *m_Domain)
 void OAuth2_process()
 {
 	char m_Domain[512] = { 0 };
-	char *CGI_HTTP_HOST = getenv("HTTP_HOST");
 	if (CGI_HTTP_HOST == NULL)
 	{
 		cout << "Status: 500 Internal Server Error\r\n";
 		Error("错误：缺少 HTTP_HOST 环境变量，请检查 CGI 接口设定。");
 		return;
 	}
-	char *CGI_QUERY_STRING = getenv("QUERY_STRING");
 	char *stid = NULL;
 	if (CGI_QUERY_STRING != NULL)
 	{
@@ -87,9 +84,7 @@ void OAuth2_process()
 // QQ授权回调
 void OAuth2_CallBack()
 {
-	char *CGI_QUERY_STRING = getenv("QUERY_STRING");
 	char m_Domain[512] = { 0 };
-	char *CGI_HTTP_HOST = getenv("HTTP_HOST");
 	if (CGI_HTTP_HOST == NULL)
 	{
 		cout << "Status: 500 Internal Server Error\r\n";
