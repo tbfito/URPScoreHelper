@@ -119,7 +119,7 @@ int main(int argc, const char* argv[])
 
 			if (strcmp(CGI_REQUEST_METHOD, "GET") == 0) // 如果是 GET 请求
 			{
-				if (strcmp(CGI_SCRIPT_NAME, "/") == 0 || strcmp(CGI_SCRIPT_NAME, "/index.cgi") == 0)
+				if (strcmp(CGI_SCRIPT_NAME, "/") == 0 || strcmp(CGI_SCRIPT_NAME, "/index.fcgi") == 0)
 				{
 					if (strcmp(CGI_QUERY_STRING, "act=logout") == 0)
 					{
@@ -134,10 +134,10 @@ int main(int argc, const char* argv[])
 						char student_id[36] = { 0 };
 						get_student_id(student_id);
 						student_logout();
-						cout << "Status: 302 Found\r\n" << "Location: OAuth2.cgi?stid=" << student_id << "\r\n" << GLOBAL_HEADER;
+						cout << "Status: 302 Found\r\n" << "Location: OAuth2.fcgi?stid=" << student_id << "\r\n" << GLOBAL_HEADER;
 						goto END_REQUEST;
 					}
-					if (strcmp(CGI_REQUEST_URI, "/index.cgi") == 0)
+					if (strcmp(CGI_REQUEST_URI, "/index.fcgi") == 0)
 					{
 						cout << "Status: 302 Found\r\n" << "Location: /\r\n" << GLOBAL_HEADER;
 						goto END_REQUEST;
@@ -145,28 +145,28 @@ int main(int argc, const char* argv[])
 					parse_index();
 					goto END_REQUEST;
 				}
-				if (strcmp(CGI_SCRIPT_NAME, "/main.cgi") == 0)
+				if (strcmp(CGI_SCRIPT_NAME, "/main.fcgi") == 0)
 				{
 					bool need_update_cookie = false;
 					parse_main(need_update_cookie, NULL, false);
 					goto END_REQUEST;
 				}
-				if (strcmp(CGI_SCRIPT_NAME, "/OAuth2.cgi") == 0)
+				if (strcmp(CGI_SCRIPT_NAME, "/OAuth2.fcgi") == 0)
 				{
 					OAuth2_process();
 					goto END_REQUEST;
 				}
-				if (strcmp(CGI_SCRIPT_NAME, "/OAuth2CallBack.cgi") == 0)
+				if (strcmp(CGI_SCRIPT_NAME, "/OAuth2CallBack.fcgi") == 0)
 				{
 					OAuth2_CallBack();
 					goto END_REQUEST;
 				}
-				if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.cgi") == 0)
+				if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.fcgi") == 0)
 				{
 					OAuth2_Association(false);
 					goto END_REQUEST;
 				}
-				if (strcmp(CGI_SCRIPT_NAME, "/query.cgi") == 0)
+				if (strcmp(CGI_SCRIPT_NAME, "/query.fcgi") == 0)
 				{
 					if (strcmp(CGI_QUERY_STRING, "act=system_registration") == 0)
 					{
@@ -176,22 +176,22 @@ int main(int argc, const char* argv[])
 					parse_query();
 					goto END_REQUEST;
 				}
-				if (strcmp(CGI_SCRIPT_NAME, "/QuickQuery.cgi") == 0)
+				if (strcmp(CGI_SCRIPT_NAME, "/QuickQuery.fcgi") == 0)
 				{
 					parse_QuickQuery_Intro();
 					goto END_REQUEST;
 				}
-				if (strcmp(CGI_SCRIPT_NAME, "/TeachEval.cgi") == 0)
+				if (strcmp(CGI_SCRIPT_NAME, "/TeachEval.fcgi") == 0)
 				{
 					parse_teaching_evaluation();
 					goto END_REQUEST;
 				}
-				if (strcmp(CGI_SCRIPT_NAME, "/changePassword.cgi") == 0)
+				if (strcmp(CGI_SCRIPT_NAME, "/changePassword.fcgi") == 0)
 				{
 					parse_change_password();
 					goto END_REQUEST;
 				}
-				if (strcmp(CGI_SCRIPT_NAME, "/captcha.cgi") == 0)
+				if (strcmp(CGI_SCRIPT_NAME, "/captcha.fcgi") == 0)
 				{
 					parse_ajax_captcha();
 					goto END_REQUEST;
@@ -202,12 +202,12 @@ int main(int argc, const char* argv[])
 			}
 			if (strcmp(CGI_REQUEST_METHOD, "POST") == 0) // 如果是 POST 请求
 			{
-				if (strcmp(CGI_SCRIPT_NAME, "/changePassword.cgi") == 0)
+				if (strcmp(CGI_SCRIPT_NAME, "/changePassword.fcgi") == 0)
 				{
 					do_change_password();
 					goto END_REQUEST;
 				}
-				if (strcmp(CGI_SCRIPT_NAME, "/query.cgi") == 0)
+				if (strcmp(CGI_SCRIPT_NAME, "/query.fcgi") == 0)
 				{
 					if (strcmp(CGI_QUERY_STRING, "act=QuickQuery") == 0)
 					{
@@ -217,17 +217,17 @@ int main(int argc, const char* argv[])
 					parse_query();
 					goto END_REQUEST;
 				}
-				if (strcmp(CGI_SCRIPT_NAME, "/main.cgi") == 0)
+				if (strcmp(CGI_SCRIPT_NAME, "/main.fcgi") == 0)
 				{
 					parse_main(false, NULL, true);
 					goto END_REQUEST;
 				}
-				if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.cgi") == 0)
+				if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.fcgi") == 0)
 				{
 					OAuth2_Association(true);
 					goto END_REQUEST;
 				}
-				if (strcmp(CGI_SCRIPT_NAME, "/TeachEval.cgi") == 0)
+				if (strcmp(CGI_SCRIPT_NAME, "/TeachEval.fcgi") == 0)
 				{
 					if (strcmp(CGI_QUERY_STRING, "act=Evaluate") == 0)
 					{
@@ -248,7 +248,7 @@ int main(int argc, const char* argv[])
 		return 0;
 }
 
-// 预加载头部和尾部页面(header.cgi, footer.cgi, error.cgi)
+// 预加载头部和尾部页面(header.fcgi, footer.fcgi, error.fcgi)
 bool LoadPageSrc()
 {
 	// 读入主页面文件
@@ -283,17 +283,17 @@ bool LoadPageSrc()
 	memset(file_root, 0, MAX_PATH);
 
 	strcpy(file_root, doc_root);
-	strcat(file_root, "header.cgi");
+	strcat(file_root, "header.fcgi");
 
 	header = ReadTextFileToMem(file_root);
 
 	strcpy(file_root, doc_root);
-	strcat(file_root, "footer.cgi");
+	strcat(file_root, "footer.fcgi");
 	
 	footer = ReadTextFileToMem(file_root);
 
 	strcpy(file_root, doc_root);
-	strcat(file_root, "error.cgi");
+	strcat(file_root, "error.fcgi");
 	
 	error = ReadTextFileToMem(file_root);
 	// 未能加载这些模板
@@ -507,7 +507,7 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri, bool no_error_
 	return 0;
 }
 
-// 处理 GET /main.cgi
+// 处理 GET /main.fcgi
 int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 {
 	if (strcmp(CGI_REQUEST_METHOD, "POST") == 0 && p_is_login == true)
@@ -581,7 +581,7 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 		int ret = process_cookie(&p_need_set_cookie, m_photo);
 		if (ret == 1)
 		{
-			cout << "Status: 302 Found\r\nX-Powered-By: iEdon-URPScoreHelper\r\nLocation: index.cgi\r\n" << GLOBAL_HEADER;
+			cout << "Status: 302 Found\r\nX-Powered-By: iEdon-URPScoreHelper\r\nLocation: index.fcgi\r\n" << GLOBAL_HEADER;
 			return -1;
 		}
 	}
@@ -663,7 +663,7 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 	return 0;
 }
 
-// 处理主页面请求 (GET / /index.cgi)
+// 处理主页面请求 (GET / /index.fcgi)
 int parse_index()
 {
 	/*int m_iResult = 0;
@@ -674,19 +674,19 @@ int parse_index()
 
 	if (strlen(m_photo) != 0)
 	{
-		if (strcmp(CGI_SCRIPT_NAME, "/main.cgi") == 0)
+		if (strcmp(CGI_SCRIPT_NAME, "/main.fcgi") == 0)
 		{
 			parse_main(m_need_update_cookie, m_photo, false);
 			return 0;
 		}
-		cout << "Status: 302 Found\r\nLocation: main.cgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: main.fcgi\r\n" << GLOBAL_HEADER;
 		return 0;
 	}
 	else
 	{
-		if (strcmp(CGI_SCRIPT_NAME, "/main.cgi") == 0) // 如果还没登录就请求main.cgi，那就踢回去让他登陆
+		if (strcmp(CGI_SCRIPT_NAME, "/main.fcgi") == 0) // 如果还没登录就请求main.fcgi，那就踢回去让他登陆
 		{
-			cout << "Status: 302 Found\r\nLocation: index.cgi\r\n" << GLOBAL_HEADER;
+			cout << "Status: 302 Found\r\nLocation: index.fcgi\r\n" << GLOBAL_HEADER;
 			return 0;
 		}
 	}*/
@@ -752,7 +752,7 @@ int parse_index()
 }
 
 // 处理验证码 Ajax 请求
-void parse_ajax_captcha() //(AJAX: GET /captcha.cgi)
+void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 {
 	cout << "Cache-Control: no-cache\r\nPragma: no-cache\r\nExpires: -1\r\n";
 	bool m_need_update_cookie = false;
@@ -810,7 +810,7 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.cgi)
 	delete[]m_DataURL;
 }
 
-// 处理查询页面请求 (GET /query.cgi)
+// 处理查询页面请求 (GET /query.fcgi)
 int parse_query()
 {
 	bool m_need_update_cookie = false;
@@ -820,7 +820,7 @@ int parse_query()
 
 	if (strlen(m_photo) == 0) // 还没登陆就丢去登陆。
 	{
-		cout << "Status: 302 Found\r\nLocation: index.cgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: index.fcgi\r\n" << GLOBAL_HEADER;
 		return 0;
 	}
 
@@ -869,7 +869,7 @@ void parse_friendly_score(char *p_lpszScore)
 	{
 		std::string m_original_str ("<p><b>亲爱的%s，您本学期还没有电子注册</b></p><p>不注册的话，是查不了成绩的哦！</p><p>我可以施展法术，\
 <b>一键帮你在教务系统注册哦~</b></p><p>--&gt; 点按下方按钮，自动注册，直达查分界面 :P &lt;--</p>\
-<div class=\"weui-msg__opr-area\"><p class=\"weui-btn-area\"><a style=\"color:#fff\" href=\"query.cgi?act=system_registration\" class=\"weui-btn weui-btn_primary\">一键注册</a></p></div>");
+<div class=\"weui-msg__opr-area\"><p class=\"weui-btn-area\"><a style=\"color:#fff\" href=\"query.fcgi?act=system_registration\" class=\"weui-btn weui-btn_primary\">一键注册</a></p></div>");
 		m_original_str = strformat(m_original_str.c_str(), m_Student);
 		Error(m_original_str.c_str());
 		return;
@@ -1413,12 +1413,12 @@ void get_student_id(char *p_lpszBuffer)
 	free(m_rep_header);
 }
 
-// 教务系统电子注册 (GET /query.cgi?act=system_registration)
+// 教务系统电子注册 (GET /query.fcgi?act=system_registration)
 int system_registration()
 {
 	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
 	{
-		cout << "Status: 302 Found\r\n" << "Location: index.cgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\n" << "Location: index.fcgi\r\n" << GLOBAL_HEADER;
 		cout << GLOBAL_HEADER;
 		return -1;
 	}
@@ -1558,7 +1558,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	sprintf(POST_LOGIN, REQUEST_LOGIN, m_ContentLength, CGI_HTTP_COOKIE, p_xuehao, p_password, p_captcha);
 	if (!CrawlRequest(POST_LOGIN, m_rep_body, 40960, &m_iResult, true))
 	{
-		cout << "Status: 302 Found\r\nX-Powered-By: iEdon-URPScoreHelper\r\nLocation: index.cgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nX-Powered-By: iEdon-URPScoreHelper\r\nLocation: index.fcgi\r\n" << GLOBAL_HEADER;
 		free(m_rep_body);
 		return false;
 	}
@@ -1763,7 +1763,7 @@ void student_logout()
 	free(m_outbuffer);
 }
 
-// 快速查询入口 (/QuickQuery.cgi)
+// 快速查询入口 (/QuickQuery.fcgi)
 void parse_QuickQuery_Intro()
 {
 	bool m_need_update_cookie = false;
@@ -1784,7 +1784,7 @@ void parse_QuickQuery_Intro()
 	cout << footer.c_str();
 }
 
-// 免密查询结果 (/query.cgi?act=QuickQuery)
+// 免密查询结果 (/query.fcgi?act=QuickQuery)
 void parse_QuickQuery_Result()
 {
 	bool m_need_update_cookie = false;
@@ -2250,7 +2250,7 @@ void parse_QuickQuery_Result()
 		}
 }
 
-// QQ账号绑定入口与解绑逻辑 (/OAuth2Assoc.cgi)
+// QQ账号绑定入口与解绑逻辑 (/OAuth2Assoc.fcgi)
 void OAuth2_Association(bool isPOST)
 {
 	if (CGI_QUERY_STRING == NULL)
@@ -2331,7 +2331,7 @@ void OAuth2_Association(bool isPOST)
 
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
-		cout << "Status: 302 Found\r\nLocation: main.cgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: main.fcgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
@@ -2362,13 +2362,13 @@ void OAuth2_Association(bool isPOST)
 
 		if (strlen(m_photo) != 0) // 如果都登录了？那就踢到主页面去。
 		{
-			if (strcmp(CGI_SCRIPT_NAME, "/main.cgi") == 0)
+			if (strcmp(CGI_SCRIPT_NAME, "/main.fcgi") == 0)
 			{
 				parse_main(m_need_update_cookie, m_photo, false);
 				delete[]openid;
 				return;
 			}
-			cout << "Status: 302 Found\r\nLocation: main.cgi\r\n" << GLOBAL_HEADER;
+			cout << "Status: 302 Found\r\nLocation: main.fcgi\r\n" << GLOBAL_HEADER;
 			delete[]openid;
 			return;
 		}
@@ -2574,7 +2574,7 @@ void OAuth2_Association(bool isPOST)
 		sqlite3_close(db);
 
 		cout << "Status: 302 Found\r\n";
-		cout << "Location: main.cgi\r\n";
+		cout << "Location: main.fcgi\r\n";
 		cout << GLOBAL_HEADER;
 	}
 
@@ -2582,7 +2582,7 @@ void OAuth2_Association(bool isPOST)
 	return;
 }
 
-// 教学评估页面 (/TeachEval.cgi)
+// 教学评估页面 (/TeachEval.fcgi)
 void parse_teaching_evaluation()
 {
 	bool m_need_update_cookie = false;
@@ -2592,7 +2592,7 @@ void parse_teaching_evaluation()
 
 	if (strlen(m_photo) == 0) // 还没登陆就丢去登陆。
 	{
-		cout << "Status: 302 Found\r\nLocation: index.cgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: index.fcgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
 	free(m_photo);
@@ -2729,7 +2729,7 @@ void parse_teaching_evaluation()
 	cout << footer.c_str();
 }
 
-// 教学评估流程 (POST /TeachEval.cgi?act=Evaluate)
+// 教学评估流程 (POST /TeachEval.fcgi?act=Evaluate)
 void teaching_evaluation()
 {
 	bool m_need_update_cookie = false;
@@ -2739,7 +2739,7 @@ void teaching_evaluation()
 
 	if (strlen(m_photo) == 0) // 还没登陆就丢去登陆。
 	{
-		cout << "Status: 302 Found\r\nLocation: index.cgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: index.fcgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
 	free(m_photo);
@@ -2977,11 +2977,11 @@ void teaching_evaluation()
 			}
 		}
 	}
-	cout << "Status: 302 Found\r\nLocation: TeachEval.cgi\r\n" << GLOBAL_HEADER;
+	cout << "Status: 302 Found\r\nLocation: TeachEval.fcgi\r\n" << GLOBAL_HEADER;
 	return;
 }
 
-// 修改密码页面 (/changePassword.cgi)
+// 修改密码页面 (/changePassword.fcgi)
 void parse_change_password()
 {
 	bool m_need_update_cookie = false;
@@ -2991,7 +2991,7 @@ void parse_change_password()
 
 	if (strlen(m_photo) == 0) // 还没登陆就丢去登陆。
 	{
-		cout << "Status: 302 Found\r\nLocation: index.cgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: index.fcgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
 	free(m_photo);
@@ -3011,8 +3011,8 @@ void parse_change_password()
 	cout << footer.c_str();
 }
 
-// 修改密码 (POST /changePassword.cgi)
-void do_change_password() //(POST /changePassword.cgi)
+// 修改密码 (POST /changePassword.fcgi)
+void do_change_password() //(POST /changePassword.fcgi)
 {
 	// modifyPassWordAction.do?pwd=
 	bool m_need_update_cookie = false;
@@ -3022,7 +3022,7 @@ void do_change_password() //(POST /changePassword.cgi)
 
 	if (strlen(m_photo) == 0) // 还没登陆就丢去登陆。
 	{
-		cout << "Status: 302 Found\r\nLocation: index.cgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: index.fcgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
 	free(m_photo);
@@ -3132,5 +3132,5 @@ void do_change_password() //(POST /changePassword.cgi)
 	sqlite3_finalize(stmt);
 
 	student_logout();
-	cout << "Status: 302 Found\r\nLocation: index.cgi\r\n" << GLOBAL_HEADER;
+	cout << "Status: 302 Found\r\nLocation: index.fcgi\r\n" << GLOBAL_HEADER;
 }

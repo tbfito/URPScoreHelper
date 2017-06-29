@@ -7,7 +7,7 @@
 	</div>
 </header>
 <div class="content">
-	<form action="OAuth2Assoc.cgi?openid=%s" method="post" class="weui-cells weui-cells_form">
+	<form action="OAuth2Assoc.fcgi?openid=%s" method="post" class="weui-cells weui-cells_form">
 		<div class="weui-cells__title">
 			%s
 		</div>

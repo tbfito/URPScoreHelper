@@ -20,7 +20,7 @@ void getRedirectUri(char *CGI_HTTP_HOST, char *m_Domain)
 		strcpy(m_Domain, "http://");
 	}
 	strcat(m_Domain, CGI_HTTP_HOST);
-	strcat(m_Domain, "/OAuth2CallBack.cgi");
+	strcat(m_Domain, "/OAuth2CallBack.fcgi");
 }
 
 // 处理QQ登录入口请求
@@ -308,7 +308,7 @@ void OAuth2_CallBack()
 		break;
 	}
 
-	if (id == NULL || password == NULL) // 无记录，跳转至 OAuth2Assoc.cgi
+	if (id == NULL || password == NULL) // 无记录，跳转至 OAuth2Assoc.fcgi
 	{
 		pStr1 = strstr(CGI_QUERY_STRING, "state=");
 		char id[36] = { 0 };
@@ -328,11 +328,11 @@ void OAuth2_CallBack()
 		cout << "Status: 302 Found\r\n";
 		if (strcmp(id, "NONE") == 0)
 		{
-			cout << "Location: OAuth2Assoc.cgi?openid=" << openid << "\r\n";
+			cout << "Location: OAuth2Assoc.fcgi?openid=" << openid << "\r\n";
 		}
 		else
 		{
-			cout << "Location: OAuth2Assoc.cgi?openid=" << openid << "&stid=" << id << "\r\n";
+			cout << "Location: OAuth2Assoc.fcgi?openid=" << openid << "&stid=" << id << "\r\n";
 		}
 		cout << GLOBAL_HEADER;
 		free(html);
@@ -346,7 +346,7 @@ void OAuth2_CallBack()
 	}
 
 	cout << "Status: 302 Found\r\n"
-		<< "Location: index.cgi?id=" << id << "&pass=" << password << "\r\n"
+		<< "Location: index.fcgi?id=" << id << "&pass=" << password << "\r\n"
 		<< GLOBAL_HEADER;
 	
 	sqlite3_finalize(stmt);

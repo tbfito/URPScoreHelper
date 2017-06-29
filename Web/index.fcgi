@@ -7,7 +7,7 @@
 	</div>
 </header>
 <div class="content">
-	<form action="main.cgi" method="post" class="weui-cells weui-cells_form">
+	<form action="main.fcgi" method="post" class="weui-cells weui-cells_form">
 		<div class="weui-cells__title">
 			%s
 		</div>
@@ -59,12 +59,12 @@
 		</label>
 		<div class="weui-btn-area" style="display:%s">
 			<input id="i_submit" type="submit" value="登录" class="weui-btn weui-btn_primary col-50"/>
-			<a title="QQ快速登录" class="weui-btn weui-btn_default col-50" href="OAuth2.cgi">
+			<a title="QQ快速登录" class="weui-btn weui-btn_default col-50" href="OAuth2.fcgi">
 				QQ快速登录
 			</a>
 		</div>
 		<div class="quickquery" style="display:%s">
-			<a title="免密查询入口" class="weui-btn weui-btn_warn" href="QuickQuery.cgi">
+			<a title="免密查询入口" class="weui-btn weui-btn_warn" href="QuickQuery.fcgi">
 				免密快速查询入口 &gt;&gt;
 			</a>
 		</div>

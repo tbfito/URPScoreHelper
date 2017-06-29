@@ -1,6 +1,6 @@
 	<div class="weui-footer">
 		<p class="weui-footer__links">
-			<a href="main.cgi" class="weui-footer__link">唯扬小助手</a>
+			<a href="main.fcgi" class="weui-footer__link">唯扬小助手</a>
 		</p>
 		<p class="weui-footer__text">Copyright &copy; 2012-2017 iEdon Inside</p>
 	</div>

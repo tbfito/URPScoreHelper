@@ -1,5 +1,5 @@
 <div class="i_page-navbar">
-	<a href="main.cgi" class="return">返 回</a>
+	<a href="main.fcgi" class="return">返 回</a>
 	查询成绩 · %s
 </div>
 <div class="content">

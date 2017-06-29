@@ -7,7 +7,7 @@
 	</div>
 </header>
 <div class="content">
-	<form action="query.cgi?act=QuickQuery" method="post" class="weui-cells weui-cells_form">
+	<form action="query.fcgi?act=QuickQuery" method="post" class="weui-cells weui-cells_form">
 		<div class="weui-cells__title">
 			输入学号来查询成绩，暂时只支持广陵学院 :)
 		</div>
