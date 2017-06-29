@@ -19,7 +19,7 @@
 					</label>
 				</div>
 				<div class="weui-cell__bd">
-					<input class="weui-input" id="i_xh" name="xh" type="text" placeholder="请输入学号" value="%s" />
+					<input class="weui-input" id="i_xh" name="xh" type="text" placeholder="输入学号" value="%s" />
 				</div>
 			</div>
 			<div class="weui-cell weui-cell_vcode" style="display:%s">
@@ -44,7 +44,7 @@
 					</label>
 				</div>
 				<div class="weui-cell__bd">
-					<input class="weui-input" name="yzm" id="i_yzm" type="text" placeholder="请输入验证码" />
+					<input class="weui-input" name="yzm" id="i_yzm" type="text" placeholder="输入验证码" />
 				</div>
 				<div class="weui-cell__ft">
 					<img onclick="get_captcha();" class="weui-vcode-img" id="login_captcha" alt="验证码" src="img/refresh.png" width="124" height="44" />
