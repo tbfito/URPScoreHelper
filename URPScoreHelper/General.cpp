@@ -6,11 +6,11 @@ using namespace std;
 SOCKET g_so = INVALID_SOCKET;
 char JSESSIONID[256] = {0};
 
-const char* GLOBAL_HEADER = "X-Powered-By: iEdon-URPScoreHelper\n\
-Content-Type: text/html; charset=gb2312\n\
-Cache-Control: no-cache\n\
-Pragma: no-cache\n\
-Expires: -1\n\n";
+const char* GLOBAL_HEADER = "X-Powered-By: iEdon-URPScoreHelper\r\n\
+Content-Type: text/html; charset=gb2312\r\n\
+Cache-Control: no-cache\r\n\
+Pragma: no-cache\r\n\
+Expires: -1\r\n\r\n";
 
 // 首页 HTTP 请求
 const char* REQUEST_HOME_PAGE = "\

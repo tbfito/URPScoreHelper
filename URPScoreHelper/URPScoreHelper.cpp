@@ -20,202 +20,223 @@
 #endif
 #endif
 
-#define cout std::cout
+using namespace std;
 
-// 入口函数
+FCGX_Request request; //全局可以使用的请求
+
+// 入口函数 (FastCGI 处理循环)
 int main()
 {
 	LoadConfig();
-	g_start_time = GetTickCount();
+
+	streambuf * cin_streambuf = cin.rdbuf();
+	streambuf * cout_streambuf = cout.rdbuf();
+	streambuf * cerr_streambuf = cerr.rdbuf();
 
 	// 初始化 Socket 库。
 	if (!InitSocketLibrary())
 	{
-		cout << "Status: 500 Internal Server Error\n"
+		cout << "Status: 500 Internal Server Error\r\n"
 			<< GLOBAL_HEADER
 			<< "<p>Socket 初始化失败！</p>";
 		return -1;
 	}
 
-		CGI_REQUEST_METHOD = getenv("REQUEST_METHOD"); // 请求方法
-		CGI_CONTENT_LENGTH = getenv("CONTENT_LENGTH"); // 数据长度
-		CGI_SCRIPT_NAME = getenv("SCRIPT_NAME"); // 脚本名称
-		CGI_QUERY_STRING = getenv("QUERY_STRING"); // 查询参数
-		CGI_PATH_TRANSLATED = getenv("PATH_TRANSLATED"); // 脚本位置
-		CGI_HTTP_COOKIE = getenv("HTTP_COOKIE"); // Cookie
-		CGI_SERVER_SOFTWARE = getenv("SERVER_SOFTWARE"); // 服务器软件
+	FCGX_Init();
+	FCGX_InitRequest(&request, 0, 0);
 
-		// 获取多少用户使用了我们的服务 :)
-		g_fQueryCount = fopen("QueryCount.bin", "r+");
-		g_QueryCount = 0;
-		if (g_fQueryCount != NULL)
-		{
-			fscanf(g_fQueryCount, "%ld", &g_QueryCount);
-		}
-		else
-		{
-			g_fQueryCount = fopen("QueryCount.bin", "w+");
-		}
-		if (g_fQueryCount == NULL)
-		{
-			cout << "Status: 500 Internal Server Error\n"
-				<< GLOBAL_HEADER
-				<< "<p>fopen() 失败！</p>";
-			return 0;
-		}
-		fseek(g_fQueryCount, 0, SEEK_SET);
+	char *emptystr = "";
 
-		if (CGI_REQUEST_METHOD == NULL || CGI_CONTENT_LENGTH == NULL || CGI_SCRIPT_NAME == NULL || CGI_QUERY_STRING == NULL ||
-			CGI_PATH_TRANSLATED == NULL || CGI_HTTP_COOKIE == NULL)
-		{
-			cout << "Status: 500 Internal Server Error\n"
-				<< GLOBAL_HEADER
-				<< "<p>CGI 接口异常，请检查设置。</p>";
-			return 0;
-		}
+	while (FCGX_Accept_r(&request) == 0) {
+			g_start_time = GetTickCount();
 
-		if (!LoadPageSrc())
-		{
-			cout << "Status: 500 Internal Server Error\n"
-				<< GLOBAL_HEADER
-				<< "<p>网页模板文件缺失或异常。</p>";
-			return 0;
-		}
+			fcgi_streambuf cin_fcgi_streambuf(request.in);
+			fcgi_streambuf cout_fcgi_streambuf(request.out);
+			fcgi_streambuf cerr_fcgi_streambuf(request.err);
 
-		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0) // 如果是 GET 请求
-		{
-			if (strcmp(CGI_SCRIPT_NAME, "/") == 0 || strcmp(CGI_SCRIPT_NAME, "/index.cgi") == 0)
-			{
-				if (strcmp(CGI_QUERY_STRING, "act=logout") == 0)
-				{
-					student_logout();
-					cout << "Status: 302 Found\n" << "Location: /\n" << GLOBAL_HEADER;
-					return 0;
-				}
-				if (strcmp(CGI_QUERY_STRING, "act=requestAssoc") == 0)
-				{
-					bool m_need_update_cookie = false;
-					process_cookie(&m_need_update_cookie, NULL);
-					char student_id[36] = { 0 };
-					get_student_id(student_id);
-					student_logout();
-					cout << "Status: 302 Found\n" << "Location: OAuth2.cgi?stid="<< student_id << "\n" << GLOBAL_HEADER;
-					return 0;
-				}
-				if (strcmp(CGI_SCRIPT_NAME, "/index.cgi") == 0 && strcmp(CGI_QUERY_STRING, "") == 0)
-				{
-					cout << "Status: 302 Found\n" << "Location: /\n" << GLOBAL_HEADER;
-					return 0;
-				}
-				parse_index();
-				return 0;
-			}
-			if (strcmp(CGI_SCRIPT_NAME, "/main.cgi") == 0)
-			{
-				bool need_update_cookie = false;
-				parse_main(need_update_cookie, NULL, false);
-				return 0;
-			}
-			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2.cgi") == 0)
-			{
-				OAuth2_process();
-				return 0;
-			}
-			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2CallBack.cgi") == 0)
-			{
-				OAuth2_CallBack();
-				return 0;
-			}
-			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.cgi") == 0)
-			{
-				OAuth2_Association(false);
-				return 0;
-			}
-			if (strcmp(CGI_SCRIPT_NAME, "/query.cgi") == 0)
-			{
-				if (strcmp(CGI_QUERY_STRING, "act=system_registration") == 0)
-				{
-					system_registration();
-					ZeroMemory(JSESSIONID, 256);
-					return -1;
-				}
-				parse_query();
-				return 0;
-			}
-
-			if (strcmp(CGI_SCRIPT_NAME, "/QuickQuery.cgi") == 0)
-			{
-				parse_QuickQuery_Intro();
-				return 0;
-			}
-
-			if (strcmp(CGI_SCRIPT_NAME, "/TeachEval.cgi") == 0)
-			{
-				parse_teaching_evaluation();
-				return 0;
-			}
-
-			if (strcmp(CGI_SCRIPT_NAME, "/changePassword.cgi") == 0)
-			{
-				parse_change_password();
-				return 0;
-			}
-
-			if (strcmp(CGI_SCRIPT_NAME, "/captcha.cgi") == 0)
-			{
-				parse_ajax_captcha();
-				return 0;
-			}
-
-			cout << "Status: 404 No Such CGI Page\n";
-			Error("<p>找不到该页面。</p>");
+			cin.rdbuf(&cin_fcgi_streambuf);
+			cout.rdbuf(&cout_fcgi_streambuf);
+			cerr.rdbuf(&cerr_fcgi_streambuf);
 			
+			CGI_REQUEST_URI = FCGX_GetParam("REQUEST_URI", request.envp); // 请求URI
+			CGI_REQUEST_METHOD = FCGX_GetParam("REQUEST_METHOD", request.envp); // 请求方法
+			CGI_CONTENT_LENGTH = FCGX_GetParam("CONTENT_LENGTH", request.envp); // 数据长度
+			CGI_SCRIPT_NAME = FCGX_GetParam("SCRIPT_NAME", request.envp); // 脚本名称
+			CGI_QUERY_STRING = FCGX_GetParam("QUERY_STRING", request.envp); // 查询参数
+			CGI_PATH_TRANSLATED = FCGX_GetParam("PATH_TRANSLATED", request.envp); // 脚本位置
+			CGI_HTTP_COOKIE = FCGX_GetParam("HTTP_COOKIE", request.envp); // Cookie
+
+			if (!LoadPageSrc())
+			{
+				cerr << "Status: 500 Internal Server Error\r\n"
+					<< GLOBAL_HEADER
+					<< "<p>网页模板文件缺失或异常。</p>";
+				goto END_REQUEST;
+			}
+
+			// 获取多少用户使用了我们的服务 :)
+			g_fQueryCount = fopen("QueryCount.bin", "r+");
+			g_QueryCount = 0;
+			if (g_fQueryCount != NULL)
+			{
+				fscanf(g_fQueryCount, "%ld", &g_QueryCount);
+			}
+			else
+			{
+				g_fQueryCount = fopen("QueryCount.bin", "w+");
+			}
+			if (g_fQueryCount == NULL)
+			{
+				cout << "Status: 500 Internal Server Error\r\n"
+					<< GLOBAL_HEADER
+					<< "<p>fopen() 失败！</p>";
+				goto END_REQUEST;
+			}
+			fseek(g_fQueryCount, 0, SEEK_SET);
+			fclose(g_fQueryCount);
 			
-			ZeroMemory(JSESSIONID, 256);
-			return -1;
-		}
+			if (CGI_REQUEST_METHOD == NULL  || CGI_SCRIPT_NAME == NULL || CGI_QUERY_STRING == NULL ||
+				CGI_PATH_TRANSLATED == NULL || CGI_CONTENT_LENGTH == NULL)
+			{
+				cout << "Status: 500 Internal Server Error\r\n"
+					<< GLOBAL_HEADER
+					<< "<p>FastCGI 接口异常，请检查设置。</p>";
+				goto END_REQUEST;
+			}
+			if (CGI_HTTP_COOKIE == NULL)
+			{
+				CGI_HTTP_COOKIE = emptystr;
+			}
 
-		if (strcmp(CGI_REQUEST_METHOD, "POST") == 0) // 如果是 POST 请求
-		{
-			if (strcmp(CGI_SCRIPT_NAME, "/changePassword.cgi") == 0)
+			if (strcmp(CGI_REQUEST_METHOD, "GET") == 0) // 如果是 GET 请求
 			{
-				do_change_password();
-				return 0;
-			}
-			if (strcmp(CGI_SCRIPT_NAME, "/query.cgi") == 0)
-			{
-				if (strcmp(CGI_QUERY_STRING, "act=QuickQuery") == 0)
+				if (strcmp(CGI_SCRIPT_NAME, "/") == 0 || strcmp(CGI_SCRIPT_NAME, "/index.cgi") == 0)
 				{
-					parse_QuickQuery_Result();
-					return 0;
+					if (strcmp(CGI_QUERY_STRING, "act=logout") == 0)
+					{
+						student_logout();
+						cout << "Status: 302 Found\r\n" << "Location: /\r\n" << GLOBAL_HEADER;
+						goto END_REQUEST;
+					}
+					if (strcmp(CGI_QUERY_STRING, "act=requestAssoc") == 0)
+					{
+						bool m_need_update_cookie = false;
+						process_cookie(&m_need_update_cookie, NULL);
+						char student_id[36] = { 0 };
+						get_student_id(student_id);
+						student_logout();
+						cout << "Status: 302 Found\r\n" << "Location: OAuth2.cgi?stid=" << student_id << "\r\n" << GLOBAL_HEADER;
+						goto END_REQUEST;
+					}
+					if (strcmp(CGI_REQUEST_URI, "/index.cgi") == 0)
+					{
+						cout << "Status: 302 Found\r\n" << "Location: /\r\n" << GLOBAL_HEADER;
+						goto END_REQUEST;
+					}
+					parse_index();
+					goto END_REQUEST;
 				}
-				parse_query();
-				return 0;
-			}
-			if (strcmp(CGI_SCRIPT_NAME, "/main.cgi") == 0)
-			{
-				parse_main(false, NULL, true);
-				return 0;
-			}
-			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.cgi") == 0)
-			{
-				OAuth2_Association(true);
-				return 0;
-			}
-			if (strcmp(CGI_SCRIPT_NAME, "/TeachEval.cgi") == 0)
-			{
-				if (strcmp(CGI_QUERY_STRING, "act=Evaluate") == 0)
+				if (strcmp(CGI_SCRIPT_NAME, "/main.cgi") == 0)
 				{
-					teaching_evaluation();
-					return 0;
+					bool need_update_cookie = false;
+					parse_main(need_update_cookie, NULL, false);
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_SCRIPT_NAME, "/OAuth2.cgi") == 0)
+				{
+					OAuth2_process();
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_SCRIPT_NAME, "/OAuth2CallBack.cgi") == 0)
+				{
+					OAuth2_CallBack();
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.cgi") == 0)
+				{
+					OAuth2_Association(false);
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_SCRIPT_NAME, "/query.cgi") == 0)
+				{
+					if (strcmp(CGI_QUERY_STRING, "act=system_registration") == 0)
+					{
+						system_registration();
+						goto END_REQUEST;
+					}
+					parse_query();
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_SCRIPT_NAME, "/QuickQuery.cgi") == 0)
+				{
+					parse_QuickQuery_Intro();
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_SCRIPT_NAME, "/TeachEval.cgi") == 0)
+				{
+					parse_teaching_evaluation();
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_SCRIPT_NAME, "/changePassword.cgi") == 0)
+				{
+					parse_change_password();
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_SCRIPT_NAME, "/captcha.cgi") == 0)
+				{
+					parse_ajax_captcha();
+					goto END_REQUEST;
+				}
+				cout << "Status: 404 No Such CGI Page\r\n";
+				Error("<p>找不到该页面。</p>");
+				goto END_REQUEST;
+			}
+			if (strcmp(CGI_REQUEST_METHOD, "POST") == 0) // 如果是 POST 请求
+			{
+				if (strcmp(CGI_SCRIPT_NAME, "/changePassword.cgi") == 0)
+				{
+					do_change_password();
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_SCRIPT_NAME, "/query.cgi") == 0)
+				{
+					if (strcmp(CGI_QUERY_STRING, "act=QuickQuery") == 0)
+					{
+						parse_QuickQuery_Result();
+						goto END_REQUEST;
+					}
+					parse_query();
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_SCRIPT_NAME, "/main.cgi") == 0)
+				{
+					parse_main(false, NULL, true);
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.cgi") == 0)
+				{
+					OAuth2_Association(true);
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_SCRIPT_NAME, "/TeachEval.cgi") == 0)
+				{
+					if (strcmp(CGI_QUERY_STRING, "act=Evaluate") == 0)
+					{
+						teaching_evaluation();
+						goto END_REQUEST;
+					}
 				}
 			}
+			cout << "Status: 500 Internal Server Error\r\n";
+			Error("<p>发生错误，未经处理的异常。</p>");
+			goto END_REQUEST;
+					END_REQUEST : 
+						ZeroMemory(JSESSIONID, 256);
+						FCGX_Finish_r(&request);
+						continue;
 		}
-
-	puts("Status: 500 Internal Server Error");
-	Error("<p>发生错误，未经处理的异常。</p>");
-	
-	return -1;
+		cerr << "Please run in FastCGI mode.";
+		return 0;
 }
 
 // 预加载头部和尾部页面(header.cgi, footer.cgi, error.cgi)
@@ -306,8 +327,6 @@ void LoadConfig()
 	int db_ret = sqlite3_open("URPScoreHelper.db", &db);
 	if (db_ret != SQLITE_OK)
 	{
-		cout << "Status: 500 Internal Server Error\n";
-		Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
 		return;
 	}
 
@@ -319,11 +338,6 @@ void LoadConfig()
 
 	if (db_ret != SQLITE_OK)
 	{
-		cout << "Status: 500 Internal Server Error\n";
-		std::string Err_Msg ("<b>解除绑定失败，请稍后再试。</b><p>(");
-		Err_Msg += sqlite3_errmsg(db);
-		Err_Msg += ")</p>";
-		Error(Err_Msg.c_str());
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
 		return;
@@ -371,7 +385,7 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri, bool no_error_
 				free(m_rep_header);
 				if (!no_error_page)
 				{
-					cout << "Status: 500 Internal Server Error\n";
+					cout << "Status: 500 Internal Server Error\r\n";
 					Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 结尾失败。</p>");
 				}
 				return -1;
@@ -416,7 +430,7 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri, bool no_error_
 		{
 			if (!no_error_page)
 			{
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 标头失败。</p>");
 			}
 			return -1;
@@ -426,7 +440,7 @@ int process_cookie(bool *p_need_update_cookie, char *p_photo_uri, bool no_error_
 		{
 			if (!no_error_page)
 			{
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 结尾失败。</p>");
 			}
 			return -1;
@@ -493,24 +507,19 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 		int m_post_length = atoi(CGI_CONTENT_LENGTH);
 		if (m_post_length <= 0 || m_post_length > 127)
 		{
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p>发生错误，POST 数据长度异常。</p>");
 			return -1;
 		}
 		char *m_post_data = (char *)malloc(m_post_length + 2);
-		if (fgets(m_post_data, m_post_length + 1, stdin) == NULL)
-		{
-			cout << "Status: 500 Internal Server Error\n";
-			Error("<p>发生错误，POST 数据拉取失败。</p>");
-			return -1;
-		}
+		FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
 
 		// 获取学号
 		char *pStr1 = strstr(m_post_data, "xh=");
 		if (pStr1 == NULL)
 		{
 			free(m_post_data);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p>无法获取学号信息。</p>");
 			return -1;
 		}
@@ -525,7 +534,7 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 		if (pStr1 == NULL)
 		{
 			free(m_post_data);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p>无法获取密码信息。</p>");
 			return -1;
 		}
@@ -540,7 +549,7 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 		if (pStr1 == NULL)
 		{
 			free(m_post_data);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p>无法获取验证码信息。</p>");
 			return -1;
 		}
@@ -563,7 +572,7 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 		int ret = process_cookie(&p_need_set_cookie, m_photo);
 		if (ret == 1)
 		{
-			cout << "Status: 302 Found\nX-Powered-By: iEdon-URPScoreHelper\nLocation: index.cgi\n" << GLOBAL_HEADER;
+			cout << "Status: 302 Found\r\nX-Powered-By: iEdon-URPScoreHelper\r\nLocation: index.cgi\r\n" << GLOBAL_HEADER;
 			return -1;
 		}
 	}
@@ -577,7 +586,7 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 
 	// 输出网页
 	if (p_need_set_cookie)
-		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 
 	cout << GLOBAL_HEADER;
 
@@ -589,7 +598,7 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 	int db_ret = sqlite3_open("URPScoreHelper.db", &db);
 	if (db_ret != SQLITE_OK)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
 		return -1;
 	}
@@ -605,7 +614,7 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 
 	if (db_ret != SQLITE_OK)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		std::string Err_Msg("<b>数据库准备失败！请确认数据库合法性。</b><p>(");
 		Err_Msg.append(sqlite3_errmsg(db));
 		Err_Msg.append(")</p>");
@@ -627,16 +636,16 @@ int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login)
 	sqlite3_finalize(stmt);
 	sqlite3_close(db);
 
-	fprintf(stdout, header.c_str(), title.c_str());
+	cout << strformat( header.c_str(), title.c_str());
 
 	if (openid == NULL)
 	{
-		fprintf(stdout, m_lpszHomepage.c_str(), m_photo, m_student_name, m_student_id,
+		cout << strformat( m_lpszHomepage.c_str(), m_photo, m_student_name, m_student_id,
 			"inline-block", "none", "");
 	}
 	else
 	{
-		fprintf(stdout, m_lpszHomepage.c_str(), m_photo, m_student_name, m_student_id,
+		cout << strformat( m_lpszHomepage.c_str(), m_photo, m_student_name, m_student_id,
 			"none", "inline-block", m_student_id);
 	}
 
@@ -661,14 +670,14 @@ int parse_index()
 			parse_main(m_need_update_cookie, m_photo, false);
 			return 0;
 		}
-		cout << "Status: 302 Found\nLocation: main.cgi\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: main.cgi\r\n" << GLOBAL_HEADER;
 		return 0;
 	}
 	else
 	{
 		if (strcmp(CGI_SCRIPT_NAME, "/main.cgi") == 0) // 如果还没登录就请求main.cgi，那就踢回去让他登陆
 		{
-			cout << "Status: 302 Found\nLocation: index.cgi\n" << GLOBAL_HEADER;
+			cout << "Status: 302 Found\r\nLocation: index.cgi\r\n" << GLOBAL_HEADER;
 			return 0;
 		}
 	}*/
@@ -712,20 +721,20 @@ int parse_index()
 
 	/*// 输出网页
 	if (m_need_update_cookie)
-		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";*/
+		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";*/
 
 	cout << GLOBAL_HEADER;
 
-	fprintf(stdout, header.c_str(), SOFTWARE_NAME);
+	cout << strformat( header.c_str(), SOFTWARE_NAME);
 
 	if (m_xh == NULL || m_mm == NULL)
 	{
-		fprintf(stdout, m_lpszHomepage.c_str(), SOFTWARE_NAME, g_users, g_QueryCount, 
+		cout << strformat( m_lpszHomepage.c_str(), SOFTWARE_NAME, g_users, g_QueryCount, 
 						"输入你的教务系统账号来登录吧 :)", "flex", "", "flex", "", "block", "block", "none");
 	}
 	else 
 	{
-		fprintf(stdout, m_lpszHomepage.c_str(), SOFTWARE_NAME, g_users, g_QueryCount,
+		cout << strformat( m_lpszHomepage.c_str(), SOFTWARE_NAME, g_users, g_QueryCount,
 						"QQ登录成功，输入验证码继续吧 :)", "none", m_xh, "none", m_mm, "none", "none", "block");
 	}
 
@@ -736,14 +745,14 @@ int parse_index()
 // 处理验证码 Ajax 请求
 void parse_ajax_captcha() //(AJAX: GET /captcha.cgi)
 {
-	cout << "Cache-Control: no-cache\nPragma: no-cache\nExpires: -1\n";
+	cout << "Cache-Control: no-cache\r\nPragma: no-cache\r\nExpires: -1\r\n";
 	bool m_need_update_cookie = false;
 	char *m_photo = (char *)malloc(102424);
 	ZeroMemory(m_photo, 102424);
 	process_cookie(&m_need_update_cookie, m_photo, true);
 
 	if (m_need_update_cookie)
-		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 	free(m_photo);
 	
 	// 置随机数种子，并取得一个随机数，用于获取验证码。
@@ -758,8 +767,8 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.cgi)
 	int m_iResult = 0;
 	if (!CrawlRequest(Captcha, m_rep_body, 8192, &m_iResult, true))
 	{
-		cout << "Status: 500 Internal Server Error\n";
-		cout << "Content-Type: text/plain; charset=gb2312\nX-Powered-By: iEdon-URPScoreHelper\n\n";
+		cout << "Status: 500 Internal Server Error\r\n";
+		cout << "Content-Type: text/plain; charset=gb2312\r\nX-Powered-By: iEdon-URPScoreHelper\r\n\r\n";
 		cout << "无法获取验证码，教务系统可能挂了";
 		free(m_rep_body);
 		return;
@@ -769,8 +778,8 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.cgi)
 	char *pStr1 = strstr(m_rep_body, "\r\n\r\n");
 	if (pStr1 == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\n";
-		cout << "Content-Type: text/plain; charset=gb2312\nX-Powered-By: iEdon-URPScoreHelper\n\n";
+		cout << "Status: 500 Internal Server Error\r\n";
+		cout << "Content-Type: text/plain; charset=gb2312\r\nX-Powered-By: iEdon-URPScoreHelper\r\n\r\n";
 		cout << "无法分析验证码响应协议。";
 		return;
 	}
@@ -785,7 +794,7 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.cgi)
 	strcat(m_DataURL, m_base64);
 	free(m_rep_body);
 
-	cout << "Content-Type: text/plain\nX-Powered-By: iEdon-URPScoreHelper\n\n";
+	cout << "Content-Type: text/plain\r\nX-Powered-By: iEdon-URPScoreHelper\r\n\r\n";
 	cout << m_DataURL;
 
 	delete[]m_base64;
@@ -802,7 +811,7 @@ int parse_query()
 
 	if (strlen(m_photo) == 0) // 还没登陆就丢去登陆。
 	{
-		cout << "Status: 302 Found\nLocation: index.cgi\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: index.cgi\r\n" << GLOBAL_HEADER;
 		return 0;
 	}
 
@@ -824,7 +833,7 @@ int parse_query()
 	{
 		student_logout();
 		free(m_rep_body);
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("<p>从服务器拉取分数失败。</p>");
 		return -1;
 	}
@@ -871,7 +880,7 @@ void parse_friendly_score(char *p_lpszScore)
 		if (m_result == NULL)
 		{
 			free(m_rep_body);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p><b>从服务器拉取分数失败。(BeginOfTable)</b></p><p>教务君可能月线繁忙，666 请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
 			return;
 		}
@@ -882,7 +891,7 @@ void parse_friendly_score(char *p_lpszScore)
 		if (m_result == NULL)
 		{
 			free(m_rep_body);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p>从服务器拉取分数失败。(EndOfBodyNotFound)</p>");
 			return;
 		}
@@ -905,12 +914,17 @@ void parse_friendly_score(char *p_lpszScore)
 		title += "的考试成绩 - ";
 		title += SOFTWARE_NAME;
 
-		fprintf(stdout, header.c_str(), title.c_str());
-		fprintf(stdout, m_lpszQuery.c_str(), m_Student, m_prep);
+		cout << strformat( header.c_str(), title.c_str());
+		cout << strformat( m_lpszQuery.c_str(), m_Student, m_prep);
 		cout << footer.c_str();
 
-		fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
-		fclose(g_fQueryCount);
+		g_fQueryCount = fopen("QueryCount.bin", "w+");
+		if (g_fQueryCount != NULL)
+		{
+			fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
+			fclose(g_fQueryCount);
+		}
+
 		free(m_prep);
 		// free(m_result); BUG CAN NOT RELEASE!
 		return;
@@ -932,7 +946,7 @@ void parse_friendly_score(char *p_lpszScore)
 		if (m_result == NULL)
 		{
 			free(m_rep_body);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p><b>从服务器拉取分数失败。(BeginOfRet)</b></p><p>教务君可能月线繁忙，666 请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
 			return;
 		}
@@ -943,7 +957,7 @@ void parse_friendly_score(char *p_lpszScore)
 		if (m_result == NULL)
 		{
 			free(m_rep_body);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p>从服务器拉取分数失败。(EndOfBodyNotFound)</p>");
 			return;
 		}
@@ -959,12 +973,17 @@ void parse_friendly_score(char *p_lpszScore)
 		title += "的通过科目 - ";
 		title += SOFTWARE_NAME;
 
-		fprintf(stdout, header.c_str(), title.c_str());
-		fprintf(stdout, m_lpszQuery.c_str(), m_Student, m_prep);
+		cout << strformat( header.c_str(), title.c_str());
+		cout << strformat( m_lpszQuery.c_str(), m_Student, m_prep);
 		cout << footer.c_str();
 
-		fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
-		fclose(g_fQueryCount);
+		g_fQueryCount = fopen("QueryCount.bin", "w+");
+		if (g_fQueryCount != NULL)
+		{
+			fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
+			fclose(g_fQueryCount);
+		}
+
 		free(m_prep);
 		// free(m_result); BUG CAN NOT RELEASE!
 		return;
@@ -986,7 +1005,7 @@ void parse_friendly_score(char *p_lpszScore)
 		if (m_result == NULL)
 		{
 			free(m_rep_body);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p><b>从服务器拉取分数失败。(BeginOfRet)</b></p><p>教务君可能月线繁忙，666 请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
 			return;
 		}
@@ -997,7 +1016,7 @@ void parse_friendly_score(char *p_lpszScore)
 		if (m_result == NULL)
 		{
 			free(m_rep_body);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p>从服务器拉取分数失败。(EndOfBodyNotFound)</p>");
 			return;
 		}
@@ -1013,12 +1032,16 @@ void parse_friendly_score(char *p_lpszScore)
 		title += "的专业方案 - ";
 		title += SOFTWARE_NAME;
 
-		fprintf(stdout, header.c_str(), title.c_str());
-		fprintf(stdout, m_lpszQuery.c_str(), m_Student, m_prep);
+		cout << strformat( header.c_str(), title.c_str());
+		cout << strformat( m_lpszQuery.c_str(), m_Student, m_prep);
 		cout << footer.c_str();
+		g_fQueryCount = fopen("QueryCount.bin", "w+");
+		if (g_fQueryCount != NULL)
+		{
+			fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
+			fclose(g_fQueryCount);
+		}
 
-		fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
-		fclose(g_fQueryCount);
 		free(m_prep);
 		// free(m_result); BUG CAN NOT RELEASE!
 		return;
@@ -1040,7 +1063,7 @@ void parse_friendly_score(char *p_lpszScore)
 		if (m_result == NULL)
 		{
 			free(m_rep_body);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p><b>从服务器拉取分数失败。(BeginOfRet)</b></p><p>教务君可能月线繁忙，666 请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
 			return;
 		}
@@ -1049,7 +1072,7 @@ void parse_friendly_score(char *p_lpszScore)
 		{
 			
 			free(m_rep_body);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p><b>从服务器拉取分数失败。(MidOfRet-Table)</b></p><p>教务君可能月线繁忙，666 请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
 			return;
 		}
@@ -1059,7 +1082,7 @@ void parse_friendly_score(char *p_lpszScore)
 		if (m_result == NULL)
 		{
 			free(m_rep_body);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p>从服务器拉取分数失败。(EndOfBodyNotFound)</p>");
 			return;
 		}
@@ -1075,12 +1098,17 @@ void parse_friendly_score(char *p_lpszScore)
 		title += "的未通过科目 - ";
 		title += SOFTWARE_NAME;
 
-		fprintf(stdout, header.c_str(), title.c_str());
-		fprintf(stdout, m_lpszQuery.c_str(), m_Student, m_prep);
+		cout << strformat( header.c_str(), title.c_str());
+		cout << strformat( m_lpszQuery.c_str(), m_Student, m_prep);
 		cout << footer.c_str();
 
-		fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
-		fclose(g_fQueryCount);
+		g_fQueryCount = fopen("QueryCount.bin", "w+");
+		if (g_fQueryCount != NULL)
+		{
+			fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
+			fclose(g_fQueryCount);
+		}
+
 		free(m_prep);
 		// free(m_result); BUG CAN NOT RELEASE!
 		return;
@@ -1282,13 +1310,17 @@ void parse_friendly_score(char *p_lpszScore)
 	title += "的本学期成绩 - ";
 	title += SOFTWARE_NAME;
 
-	fprintf(stdout, header.c_str(), title.c_str());
-	fprintf(stdout, m_lpszQuery.c_str(), m_Student, m_Output.c_str());
+	cout << strformat( header.c_str(), title.c_str());
+	cout << strformat( m_lpszQuery.c_str(), m_Student, m_Output.c_str());
 
 	cout << footer.c_str();
 
-	fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
-	fclose(g_fQueryCount);
+	g_fQueryCount = fopen("QueryCount.bin", "w+");
+	if (g_fQueryCount != NULL)
+	{
+		fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
+		fclose(g_fQueryCount);
+	}
 }
 
 // 获取学生姓名
@@ -1377,7 +1409,7 @@ int system_registration()
 {
 	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
 	{
-		cout << "Status: 302 Found\n" << "Location: index.cgi\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\n" << "Location: index.cgi\r\n" << GLOBAL_HEADER;
 		cout << GLOBAL_HEADER;
 		return -1;
 	}
@@ -1482,7 +1514,7 @@ int system_registration()
 	{
 		student_logout();
 		free(m_rep_header);
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("<p>从服务器拉取分数失败。</p>");
 		
 		return -1;
@@ -1517,7 +1549,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	sprintf(POST_LOGIN, REQUEST_LOGIN, m_ContentLength, CGI_HTTP_COOKIE, p_xuehao, p_password, p_captcha);
 	if (!CrawlRequest(POST_LOGIN, m_rep_body, 40960, &m_iResult, true))
 	{
-		cout << "Status: 302 Found\nX-Powered-By: iEdon-URPScoreHelper\nLocation: index.cgi\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nX-Powered-By: iEdon-URPScoreHelper\r\nLocation: index.cgi\r\n" << GLOBAL_HEADER;
 		free(m_rep_body);
 		return false;
 	}
@@ -1528,7 +1560,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	{
 		
 		free(m_rep_body);
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("<p>从服务器拉取登录结果失败。</p>");
 		return false;
 	}
@@ -1539,7 +1571,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	{
 		
 		free(m_rep_body);
-		cout << "Status: 403 Forbidden\n";
+		cout << "Status: 403 Forbidden\r\n";
 		Error("<p>证件号或密码不对啊，大佬。 TAT。</p>");
 		return false;
 	}
@@ -1548,7 +1580,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	{
 		
 		free(m_rep_body);
-		cout << "Status: 403 Forbidden\n";
+		cout << "Status: 403 Forbidden\r\n";
 		Error("<p><b>学号或密码不对啊。</b></p><p>如果你曾修改过教务系统的账号密码，请使用新密码再试一试。</p>");
 		return false;
 	}
@@ -1557,7 +1589,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	{
 		
 		free(m_rep_body);
-		cout << "Status: 403 Forbidden\n";
+		cout << "Status: 403 Forbidden\r\n";
 		Error("<p>验证码不对啊，大佬。 TAT。</p>");
 		return false;
 	}
@@ -1566,7 +1598,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	{
 		
 		free(m_rep_body);
-		cout << "Status: 403 Forbidden\n";
+		cout << "Status: 403 Forbidden\r\n";
 		Error("<p>教务系统君说数据库繁忙 :P</p><p>对于<b>数据库跑路</b>问题，那就等等先咯~</p>");
 		return false;
 	}
@@ -1575,7 +1607,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	{
 		
 		free(m_rep_body);
-		cout << "Status: 403 Forbidden\n";
+		cout << "Status: 403 Forbidden\r\n";
 		Error("<p>天呐。发生了谜一般的问题！教务系统神隐了 0.0</p><p>建议你稍候再试试吧。</p>");
 		return false;
 	}
@@ -1586,7 +1618,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	if (db_ret != SQLITE_OK)
 	{
 		student_logout();
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
 		return false;
 	}
@@ -1603,7 +1635,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	if (db_ret != SQLITE_OK)
 	{
 		student_logout();
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		std::string Err_Msg = "<b>数据库准备失败！请确认数据库合法性。</b><p>(";
 		Err_Msg += sqlite3_errmsg(db);
 		Err_Msg += ")</p>";
@@ -1643,7 +1675,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		if (db_ret != SQLITE_OK)
 		{
 			student_logout();
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			std::string Err_Msg("<b>很抱歉，登录失败。</b><p>数据库错误 (");
 			Err_Msg += sqlite3_errmsg(db);
 			Err_Msg += ")</p>";
@@ -1662,7 +1694,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		if (db_ret != SQLITE_OK)
 		{
 			student_logout();
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
 			return false;
 		}
@@ -1685,7 +1717,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		if (db_ret != SQLITE_OK)
 		{
 			student_logout();
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			std::string Err_Msg("<b>登录数据库记录失败，请稍后再试。</b><p>(");
 			Err_Msg += sqlite3_errmsg(db);
 			Err_Msg += ")</p>";
@@ -1731,14 +1763,14 @@ void parse_QuickQuery_Intro()
 	std::string m_lpszQuery = ReadTextFileToMem(CGI_PATH_TRANSLATED);
 
 	if (m_need_update_cookie)
-		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 	cout << GLOBAL_HEADER;
 
 	std::string title("免密成绩查询 - ");
 	title += SOFTWARE_NAME;
 
-	fprintf(stdout, header.c_str(), title.c_str());
-	fprintf(stdout, m_lpszQuery.c_str(), SOFTWARE_NAME, g_users, g_QueryCount);
+	cout << strformat( header.c_str(), title.c_str());
+	cout << strformat( m_lpszQuery.c_str(), SOFTWARE_NAME, g_users, g_QueryCount);
 
 	cout << footer.c_str();
 }
@@ -1755,23 +1787,15 @@ void parse_QuickQuery_Result()
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		if (m_need_update_cookie)
-			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 		Error("<p>发生错误，POST 数据长度异常。</p>");
 		
 		return;
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);	// TORESEARCH
-	if (fgets(m_post_data, m_post_length + 1, stdin) == NULL)
-	{
-		cout << "Status: 500 Internal Server Error\n";
-		if (m_need_update_cookie)
-			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-		Error("<p>发生错误，POST 数据拉取失败。</p>");
-		
-		return;
-	}
+	FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
 
 	// 获取学号
 	char *pStr1 = strstr(m_post_data, "xh=");
@@ -1779,10 +1803,11 @@ void parse_QuickQuery_Result()
 	{
 		
 		free(m_post_data);
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		if (m_need_update_cookie)
-			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
-		Error("<p>无法获取学号信息。</p>");
+			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+		Error(m_post_data);
+		//Error("<p>无法获取学号信息。</p>");
 		return;
 	}
 	char *pStr2 = strstr(pStr1 + 3, "&");
@@ -1803,9 +1828,9 @@ void parse_QuickQuery_Result()
 	{
 		
 		free(m_post_data);
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		if (m_need_update_cookie)
-			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 		Error("<p>输入的学号个数存在问题，请确认！</p>");
 		return;
 	}
@@ -1819,9 +1844,9 @@ void parse_QuickQuery_Result()
 			if (strlen(m_xh[xh_index]) != 9)
 			{
 				
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				Error("<p>输入的学号中有长度存在问题，请确认！</p>");
 				return;
 			}
@@ -1839,9 +1864,9 @@ void parse_QuickQuery_Result()
 			ZeroMemory(m_lpvBuffer, 4096);
 			if (!CrawlRequest(m_query_request, m_lpvBuffer, 4096, &m_ilength))
 			{
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				Error("<p>投递免密查询请求失败。</p><p>请确认教务系统是可用的。</p>");
 				
 				free(m_lpvBuffer);
@@ -1851,20 +1876,20 @@ void parse_QuickQuery_Result()
 			pStr1 = strstr(m_lpvBuffer, "&reportParamsId=");
 			if (pStr1 == NULL)
 			{
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				Error("<p>获取报表ID错误。(1)</p>");
 				
 				free(m_lpvBuffer);
 				return;
 			}
-			pStr2 = strstr(pStr1 + 16, "\n");
+			pStr2 = strstr(pStr1 + 16, "\r\n");
 			if (pStr1 == NULL)
 			{
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				Error("<p>获取报表ID错误。(2)</p>");
 				
 				free(m_lpvBuffer);
@@ -1882,9 +1907,9 @@ void parse_QuickQuery_Result()
 			ZeroMemory(m_lpvBuffer, 40960);
 			if (!CrawlRequest(m_query_report, m_lpvBuffer, 40960, &m_ilength))
 			{
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				Error("<p>通过ID免密查询失败。</p><p>发生了天知道的错误。</p>");
 				
 				free(m_lpvBuffer);
@@ -1897,9 +1922,9 @@ void parse_QuickQuery_Result()
 				pStr2 = strstr(pStr1, "at");
 				if (pStr2 != NULL)
 				{
-					cout << "Status: 500 Internal Server Error\n";
+					cout << "Status: 500 Internal Server Error\r\n";
 					if (m_need_update_cookie)
-						cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+						cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 					Error("教务系统出错了，请稍后重试~");
 					free(m_lpvBuffer);
 					return;
@@ -1911,9 +1936,9 @@ void parse_QuickQuery_Result()
 			pStr1 = strstr(m_lpvBuffer, "com.runqian.report.view.text.TextFileServlet");
 			if (pStr1 == NULL)
 			{
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				Error("<p>免密查询返回参数错误。(1)</p>");
 				
 				free(m_lpvBuffer);
@@ -1922,9 +1947,9 @@ void parse_QuickQuery_Result()
 			pStr2 = strstr(pStr1 + 46, "\";");
 			if (pStr1 == NULL)
 			{
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				Error("<p>免密查询返回参数错误。(2)</p>");
 				
 				free(m_lpvBuffer);
@@ -1940,9 +1965,9 @@ void parse_QuickQuery_Result()
 			ZeroMemory(m_lpvBuffer, 40960);
 			if (!CrawlRequest(m_query_score, m_lpvBuffer, 40960, &m_ilength))
 			{
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				Error("<p>接受分数信息失败！</p>");
 				
 				free(m_lpvBuffer);
@@ -1952,9 +1977,9 @@ void parse_QuickQuery_Result()
 			pStr1 = strstr(m_lpvBuffer, "姓名\t");
 			if (pStr1 == NULL)
 			{
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				Error("<p>学生姓名获取失败！(1)</p>");
 				
 				free(m_lpvBuffer);
@@ -1963,9 +1988,9 @@ void parse_QuickQuery_Result()
 			pStr2 = strstr(pStr1 + 4, "\t\t");
 			if (pStr2 == NULL)
 			{
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				Error("<p>学生姓名获取失败！(2)</p>");
 				
 				free(m_lpvBuffer);
@@ -1974,9 +1999,9 @@ void parse_QuickQuery_Result()
 
 			if ((pStr2 - pStr1) <= 4)
 			{
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error, 
 					"<p><b>呃，获取失败了。请确认所输信息是正确的。</b></p><p>发生错误的学号: %s</p>", 
@@ -1990,9 +2015,9 @@ void parse_QuickQuery_Result()
 			mid(m_xxmz, pStr1 + 4, pStr2 - pStr1 - 5, 1);
 			if (strlen(m_xxmz) < 2)
 			{
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error,
 					"<p><b>获取信息失败，请确认输入正确。</b></p><p>发生错误的学号: %s</p>",
@@ -2010,9 +2035,9 @@ void parse_QuickQuery_Result()
 			pStr1 = strstr(m_lpvBuffer, "考试时间\t\t\n");
 			if (pStr1 == NULL)
 			{
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error,
 					"<p><b>接受到的报表存在问题。</b></p><p>发生错误的学号: %s</p>",
@@ -2025,9 +2050,9 @@ void parse_QuickQuery_Result()
 
 			if (strlen(m_lpvBuffer) <= 800)
 			{
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error,
 					"<p><b>收到的报表大小存在问题。</b></p><p>发生错误的学号: %s</p>",
@@ -2132,9 +2157,9 @@ void parse_QuickQuery_Result()
 
 			if (!m_success)
 			{
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				Error("<p>抱歉，免密查询失败，请稍后再试。</p>");
 				
 				return;
@@ -2193,8 +2218,8 @@ void parse_QuickQuery_Result()
 			std::string title("多人查询 - 免密成绩查询 - ");
 			title += SOFTWARE_NAME;
 
-			fprintf(stdout, header.c_str(), title.c_str());
-			fprintf(stdout, m_lpszQuery.c_str(), "多人查询", m_list);
+			cout << strformat( header.c_str(), title.c_str());
+			cout << strformat( m_lpszQuery.c_str(), "多人查询", m_list);
 		}
 		else
 		{
@@ -2202,13 +2227,18 @@ void parse_QuickQuery_Result()
 			title += " - 免密成绩查询 - ";
 			title += SOFTWARE_NAME;
 
-			fprintf(stdout, header.c_str(), title.c_str());
-			fprintf(stdout, m_lpszQuery.c_str(), m_xxmz, m_list);
+			cout << strformat( header.c_str(), title.c_str());
+			cout << strformat( m_lpszQuery.c_str(), m_xxmz, m_list);
 		}
 		cout << footer.c_str();
+
 		g_QueryCount = g_QueryCount + m_xhgs;
-		fprintf(g_fQueryCount, "%ld", g_QueryCount);
-		fclose(g_fQueryCount);
+		g_fQueryCount = fopen("QueryCount.bin", "w+");
+		if (g_fQueryCount != NULL)
+		{
+			fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
+			fclose(g_fQueryCount);
+		}
 }
 
 // QQ账号绑定入口与解绑逻辑 (/OAuth2Assoc.cgi)
@@ -2217,7 +2247,7 @@ void OAuth2_Association(bool isPOST)
 	char *CGI_QUERY_STRING = getenv("QUERY_STRING");
 	if (CGI_QUERY_STRING == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("参数错误 (Null QUERY_STRING)");
 		return;
 	}
@@ -2230,7 +2260,7 @@ void OAuth2_Association(bool isPOST)
 		get_student_id(student_id);
 		if (student_id == NULL)
 		{
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("非法操作！ (尚未登录)");
 			return;
 		}
@@ -2246,7 +2276,7 @@ void OAuth2_Association(bool isPOST)
 		}
 		if (strcmp(releaseid, student_id) != 0)
 		{
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("非法操作！ (身份错误)");
 			return;
 		}
@@ -2255,7 +2285,7 @@ void OAuth2_Association(bool isPOST)
 		int db_ret = sqlite3_open("URPScoreHelper.db", &db);
 		if (db_ret != SQLITE_OK)
 		{
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
 			return;
 		}
@@ -2276,7 +2306,7 @@ void OAuth2_Association(bool isPOST)
 
 		if (db_ret != SQLITE_OK)
 		{
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			std::string Err_Msg("<b>解除绑定失败，请稍后再试。</b><p>(");
 			Err_Msg += sqlite3_errmsg(db);
 			Err_Msg += ")</p>";
@@ -2293,14 +2323,14 @@ void OAuth2_Association(bool isPOST)
 
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
-		cout << "Status: 302 Found\nLocation: main.cgi\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: main.cgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
 	pStr1 = strstr(CGI_QUERY_STRING, "openid=");
 	if (pStr1 == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("鉴权失败 (Null openid)");
 		return;
 	}
@@ -2330,7 +2360,7 @@ void OAuth2_Association(bool isPOST)
 				delete[]openid;
 				return;
 			}
-			cout << "Status: 302 Found\nLocation: main.cgi\n" << GLOBAL_HEADER;
+			cout << "Status: 302 Found\r\nLocation: main.cgi\r\n" << GLOBAL_HEADER;
 			delete[]openid;
 			return;
 		}
@@ -2358,7 +2388,7 @@ void OAuth2_Association(bool isPOST)
 			int db_ret = sqlite3_open("URPScoreHelper.db", &db);
 			if (db_ret != SQLITE_OK)
 			{
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
 				delete[]openid;
 				return;
@@ -2375,7 +2405,7 @@ void OAuth2_Association(bool isPOST)
 
 			if (db_ret != SQLITE_OK)
 			{
-				cout << "Status: 500 Internal Server Error\n";
+				cout << "Status: 500 Internal Server Error\r\n";
 				char Err_Msg[512] = "<b>数据库准备失败！请确认数据库合法性。</b><p>(";
 				strcat(Err_Msg, sqlite3_errmsg(db));
 				strcat(Err_Msg, ")</p>");
@@ -2406,27 +2436,27 @@ void OAuth2_Association(bool isPOST)
 
 		// 输出网页
 		if (m_need_update_cookie)
-			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 
 		cout << GLOBAL_HEADER;
 
 		std::string title("QQ用户绑定 - ");
 		title += SOFTWARE_NAME;
-		fprintf(stdout, header.c_str(), title.c_str());
+		cout << strformat( header.c_str(), title.c_str());
 
 		if (strlen(stid) == 0)
 		{
-			fprintf(stdout, m_lpszHomepage.c_str(), SOFTWARE_NAME, openid, "感谢使用QQ登录，请先绑定自己的学号吧 :)",
+			cout << strformat( m_lpszHomepage.c_str(), SOFTWARE_NAME, openid, "感谢使用QQ登录，请先绑定自己的学号吧 :)",
 				 "flex", "", "flex", pass);
 		}
 		else if(strlen(pass) == 0)
 		{
-			fprintf(stdout, m_lpszHomepage.c_str(), SOFTWARE_NAME, openid, "感谢使用QQ登录，请输入学号对应密码来继续操作 :)",
+			cout << strformat( m_lpszHomepage.c_str(), SOFTWARE_NAME, openid, "感谢使用QQ登录，请输入学号对应密码来继续操作 :)",
 				"none", stid, "flex", pass);
 		}
 		else
 		{
-			fprintf(stdout, m_lpszHomepage.c_str(), SOFTWARE_NAME, openid, "感谢使用QQ登录，请输入验证码来继续操作 :)",
+			cout << strformat( m_lpszHomepage.c_str(), SOFTWARE_NAME, openid, "感谢使用QQ登录，请输入验证码来继续操作 :)",
 				"none", stid, "none", pass);
 		}
 		cout << footer.c_str();
@@ -2437,26 +2467,20 @@ void OAuth2_Association(bool isPOST)
 		int m_post_length = atoi(CGI_CONTENT_LENGTH);
 		if (m_post_length <= 0)
 		{
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p>发生错误，POST 数据长度异常。</p>");
 			delete[]openid;
 			return;
 		}
 		char *m_post_data = (char *)malloc(m_post_length + 2);
-		if (fgets(m_post_data, m_post_length + 1, stdin) == NULL)
-		{
-			cout << "Status: 500 Internal Server Error\n";
-			Error("<p>发生错误，POST 数据拉取失败。</p>");
-			delete[]openid;
-			return;
-		}
+		FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
 
 		// 获取学号
 		char *pStr1 = strstr(m_post_data, "xh=");
 		if (pStr1 == NULL)
 		{
 			free(m_post_data);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p>无法获取学号信息。</p>");
 			delete[]openid;
 			return;
@@ -2472,7 +2496,7 @@ void OAuth2_Association(bool isPOST)
 		if (pStr1 == NULL)
 		{
 			free(m_post_data);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p>无法获取密码信息。</p>");
 			delete[]openid;
 			return;
@@ -2488,7 +2512,7 @@ void OAuth2_Association(bool isPOST)
 		if (pStr1 == NULL)
 		{
 			free(m_post_data);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p>无法获取验证码信息。</p>");
 			delete[]openid;
 			return;
@@ -2507,7 +2531,7 @@ void OAuth2_Association(bool isPOST)
 		int db_ret = sqlite3_open("URPScoreHelper.db", &db);
 		if (db_ret != SQLITE_OK)
 		{
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
 			delete[]openid;
 			return;
@@ -2526,7 +2550,7 @@ void OAuth2_Association(bool isPOST)
 
 		if (db_ret != SQLITE_OK)
 		{
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			char Err_Msg[1024] = "<b>很抱歉，QQ绑定失败。</b><p>数据库错误 (";
 			strcat(Err_Msg, sqlite3_errmsg(db));
 			strcat(Err_Msg, ")</p><p>但是别方吖，还可以正常登录的。</p>");
@@ -2541,8 +2565,8 @@ void OAuth2_Association(bool isPOST)
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
 
-		cout << "Status: 302 Found\n";
-		cout << "Location: main.cgi\n";
+		cout << "Status: 302 Found\r\n";
+		cout << "Location: main.cgi\r\n";
 		cout << GLOBAL_HEADER;
 	}
 
@@ -2560,7 +2584,7 @@ void parse_teaching_evaluation()
 
 	if (strlen(m_photo) == 0) // 还没登陆就丢去登陆。
 	{
-		cout << "Status: 302 Found\nLocation: index.cgi\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: index.cgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
 	free(m_photo);
@@ -2581,7 +2605,7 @@ void parse_teaching_evaluation()
 	{
 		student_logout();
 		free(m_rep_body);
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("<p>从服务器拉取教学评估信息失败。</p>");
 		return;
 	}
@@ -2590,7 +2614,7 @@ void parse_teaching_evaluation()
 	if (m_result != NULL)
 	{
 		free(m_rep_body);
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("<p>学校还未开放评教呢，或者来晚了哦</p>");
 		return;
 	}
@@ -2612,7 +2636,7 @@ void parse_teaching_evaluation()
 		{
 			student_logout();
 			free(m_rep_body);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p>从服务器拉取待评列表失败。</p>");
 			return;
 		}
@@ -2626,7 +2650,7 @@ void parse_teaching_evaluation()
 		{
 			student_logout();
 			free(m_rep_body);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p>评教条目数目分割失败。</p>");
 			return;
 		}
@@ -2672,7 +2696,7 @@ void parse_teaching_evaluation()
 
 	std::string title = "一键评教 - ";
 	title += SOFTWARE_NAME;
-	fprintf(stdout, header.c_str(), title.c_str());
+	cout << strformat( header.c_str(), title.c_str());
 	bool need_eval = true;
 	if (to_eval && counts)
 	{
@@ -2689,7 +2713,7 @@ void parse_teaching_evaluation()
 	outer.append(out_head);
 	outer.append(to_eval_list);
 
-	fprintf(stdout,
+	cout << strformat(
 		m_lpszTeachEvalPage.c_str(),
 		need_eval ? "老师很辛苦，给个赞呗。默认全好评，你懂的 :)" : "",
 		need_eval ? "block" : "none"
@@ -2707,7 +2731,7 @@ void teaching_evaluation()
 
 	if (strlen(m_photo) == 0) // 还没登陆就丢去登陆。
 	{
-		cout << "Status: 302 Found\nLocation: index.cgi\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: index.cgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
 	free(m_photo);
@@ -2716,23 +2740,18 @@ void teaching_evaluation()
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("<p>发生错误，POST 数据长度异常。</p>");
 		return;
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);
-	if (fgets(m_post_data, m_post_length + 1, stdin) == NULL)
-	{
-		cout << "Status: 500 Internal Server Error\n";
-		Error("<p>发生错误，POST 数据拉取失败。</p>");
-		return;
-	}
+	FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
 	// 获取主观评价
 	char *pStr1 = strstr(m_post_data, "nr=");
 	if (pStr1 == NULL)
 	{
 		free(m_post_data);
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("<p>无法获取主观评价内容。</p>");
 		return;
 	}
@@ -2757,7 +2776,7 @@ void teaching_evaluation()
 	{
 		student_logout();
 		free(m_rep_body);
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("<p>从服务器拉取教学评估信息失败。</p>");
 		return;
 	}
@@ -2766,7 +2785,7 @@ void teaching_evaluation()
 	if (m_result != NULL)
 	{
 		free(m_rep_body);
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("<p><b>啊哦，出错误啦</b></p><p>非教学评估时期，或评估时间已过。</p>");
 		return;
 	}
@@ -2788,7 +2807,7 @@ void teaching_evaluation()
 		{
 			student_logout();
 			free(m_rep_body);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p>从服务器拉取待评列表失败。</p>");
 			return;
 		}
@@ -2802,7 +2821,7 @@ void teaching_evaluation()
 		{
 			student_logout();
 			free(m_rep_body);
-			cout << "Status: 500 Internal Server Error\n";
+			cout << "Status: 500 Internal Server Error\r\n";
 			Error("<p>评教条目数目分割失败。</p>");
 			return;
 		}
@@ -2858,7 +2877,7 @@ void teaching_evaluation()
 				if (m_result == NULL)
 				{
 					free(m_rep_body);
-					cout << "Status: 500 Internal Server Error\n";
+					cout << "Status: 500 Internal Server Error\r\n";
 					std::string err_msg = "<p>呃，出错了呢</p><p>很抱歉，在评估《";
 					err_msg = err_msg + te[i].name + "》课程时出现了错误。</p><p>(进入详细页面失败)</p>";
 					Error((char *)err_msg.c_str());
@@ -2873,7 +2892,7 @@ void teaching_evaluation()
 					if (p1 == NULL)
 					{
 						free(m_rep_body);
-						cout << "Status: 500 Internal Server Error\n";
+						cout << "Status: 500 Internal Server Error\r\n";
 						std::string err_msg = "<p>呃，出错了呢</p><p>很抱歉，在评估《";
 						err_msg = err_msg + te[i].name + "》课程时出现了错误。</p><p>(名称条目引号闭合失败)</p>";
 						Error((char *)err_msg.c_str());
@@ -2894,7 +2913,7 @@ void teaching_evaluation()
 					if (p2 == NULL)
 					{
 						free(m_rep_body);
-						cout << "Status: 500 Internal Server Error\n";
+						cout << "Status: 500 Internal Server Error\r\n";
 						std::string err_msg = "<p>呃，出错了呢</p><p>很抱歉，在评估《";
 						err_msg = err_msg + te[i].name + "》课程时出现了错误。</p><p>(值条目引号开启失败)</p>";
 						Error((char *)err_msg.c_str());
@@ -2904,7 +2923,7 @@ void teaching_evaluation()
 					if (p2 == NULL)
 					{
 						free(m_rep_body);
-						cout << "Status: 500 Internal Server Error\n";
+						cout << "Status: 500 Internal Server Error\r\n";
 						std::string err_msg = "<p>呃，出错了呢</p><p>很抱歉，在评估《";
 						err_msg = err_msg + te[i].name + "》课程时出现了错误。</p><p>(值条目引号闭合失败)</p>";
 						Error((char *)err_msg.c_str());
@@ -2940,7 +2959,7 @@ void teaching_evaluation()
 				if (m_result == NULL)
 				{
 					free(m_rep_body);
-					cout << "Status: 500 Internal Server Error\n";
+					cout << "Status: 500 Internal Server Error\r\n";
 					std::string err_msg = "<p>呃，出错了呢</p><p>很抱歉，在评估《";
 					err_msg = err_msg + te[i].name + "》课程时出现了错误。</p>";
 					Error((char *)err_msg.c_str());
@@ -2950,7 +2969,7 @@ void teaching_evaluation()
 			}
 		}
 	}
-	cout << "Status: 302 Found\nLocation: TeachEval.cgi\n" << GLOBAL_HEADER;
+	cout << "Status: 302 Found\r\nLocation: TeachEval.cgi\r\n" << GLOBAL_HEADER;
 	return;
 }
 
@@ -2964,7 +2983,7 @@ void parse_change_password()
 
 	if (strlen(m_photo) == 0) // 还没登陆就丢去登陆。
 	{
-		cout << "Status: 302 Found\nLocation: index.cgi\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: index.cgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
 	free(m_photo);
@@ -2972,14 +2991,14 @@ void parse_change_password()
 	std::string m_lpszQuery = ReadTextFileToMem(CGI_PATH_TRANSLATED);
 
 	if (m_need_update_cookie)
-		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\n";
+		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 	cout << GLOBAL_HEADER;
 
 	std::string title("修改密码 - ");
 	title += SOFTWARE_NAME;
 
-	fprintf(stdout, header.c_str(), title.c_str());
-	fprintf(stdout, m_lpszQuery.c_str());
+	cout << strformat( header.c_str(), title.c_str());
+	cout << strformat( m_lpszQuery.c_str());
 
 	cout << footer.c_str();
 }
@@ -2995,7 +3014,7 @@ void do_change_password() //(POST /changePassword.cgi)
 
 	if (strlen(m_photo) == 0) // 还没登陆就丢去登陆。
 	{
-		cout << "Status: 302 Found\nLocation: index.cgi\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: index.cgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
 	free(m_photo);
@@ -3004,23 +3023,18 @@ void do_change_password() //(POST /changePassword.cgi)
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0 || m_post_length > 127)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("<p>发生错误，POST 数据长度异常。</p>");
 		return;
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);
-	if (fgets(m_post_data, m_post_length + 1, stdin) == NULL)
-	{
-		cout << "Status: 500 Internal Server Error\n";
-		Error("<p>发生错误，POST 数据拉取失败。</p>");
-		return;
-	}
+	FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
 	// 获取新密码
 	char *pStr1 = strstr(m_post_data, "mm=");
 	if (pStr1 == NULL)
 	{
 		free(m_post_data);
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("<p>发生了错误，无法获取 POST 数据。</p>");
 		return;
 	}
@@ -3035,7 +3049,7 @@ void do_change_password() //(POST /changePassword.cgi)
 
 	if (len > 12 || len <= 0)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("<p>新密码长度不能超过12个字符！</p>");
 		return;
 	}
@@ -3056,7 +3070,7 @@ void do_change_password() //(POST /changePassword.cgi)
 	if (pStr1 == NULL)
 	{
 		free(m_rep_header);
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("<p>密码修改失败，请确认是否输入了非法字符，或请稍后再试。</p>");
 		return;
 	}
@@ -3067,7 +3081,7 @@ void do_change_password() //(POST /changePassword.cgi)
 	if (db_ret != SQLITE_OK)
 	{
 		student_logout();
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("密码修改成功，但打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
 		return;
 	}
@@ -3092,7 +3106,7 @@ void do_change_password() //(POST /changePassword.cgi)
 	if (db_ret != SQLITE_OK)
 	{
 		student_logout();
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		std::string Err_Msg("<b>密码修改成功，但登录数据库记录失败，请稍后再试。(请使用新密码登录)</b><p>(");
 		Err_Msg += sqlite3_errmsg(db);
 		Err_Msg += ")</p>";
@@ -3110,5 +3124,5 @@ void do_change_password() //(POST /changePassword.cgi)
 	sqlite3_finalize(stmt);
 
 	student_logout();
-	cout << "Status: 302 Found\nLocation: index.cgi\n" << GLOBAL_HEADER;
+	cout << "Status: 302 Found\r\nLocation: index.cgi\r\n" << GLOBAL_HEADER;
 }

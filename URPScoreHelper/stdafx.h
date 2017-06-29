@@ -5,30 +5,33 @@
 
 #pragma once
 #define _CRT_SECURE_NO_WARNINGS
+
 #include "targetver.h"
-
-#include <stdio.h>
-#include <tchar.h>
-
-// TODO:  在此处引用程序需要的其他头文件
-
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <winsock.h>
-#include <time.h>
-#include <string.h>
+#include <ctime>
 #include <iostream>
-#pragma comment(lib, "ws2_32.lib")
+#include <string>
+#include "libfcgi/fcgio.h"
+
 extern "C"
 {
 #ifdef _WIN64
-#include "curl-7.53.1-win64-mingw/include/curl/curl.h"
-#include "sqlite-3.1.8-win64/sqlite3.h"
-#pragma comment(lib, "sqlite-3.1.8-win64/sqlite3.lib")
-#pragma comment(lib, "curl-7.53.1-win64-mingw/bin/libcurl.lib")
+	#pragma comment(lib, "ws2_32.lib")
+	#include "curl-7.53.1-win64-mingw/include/curl/curl.h"
+	#include "sqlite-3.1.8-win64/sqlite3.h"
+	#pragma comment(lib, "libfcgi/libfcgi_x64.lib")
+	#pragma comment(lib, "sqlite-3.1.8-win64/sqlite3.lib")
+	#pragma comment(lib, "curl-7.53.1-win64-mingw/bin/libcurl.lib")
 #else
-#include "curl-7.53.1-win32-mingw/include/curl/curl.h"
-#include "sqlite-3.1.8-win32/sqlite3.h"
-#pragma comment(lib, "sqlite-3.1.8-win32/sqlite3.lib")
-#pragma comment(lib, "curl-7.53.1-win32-mingw/bin/libcurl.lib")
+	#ifdef _WIN32
+		#pragma comment(lib, "ws2_32.lib")
+		#include "curl-7.53.1-win32-mingw/include/curl/curl.h"
+		#include "sqlite-3.1.8-win32/sqlite3.h"
+		#pragma comment(lib, "libfcgi/libfcgi.lib")
+		#pragma comment(lib, "sqlite-3.1.8-win32/sqlite3.lib")
+		#pragma comment(lib, "curl-7.53.1-win32-mingw/bin/libcurl.lib")
+	#endif
 #endif
 }

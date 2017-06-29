@@ -47,6 +47,7 @@ char * right(char *dst, char *src, int n)
 		;
 	return(dst);
 }
+
 // 将字符串中指定子字符串用指定字符串代替，targ_str 是被替换的，val是替换的字符串
 void replace_string(char * source_str, char * targ_str, char *val)
 {

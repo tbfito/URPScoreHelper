@@ -31,7 +31,7 @@ void OAuth2_process()
 	char *CGI_HTTP_HOST = getenv("HTTP_HOST");
 	if (CGI_HTTP_HOST == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("错误：缺少 HTTP_HOST 环境变量，请检查 CGI 接口设定。");
 		return;
 	}
@@ -78,8 +78,8 @@ void OAuth2_process()
 		sprintf(m_lpszURL, OAUTH2_AUTHENTICATION, OAUTH2_APPID, m_Domain, stid);
 	}
 
-	cout << "Status: 302 Found\n";
-	cout << "Location: " << m_lpszURL << '\n';
+	cout << "Status: 302 Found\r\n";
+	cout << "Location: " << m_lpszURL << '\r\n';
 	cout << GLOBAL_HEADER;
 	delete[]m_lpszURL;
 }
@@ -92,7 +92,7 @@ void OAuth2_CallBack()
 	char *CGI_HTTP_HOST = getenv("HTTP_HOST");
 	if (CGI_HTTP_HOST == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("错误：缺少 HTTP_HOST 环境变量，请检查 CGI 接口设定。");
 		return;
 	}
@@ -100,14 +100,14 @@ void OAuth2_CallBack()
 
 	if (CGI_QUERY_STRING == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("鉴权失败 (Null QUERY_STRING)");
 		return;
 	}
 	char *pStr1 = strstr(CGI_QUERY_STRING, "code=");
 	if (pStr1 == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("鉴权失败 (Null Code)");
 		return;
 	}
@@ -134,7 +134,7 @@ void OAuth2_CallBack()
 
 	if (curl == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("无法初始化 libcurl。");
 		delete[]access_token_req;
 		delete[]code;
@@ -152,7 +152,7 @@ void OAuth2_CallBack()
 
 	if (ret != CURLE_OK)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("curl 操作失败！");
 		free(html);
 		delete[]access_token_req;
@@ -163,7 +163,7 @@ void OAuth2_CallBack()
 	pStr1 = strstr(html, "access_token=");
 	if (pStr1 == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error(html);
 		free(html);
 		delete[]access_token_req;
@@ -174,7 +174,7 @@ void OAuth2_CallBack()
 	pStr2 = strstr(pStr1 + 14, "&");
 	if (pStr2 == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("获取 access_token 失败！(Json_right)");
 		free(html);
 		delete[]access_token_req;
@@ -189,7 +189,7 @@ void OAuth2_CallBack()
 	/*pStr1 = strstr(html, "\"social_uid\": ");
 	if (pStr1 == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error(html);
 		free(html);
 		delete[]access_token_req;
@@ -200,7 +200,7 @@ void OAuth2_CallBack()
 	pStr2 = strstr(pStr1 + 15, ",");
 	if (pStr2 == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("获取 access_token 失败！(Json_right)");
 		free(html);
 		delete[]access_token_req;
@@ -227,7 +227,7 @@ void OAuth2_CallBack()
 
 	if (ret != CURLE_OK)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("curl 操作失败！");
 		free(html);
 		delete[]access_token_req;
@@ -238,7 +238,7 @@ void OAuth2_CallBack()
 	pStr1 = strstr(html, "\"openid\":\"");
 	if (pStr1 == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error(html);
 		free(html);
 		delete[]access_token_req;
@@ -249,7 +249,7 @@ void OAuth2_CallBack()
 	pStr2 = strstr(pStr1 + 11, "\"");
 	if (pStr2 == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("获取 access_token 失败！(Json_right)");
 		free(html);
 		delete[]access_token_req;
@@ -267,7 +267,7 @@ void OAuth2_CallBack()
 	int db_ret = sqlite3_open("URPScoreHelper.db", &db);
 	if (db_ret != SQLITE_OK)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
 		free(html);
 		delete[]access_token;
@@ -288,7 +288,7 @@ void OAuth2_CallBack()
 
 	if (db_ret != SQLITE_OK)
 	{
-		cout << "Status: 500 Internal Server Error\n";
+		cout << "Status: 500 Internal Server Error\r\n";
 		char Err_Msg[512] = "<b>数据库准备失败！请确认数据库合法性。</b><p>(";
 		strcat(Err_Msg, sqlite3_errmsg(db));
 		strcat(Err_Msg, ")</p>");
@@ -330,14 +330,14 @@ void OAuth2_CallBack()
 			}
 		}
 
-		cout << "Status: 302 Found\n";
+		cout << "Status: 302 Found\r\n";
 		if (strcmp(id, "NONE") == 0)
 		{
-			cout << "Location: OAuth2Assoc.cgi?openid=" << openid << "\n";
+			cout << "Location: OAuth2Assoc.cgi?openid=" << openid << "\r\n";
 		}
 		else
 		{
-			cout << "Location: OAuth2Assoc.cgi?openid=" << openid << "&stid=" << id << "\n";
+			cout << "Location: OAuth2Assoc.cgi?openid=" << openid << "&stid=" << id << "\r\n";
 		}
 		cout << GLOBAL_HEADER;
 		free(html);
@@ -350,8 +350,8 @@ void OAuth2_CallBack()
 		return;
 	}
 
-	cout << "Status: 302 Found\n"
-		<< "Location: index.cgi?id=" << id << "&pass=" << password << "\n"
+	cout << "Status: 302 Found\r\n"
+		<< "Location: index.cgi?id=" << id << "&pass=" << password << "\r\n"
 		<< GLOBAL_HEADER;
 	
 	sqlite3_finalize(stmt);

@@ -9,7 +9,7 @@ bool InitSocketLibrary()
 	int m_dwRet = WSAStartup(MAKEWORD(2, 2), &WSAData);
 	if (m_dwRet != 0)
 	{
-		puts("Status: 500 Internal Server Error");
+		std::cout << "Status: 500 Internal Server Error";
 		Error("<p>无法初始化 Windows Socket。</p>");
 		return false;
 	}
@@ -29,7 +29,7 @@ bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTo
 	{
 		WSACleanup();
 		char m_ErrMsg[1024] = { 0 };
-		puts("Status: 500 Internal Server Error");
+		std::cout << "Status: 500 Internal Server Error\r\n";
 		sprintf(m_ErrMsg, "<p>无法创建 Socket。</p>\r\n<p>错误代码： %d</p>", WSAGetLastError());
 		Error(m_ErrMsg);
 		return false;
@@ -80,7 +80,7 @@ bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTo
 		WSACleanup();
 		if (!no_error_page)
 		{
-			puts("Status: 500 Internal Server Error");
+			std::cout << "Status: 500 Internal Server Error\r\n";
 			char buff[10] = { 0 };
 			_itoa(errid, buff, 10);
 			std::string err_msg("<p><b>连接学校服务器失败！</b></p><p>OS代码: (");
@@ -105,7 +105,7 @@ bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTo
 		WSACleanup();
 		if (!no_error_page)
 		{
-			puts("Status: 500 Internal Server Error");
+			std::cout << "Status: 500 Internal Server Error\r\n";
 			char m_ErrMsg[1024] = { 0 };
 			sprintf(m_ErrMsg, "<p>无法向教务系统投递请求。</p>\r\n<p>错误代码： %d</p>", WSAGetLastError());
 			Error(m_ErrMsg);
@@ -124,6 +124,7 @@ bool CrawlRequest(const char *p_rq, char *p_lpvBuffer, int p_iLength, int *p_iTo
 	{
 		*p_iTotalRead += m_iResult;
 	}
+
 	closesocket(g_so);
 	WSACleanup();
 	return true;
