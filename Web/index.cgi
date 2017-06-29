@@ -33,7 +33,7 @@
 				</div>
 				<div class="weui-cell__ft">
 					<button type="button" class="weui-vcode-btn" onclick="autofill();">
-						自动填充
+						自动填写密码
 					</button>
 				</div>
 			</div>
@@ -47,7 +47,7 @@
 					<input class="weui-input" name="yzm" id="i_yzm" type="text" placeholder="请输入验证码" />
 				</div>
 				<div class="weui-cell__ft">
-					<img onclick="get_captcha();" class="weui-vcode-img" id="login_captcha" alt="验证码" src="img/refresh.png" width="90.5" height="44" />
+					<img onclick="get_captcha();" class="weui-vcode-img" id="login_captcha" alt="验证码" src="img/refresh.png" width="120" height="44" />
 				</div>
 			</div>
 		</div>
