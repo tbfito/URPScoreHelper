@@ -140,6 +140,7 @@ void OAuth2_CallBack()
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, html);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, OAuth2_curl_receive);
 	curl_easy_setopt(curl, CURLOPT_URL, access_token_req);
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, USER_AGENT);
 	CURLcode ret = curl_easy_perform(curl);
 
 	if (ret != CURLE_OK)
@@ -212,6 +213,7 @@ void OAuth2_CallBack()
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, html);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, OAuth2_curl_receive);
 	curl_easy_setopt(curl, CURLOPT_URL,openid_req);
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, USER_AGENT);
 	ret = curl_easy_perform(curl);
 
 	if (ret != CURLE_OK)
