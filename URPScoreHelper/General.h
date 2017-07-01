@@ -29,6 +29,7 @@ extern const char* QUICK_SCORE;
 extern int CURL_TIMEOUT;
 extern char *SERVER_URL;
 extern char *USER_AGENT;
+extern char *CURL_PROXY_URL;
 extern char *OAUTH2_APPID;
 extern char *OAUTH2_SECRET;
 extern std::string ERROR_HTML;

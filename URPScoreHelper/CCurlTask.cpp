@@ -64,7 +64,10 @@ bool CCurlTask::Exec(bool headonly, std::string url, std::string cookie, bool is
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, this->curl_receive);
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 	curl_easy_setopt(curl, CURLOPT_USERAGENT, USER_AGENT);
-
+	if (strlen(CURL_PROXY_URL) != 0)
+	{
+		curl_easy_setopt(curl, CURLOPT_PROXY, CURL_PROXY_URL);
+	}
 	CURLcode ret = curl_easy_perform(curl);
 	if (ret != CURLE_OK)
 	{

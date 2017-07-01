@@ -300,11 +300,13 @@ void LoadConfig()
 	USER_AGENT = (char *)malloc(1024);
 	OAUTH2_APPID = (char *)malloc(1024);
 	OAUTH2_SECRET = (char *)malloc(1024);
+	CURL_PROXY_URL = (char *)malloc(1024);
 	char *lpvBuffer = (char *)malloc(128);
 	memset(SERVER_URL, 0, 1024);
 	memset(USER_AGENT, 0, 1024);
 	memset(OAUTH2_APPID, 0, 1024);
 	memset(OAUTH2_SECRET, 0, 1024);
+	memset(CURL_PROXY_URL, 0, 1024);
 	memset(lpvBuffer, 0, 128);
 	char *Dir = (char *)malloc(260);
 	GetCurrentDirectoryA(260, Dir);
@@ -314,7 +316,8 @@ void LoadConfig()
 	GetPrivateProfileStringA("Config", "CURL_TIMEOUT", "10", lpvBuffer, 128, Dir);
 	GetPrivateProfileStringA("Config", "OAUTH2_APPID", "NULL", OAUTH2_APPID, 1024, Dir);
 	GetPrivateProfileStringA("Config", "OAUTH2_SECRET", "NULL", OAUTH2_SECRET, 1024, Dir);
-	
+	GetPrivateProfileStringA("Config", "CURL_PROXY_URL", "", CURL_PROXY_URL, 1024, Dir);
+
 	CURL_TIMEOUT = atoi(lpvBuffer);
 	if (CURL_TIMEOUT <= 0)
 		CURL_TIMEOUT = 10;
