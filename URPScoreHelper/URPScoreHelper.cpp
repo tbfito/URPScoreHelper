@@ -70,7 +70,7 @@ int main(int argc, const char* argv[])
 
 			if (!LoadPageSrc())
 			{
-				cerr << "Status: 500 Internal Server Error\r\n"
+				cout << "Status: 500 Internal Server Error\r\n"
 					<< GLOBAL_HEADER
 					<< "<p>网页模板文件缺失或异常。</p>";
 				goto END_REQUEST;
@@ -104,6 +104,11 @@ int main(int argc, const char* argv[])
 						bool m_need_update_cookie = false;
 						std::string nullphoto;
 						process_cookie(&m_need_update_cookie, nullphoto);
+						if (nullphoto.empty())
+						{
+							cout << "Status: 302 Found\r\n" << "Location: /index.fcgi\r\n" << GLOBAL_HEADER;
+							goto END_REQUEST;
+						}
 						char student_id[36] = { 0 };
 						get_student_id(student_id);
 						student_logout();
@@ -225,6 +230,7 @@ int main(int argc, const char* argv[])
 		free(USER_AGENT);
 		free(OAUTH2_APPID);
 		free(OAUTH2_SECRET);
+		free(CURL_PROXY_URL);
 		curl_global_cleanup();
 		return 0;
 }

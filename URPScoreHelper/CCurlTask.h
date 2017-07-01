@@ -7,10 +7,9 @@ public:
 	bool CCurlTask::SetReferer(std::string & referer);
 	char *GetResult();
 	size_t GetLength();
-	std::string & GetStrResult();
 	
 private:
-	static size_t curl_receive(void *buffer, size_t size, size_t nmemb, void *curlclass);
+	static size_t curl_receive(void *buffer, size_t size, size_t nmemb, void *stringclass);
 	CURL* curl;
 	std::string result;
 };
