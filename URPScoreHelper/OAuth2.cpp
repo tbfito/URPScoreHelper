@@ -65,15 +65,15 @@ void OAuth2_process()
 	}
 	else if(strlen(stid) == 0)
 	{
-		delete[]stid;
 		m_lpszURL = new char[strlen(OAUTH2_AUTHENTICATION) + strlen(OAUTH2_APPID) + strlen(m_Domain) + 5];
 		sprintf(m_lpszURL, OAUTH2_AUTHENTICATION, OAUTH2_APPID, m_Domain, "NONE");
+		delete[]stid;
 	}
 	else
 	{
-		delete[]stid;
 		m_lpszURL = new char[strlen(OAUTH2_AUTHENTICATION) + strlen(OAUTH2_APPID) + strlen(m_Domain) + strlen(stid) + 1];
 		sprintf(m_lpszURL, OAUTH2_AUTHENTICATION, OAUTH2_APPID, m_Domain, stid);
+		delete[]stid;
 	}
 
 	cout << "Status: 302 Found\r\n";
@@ -151,11 +151,15 @@ void OAuth2_CallBack()
 		delete[]code;
 		return;
 	}
+	curl_easy_cleanup(curl);
 
 	pStr1 = strstr(html, "access_token=");
 	if (pStr1 == NULL)
 	{
-		Error(html);
+		std::string err("<p><b>无法读取 access_token</b></p><p>");
+		err.append(html);
+		err.append("</p>");
+		Error(err.c_str());
 		free(html);
 		delete[]access_token_req;
 		delete[]code;
@@ -203,6 +207,7 @@ void OAuth2_CallBack()
 	mid(openid, pStr1 + 14, pStr2 - pStr1 - 14, 0);*/
 	free(html);
 
+	curl = curl_easy_init();
 	html = (char *)malloc(1024);
 	memset(html, 0, 1024);
 	char openid_req[512] = { 0 };
@@ -228,7 +233,10 @@ void OAuth2_CallBack()
 	pStr1 = strstr(html, "\"openid\":\"");
 	if (pStr1 == NULL)
 	{
-		Error(html);
+		std::string err("<p><b>无法读取 openid</b></p><p>");
+		err.append(html);
+		err.append("</p>");
+		Error(err.c_str());
 		free(html);
 		delete[]access_token_req;
 		delete[]code;
