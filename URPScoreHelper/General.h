@@ -3,10 +3,16 @@
 #define SOFTWARE_NAME "唯扬小助手"
 #define SOFTWARE_COPYRIGHT "Copyright (C) 2012-2017 iEdon Inside"
 
+// Unix 兼容 Win 宏定义
 #ifdef ZeroMemory
 #undef ZeroMemory
 #endif
 #define ZeroMemory(Destination,Length) memset((Destination),0,(Length))
+#ifdef MAX_PATH
+#undef MAX_PATH
+#define MAX_PATH 260
+#endif
+
 
 // 外部使用的变量
 
@@ -26,6 +32,7 @@ extern const char* BEFORE_TEMPLATE;
 extern const char* AFTER_TEMPLATE;
 extern const char* QUICK_SCORE;
 
+extern sqlite3 * db;
 extern int CURL_TIMEOUT;
 extern bool CURL_USE_PROXY;
 extern char *SERVER_URL;

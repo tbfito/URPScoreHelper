@@ -172,6 +172,8 @@
   <ItemGroup>
     <ClInclude Include="CCurlTask.h" />
     <ClInclude Include="General.h" />
+    <ClInclude Include="ini.h" />
+    <ClInclude Include="INIReader.h" />
     <ClInclude Include="OAuth2.h" />
     <ClInclude Include="URPRequests.h" />
     <ClInclude Include="URPScoreHelper.h" />
@@ -182,6 +184,8 @@
   <ItemGroup>
     <ClCompile Include="CCurlTask.cpp" />
     <ClCompile Include="General.cpp" />
+    <ClCompile Include="ini.cpp" />
+    <ClCompile Include="INIReader.cpp" />
     <ClCompile Include="OAuth2.cpp" />
     <ClCompile Include="URPRequests.cpp" />
     <ClCompile Include="URPScoreHelper.cpp" />

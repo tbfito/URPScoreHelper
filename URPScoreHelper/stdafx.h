@@ -16,6 +16,8 @@
 extern "C"
 {
 #ifdef _WIN64
+	#include <direct.h>
+	#define getcwd _getcwd
 	#include "curl-7.53.1-win64-mingw/include/curl/curl.h"
 	#include "sqlite-3.1.8-win64/sqlite3.h"
 	#pragma comment(lib, "libfcgi/libfcgi_x64.lib")
@@ -23,11 +25,16 @@ extern "C"
 	#pragma comment(lib, "curl-7.53.1-win64-mingw/bin/libcurl.lib")
 #else
 	#ifdef _WIN32
+		#include <direct.h>
+		#define getcwd _getcwd
 		#include "curl-7.53.1-win32-mingw/include/curl/curl.h"
 		#include "sqlite-3.1.8-win32/sqlite3.h"
 		#pragma comment(lib, "libfcgi/libfcgi.lib")
 		#pragma comment(lib, "sqlite-3.1.8-win32/sqlite3.lib")
 		#pragma comment(lib, "curl-7.53.1-win32-mingw/bin/libcurl.lib")
+	#else
+		#include <unistd.h>
+		#include <curl/curl.h>
 	#endif
 #endif
 }

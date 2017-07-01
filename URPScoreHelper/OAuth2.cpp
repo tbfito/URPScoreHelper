@@ -10,6 +10,7 @@ void getRedirectUri(char *http_host, char *m_Domain)
 {
 	if (CGI_HTTPS != NULL && strcmp(CGI_HTTPS, "") != 0
 		&& strcmp(CGI_HTTPS, "off") != 0
+		&& strcmp(CGI_HTTPS, "OFF") != 0
 		&& strcmp(CGI_HTTPS, "0") != 0)
 	{
 		strcpy(m_Domain, "https://");
@@ -259,18 +260,7 @@ void OAuth2_CallBack()
 
 	//  成功拿到 access_token 和 openid
 
-	sqlite3 * db = NULL;
-	int db_ret = sqlite3_open("URPScoreHelper.db", &db);
-	if (db_ret != SQLITE_OK)
-	{
-		Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
-		free(html);
-		delete[]access_token;
-		delete[]access_token_req;
-		delete[]openid;
-		delete[]code;
-		return;
-	}
+
 
 	// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
 	std::string query("SELECT id, password FROM URPScoreHelper WHERE openid='");
@@ -279,7 +269,7 @@ void OAuth2_CallBack()
 
 	char **db_Result = NULL;
 	sqlite3_stmt *stmt;
-	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
 
 	if (db_ret != SQLITE_OK)
 	{
@@ -289,7 +279,6 @@ void OAuth2_CallBack()
 		Error(Err_Msg);
 		free(html);
 		sqlite3_finalize(stmt);
-		sqlite3_close(db);
 		delete[]access_token;
 		delete[]access_token_req;
 		delete[]openid;
@@ -336,7 +325,6 @@ void OAuth2_CallBack()
 		cout << GLOBAL_HEADER;
 		free(html);
 		sqlite3_finalize(stmt);
-		sqlite3_close(db);
 		delete[]access_token;
 		delete[]access_token_req;
 		delete[]openid;
@@ -349,7 +337,6 @@ void OAuth2_CallBack()
 		<< GLOBAL_HEADER;
 	
 	sqlite3_finalize(stmt);
-	sqlite3_close(db);
 	delete[]access_token;
 	delete[]access_token_req;
 	delete[]openid;

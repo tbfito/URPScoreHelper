@@ -10,6 +10,7 @@ FILE *g_fQueryCount;
 unsigned long long g_QueryCount;
 clock_t g_start_time;
 int g_users;
+sqlite3 *db;
 
 FCGX_Request request; //全局可以使用的请求
 char *CGI_SCRIPT_NAME; // 脚本名字
@@ -21,6 +22,8 @@ char *CGI_PATH_TRANSLATED; // 脚本位置
 char *CGI_HTTP_COOKIE; // Cookie
 char *CGI_HTTP_HOST;
 char *CGI_HTTPS;
+bool isPageSrcLoadSuccess;
+bool isdbReady;
 
 int parse_main(bool p_need_set_cookie, std::string & p_photo);
 int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri);
@@ -34,7 +37,7 @@ void student_logout();
 bool student_login(char *p_xuehao, char *p_password, char *p_captcha);
 void parse_QuickQuery_Intro();
 void parse_QuickQuery_Result();
-bool LoadPageSrc();
+void LoadPageSrc();
 void OAuth2_Association(bool isPOST);
 void LoadConfig();
 void parse_teaching_evaluation();

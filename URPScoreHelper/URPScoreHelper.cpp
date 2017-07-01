@@ -13,6 +13,8 @@
 #include "CCurlTask.h"
 #include "OAuth2.h"
 #include "URPRequests.h"
+#include "INIReader.h"
+
 #ifdef _WIN64
 #include "resource.h"
 #else
@@ -31,6 +33,7 @@ int main(int argc, const char* argv[])
 	FCGX_Init();
 	curl_global_init(CURL_GLOBAL_ALL);
 	static char *emptystr = "";
+	isPageSrcLoadSuccess = false;
 
 	int FCGX_SocketId = 0;
 	if (argc == 3)
@@ -45,209 +48,228 @@ int main(int argc, const char* argv[])
 
 	FCGX_InitRequest(&request, FCGX_SocketId, 0);
 
-	while (FCGX_Accept_r(&request) == 0) {
+	while (FCGX_Accept_r(&request) == 0)
+	{
 
-			g_start_time = GetTickCount();
+		g_start_time = GetTickCount();
+		if (isdbReady)
+		{
 			SetUsersCounter();
+		}
 
-			fcgi_streambuf cin_fcgi_streambuf(request.in);
-			fcgi_streambuf cout_fcgi_streambuf(request.out);
-			fcgi_streambuf cerr_fcgi_streambuf(request.err);
+		fcgi_streambuf cin_fcgi_streambuf(request.in);
+		fcgi_streambuf cout_fcgi_streambuf(request.out);
+		fcgi_streambuf cerr_fcgi_streambuf(request.err);
 
-			cin.rdbuf(&cin_fcgi_streambuf);
-			cout.rdbuf(&cout_fcgi_streambuf);
-			cerr.rdbuf(&cerr_fcgi_streambuf);
-			
-			CGI_REQUEST_URI = FCGX_GetParam("REQUEST_URI", request.envp); // 请求URI
-			CGI_REQUEST_METHOD = FCGX_GetParam("REQUEST_METHOD", request.envp); // 请求方法
-			CGI_CONTENT_LENGTH = FCGX_GetParam("CONTENT_LENGTH", request.envp); // 数据长度
-			CGI_SCRIPT_NAME = FCGX_GetParam("SCRIPT_NAME", request.envp); // 脚本名称
-			CGI_QUERY_STRING = FCGX_GetParam("QUERY_STRING", request.envp); // 查询参数
-			CGI_PATH_TRANSLATED = FCGX_GetParam("PATH_TRANSLATED", request.envp); // 脚本位置
-			CGI_HTTP_COOKIE = FCGX_GetParam("HTTP_COOKIE", request.envp); // Cookie
-			CGI_HTTPS = FCGX_GetParam("HTTPS", request.envp);
-			CGI_HTTP_HOST = FCGX_GetParam("HTTP_HOST", request.envp);
+		cin.rdbuf(&cin_fcgi_streambuf);
+		cout.rdbuf(&cout_fcgi_streambuf);
+		cerr.rdbuf(&cerr_fcgi_streambuf);
 
-			if (!LoadPageSrc())
+		CGI_REQUEST_URI = FCGX_GetParam("REQUEST_URI", request.envp); // 请求URI
+		CGI_REQUEST_METHOD = FCGX_GetParam("REQUEST_METHOD", request.envp); // 请求方法
+		CGI_CONTENT_LENGTH = FCGX_GetParam("CONTENT_LENGTH", request.envp); // 数据长度
+		CGI_SCRIPT_NAME = FCGX_GetParam("SCRIPT_NAME", request.envp); // 脚本名称
+		CGI_QUERY_STRING = FCGX_GetParam("QUERY_STRING", request.envp); // 查询参数
+		CGI_PATH_TRANSLATED = FCGX_GetParam("PATH_TRANSLATED", request.envp); // 脚本位置
+		CGI_HTTP_COOKIE = FCGX_GetParam("HTTP_COOKIE", request.envp); // Cookie
+		CGI_HTTPS = FCGX_GetParam("HTTPS", request.envp);
+		CGI_HTTP_HOST = FCGX_GetParam("HTTP_HOST", request.envp);
+
+		if (!isdbReady)
+		{
+			cout << "Status: 500 Internal Server Error\r\n"
+				<< GLOBAL_HEADER
+				<< "<p><b>数据库打开失败</b></p><p>请检查 Database.db 是否存在。</p>";
+			goto END_REQUEST;
+		}
+
+		if (!isPageSrcLoadSuccess)
+		{
+			LoadPageSrc();
+			if (!isPageSrcLoadSuccess)
 			{
 				cout << "Status: 500 Internal Server Error\r\n"
 					<< GLOBAL_HEADER
 					<< "<p>网页模板文件缺失或异常。</p>";
 				goto END_REQUEST;
 			}
-			
-			if (CGI_REQUEST_METHOD == NULL  || CGI_SCRIPT_NAME == NULL || CGI_QUERY_STRING == NULL ||
-				CGI_PATH_TRANSLATED == NULL || CGI_CONTENT_LENGTH == NULL)
-			{
-				cout << "Status: 500 Internal Server Error\r\n"
-					<< GLOBAL_HEADER
-					<< "<p>FastCGI 接口异常，请检查设置。</p>";
-				goto END_REQUEST;
-			}
-			if (CGI_HTTP_COOKIE == NULL)
-			{
-				CGI_HTTP_COOKIE = emptystr;
-			}
-
-			if (strcmp(CGI_REQUEST_METHOD, "GET") == 0) // 如果是 GET 请求
-			{
-				if (strcmp(CGI_SCRIPT_NAME, "/") == 0 || strcmp(CGI_SCRIPT_NAME, "/index.fcgi") == 0)
-				{
-					if (strcmp(CGI_QUERY_STRING, "act=logout") == 0)
-					{
-						student_logout();
-						cout << "Status: 302 Found\r\n" << "Location: /\r\n" << GLOBAL_HEADER;
-						goto END_REQUEST;
-					}
-					if (strcmp(CGI_QUERY_STRING, "act=requestAssoc") == 0)
-					{
-						bool m_need_update_cookie = false;
-						std::string nullphoto;
-						process_cookie(&m_need_update_cookie, nullphoto);
-						if (nullphoto.empty())
-						{
-							cout << "Status: 302 Found\r\n" << "Location: /index.fcgi\r\n" << GLOBAL_HEADER;
-							goto END_REQUEST;
-						}
-						char student_id[36] = { 0 };
-						get_student_id(student_id);
-						student_logout();
-						cout << "Status: 302 Found\r\n" << "Location: OAuth2.fcgi?stid=" << student_id << "\r\n" << GLOBAL_HEADER;
-						goto END_REQUEST;
-					}
-					if (strcmp(CGI_REQUEST_URI, "/index.fcgi") == 0)
-					{
-						cout << "Status: 302 Found\r\n" << "Location: /\r\n" << GLOBAL_HEADER;
-						goto END_REQUEST;
-					}
-					parse_index();
-					goto END_REQUEST;
-				}
-				if (strcmp(CGI_SCRIPT_NAME, "/main.fcgi") == 0)
-				{
-					bool need_update_cookie = false;
-					std::string nullphoto;
-					parse_main(need_update_cookie, nullphoto);
-					goto END_REQUEST;
-				}
-				if (strcmp(CGI_SCRIPT_NAME, "/OAuth2.fcgi") == 0)
-				{
-					OAuth2_process();
-					goto END_REQUEST;
-				}
-				if (strcmp(CGI_SCRIPT_NAME, "/OAuth2CallBack.fcgi") == 0)
-				{
-					OAuth2_CallBack();
-					goto END_REQUEST;
-				}
-				if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.fcgi") == 0)
-				{
-					OAuth2_Association(false);
-					goto END_REQUEST;
-				}
-				if (strcmp(CGI_SCRIPT_NAME, "/query.fcgi") == 0)
-				{
-					if (strcmp(CGI_QUERY_STRING, "act=system_registration") == 0)
-					{
-						system_registration();
-						goto END_REQUEST;
-					}
-					parse_query();
-					goto END_REQUEST;
-				}
-				if (strcmp(CGI_SCRIPT_NAME, "/QuickQuery.fcgi") == 0)
-				{
-					parse_QuickQuery_Intro();
-					goto END_REQUEST;
-				}
-				if (strcmp(CGI_SCRIPT_NAME, "/TeachEval.fcgi") == 0)
-				{
-					parse_teaching_evaluation();
-					goto END_REQUEST;
-				}
-				if (strcmp(CGI_SCRIPT_NAME, "/changePassword.fcgi") == 0)
-				{
-					parse_change_password();
-					goto END_REQUEST;
-				}
-				if (strcmp(CGI_SCRIPT_NAME, "/captcha.fcgi") == 0)
-				{
-					parse_ajax_captcha();
-					goto END_REQUEST;
-				}
-				cout << "Status: 404 Not Found\r\n";
-				Error("<p>找不到该页面。</p>");
-				goto END_REQUEST;
-			}
-			if (strcmp(CGI_REQUEST_METHOD, "POST") == 0) // 如果是 POST 请求
-			{
-				if (strcmp(CGI_SCRIPT_NAME, "/changePassword.fcgi") == 0)
-				{
-					do_change_password();
-					goto END_REQUEST;
-				}
-				if (strcmp(CGI_SCRIPT_NAME, "/query.fcgi") == 0)
-				{
-					if (strcmp(CGI_QUERY_STRING, "act=QuickQuery") == 0)
-					{
-						parse_QuickQuery_Result();
-						goto END_REQUEST;
-					}
-					parse_query();
-					goto END_REQUEST;
-				}
-				if (strcmp(CGI_SCRIPT_NAME, "/main.fcgi") == 0)
-				{
-					std::string nullphoto;
-					parse_main(false, nullphoto);
-					goto END_REQUEST;
-				}
-				if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.fcgi") == 0)
-				{
-					OAuth2_Association(true);
-					goto END_REQUEST;
-				}
-				if (strcmp(CGI_SCRIPT_NAME, "/TeachEval.fcgi") == 0)
-				{
-					if (strcmp(CGI_QUERY_STRING, "act=Evaluate") == 0)
-					{
-						teaching_evaluation();
-						goto END_REQUEST;
-					}
-				}
-			}
-			cout << "Status: 500 Internal Server Error\r\n";
-			Error("<p>发生错误，未经处理的异常。</p>");
-			goto END_REQUEST;
-					END_REQUEST : 
-						ZeroMemory(JSESSIONID, 256);
-						FCGX_Finish_r(&request);
-						//_CrtDumpMemoryLeaks();
-						continue;
 		}
-		cout << SOFTWARE_NAME << endl << SOFTWARE_COPYRIGHT << endl << endl << "\tOptions: [-p :port_number]" << endl;
+
+		if (CGI_REQUEST_METHOD == NULL || CGI_SCRIPT_NAME == NULL || CGI_QUERY_STRING == NULL ||
+			CGI_PATH_TRANSLATED == NULL || CGI_CONTENT_LENGTH == NULL)
+		{
+			cout << "Status: 500 Internal Server Error\r\n"
+				<< GLOBAL_HEADER
+				<< "<p>FastCGI 接口异常，请检查设置。</p>";
+			goto END_REQUEST;
+		}
+		if (CGI_HTTP_COOKIE == NULL)
+		{
+			CGI_HTTP_COOKIE = emptystr;
+		}
+
+		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0) // 如果是 GET 请求
+		{
+			if (strcmp(CGI_SCRIPT_NAME, "/") == 0 || strcmp(CGI_SCRIPT_NAME, "/index.fcgi") == 0)
+			{
+				if (strcmp(CGI_QUERY_STRING, "act=logout") == 0)
+				{
+					student_logout();
+					cout << "Status: 302 Found\r\n" << "Location: /\r\n" << GLOBAL_HEADER;
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_QUERY_STRING, "act=requestAssoc") == 0)
+				{
+					bool m_need_update_cookie = false;
+					std::string nullphoto;
+					process_cookie(&m_need_update_cookie, nullphoto);
+					if (nullphoto.empty())
+					{
+						cout << "Status: 302 Found\r\n" << "Location: /index.fcgi\r\n" << GLOBAL_HEADER;
+						goto END_REQUEST;
+					}
+					char student_id[36] = { 0 };
+					get_student_id(student_id);
+					student_logout();
+					cout << "Status: 302 Found\r\n" << "Location: OAuth2.fcgi?stid=" << student_id << "\r\n" << GLOBAL_HEADER;
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_REQUEST_URI, "/index.fcgi") == 0)
+				{
+					cout << "Status: 302 Found\r\n" << "Location: /\r\n" << GLOBAL_HEADER;
+					goto END_REQUEST;
+				}
+				parse_index();
+				goto END_REQUEST;
+			}
+			if (strcmp(CGI_SCRIPT_NAME, "/main.fcgi") == 0)
+			{
+				bool need_update_cookie = false;
+				std::string nullphoto;
+				parse_main(need_update_cookie, nullphoto);
+				goto END_REQUEST;
+			}
+			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2.fcgi") == 0)
+			{
+				OAuth2_process();
+				goto END_REQUEST;
+			}
+			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2CallBack.fcgi") == 0)
+			{
+				OAuth2_CallBack();
+				goto END_REQUEST;
+			}
+			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.fcgi") == 0)
+			{
+				OAuth2_Association(false);
+				goto END_REQUEST;
+			}
+			if (strcmp(CGI_SCRIPT_NAME, "/query.fcgi") == 0)
+			{
+				if (strcmp(CGI_QUERY_STRING, "act=system_registration") == 0)
+				{
+					system_registration();
+					goto END_REQUEST;
+				}
+				parse_query();
+				goto END_REQUEST;
+			}
+			if (strcmp(CGI_SCRIPT_NAME, "/QuickQuery.fcgi") == 0)
+			{
+				parse_QuickQuery_Intro();
+				goto END_REQUEST;
+			}
+			if (strcmp(CGI_SCRIPT_NAME, "/TeachEval.fcgi") == 0)
+			{
+				parse_teaching_evaluation();
+				goto END_REQUEST;
+			}
+			if (strcmp(CGI_SCRIPT_NAME, "/changePassword.fcgi") == 0)
+			{
+				parse_change_password();
+				goto END_REQUEST;
+			}
+			if (strcmp(CGI_SCRIPT_NAME, "/captcha.fcgi") == 0)
+			{
+				parse_ajax_captcha();
+				goto END_REQUEST;
+			}
+			cout << "Status: 404 Not Found\r\n";
+			Error("<p>找不到该页面。</p>");
+			goto END_REQUEST;
+		}
+		if (strcmp(CGI_REQUEST_METHOD, "POST") == 0) // 如果是 POST 请求
+		{
+			if (strcmp(CGI_SCRIPT_NAME, "/changePassword.fcgi") == 0)
+			{
+				do_change_password();
+				goto END_REQUEST;
+			}
+			if (strcmp(CGI_SCRIPT_NAME, "/query.fcgi") == 0)
+			{
+				if (strcmp(CGI_QUERY_STRING, "act=QuickQuery") == 0)
+				{
+					parse_QuickQuery_Result();
+					goto END_REQUEST;
+				}
+				parse_query();
+				goto END_REQUEST;
+			}
+			if (strcmp(CGI_SCRIPT_NAME, "/main.fcgi") == 0)
+			{
+				std::string nullphoto;
+				parse_main(false, nullphoto);
+				goto END_REQUEST;
+			}
+			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.fcgi") == 0)
+			{
+				OAuth2_Association(true);
+				goto END_REQUEST;
+			}
+			if (strcmp(CGI_SCRIPT_NAME, "/TeachEval.fcgi") == 0)
+			{
+				if (strcmp(CGI_QUERY_STRING, "act=Evaluate") == 0)
+				{
+					teaching_evaluation();
+					goto END_REQUEST;
+				}
+			}
+		}
+		cout << "Status: 500 Internal Server Error\r\n";
+		Error("<p>发生错误，未经处理的异常。</p>");
+		goto END_REQUEST;
+
+		END_REQUEST:
+			ZeroMemory(JSESSIONID, 256);
+			FCGX_Finish_r(&request);
+			//_CrtDumpMemoryLeaks();
+			continue;
+	}
+		printf("%s\n%s\n\n%s\n", SOFTWARE_NAME, SOFTWARE_COPYRIGHT, "\tOptions: [-p (localhost):port_number]");
+		curl_global_cleanup();
+		sqlite3_close(db);
 		free(SERVER_URL);
 		free(USER_AGENT);
 		free(OAUTH2_APPID);
 		free(OAUTH2_SECRET);
 		free(CURL_PROXY_URL);
-		curl_global_cleanup();
 		return 0;
 }
 
 // 预加载头部和尾部页面(header.fcgi, footer.fcgi, error.fcgi)
-bool LoadPageSrc()
+void LoadPageSrc()
 {
 	// 读入主页面文件
-	char *pStr = strstr((char *)CGI_PATH_TRANSLATED, "\\");
+	char *pStr = strstr(CGI_PATH_TRANSLATED, "\\");
 	bool isUnixBasedPath = (pStr == NULL);
 	if (isUnixBasedPath)
 	{
-		pStr = strstr((char *)CGI_PATH_TRANSLATED, "/");
+		pStr = strstr(CGI_PATH_TRANSLATED, "/");
 	}
 	if (pStr == NULL)
 	{
-		return false;
+		isPageSrcLoadSuccess = false;
+		return;
 	}
 	char *Last = NULL;
 	while (pStr != NULL)
@@ -265,7 +287,7 @@ bool LoadPageSrc()
 	char *doc_root = new char[MAX_PATH];
 	memset(doc_root, 0, MAX_PATH);
 
-	mid(doc_root, (char *)CGI_PATH_TRANSLATED, Last - (char *)CGI_PATH_TRANSLATED + 1, 0);
+	mid(doc_root, CGI_PATH_TRANSLATED, Last - CGI_PATH_TRANSLATED + 1, 0);
 	char *file_root = new char[MAX_PATH];
 	memset(file_root, 0, MAX_PATH);
 
@@ -286,7 +308,8 @@ bool LoadPageSrc()
 	// 未能加载这些模板
 	if (header.empty() || footer.empty() || error.empty())
 	{
-		return false;
+		isPageSrcLoadSuccess = false;
+		return;
 	}
 	
 	std::string title("提示 - ");
@@ -296,7 +319,7 @@ bool LoadPageSrc()
 
 	delete[]doc_root;
 	delete[]file_root;
-	return true;
+	isPageSrcLoadSuccess = true;
 }
 
 // 加载配置
@@ -308,29 +331,70 @@ void LoadConfig()
 	OAUTH2_SECRET = (char *)malloc(1024);
 	CURL_PROXY_URL = (char *)malloc(1024);
 	char *lpvBuffer = (char *)malloc(128);
+
 	memset(SERVER_URL, 0, 1024);
 	memset(USER_AGENT, 0, 1024);
 	memset(OAUTH2_APPID, 0, 1024);
 	memset(OAUTH2_SECRET, 0, 1024);
 	memset(CURL_PROXY_URL, 0, 1024);
 	memset(lpvBuffer, 0, 128);
+
 	char *Dir = (char *)malloc(260);
-	GetCurrentDirectoryA(260, Dir);
-	strcat(Dir, "\\config.ini");
-	GetPrivateProfileStringA("Config", "SERVER_URL", "http://127.0.0.1", SERVER_URL, 1024, Dir);
-	GetPrivateProfileStringA("Config", "USER_AGENT", SOFTWARE_NAME, USER_AGENT, 1024, Dir);
-	GetPrivateProfileStringA("Config", "CURL_TIMEOUT", "10", lpvBuffer, 128, Dir);
-	GetPrivateProfileStringA("Config", "OAUTH2_APPID", "NULL", OAUTH2_APPID, 1024, Dir);
-	GetPrivateProfileStringA("Config", "OAUTH2_SECRET", "NULL", OAUTH2_SECRET, 1024, Dir);
-	GetPrivateProfileStringA("Config", "CURL_PROXY_URL", "", CURL_PROXY_URL, 1024, Dir);
+	memset(Dir, 0, 260);
+	getcwd(Dir, MAX_PATH);
+	char *pStr = strstr(Dir, "\\");
+	bool isUnixBasedPath = (pStr == NULL);
+	if (isUnixBasedPath) // Unix-like system
+	{
+		strcat(Dir, "/config.ini");
+	}
+	else // for windows
+	{
+		strcat(Dir, "\\config.ini");
+	}
+
+	INIReader reader(Dir);
+	if (reader.ParseError() != 0) {
+		strcpy(SERVER_URL, "http://127.0.0.1");
+		strcpy(USER_AGENT, SOFTWARE_NAME);
+		strcpy(lpvBuffer, "10");
+		strcpy(OAUTH2_APPID, "NULL");
+		strcpy(OAUTH2_SECRET, "NULL");
+		strcpy(CURL_PROXY_URL, "");
+	}
+	else
+	{
+		strcpy(SERVER_URL, reader.Get("Config", "SERVER_URL", "http://127.0.0.1").c_str());
+		strcpy(USER_AGENT, reader.Get("Config", "USER_AGENT", SOFTWARE_NAME).c_str());
+		strcpy(lpvBuffer, reader.Get("Config", "CURL_TIMEOUT", "10").c_str());
+		strcpy(OAUTH2_APPID, reader.Get("Config", "OAUTH2_APPID", "NULL").c_str());
+		strcpy(OAUTH2_SECRET, reader.Get("Config", "OAUTH2_SECRET", "NULL").c_str());
+		strcpy(CURL_PROXY_URL, reader.Get("Config", "CURL_PROXY_URL", "").c_str());
+	}
+		
 	CURL_TIMEOUT = atoi(lpvBuffer);
 	if (CURL_TIMEOUT <= 0)
 		CURL_TIMEOUT = 10;
 	memset(lpvBuffer, 0, 128);
-	GetPrivateProfileStringA("Config", "CURL_USE_PROXY", "1", lpvBuffer, 128, Dir);
+	if (reader.ParseError() == 0)
+	{
+		strcpy(lpvBuffer, reader.Get("Config", "CURL_USE_PROXY", "0").c_str());
+	}
 	CURL_USE_PROXY = (atoi(lpvBuffer) == 1);
+
 	free(lpvBuffer);
 	free(Dir);
+	
+	db = NULL;
+	int db_ret = sqlite3_open("Database.db", &db);
+	if (db_ret != SQLITE_OK)
+	{
+		isdbReady = false;
+	}
+	else
+	{
+		isdbReady = true;
+	}
 }
 
 // 更新用户数量计数器
@@ -352,24 +416,16 @@ void SetUsersCounter()
 		fseek(g_fQueryCount, 0, SEEK_SET);
 		fclose(g_fQueryCount);
 	}
-	
-	sqlite3 * db = NULL;
-	int db_ret = sqlite3_open("URPScoreHelper.db", &db);
-	if (db_ret != SQLITE_OK)
-	{
-		return;
-	}
 
 	std::string query("SELECT COUNT(*) FROM URPScoreHelper;");
 
 	char **db_Result = NULL;
 	sqlite3_stmt *stmt;
-	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
 
 	if (db_ret != SQLITE_OK)
 	{
 		sqlite3_finalize(stmt);
-		sqlite3_close(db);
 		return;
 	}
 
@@ -385,7 +441,6 @@ void SetUsersCounter()
 		g_users = atoi((const char *)counts);
 	}
 	sqlite3_finalize(stmt);
-	sqlite3_close(db);
 }
 
 // 处理 Cookie、照片(p_photo_uri 为空代表不要照片, 随便设置内容不为空则会向里面写入照片数据)
@@ -582,14 +637,6 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 	title += " - ";
 	title += SOFTWARE_NAME;
 
-	sqlite3 * db = NULL;
-	int db_ret = sqlite3_open("URPScoreHelper.db", &db);
-	if (db_ret != SQLITE_OK)
-	{
-		Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
-		return -1;
-	}
-
 	// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
 	std::string query("SELECT openid FROM URPScoreHelper WHERE id='");
 	query.append(m_student_id);
@@ -597,7 +644,7 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 
 	char **db_Result = NULL;
 	sqlite3_stmt *stmt;
-	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
 
 	if (db_ret != SQLITE_OK)
 	{
@@ -606,7 +653,6 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 		Err_Msg.append(")</p>");
 		Error(Err_Msg.c_str());
 		sqlite3_finalize(stmt);
-		sqlite3_close(db);
 		return -1;
 	}
 
@@ -619,7 +665,6 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 	}
 
 	sqlite3_finalize(stmt);
-	sqlite3_close(db);
 
 	cout << strformat( header.c_str(), title.c_str());
 
@@ -1426,16 +1471,6 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		return false;
 	}
 
-	// 这里表示登录成功，应该写入数据库了。
-	sqlite3 * db = NULL;
-	int db_ret = sqlite3_open("URPScoreHelper.db", &db);
-	if (db_ret != SQLITE_OK)
-	{
-		student_logout();
-		Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
-		return false;
-	}
-
 	// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
 	std::string query("SELECT id FROM URPScoreHelper WHERE id='");
 	query += p_xuehao;
@@ -1443,7 +1478,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 
 	char **db_Result = NULL;
 	sqlite3_stmt *stmt;
-	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
 
 	if (db_ret != SQLITE_OK)
 	{
@@ -1453,7 +1488,6 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		Err_Msg += ")</p>";
 		Error(Err_Msg.c_str());
 		sqlite3_finalize(stmt);
-		sqlite3_close(db);
 		return false;
 	}
 
@@ -1492,7 +1526,6 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 			Err_Msg += ")</p>";
 			Error(Err_Msg.c_str());
 			sqlite3_finalize(stmt);
-			sqlite3_close(db);
 			return false;
 		}
 		sqlite3_step(stmt);
@@ -1500,15 +1533,6 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	}
 	else // 为成功登录的学生更新记录
 	{
-		sqlite3 * db = NULL;
-		int db_ret = sqlite3_open("URPScoreHelper.db", &db);
-		if (db_ret != SQLITE_OK)
-		{
-			student_logout();
-			Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
-			return false;
-		}
-
 		// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128) text lastlogin(64)。
 		std::string query("UPDATE URPScoreHelper SET password='");
 		char m_time[128] = { 0 };
@@ -1532,20 +1556,15 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 			Err_Msg += ")</p>";
 			Error(Err_Msg.c_str());
 			sqlite3_finalize(stmt);
-			sqlite3_close(db);
 			return false;
 		}
-
 		while (sqlite3_step(stmt) == SQLITE_ROW)
 		{
 			break;
 		}
-
 		sqlite3_finalize(stmt);
 	}
-
-	// 至此，学生登录成功，释放资源。
-	sqlite3_close(db);
+	// 至此，学生登录成功
 	return true;
 }
 
@@ -2031,14 +2050,6 @@ void OAuth2_Association(bool isPOST)
 			return;
 		}
 
-		sqlite3 * db = NULL;
-		int db_ret = sqlite3_open("URPScoreHelper.db", &db);
-		if (db_ret != SQLITE_OK)
-		{
-			Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
-			return;
-		}
-
 		// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
 		/*char *query = new char[strlen("DELETE FROM URPScoreHelper WHERE id='") + 36 + 1];
 		memset(query, 0, strlen("DELETE FROM URPScoreHelper WHERE id='") + 36 + 1);
@@ -2051,7 +2062,7 @@ void OAuth2_Association(bool isPOST)
 
 		char **db_Result = NULL;
 		sqlite3_stmt *stmt;
-		db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+		int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
 
 		if (db_ret != SQLITE_OK)
 		{
@@ -2060,7 +2071,6 @@ void OAuth2_Association(bool isPOST)
 			Err_Msg += ")</p>";
 			Error(Err_Msg.c_str());
 			sqlite3_finalize(stmt);
-			sqlite3_close(db);
 			return;
 		}
 
@@ -2070,7 +2080,6 @@ void OAuth2_Association(bool isPOST)
 		}
 
 		sqlite3_finalize(stmt);
-		sqlite3_close(db);
 		cout << "Status: 302 Found\r\nLocation: main.fcgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
@@ -2129,15 +2138,6 @@ void OAuth2_Association(bool isPOST)
 		char pass[512] = {0};
 		if (strlen(stid) != 0)
 		{
-			sqlite3 * db = NULL;
-			int db_ret = sqlite3_open("URPScoreHelper.db", &db);
-			if (db_ret != SQLITE_OK)
-			{
-				Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
-				delete[]openid;
-				return;
-			}
-
 			// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
 			std::string query("SELECT password FROM URPScoreHelper WHERE id='");
 			query += stid;
@@ -2145,7 +2145,7 @@ void OAuth2_Association(bool isPOST)
 
 			char **db_Result = NULL;
 			sqlite3_stmt *stmt;
-			db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+			int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
 
 			if (db_ret != SQLITE_OK)
 			{
@@ -2154,7 +2154,6 @@ void OAuth2_Association(bool isPOST)
 				strcat(Err_Msg, ")</p>");
 				Error(Err_Msg);
 				sqlite3_finalize(stmt);
-				sqlite3_close(db);
 				delete[]openid;
 				return;
 			}
@@ -2172,7 +2171,6 @@ void OAuth2_Association(bool isPOST)
 			}
 			sqlite3_step(stmt);
 			sqlite3_finalize(stmt);
-			sqlite3_close(db);
 		}
 
 		std::string m_lpszHomepage = ReadTextFileToMem(CGI_PATH_TRANSLATED);
@@ -2265,17 +2263,8 @@ void OAuth2_Association(bool isPOST)
 			delete[]openid;
 			return;
 		}
-		// 这里表示登录成功，应该写入数据库了。
-		sqlite3 * db = NULL;
-		int db_ret = sqlite3_open("URPScoreHelper.db", &db);
-		if (db_ret != SQLITE_OK)
-		{
-			Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
-			free(m_post_data);
-			delete[]openid;
-			return;
-		}
 
+		// 这里表示登录成功，应该写入数据库了。
 		// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
 		std::string query("UPDATE URPScoreHelper SET openid='");
 		query += openid;
@@ -2285,7 +2274,7 @@ void OAuth2_Association(bool isPOST)
 
 		char **db_Result = NULL;
 		sqlite3_stmt *stmt;
-		db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+		int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
 
 		if (db_ret != SQLITE_OK)
 		{
@@ -2294,7 +2283,6 @@ void OAuth2_Association(bool isPOST)
 			strcat(Err_Msg, ")</p><p>但是别方吖，还可以正常登录的。</p>");
 			Error(Err_Msg);
 			sqlite3_finalize(stmt);
-			sqlite3_close(db);
 			free(m_post_data);
 			delete[]openid;
 			return;
@@ -2302,7 +2290,6 @@ void OAuth2_Association(bool isPOST)
 
 		sqlite3_step(stmt);
 		sqlite3_finalize(stmt);
-		sqlite3_close(db);
 
 		cout << "Status: 302 Found\r\n";
 		cout << "Location: main.fcgi\r\n";
@@ -2549,6 +2536,8 @@ void teaching_evaluation()
 		counts++;
 		m_result1 = strstr(m_result, "<td align=\"center\">是</td>");
 		m_result = strstr(m_result + 11, "<img name=\"");
+
+		free(tmp);
 	}
 
 	int to_eval = 0;
@@ -2718,6 +2707,7 @@ void do_change_password() //(POST /changePassword.fcgi)
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);
 	FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
+
 	// 获取新密码
 	char *pStr1 = strstr(m_post_data, "mm=");
 	if (pStr1 == NULL)
@@ -2760,14 +2750,6 @@ void do_change_password() //(POST /changePassword.fcgi)
 		return;
 	}
 
-	sqlite3 * db = NULL;
-	int db_ret = sqlite3_open("URPScoreHelper.db", &db);
-	if (db_ret != SQLITE_OK)
-	{
-		Error("密码修改成功，但打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
-		return;
-	}
-
 	// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128) text lastlogin(64)。
 	std::string query("UPDATE URPScoreHelper SET password='");
 	char m_time[128] = { 0 };
@@ -2783,7 +2765,7 @@ void do_change_password() //(POST /changePassword.fcgi)
 
 	char **db_Result = NULL;
 	sqlite3_stmt *stmt;
-	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
 
 	if (db_ret != SQLITE_OK)
 	{
@@ -2792,7 +2774,6 @@ void do_change_password() //(POST /changePassword.fcgi)
 		Err_Msg += ")</p>";
 		Error(Err_Msg.c_str());
 		sqlite3_finalize(stmt);
-		sqlite3_close(db);
 		return;
 	}
 
