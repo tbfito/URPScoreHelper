@@ -27,6 +27,7 @@ extern const char* AFTER_TEMPLATE;
 extern const char* QUICK_SCORE;
 
 extern int CURL_TIMEOUT;
+extern bool CURL_USE_PROXY;
 extern char *SERVER_URL;
 extern char *USER_AGENT;
 extern char *CURL_PROXY_URL;

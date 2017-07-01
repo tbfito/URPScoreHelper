@@ -22,6 +22,7 @@ char *USER_AGENT = NULL;
 int CURL_TIMEOUT = 10;
 char *OAUTH2_APPID = NULL;
 char *OAUTH2_SECRET = NULL;
+bool CURL_USE_PROXY = false;
 char *CURL_PROXY_URL = NULL;
 
 /*

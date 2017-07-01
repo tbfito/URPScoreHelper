@@ -323,11 +323,12 @@ void LoadConfig()
 	GetPrivateProfileStringA("Config", "OAUTH2_APPID", "NULL", OAUTH2_APPID, 1024, Dir);
 	GetPrivateProfileStringA("Config", "OAUTH2_SECRET", "NULL", OAUTH2_SECRET, 1024, Dir);
 	GetPrivateProfileStringA("Config", "CURL_PROXY_URL", "", CURL_PROXY_URL, 1024, Dir);
-
 	CURL_TIMEOUT = atoi(lpvBuffer);
 	if (CURL_TIMEOUT <= 0)
 		CURL_TIMEOUT = 10;
-
+	memset(lpvBuffer, 0, 128);
+	GetPrivateProfileStringA("Config", "CURL_USE_PROXY", "", CURL_PROXY_URL, 1024, Dir);
+	CURL_USE_PROXY = (atoi(lpvBuffer) == 1);
 	free(lpvBuffer);
 	free(Dir);
 }
