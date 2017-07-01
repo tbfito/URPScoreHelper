@@ -327,7 +327,7 @@ void LoadConfig()
 	if (CURL_TIMEOUT <= 0)
 		CURL_TIMEOUT = 10;
 	memset(lpvBuffer, 0, 128);
-	GetPrivateProfileStringA("Config", "CURL_USE_PROXY", "", CURL_PROXY_URL, 1024, Dir);
+	GetPrivateProfileStringA("Config", "CURL_USE_PROXY", "", lpvBuffer, 128, Dir);
 	CURL_USE_PROXY = (atoi(lpvBuffer) == 1);
 	free(lpvBuffer);
 	free(Dir);
