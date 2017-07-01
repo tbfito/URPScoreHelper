@@ -13,6 +13,6 @@
 void OAuth2_process();
 void OAuth2_CallBack();
 
-size_t curl_receive(void *buffer, size_t size, size_t nmemb, char *html);
+size_t OAuth2_curl_receive(void *buffer, size_t size, size_t nmemb, char *html);
 
 #endif

@@ -11,11 +11,22 @@ unsigned long long g_QueryCount;
 clock_t g_start_time;
 int g_users;
 
-int parse_main(bool p_need_set_cookie, char *p_photo, bool p_is_login);
-int process_cookie(bool *p_need_update_cookie, char *p_photo_uri, bool no_error_page = false);
+FCGX_Request request; //全局可以使用的请求
+char *CGI_SCRIPT_NAME; // 脚本名字
+char *CGI_REQUEST_URI; // 请求URI
+char *CGI_REQUEST_METHOD; // 请求方法
+char *CGI_CONTENT_LENGTH; // 数据长度
+char *CGI_QUERY_STRING; // 查询参数
+char *CGI_PATH_TRANSLATED; // 脚本位置
+char *CGI_HTTP_COOKIE; // Cookie
+char *CGI_HTTP_HOST;
+char *CGI_HTTPS;
+
+int parse_main(bool p_need_set_cookie, std::string & p_photo);
+int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri);
 int parse_index();
 int parse_query();
-void parse_friendly_score(char *p_lpszScore);
+void parse_friendly_score(std::string & p_strlpszScore);
 void get_student_name(char *p_lpszBuffer);
 void get_student_id(char *p_lpszBuffer);
 int system_registration();
@@ -31,6 +42,7 @@ void teaching_evaluation();
 void parse_change_password();
 void do_change_password();
 void parse_ajax_captcha();
+void SetUsersCounter();
 
 typedef struct test_info
 {

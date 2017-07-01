@@ -6,10 +6,8 @@
 #pragma once
 #define _CRT_SECURE_NO_WARNINGS
 
-#include "targetver.h"
 #include <cstdio>
 #include <cstdlib>
-#include <winsock.h>
 #include <ctime>
 #include <iostream>
 #include <string>
@@ -18,7 +16,6 @@
 extern "C"
 {
 #ifdef _WIN64
-	#pragma comment(lib, "ws2_32.lib")
 	#include "curl-7.53.1-win64-mingw/include/curl/curl.h"
 	#include "sqlite-3.1.8-win64/sqlite3.h"
 	#pragma comment(lib, "libfcgi/libfcgi_x64.lib")
@@ -26,7 +23,6 @@ extern "C"
 	#pragma comment(lib, "curl-7.53.1-win64-mingw/bin/libcurl.lib")
 #else
 	#ifdef _WIN32
-		#pragma comment(lib, "ws2_32.lib")
 		#include "curl-7.53.1-win32-mingw/include/curl/curl.h"
 		#include "sqlite-3.1.8-win32/sqlite3.h"
 		#pragma comment(lib, "libfcgi/libfcgi.lib")
@@ -35,3 +31,11 @@ extern "C"
 	#endif
 #endif
 }
+/*
+#define _CRTDBG_MAP_ALLOC
+#define _CRTDBG_MAP_ALLOC_NEW
+#include <crtdbg.h>
+#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#define new DEBUG_NEW
+*/
+//#include <vld.h>

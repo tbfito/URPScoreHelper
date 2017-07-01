@@ -2,7 +2,6 @@
 #include "OAuth2.h"
 #include "StringHelper.h"
 #include "General.h"
-#include "CrawlFactory.h"
 
 using namespace std;
 int shift = 0;
@@ -30,7 +29,7 @@ void OAuth2_process()
 	if (CGI_HTTP_HOST == NULL)
 	{
 		cout << "Status: 500 Internal Server Error\r\n";
-		Error("错误：缺少 HTTP_HOST 环境变量，请检查 CGI 接口设定。");
+		Error("错误：缺少 HTTP_HOST 环境变量，请检查 FastCGI 接口设定。");
 		return;
 	}
 	char *stid = NULL;
@@ -66,11 +65,13 @@ void OAuth2_process()
 	}
 	else if(strlen(stid) == 0)
 	{
+		delete[]stid;
 		m_lpszURL = new char[strlen(OAUTH2_AUTHENTICATION) + strlen(OAUTH2_APPID) + strlen(m_Domain) + 5];
 		sprintf(m_lpszURL, OAUTH2_AUTHENTICATION, OAUTH2_APPID, m_Domain, "NONE");
 	}
 	else
 	{
+		delete[]stid;
 		m_lpszURL = new char[strlen(OAUTH2_AUTHENTICATION) + strlen(OAUTH2_APPID) + strlen(m_Domain) + strlen(stid) + 1];
 		sprintf(m_lpszURL, OAUTH2_AUTHENTICATION, OAUTH2_APPID, m_Domain, stid);
 	}
@@ -87,7 +88,7 @@ void OAuth2_CallBack()
 	char m_Domain[512] = { 0 };
 	if (CGI_HTTP_HOST == NULL)
 	{
-		Error("错误：缺少 HTTP_HOST 环境变量，请检查 CGI 接口设定。");
+		Error("错误：缺少 HTTP_HOST 环境变量，请检查 FastCGI 接口设定。");
 		return;
 	}
 	getRedirectUri(CGI_HTTP_HOST, m_Domain);
@@ -126,7 +127,7 @@ void OAuth2_CallBack()
 
 	if (curl == NULL)
 	{
-		Error("无法初始化 libcurl。");
+		Error("无法初始化 curl");
 		delete[]access_token_req;
 		delete[]code;
 		return;
@@ -135,9 +136,9 @@ void OAuth2_CallBack()
 	char* html = (char *)malloc(1024);
 	memset(html, 0, 1024);
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
-	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 15);
+	curl_easy_setopt(curl, CURLOPT_TIMEOUT, CURL_TIMEOUT);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, html);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_receive);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, OAuth2_curl_receive);
 	curl_easy_setopt(curl, CURLOPT_URL, access_token_req);
 	CURLcode ret = curl_easy_perform(curl);
 
@@ -207,15 +208,14 @@ void OAuth2_CallBack()
 	sprintf(openid_req, OAUTH2_GET_OPENID, access_token);
 	shift = 0;
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
-	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 15);
+	curl_easy_setopt(curl, CURLOPT_TIMEOUT, CURL_TIMEOUT);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, html);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_receive);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, OAuth2_curl_receive);
 	curl_easy_setopt(curl, CURLOPT_URL,openid_req);
 	ret = curl_easy_perform(curl);
 
 	if (ret != CURLE_OK)
 	{
-		cout << "Status: 500 Internal Server Error\r\n";
 		Error("curl 操作失败！");
 		free(html);
 		delete[]access_token_req;
@@ -226,7 +226,6 @@ void OAuth2_CallBack()
 	pStr1 = strstr(html, "\"openid\":\"");
 	if (pStr1 == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\r\n";
 		Error(html);
 		free(html);
 		delete[]access_token_req;
@@ -237,7 +236,6 @@ void OAuth2_CallBack()
 	pStr2 = strstr(pStr1 + 11, "\"");
 	if (pStr2 == NULL)
 	{
-		cout << "Status: 500 Internal Server Error\r\n";
 		Error("获取 access_token 失败！(Json_right)");
 		free(html);
 		delete[]access_token_req;
@@ -255,7 +253,6 @@ void OAuth2_CallBack()
 	int db_ret = sqlite3_open("URPScoreHelper.db", &db);
 	if (db_ret != SQLITE_OK)
 	{
-		cout << "Status: 500 Internal Server Error\r\n";
 		Error("打开数据库文件失败，请检查 URPScoreHelper.db 是否存在。");
 		free(html);
 		delete[]access_token;
@@ -276,7 +273,6 @@ void OAuth2_CallBack()
 
 	if (db_ret != SQLITE_OK)
 	{
-		cout << "Status: 500 Internal Server Error\r\n";
 		char Err_Msg[512] = "<b>数据库准备失败！请确认数据库合法性。</b><p>(";
 		strcat(Err_Msg, sqlite3_errmsg(db));
 		strcat(Err_Msg, ")</p>");
@@ -352,7 +348,7 @@ void OAuth2_CallBack()
 	curl_easy_cleanup(curl);
 }
 
-size_t curl_receive(void *buffer, size_t size, size_t nmemb, char *html)
+size_t OAuth2_curl_receive(void *buffer, size_t size, size_t nmemb, char *html)
 {
 	int resize = size * nmemb;
 	html = (char *)realloc(html, resize + shift + 1);

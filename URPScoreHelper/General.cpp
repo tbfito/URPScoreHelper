@@ -1,9 +1,6 @@
-Ôªø#include "stdafx.h"
+#include "stdafx.h"
 #include "General.h"
 
-using namespace std;
-
-SOCKET g_so = INVALID_SOCKET;
 char JSESSIONID[256] = {0};
 
 const char* GLOBAL_HEADER = "X-Powered-By: iEdon-URPScoreHelper\r\n\
@@ -12,202 +9,33 @@ Cache-Control: no-cache\r\n\
 Pragma: no-cache\r\n\
 Expires: -1\r\n\r\n";
 
-// È¶ñÈ°µ HTTP ËØ∑Ê±Ç
-const char* REQUEST_HOME_PAGE = "\
-GET / HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Accept: */*\n\
-Connection: close\n\n";
-
-// È¶ñÈ°µ HTTP ËØ∑Ê±ÇÔºàÂ∏¶ COOKIE Ôºâ
-const char* REQUEST_HOME_PAGE_WITH_COOKIE = "\
-GET / HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Accept: */*\n\
-Cookie: %s\n\
-Connection: close\n\n";
-
-// È™åËØÅÁ†Å HTTP ËØ∑Ê±Ç
-const char* REQUEST_CAPTCHA = "\
-GET /validateCodeAction.do?random=0.%d HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Accept: */*\n\
-Cookie: JSESSIONID=%s\n\
-Connection: close\n\n";
-
-// ËØ∑Ê±ÇÁôªÈôÜ
-const char * REQUEST_LOGIN = "\
-POST /loginAction.do HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Content-Length: %d\n\
-Cache-Control: max-age=0\n\
-Content-Type: application/x-www-form-urlencoded\n\
-Accept: */*\n\
-Cookie: %s\n\
-Connection: close\n\n\
-zjh1=&tips=&lx=&evalue=&eflag=&fs=&dzslh=&zjh=%s&mm=%s&v_yzm=%s";
-
-// ËØ∑Ê±ÇÊü•ÂàÜ
-const char * REQUEST_QUERY_SCORE = "\
-GET /bxqcjcxAction.do HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Accept: */*\n\
-Cookie: %s\n\
-Connection: close\n\n";
-
-// ÂÆâÂÖ®ÁôªÂá∫ÊïôÂä°Á≥ªÁªü
-const char * REQUEST_LOGOUT = "\
-GET /logout.do HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Accept: */*\n\
-Cookie: %s\n\
-Connection: close\n\n";
-
-// Ëé∑ÂèñÁîµÂ≠êÊ≥®ÂÜåÈ°µÈù¢
-const char * REQUEST_GET_REGISTER_INTERFACE = "\
-GET /dzzcAction.do HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Accept: */*\n\
-Cookie: %s\n\
-Connection: close\n\n";
-
-// Êèê‰∫§ÁîµÂ≠êÊ≥®ÂÜåËØ∑Ê±Ç
-const char * REQUEST_POST_REGISTER_INTERFACE = "\
-POST /dzzcAction.do?zc=zc&zxjxjhh=%s HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Accept: */*\n\
-Cookie: %s\n\
-Content-Length: %d\n\
-Connection: close\n\n%s";
-
-const char * REQUEST_SET_REPORT_PARAMS =  "\
-POST /setReportParams HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Cookie: %s\n\
-Accept: */*\n\
-Content-Length: %d\n\
-Cache-Control: max-age=0\n\
-Content-Type: application/x-www-form-urlencoded\n\
-Connection: close\n\n";
-
-const char * REQUEST_REPORT_FILES = "\
-GET /reportFiles/cj/cj_zwcjd.jsp?&reportParamsId=%s HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Referer: /reportFiles/cj/cj_zwcjd.jsp\n\
-Cookie: %s\n\
-Accept: */*\n\
-Connection: close\n\n";
-
-const char * REQUEST_TXT_SCORES = "\
-GET /servlet/com.runqian.report.view.text.TextFileServlet?%s HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Referer: /reportFiles/cj/cj_zwcjd.jsp?&reportParamsId=%s\n\
-Cookie: %s\n\
-Accept: */*\n\
-Connection: close\n\n";
-
-const char * REQUEST_PHOTO = "\
-GET /xjInfoAction.do?oper=img HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Cookie: %s\n\
-Accept: */*\n\
-Connection: close\n\n";
-
-const char * REQUEST_TOP = "\
-GET /menu/top.jsp HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Cookie: %s\n\
-Accept: */*\n\
-Connection: close\n\n";
-
-const char * GET_GRADE_BY_QBINFO = "\
-GET /gradeLnAllAction.do?type=ln&oper=qbinfo HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Cookie: %s\n\
-Accept: */*\n\
-Connection: close\n\n";
-
-const char * GET_GRADE_BY_PLAN = "\
-GET /gradeLnAllAction.do?type=ln&oper=fainfo HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Cookie: %s\n\
-Accept: */*\n\
-Connection: close\n\n";
-
-const char * GET_GRADE_BY_FAILED = "\
-GET /gradeLnAllAction.do?type=ln&oper=bjg HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Cookie: %s\n\
-Accept: */*\n\
-Connection: close\n\n";
-
-const char * GET_SMALL_TEST_SCORE = "\
-GET /cjSearchAction.do?oper=getKscjList HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Cookie: %s\n\
-Accept: */*\n\
-Connection: close\n\n";
-
-const char * GET_TEACH_EVAL_LIST = "\
-GET /jxpgXsAction.do?oper=listWj&pageSize=200 HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Cookie: %s\n\
-Accept: */*\n\
-Connection: close\n\n";
-
-const char * POST_TEACH_EVAL = "\
-POST /jxpgXsAction.do?oper=wjpg HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Content-Length: %d\n\
-Cache-Control: max-age=0\n\
-Content-Type: application/x-www-form-urlencoded\n\
-Accept: */*\n\
-Cookie: %s\n\
-Connection: close\n\n%s";
-
-const char * POST_PRE_TEACH_EVAL = "\
-POST /jxpgXsAction.do HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Content-Length: %d\n\
-Cache-Control: max-age=0\n\
-Content-Type: application/x-www-form-urlencoded\n\
-Accept: */*\n\
-Cookie: %s\n\
-Connection: close\n\n%s";
-
-const char * REQ_CHANGE_PASSWORD = "\
-GET /modifyPassWordAction.do?pwd=%s HTTP/1.0\n\
-User-Agent: iEdon-URPScoreHelper\n\
-Cookie: %s\n\
-Accept: */*\n\
-Connection: close\n\n";
-
-// ÂàÜÊï∞ÊòæÁ§∫Âùó
-const char *BEFORE_TEMPLATE = "<div id=\"list_page\" style=\"background-color:transparent !important\"><table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"titleTop2\" style=\"background-color:transparent !important;border:none\"><tbody><tr><td class=\"pageAlign\"><table cellpadding=\"0\" width=\"100%\" class=\"displayTag\" cellspacing=\"1\" border=\"0\" id=\"user\"><thead><tr><th align=\"center\" width=\"30%\" class=\"sortable\">ËØæÁ®ãÂêçÁß∞</th><th align=\"center\" width=\"10%\" class=\"sortable\">ÊàêÁª©</th><th align=\"center\" width=\"10%\" class=\"sortable\">ÂùáÂàÜ</th><th align=\"center\" width=\"10%\" class=\"sortable\">ÊúÄÈ´ò</th><th align=\"center\" width=\"10%\" class=\"sortable\">ÊúÄ‰Ωé</th><th align=\"center\" width=\"10%\" class=\"sortable\">ÂêçÊ¨°</th><th align=\"center\" width=\"10%\" class=\"sortable\">Â≠¶ÂàÜ</th><th align=\"center\" width=\"10%\" class=\"sortable\">Áª©ÁÇπ</th></tr></thead><tbody>";
+// ∑÷ ˝œ‘ æøÈ
+const char *BEFORE_TEMPLATE = "<div id=\"list_page\" style=\"background-color:transparent !important\"><table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"titleTop2\" style=\"background-color:transparent !important;border:none\"><tbody><tr><td class=\"pageAlign\"><table cellpadding=\"0\" width=\"100%\" class=\"displayTag\" cellspacing=\"1\" border=\"0\" id=\"user\"><thead><tr><th align=\"center\" width=\"30%\" class=\"sortable\">øŒ≥Ã√˚≥∆</th><th align=\"center\" width=\"10%\" class=\"sortable\">≥…º®</th><th align=\"center\" width=\"10%\" class=\"sortable\">æ˘∑÷</th><th align=\"center\" width=\"10%\" class=\"sortable\">◊Ó∏ﬂ</th><th align=\"center\" width=\"10%\" class=\"sortable\">◊ÓµÕ</th><th align=\"center\" width=\"10%\" class=\"sortable\">√˚¥Œ</th><th align=\"center\" width=\"10%\" class=\"sortable\">—ß∑÷</th><th align=\"center\" width=\"10%\" class=\"sortable\">º®µ„</th></tr></thead><tbody>";
 const char *AFTER_TEMPLATE = "</tbody></table></td></tr></tbody></table></div>";
 const char *SCORE_TEMPLATE = "<tr class=\"even\" onmouseout=\"this.className='even';\" onmouseover=\"this.className='evenfocus';\"><td align=\"center\" style=\"%s\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%.1f</td></tr>";
 const char *QUICK_SCORE = "<div class=\"weui-cell\"><div class=\"weui-cell__bd\"><p>%s</p></div><div class=\"weui-cell__ft\">%s</div></div>";
 
-// ÈîôËØØÈ°µÈù¢ÂíåÈÖçÁΩÆÂàùÂßãÂåñ
+// ¥ÌŒÛ“≥√Ê∫Õ≈‰÷√≥ı ºªØ
 std::string ERROR_HTML;
-char *SERVER = NULL;
-char *SERVER_PORT = NULL;
+char *SERVER_URL = NULL;
+char *USER_AGENT = NULL;
+int CURL_TIMEOUT = 10;
 char *OAUTH2_APPID = NULL;
 char *OAUTH2_SECRET = NULL;
 
 /*
-ËæìÂá∫ÈîôËØØÈ°µÈù¢
+ ‰≥ˆ¥ÌŒÛ“≥√Ê
 @Params: char* error message
 @Return: none
 */
 void Error(const char *p_ErrMsg)
 {
 	std::string output = strformat(ERROR_HTML.c_str(), p_ErrMsg);
-	cout << GLOBAL_HEADER << output.c_str();
+	std::cout << GLOBAL_HEADER << output.c_str();
 }
 
 /*
-BASE64 ÁºñÁ†Å
+BASE64 ±‡¬Î
 @Params: source bin, in buffer, in length
 @Return char* base64 code
 */
@@ -253,7 +81,7 @@ char * base64_encode(const unsigned char * bindata, char * base64, int binlength
 
 
 /*
-Â∞ÜÊñáÊú¨Êñá‰ª∂ËØªÂÖ•ÂÜÖÂ≠ò
+Ω´Œƒ±æŒƒº˛∂¡»Îƒ⁄¥Ê
 @Params: const char* file path
 @Return: std::string filedata
 */
@@ -265,9 +93,9 @@ std::string ReadTextFileToMem(const char *lpszLocalPath)
 	{
 		return fdata;
 	}
-	fseek(m_file, 0, SEEK_END); // ÁßªÂà∞Â∞æ
-	int m_file_length = ftell(m_file); // ÂèñÂæóÈïøÂ∫¶
-	fseek(m_file, 0, SEEK_SET); // ÁßªÂà∞È¶ñ
+	fseek(m_file, 0, SEEK_END); // “∆µΩŒ≤
+	int m_file_length = ftell(m_file); // »°µ√≥§∂»
+	fseek(m_file, 0, SEEK_SET); // “∆µΩ ◊
 	char *m_lpszfdata = (char *)malloc(m_file_length + 1);
 	ZeroMemory(m_lpszfdata, m_file_length + 1);
 	if (fread(m_lpszfdata, m_file_length, 1, m_file) != 1)
@@ -282,7 +110,7 @@ std::string ReadTextFileToMem(const char *lpszLocalPath)
 }
 
 /*
-Â∞ÜÊàêÁª©ËΩ¨Âåñ‰∏∫Áª©ÁÇπ
+Ω´≥…º®◊™ªØŒ™º®µ„
 @Params: float cj
 @Return: float jidian point
 */
@@ -294,7 +122,7 @@ float cj2jd(float cj)
 }
 
 /*
-ÂÆûÁé∞ std::string ÁöÑÊ†ºÂºèÂåñÂäüËÉΩ
+ µœ÷ std::string µƒ∏Ò ΩªØπ¶ƒ‹
 @Params: const char *format
 @Return: std::string
 */
@@ -313,7 +141,7 @@ std::string strformat(const char *format, ...)
 	}
 
 	// need more space...
-	char* p = static_cast<char*>(alloca(needed));
+	char* p = static_cast<char*>(_alloca(needed));
 	vsnprintf(p, needed, format, arg_list);
 	std::string str(p);
 	return str;

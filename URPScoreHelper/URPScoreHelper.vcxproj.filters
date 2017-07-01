@@ -27,9 +27,6 @@
     <ClInclude Include="StringHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="CrawlFactory.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -37,6 +34,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="OAuth2.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CCurlTask.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="URPRequests.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,13 +53,16 @@
     <ClCompile Include="StringHelper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="CrawlFactory.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="URPScoreHelper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="OAuth2.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CCurlTask.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="URPRequests.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -66,12 +72,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="icon1.ico">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="icon2.ico">
-      <Filter>资源文件</Filter>
-    </Image>
     <Image Include="URPScoreHelper.ico">
       <Filter>资源文件</Filter>
     </Image>
