@@ -4,7 +4,6 @@
 #include "General.h"
 
 using namespace std;
-int shift = 0;
 
 void getRedirectUri(char *http_host, char *m_Domain)
 {
@@ -134,11 +133,10 @@ void OAuth2_CallBack()
 		return;
 	}
 
-	char* html = (char *)malloc(1024);
-	memset(html, 0, 1024);
+	std::string html;
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
 	curl_easy_setopt(curl, CURLOPT_TIMEOUT, CURL_TIMEOUT);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, html);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &html);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, OAuth2_curl_receive);
 	curl_easy_setopt(curl, CURLOPT_URL, access_token_req);
 	curl_easy_setopt(curl, CURLOPT_USERAGENT, USER_AGENT);
@@ -147,21 +145,18 @@ void OAuth2_CallBack()
 	if (ret != CURLE_OK)
 	{
 		Error("curl 操作失败！");
-		free(html);
 		delete[]access_token_req;
 		delete[]code;
 		return;
 	}
-	curl_easy_cleanup(curl);
 
-	pStr1 = strstr(html, "access_token=");
+	pStr1 = strstr((char *)html.c_str(), "access_token=");
 	if (pStr1 == NULL)
 	{
 		std::string err("<p><b>无法读取 access_token</b></p><p>");
 		err.append(html);
 		err.append("</p>");
 		Error(err.c_str());
-		free(html);
 		delete[]access_token_req;
 		delete[]code;
 		return;
@@ -171,14 +166,13 @@ void OAuth2_CallBack()
 	if (pStr2 == NULL)
 	{
 		Error("获取 access_token 失败！(Json_right)");
-		free(html);
 		delete[]access_token_req;
 		delete[]code;
 		return;
 	}
 
-	char *access_token = new char[strlen(html)];
-	memset(access_token, 0, strlen(html));
+	char *access_token = new char[html.length()];
+	memset(access_token, 0, html.length());
 	mid(access_token, pStr1 + 13, pStr2 - pStr1 - 13, 0);
 
 	/*pStr1 = strstr(html, "\"social_uid\": ");
@@ -206,17 +200,14 @@ void OAuth2_CallBack()
 	char *openid = new char[strlen(html)];
 	memset(openid, 0, strlen(html));
 	mid(openid, pStr1 + 14, pStr2 - pStr1 - 14, 0);*/
-	free(html);
+	curl_easy_cleanup(curl);
 
 	curl = curl_easy_init();
-	html = (char *)malloc(1024);
-	memset(html, 0, 1024);
 	char openid_req[512] = { 0 };
 	sprintf(openid_req, OAUTH2_GET_OPENID, access_token);
-	shift = 0;
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
 	curl_easy_setopt(curl, CURLOPT_TIMEOUT, CURL_TIMEOUT);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, html);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &html);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, OAuth2_curl_receive);
 	curl_easy_setopt(curl, CURLOPT_URL,openid_req);
 	curl_easy_setopt(curl, CURLOPT_USERAGENT, USER_AGENT);
@@ -225,20 +216,18 @@ void OAuth2_CallBack()
 	if (ret != CURLE_OK)
 	{
 		Error("curl 操作失败！");
-		free(html);
 		delete[]access_token_req;
 		delete[]code;
 		return;
 	}
 
-	pStr1 = strstr(html, "\"openid\":\"");
+	pStr1 = strstr((char *)html.c_str(), "\"openid\":\"");
 	if (pStr1 == NULL)
 	{
 		std::string err("<p><b>无法读取 openid</b></p><p>");
 		err.append(html);
 		err.append("</p>");
 		Error(err.c_str());
-		free(html);
 		delete[]access_token_req;
 		delete[]code;
 		return;
@@ -248,14 +237,13 @@ void OAuth2_CallBack()
 	if (pStr2 == NULL)
 	{
 		Error("获取 access_token 失败！(Json_right)");
-		free(html);
 		delete[]access_token_req;
 		delete[]code;
 		return;
 	}
 
-	char *openid = new char[strlen(html)];
-	memset(openid, 0, strlen(html));
+	char *openid = new char[html.length()];
+	memset(openid, 0, html.length());
 	mid(openid, pStr1 + 10, pStr2 - pStr1 - 10, 0);
 
 	//  成功拿到 access_token 和 openid
@@ -277,7 +265,6 @@ void OAuth2_CallBack()
 		strcat(Err_Msg, sqlite3_errmsg(db));
 		strcat(Err_Msg, ")</p>");
 		Error(Err_Msg);
-		free(html);
 		sqlite3_finalize(stmt);
 		delete[]access_token;
 		delete[]access_token_req;
@@ -323,7 +310,6 @@ void OAuth2_CallBack()
 			cout << "Location: OAuth2Assoc.fcgi?openid=" << openid << "&stid=" << id << "\r\n";
 		}
 		cout << GLOBAL_HEADER;
-		free(html);
 		sqlite3_finalize(stmt);
 		delete[]access_token;
 		delete[]access_token_req;
@@ -341,15 +327,12 @@ void OAuth2_CallBack()
 	delete[]access_token_req;
 	delete[]openid;
 	delete[]code;
-	free(html);
 	curl_easy_cleanup(curl);
 }
 
-size_t OAuth2_curl_receive(void *buffer, size_t size, size_t nmemb, char *html)
+size_t OAuth2_curl_receive(char *buffer, size_t size, size_t nmemb, std::string *html)
 {
-	int resize = size * nmemb;
-	html = (char *)realloc(html, resize + shift + 1);
-	memcpy(html + shift, (char *)buffer, resize);
-	shift += resize;
-	return resize;
+	int block_size = size * nmemb;
+	html->append(buffer);
+	return block_size;
 }

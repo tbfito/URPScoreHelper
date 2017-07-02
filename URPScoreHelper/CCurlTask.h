@@ -9,7 +9,7 @@ public:
 	size_t GetLength();
 	
 private:
-	static size_t curl_receive(void *buffer, size_t size, size_t nmemb, void *stringclass);
+	static size_t curl_receive(char *buffer, size_t size, size_t nmemb, std::string *stringclass);
 	CURL* curl;
 	std::string result;
 };

@@ -121,9 +121,9 @@ int main(int argc, const char* argv[])
 				if (strcmp(CGI_QUERY_STRING, "act=requestAssoc") == 0)
 				{
 					bool m_need_update_cookie = false;
-					std::string nullphoto;
-					process_cookie(&m_need_update_cookie, nullphoto);
-					if (nullphoto.empty())
+					std::string photo(" ");
+					process_cookie(&m_need_update_cookie, photo);
+					if (photo.empty())
 					{
 						cout << "Status: 302 Found\r\n" << "Location: /index.fcgi\r\n" << GLOBAL_HEADER;
 						goto END_REQUEST;

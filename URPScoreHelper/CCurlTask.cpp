@@ -71,10 +71,9 @@ bool CCurlTask::Exec(bool headonly, std::string url, std::string cookie, bool is
 	return true;
 }
 
-size_t CCurlTask::curl_receive(void *buffer, size_t size, size_t nmemb, void *stringclass)
+size_t CCurlTask::curl_receive(char *buffer, size_t size, size_t nmemb, std::string *stringclass)
 {
 	int block_size = size * nmemb;
-	std::string * str = (std::string *)stringclass;
-	str->append((char*)buffer, block_size);
+	stringclass->append(buffer, block_size);
 	return block_size;
 }
