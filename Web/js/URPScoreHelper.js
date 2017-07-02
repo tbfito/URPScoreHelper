@@ -5,7 +5,6 @@ function createxmlHttpRequest() {
 		return new XMLHttpRequest();
 	}
 }
-
 function convertData(data) {
 	if (typeof data === 'object') {
 		var convertResult = "";
@@ -18,7 +17,6 @@ function convertData(data) {
 		return data;
 	}
 }
-
 function ajax() {
 	var ajaxData = {
 		type: arguments[0].type || "GET",
@@ -63,50 +61,12 @@ function get_captcha() {
 		},
 		success: function(msg) {
 			obj.src = msg;
-			ocr_captcha(msg);
 		},
 		error: function(msg) {
 			obj.src = "img/refresh.png";
 			$.toast(msg, "text");
 		}
 	})
-}
-
-function ocr_captcha(dataURI) {
-	ajax({
-		type: "POST",
-		url: "https://api.iedon.com/captcha_ocr/ocr.php",
-		data:{"pic":dataURI}, 
-		success: function(msg) {
-			if(msg != null && msg.length != 0) {
-				if(msg == '__ERROR')
-				{
-					get_captcha();
-					return;
-				}
-				var patrn=/^(\w){4,4}$/;
-				if (!patrn.exec(msg))
-				{
-					get_captcha();
-					return;
-				}
-				msg.replace("l", "1");
-				msg.replace("I", "1");
-				msg.replace("O", "0");
-				document.getElementById("i_yzm").value = msg;
-			}
-		},
-	})
-}
-function getQueryString(name) {
-	var i;
-    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", i); // 匹配目标参数
-    var result = window.location.search.substr(1).match(reg);  // 对querystring匹配目标参数
-    if (result != null) {
-        return decodeURIComponent(result[2]);
-    } else {
-        return null;
-    }
 }
 function autofill() {
 	obj = document.getElementById("i_xh");

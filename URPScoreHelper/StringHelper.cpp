@@ -51,7 +51,8 @@ char * right(char *dst, char *src, int n)
 // 将字符串中指定子字符串用指定字符串代替，targ_str 是被替换的，val是替换的字符串
 void replace_string(char * source_str, char * targ_str, char *val)
 {
-	char temp_sstr[513], result[513];
+	char * temp_sstr = new char[strlen(source_str) + 1];
+	char * result = new char[strlen(source_str) + 1];
 	char * p, *q;
 	int len; len = 0; q = p = NULL;
 	memset(result, 0, sizeof(result));
@@ -73,6 +74,8 @@ void replace_string(char * source_str, char * targ_str, char *val)
 			strcat(result, p);
 	}
 	strcpy(source_str, result);
+	delete[]temp_sstr;
+	delete[]result;
 }
 
 static unsigned char hexchars[] = "0123456789ABCDEF";

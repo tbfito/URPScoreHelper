@@ -2,7 +2,7 @@
 #include "URPRequests.h"
 
 const char * REQUEST_HOME_PAGE = "/";
-const char* REQUEST_CAPTCHA = "/validateCodeAction.do?random=0.%d";
+const char * REQUEST_CAPTCHA = "/validateCodeAction.do?random=0.%d";
 const char * REQUEST_LOGIN = "/loginAction.do";
 const char * REQUEST_QUERY_SCORE = "/bxqcjcxAction.do";
 const char * REQUEST_LOGOUT = "/logout.do";
@@ -23,3 +23,4 @@ const char * GET_TEACH_EVAL_LIST = "/jxpgXsAction.do?oper=listWj&pageSize=200";
 const char * POST_TEACH_EVAL = "/jxpgXsAction.do?oper=wjpg";
 const char * POST_PRE_TEACH_EVAL = "/jxpgXsAction.do";
 const char * REQ_CHANGE_PASSWORD = "/modifyPassWordAction.do?pwd=%s";
+const char * REQUEST_SCHEDULE = "/xkAction.do?actionType=6";

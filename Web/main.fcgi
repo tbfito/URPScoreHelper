@@ -35,12 +35,12 @@
 		  本学期成绩
 		</p>
 	  </a>
-		<a href="query.fcgi?order=tests" class="weui-grid js_grid">
+	  <a href="query.fcgi?order=schedule" class="weui-grid js_grid">
 		<div class="weui-grid__icon">
-		  <img src="img/tests.png" alt="">
+		  <img src="img/schedule.png" alt="">
 		</div>
 		<p class="weui-grid__label">
-		  月中补缓清考
+		  我的课程表
 		</p>
 	  </a>
 		<a href="query.fcgi?order=passed" class="weui-grid js_grid">
@@ -51,20 +51,28 @@
 		  已过科目
 		</p>
 	  </a>
-		 <a href="query.fcgi?order=byplan" class="weui-grid js_grid">
+	  	<a href="query.fcgi?order=byplan" class="weui-grid js_grid">
 		<div class="weui-grid__icon">
 		  <img src="img/plan.png" alt="">
 		</div>
 		<p class="weui-grid__label">
-		  专业方案
+		  我的专业
 		</p>
 	  </a>
-	   <a href="query.fcgi?order=failed" class="weui-grid js_grid">
+	    <a href="query.fcgi?order=failed" class="weui-grid js_grid">
 		<div class="weui-grid__icon">
 		  <img src="img/failed.png" alt="">
 		</div>
 		<p class="weui-grid__label">
 		  挂科查询
+		</p>
+	  </a>
+	   <a href="query.fcgi?order=tests" class="weui-grid js_grid">
+		<div class="weui-grid__icon">
+		  <img src="img/tests.png" alt="">
+		</div>
+		<p class="weui-grid__label">
+		  月中补缓清考
 		</p>
 	  </a>
 		 <a onclick="logout();" href="javascript:void(0);" class="weui-grid js_grid">

@@ -51,7 +51,7 @@ int main(int argc, const char* argv[])
 	while (FCGX_Accept_r(&request) == 0)
 	{
 
-		g_start_time = GetTickCount();
+		g_start_time = clock();
 		if (isdbReady)
 		{
 			SetUsersCounter();
@@ -832,7 +832,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	char *m_query_not_reg = strstr(p_lpszScore, "没有注册");
 	if (m_query_not_reg != NULL)
 	{
-		std::string m_original_str ("<p><b>亲爱的%s，您本学期还没有电子注册</b></p><p>不注册的话，是查不了成绩的哦！</p><p>我可以施展法术，\
+		std::string m_original_str ("<p><b>亲爱的%s，您本学期还没有电子注册</b></p><p>不注册的话，是查不了信息的哦！</p><p>我可以施展法术，\
 <b>一键帮你在教务系统注册哦~</b></p><p>--&gt; 点按下方按钮，自动注册，直达查分界面 :P &lt;--</p>\
 <div class=\"weui-msg__opr-area\"><p class=\"weui-btn-area\"><a style=\"color:#fff\" href=\"query.fcgi?act=system_registration\" class=\"weui-btn weui-btn_primary\">一键注册</a></p></div>");
 		m_original_str = strformat(m_original_str.c_str(), m_Student);
@@ -857,6 +857,10 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		}
 		m_result += 93;
 		char *m_prep = (char *)malloc(req.GetLength());
+		replace_string(m_result, "&nbsp;", "");
+		replace_string(m_result, "\t", "");
+		replace_string(m_result, "\r", "");
+		replace_string(m_result, "\n", "");
 		strcpy(m_prep, "<div id=\"list_page\">");
 		char *m_end_body = strstr(m_result, "</table>");
 		if (m_result == NULL)
@@ -917,6 +921,10 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		}
 		m_result += 92;
 		char *m_prep = (char *)malloc(req.GetLength());
+		replace_string(m_result, "&nbsp;", "");
+		replace_string(m_result, "\t", "");
+		replace_string(m_result, "\r", "");
+		replace_string(m_result, "\n", "");
 		strcpy(m_prep, "<div id=\"list_page\">");
 		char *m_end_body = strstr(m_result, "</body>");
 		if (m_result == NULL)
@@ -970,6 +978,10 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		}
 		m_result += 92;
 		char *m_prep = (char *)malloc(req.GetLength());
+		replace_string(m_result, "&nbsp;", "");
+		replace_string(m_result, "\t", "");
+		replace_string(m_result, "\r", "");
+		replace_string(m_result, "\n", "");
 		strcpy(m_prep, "<div id=\"list_page\">");
 		char *m_end_body = strstr(m_result, "</body>");
 		if (m_result == NULL)
@@ -1027,6 +1039,10 @@ void parse_friendly_score(std::string & p_strlpszScore)
 			return;
 		}
 		char *m_prep = (char *)malloc(req.GetLength());
+		replace_string(m_result, "&nbsp;", "");
+		replace_string(m_result, "\t", "");
+		replace_string(m_result, "\r", "");
+		replace_string(m_result, "\n", "");
 		strcpy(m_prep, "<div id=\"list_page\">");
 		char *m_end_body = strstr(m_result, "</body>");
 		if (m_result == NULL)
@@ -1058,6 +1074,68 @@ void parse_friendly_score(std::string & p_strlpszScore)
 			fclose(g_fQueryCount);
 		}
 
+		free(m_prep);
+		return;
+	}
+
+	if (strcmp(CGI_QUERY_STRING, "order=schedule") == 0)
+	{
+		free(p_lpszScore);
+		CCurlTask req;
+		if (!req.Exec(false, REQUEST_SCHEDULE, CGI_HTTP_COOKIE))
+		{
+			Error("<p><b>接收数据失败</b></p><p>curl 操作失败</p>");
+			return;
+		}
+		char *m_rep_body = req.GetResult();
+		char *m_result = strstr(m_rep_body, "<table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"titleTop2\">");
+		if (m_result == NULL)
+		{
+			Error("<p><b>从服务器拉取课程表失败。(BeginOfTable)</b></p><p>建议你稍后再试</p>");
+			return;
+		}
+		m_result += 81;
+		char *m_prep = (char *)malloc(req.GetLength());
+		replace_string(m_result, "&nbsp;", "");
+		replace_string(m_result, "\t", "");
+		replace_string(m_result, "\r", "");
+		replace_string(m_result, "\n", "");
+		strcpy(m_prep, "<div id=\"list_page\">");
+		char *m_end_body = strstr(m_result, "</table>");
+		if (m_result == NULL)
+		{
+			free(m_prep);
+			Error("<p>从服务器拉取课程表失败。(EndOfBodyNotFound)</p>");
+			return;
+		}
+		m_result -= 81;
+		cout << GLOBAL_HEADER;
+		char m_before[512] = { 0 };
+		sprintf(m_before, "<a name=\"qb_731\"></a><table width=\"100%%\" border=\"0\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td class=\"Linetop\"></td></tr></tbody></table><table width=\"100%%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\"><tbody><tr><td width=\"100%%\"><table border=\"0\" align=\"left\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td>&nbsp;</td><td valign=\"middle\">&nbsp;<b>%s</b> &nbsp;</td></tr></tbody></table></td></tr></tbody></table>", "我的课程表 / 选课结果");
+		*(m_end_body + 8) = '<';
+		*(m_end_body + 9) = '/';
+		*(m_end_body + 10) = 'd';
+		*(m_end_body + 11) = 'i';
+		*(m_end_body + 12) = 'v';
+		*(m_end_body + 13) = '>';
+		*(m_end_body + 14) = '\0';
+
+		strcat(m_prep, m_before);
+		strcat(m_prep, m_result);
+
+		std::string title("本学期课程表 - ");
+		title += SOFTWARE_NAME;
+
+		cout << strformat(header.c_str(), title.c_str());
+		cout << strformat(m_lpszQuery.c_str(), m_Student, m_prep);
+		cout << footer.c_str();
+
+		g_fQueryCount = fopen("QueryCount.bin", "w+");
+		if (g_fQueryCount != NULL)
+		{
+			fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
+			fclose(g_fQueryCount);
+		}
 		free(m_prep);
 		return;
 	}
@@ -1250,7 +1328,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	}
 
 	char m_query_time[128] = { 0 };
-	sprintf(m_query_time, "<br /><center>本次查询耗时 %.2f 秒</center>", (double)((GetTickCount() - g_start_time) / 1000));
+	sprintf(m_query_time, "<br /><center>本次查询耗时 %.2f 秒</center>", (double)((clock() - g_start_time) / 1000));
 	m_Output.append(m_query_time);
 
 	cout << GLOBAL_HEADER;
@@ -1983,7 +2061,7 @@ void parse_QuickQuery_Result()
 		cout << GLOBAL_HEADER;
 
 		char m_query_time[512] = { 0 };
-		sprintf(m_query_time, "<br /><center>本次查询耗时 %.2f 秒</center>", (double)((GetTickCount() - g_start_time) / 1000));
+		sprintf(m_query_time, "<br /><center>本次查询耗时 %.2f 秒</center>", (double)((clock() - g_start_time) / 1000));
 		m_list.append(m_query_time);
 
 		if (m_xhgs > 1)
