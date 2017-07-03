@@ -1521,7 +1521,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	char *m_login_not_auth = strstr(m_result, "证件号");
 	if (m_login_not_auth != NULL)
 	{
-		Error("<p>证件号或密码不对啊，请再试试</p>");
+		Error("<p><b>证件号或密码不对啊</b></p><p>如果你曾修改过教务系统的账号密码，请使用新密码再试一试。</p>");
 		return false;
 	}
 	m_login_not_auth = strstr(m_result, "密码不正确");
@@ -1533,13 +1533,13 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	m_login_not_auth = strstr(m_result, "验证码错误");
 	if (m_login_not_auth != NULL)
 	{
-		Error("<p>验证码不对啊，大佬。 TAT。</p>");
+		Error("<p>验证码不对，请重试</p>");
 		return false;
 	}
 	m_login_not_auth = strstr(m_result, "数据库");
 	if (m_login_not_auth != NULL)
 	{
-		Error("<p>教务系统君说数据库繁忙 :P</p><p>对于<b>数据库跑路</b>问题，那就等等先咯~</p>");
+		Error("<p>教务系统君说数据库繁忙 :P</p><p>先等等再试咯~</p>");
 		return false;
 	}
 	char *m_login_success = strstr(m_result, "学分制综合教务");

@@ -200,6 +200,7 @@ void OAuth2_CallBack()
 	char *openid = new char[strlen(html)];
 	memset(openid, 0, strlen(html));
 	mid(openid, pStr1 + 14, pStr2 - pStr1 - 14, 0);*/
+	html.clear();
 	curl_easy_cleanup(curl);
 
 	curl = curl_easy_init();
