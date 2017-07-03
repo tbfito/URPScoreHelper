@@ -764,7 +764,17 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 
 	// 发送验证码请求，获取验证码数据。
 	CCurlTask req;
-	if (!req.Exec(false, Captcha, CGI_HTTP_COOKIE))
+	std::string cookie;
+	if (m_need_update_cookie)
+	{
+		cookie = "JSESSIONID=";
+		cookie.append(JSESSIONID);
+	}
+	else
+	{
+		cookie = CGI_HTTP_COOKIE;
+	}
+	if (!req.Exec(false, Captcha, cookie))
 	{
 		cout << "Status: 500 Internal Server Error\r\n";
 		cout << "Content-Type: text/plain; charset=gb2312\r\n\r\n";
