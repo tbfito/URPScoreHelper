@@ -2087,7 +2087,7 @@ void parse_QuickQuery_Result()
 		g_fQueryCount = fopen("QueryCount.bin", "w+");
 		if (g_fQueryCount != NULL)
 		{
-			fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
+			fprintf(g_fQueryCount, "%ld", g_QueryCount);
 			fclose(g_fQueryCount);
 		}
 }

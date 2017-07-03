@@ -147,6 +147,7 @@ void OAuth2_CallBack()
 		Error("curl 操作失败！");
 		delete[]access_token_req;
 		delete[]code;
+		curl_easy_cleanup(curl);
 		return;
 	}
 
@@ -159,6 +160,7 @@ void OAuth2_CallBack()
 		Error(err.c_str());
 		delete[]access_token_req;
 		delete[]code;
+		curl_easy_cleanup(curl);
 		return;
 	}
 
@@ -168,6 +170,7 @@ void OAuth2_CallBack()
 		Error("获取 access_token 失败！(Json_right)");
 		delete[]access_token_req;
 		delete[]code;
+		curl_easy_cleanup(curl);
 		return;
 	}
 
@@ -204,6 +207,13 @@ void OAuth2_CallBack()
 	curl_easy_cleanup(curl);
 
 	curl = curl_easy_init();
+	if (curl == NULL)
+	{
+		Error("无法初始化 curl");
+		delete[]access_token_req;
+		delete[]code;
+		return;
+	}
 	char openid_req[512] = { 0 };
 	sprintf(openid_req, OAUTH2_GET_OPENID, access_token);
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
@@ -219,6 +229,7 @@ void OAuth2_CallBack()
 		Error("curl 操作失败！");
 		delete[]access_token_req;
 		delete[]code;
+		curl_easy_cleanup(curl);
 		return;
 	}
 
@@ -231,6 +242,7 @@ void OAuth2_CallBack()
 		Error(err.c_str());
 		delete[]access_token_req;
 		delete[]code;
+		curl_easy_cleanup(curl);
 		return;
 	}
 
@@ -240,6 +252,7 @@ void OAuth2_CallBack()
 		Error("获取 access_token 失败！(Json_right)");
 		delete[]access_token_req;
 		delete[]code;
+		curl_easy_cleanup(curl);
 		return;
 	}
 
@@ -271,6 +284,7 @@ void OAuth2_CallBack()
 		delete[]access_token_req;
 		delete[]openid;
 		delete[]code;
+		curl_easy_cleanup(curl);
 		return;
 	}
 
@@ -316,6 +330,7 @@ void OAuth2_CallBack()
 		delete[]access_token_req;
 		delete[]openid;
 		delete[]code;
+		curl_easy_cleanup(curl);
 		return;
 	}
 
