@@ -1,0 +1,1 @@
+Please map ".fcgi" to handler!

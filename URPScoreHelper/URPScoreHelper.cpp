@@ -556,7 +556,7 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 		int m_post_length = atoi(CGI_CONTENT_LENGTH);
 		if (m_post_length <= 0 || m_post_length > 127)
 		{
-			Error("<p>发生错误，POST 数据长度异常。</p>");
+			Error("<p><b>发生错误，POST 数据长度异常</b></p><p>帐号或密码输入有问题哦，请重试</p>");
 			return -1;
 		}
 		char *m_post_data = (char *)malloc(m_post_length + 2);
@@ -686,7 +686,7 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 // 处理主页面请求 (GET / /index.fcgi)
 int parse_index()
 {
-	// 如果是QQ登录回来，则自动填充账号密码。
+	// 如果是QQ登录回来，则自动填充帐号密码。
 	char *m_xh = NULL;
 	char *m_mm = NULL;
 	char *pStr1 = strstr((char *)CGI_QUERY_STRING, "id=");
@@ -729,7 +729,7 @@ int parse_index()
 	if (m_xh == NULL || m_mm == NULL)
 	{
 		cout << strformat( m_lpszHomepage.c_str(), SOFTWARE_NAME, g_users, g_QueryCount, 
-						"输入你的教务系统账号来登录吧 :)", "flex", "", "flex", "", "block", "block", "none");
+						"输入你的教务系统帐号来登录吧 :)", "flex", "", "flex", "", "block", "block", "none");
 	}
 	else 
 	{
@@ -1399,7 +1399,7 @@ void get_student_name(char *p_lpszBuffer)
 	mid(p_lpszBuffer, pStr1, pStr2 - pStr1 - 4, 4);
 }
 
-// 获取学生账号
+// 获取学生帐号
 void get_student_id(char *p_lpszBuffer)
 {
 	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
@@ -1508,14 +1508,19 @@ int system_registration()
 bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 {
 	int len = url_decode(p_password, strlen(p_password));
-	char temp[128];
+	char temp[128] = { 0 };
 	left(temp, p_password, len);
 	strcpy(p_password, temp);
 
 	// 发送登陆请求。
 	char *m_origin = "zjh1=&tips=&lx=&evalue=&eflag=&fs=&dzslh=&zjh=%s&mm=%s&v_yzm=%s";
-	char m_padding[128] = { 0 };
-	sprintf(m_padding, m_origin, p_xuehao, p_password, p_captcha);
+	char m_padding[512] = { 0 };
+	char m_paddingprep[256] = { 0 };
+	sprintf(m_paddingprep, m_origin, p_xuehao, p_password, p_captcha);
+	int newlen;
+	url_encode(m_paddingprep, strlen(m_paddingprep), &newlen);
+	left(m_padding, m_paddingprep, newlen);
+
 	CCurlTask req;
 	if (!req.Exec(false, REQUEST_LOGIN, CGI_HTTP_COOKIE, true, m_padding))
 	{
@@ -1531,13 +1536,13 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	char *m_login_not_auth = strstr(m_result, "证件号");
 	if (m_login_not_auth != NULL)
 	{
-		Error("<p><b>证件号或密码不对啊</b></p><p>如果你曾修改过教务系统的账号密码，请使用新密码再试一试。</p>");
+		Error("<p><b>证件号或密码不对啊</b></p><p>如果你曾修改过教务系统的帐号密码，请使用新密码再试一试。</p>");
 		return false;
 	}
 	m_login_not_auth = strstr(m_result, "密码不正确");
 	if (m_login_not_auth != NULL)
 	{
-		Error("<p><b>学号或密码不对啊。</b></p><p>如果你曾修改过教务系统的账号密码，请使用新密码再试一试。</p>");
+		Error("<p><b>学号或密码不对啊。</b></p><p>如果你曾修改过教务系统的帐号密码，请使用新密码再试一试。</p>");
 		return false;
 	}
 	m_login_not_auth = strstr(m_result, "验证码错误");
@@ -2102,7 +2107,7 @@ void parse_QuickQuery_Result()
 		}
 }
 
-// QQ账号绑定入口与解绑逻辑 (/OAuth2Assoc.fcgi)
+// QQ帐号绑定入口与解绑逻辑 (/OAuth2Assoc.fcgi)
 void OAuth2_Association(bool isPOST)
 {
 	if (CGI_QUERY_STRING == NULL)
@@ -2290,7 +2295,7 @@ void OAuth2_Association(bool isPOST)
 		}
 		cout << footer.c_str();
 	}
-	else // 提交账号密码验证码，打算登录绑定了
+	else // 提交帐号密码验证码，打算登录绑定了
 	{
 		// 获取 POST 数据。
 		int m_post_length = atoi(CGI_CONTENT_LENGTH);
