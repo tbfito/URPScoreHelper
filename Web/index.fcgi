@@ -47,7 +47,7 @@
 					<input class="weui-input" name="yzm" id="i_yzm" type="text" placeholder="输入验证码" />
 				</div>
 				<div class="weui-cell__ft">
-					<img onclick="get_captcha();" class="weui-vcode-img" id="login_captcha" alt="验证码" src="img/refresh.png" width="124" height="44" />
+					<img onclick="get_captcha();" class="weui-vcode-img" id="login_captcha" alt="验证码" src="img/refresh.png" width="125" height="44" />
 				</div>
 			</div>
 		</div>
@@ -64,7 +64,7 @@
 			</a>
 		</div>
 		<div class="quickquery" style="display:%s">
-			<a title="免密查询入口" class="weui-btn weui-btn_warn" href="QuickQuery.fcgi">
+			<a class="weui-btn weui-btn_warn" href="QuickQuery.fcgi">
 				免密快速查询入口 &gt;&gt;
 			</a>
 		</div>

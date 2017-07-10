@@ -1,7 +1,8 @@
 /*
 ******************************************
 ********** iEdon-URPScoreHelper **********
-**********       唯扬小助手      **********
+**********       唯扬小助手       **********
+********** CPP MVC - Controller **********
 **********  Copyright (C) iEdon **********
 ******************************************
 */
@@ -14,6 +15,7 @@
 #include "OAuth2.h"
 #include "URPRequests.h"
 #include "INIReader.h"
+#include "Encrypt.h"
 
 #ifdef _WIN64
 #include "resource.h"
@@ -50,7 +52,6 @@ int main(int argc, const char* argv[])
 
 	while (FCGX_Accept_r(&request) == 0)
 	{
-
 		g_start_time = clock();
 		if (isdbReady)
 		{
@@ -128,9 +129,10 @@ int main(int argc, const char* argv[])
 						cout << "Status: 302 Found\r\n" << "Location: /index.fcgi\r\n" << GLOBAL_HEADER;
 						goto END_REQUEST;
 					}
-					char student_id[36] = { 0 };
+					char student_id[512] = { 0 };
 					get_student_id(student_id);
 					student_logout();
+					EnCodeStr(student_id, student_id);
 					cout << "Status: 302 Found\r\n" << "Location: OAuth2.fcgi?stid=" << student_id << "\r\n" << GLOBAL_HEADER;
 					goto END_REQUEST;
 				}
@@ -241,7 +243,7 @@ int main(int argc, const char* argv[])
 
 		END_REQUEST:
 			ZeroMemory(JSESSIONID, 256);
-			FCGX_Finish_r(&request);
+			//FCGX_Finish_r(&request); 注： FCGI 库里面每次执行 Accept，已经帮做好了 Finish 动作。
 			//_CrtDumpMemoryLeaks();
 			continue;
 	}
@@ -357,7 +359,7 @@ void LoadConfig()
 	if (reader.ParseError() != 0) {
 		strcpy(SERVER_URL, "http://127.0.0.1");
 		strcpy(USER_AGENT, SOFTWARE_NAME);
-		strcpy(lpvBuffer, "10");
+		strcpy(lpvBuffer, "3");
 		strcpy(OAUTH2_APPID, "NULL");
 		strcpy(OAUTH2_SECRET, "NULL");
 		strcpy(CURL_PROXY_URL, "");
@@ -366,7 +368,7 @@ void LoadConfig()
 	{
 		strcpy(SERVER_URL, reader.Get("Config", "SERVER_URL", "http://127.0.0.1").c_str());
 		strcpy(USER_AGENT, reader.Get("Config", "USER_AGENT", SOFTWARE_NAME).c_str());
-		strcpy(lpvBuffer, reader.Get("Config", "CURL_TIMEOUT", "10").c_str());
+		strcpy(lpvBuffer, reader.Get("Config", "CURL_TIMEOUT", "3").c_str());
 		strcpy(OAUTH2_APPID, reader.Get("Config", "OAUTH2_APPID", "NULL").c_str());
 		strcpy(OAUTH2_SECRET, reader.Get("Config", "OAUTH2_SECRET", "NULL").c_str());
 		strcpy(CURL_PROXY_URL, reader.Get("Config", "CURL_PROXY_URL", "").c_str());
@@ -374,7 +376,7 @@ void LoadConfig()
 		
 	CURL_TIMEOUT = atoi(lpvBuffer);
 	if (CURL_TIMEOUT <= 0)
-		CURL_TIMEOUT = 10;
+		CURL_TIMEOUT = 3;
 	memset(lpvBuffer, 0, 128);
 	if (reader.ParseError() == 0)
 	{
@@ -395,6 +397,21 @@ void LoadConfig()
 	{
 		isdbReady = true;
 	}
+	std::string query("CREATE TABLE IF NOT EXISTS \"URPScoreHelper\" (\"id\" TEXT(36) NOT NULL, \"password\" TEXT(36) NOT NULL, \"openid\" TEXT(128), \"lastlogin\" TEXT(64), PRIMARY KEY (\"id\" ASC));");
+	char **db_Result = NULL;
+	sqlite3_stmt *stmt;
+	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+	if (db_ret != SQLITE_OK)
+	{
+		printf( "fuck!" );
+		sqlite3_finalize(stmt);
+		return;
+	}
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+	{
+		break;
+	}
+	sqlite3_finalize(stmt);
 }
 
 // 更新用户数量计数器
@@ -451,6 +468,7 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 		CCurlTask req;
 		if (!req.Exec(true, REQUEST_HOME_PAGE, CGI_HTTP_COOKIE))
 		{
+			p_photo_uri.erase();
 			return -1;
 		}
 		char *m_rep_header = req.GetResult();
@@ -462,6 +480,7 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 			if (pStr2 == NULL)
 			{
 				Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 结尾失败。</p>");
+				p_photo_uri.erase();
 				return -1;
 			}
 			mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11); // 成功获得新 Session ID。
@@ -490,6 +509,7 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 		CCurlTask req;
 		if (!req.Exec(true, REQUEST_HOME_PAGE))
 		{
+			p_photo_uri.erase();
 			return -1;
 		}
 		char *m_rep_header = req.GetResult();
@@ -498,12 +518,14 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 		if (pStr1 == NULL)
 		{
 			Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 标头失败。</p>");
+			p_photo_uri.erase();
 			return -1;
 		}
 		char *pStr2 = strstr(pStr1 + 11, ";");
 		if (pStr2 == NULL)
 		{
 			Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 结尾失败。</p>");
+			p_photo_uri.erase();
 			return -1;
 		}
 
@@ -521,6 +543,7 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 	CCurlTask req;
 	if (!req.Exec(false, REQUEST_PHOTO, Jsess))
 	{
+		p_photo_uri.erase();
 		return -1;
 	}
 	char *m_photo = req.GetResult();
@@ -542,7 +565,7 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 	}
 	else
 	{
-		p_photo_uri.clear();
+		p_photo_uri.erase();
 	}
 	return 1;
 }
@@ -622,8 +645,8 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 	// 读入主页面文件
 	std::string m_lpszHomepage = ReadTextFileToMem(CGI_PATH_TRANSLATED);
 
-	char m_student_name[16] = {0};
-	char m_student_id[16] = { 0 };
+	char m_student_name[512] = {0};
+	char m_student_id[512] = { 0 };
 	get_student_name(m_student_name);
 	get_student_id(m_student_id);
 
@@ -666,7 +689,7 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 
 	sqlite3_finalize(stmt);
 
-	cout << strformat( header.c_str(), title.c_str());
+	cout << strformat(header.c_str(), title.c_str());
 
 	if (openid == NULL)
 	{
@@ -702,6 +725,7 @@ int parse_index()
 		{
 			mid(id, pStr1 + 3, pStr2 - pStr1 - 3, 0);
 		}
+		DeCodeStr(id);
 		m_xh = id;
 		pStr1 = strstr((char *)CGI_QUERY_STRING, "pass=");
 		if (pStr1 != NULL)
@@ -716,6 +740,7 @@ int parse_index()
 			{
 				mid(pass, pStr1 + 5, pStr2 - pStr1 - 5, 0);
 			}
+			DeCodeStr(pass);
 			m_mm = pass;
 		}
 	}
@@ -756,6 +781,12 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 	if (m_need_update_cookie)
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 	
+	if (!m_photo.empty()) // 登录了就通报已经登录
+	{
+		cout << "Content-Type: text/plain; charset=gb2312\r\n\r\nLOGGED-IN";
+		return;
+	}
+
 	// 置随机数种子，并取得一个随机数，用于获取验证码。
 	srand((int)time(0));
 	int m_rand = rand();
@@ -776,9 +807,7 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 	}
 	if (!req.Exec(false, Captcha, cookie))
 	{
-		cout << "Status: 500 Internal Server Error\r\n";
-		cout << "Content-Type: text/plain; charset=gb2312\r\n\r\n";
-		cout << "无法获取验证码，教务系统可能挂了";
+		cout << "Content-Type: text/plain; charset=gb2312\r\n\r\nREQUEST-FAILED";
 		return;
 	}
 	char *m_rep_body = req.GetResult();
@@ -1338,7 +1367,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	}
 
 	char m_query_time[128] = { 0 };
-	sprintf(m_query_time, "<br /><center>本次查询耗时 %.2f 秒</center>", (double)((clock() - g_start_time) / 1000));
+	sprintf(m_query_time, "<br /><center>本次查询耗时 %.2f 秒</center>", (float)(clock() - g_start_time) / 1000.0);
 	m_Output.append(m_query_time);
 
 	cout << GLOBAL_HEADER;
@@ -1507,19 +1536,10 @@ int system_registration()
 // 登录学生
 bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 {
-	int len = url_decode(p_password, strlen(p_password));
-	char temp[128] = { 0 };
-	left(temp, p_password, len);
-	strcpy(p_password, temp);
-
 	// 发送登陆请求。
 	char *m_origin = "zjh1=&tips=&lx=&evalue=&eflag=&fs=&dzslh=&zjh=%s&mm=%s&v_yzm=%s";
 	char m_padding[512] = { 0 };
-	char m_paddingprep[256] = { 0 };
-	sprintf(m_paddingprep, m_origin, p_xuehao, p_password, p_captcha);
-	int newlen;
-	url_encode(m_paddingprep, strlen(m_paddingprep), &newlen);
-	left(m_padding, m_paddingprep, newlen);
+	sprintf(m_padding, m_origin, p_xuehao, p_password, p_captcha);
 
 	CCurlTask req;
 	if (!req.Exec(false, REQUEST_LOGIN, CGI_HTTP_COOKIE, true, m_padding))
@@ -1533,10 +1553,10 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	char *m_result = m_rep_body;
 
 	// 处理登录结果。
-	char *m_login_not_auth = strstr(m_result, "证件号");
+	char *m_login_not_auth = strstr(m_result, "证件号"); // for some urp systems
 	if (m_login_not_auth != NULL)
 	{
-		Error("<p><b>证件号或密码不对啊</b></p><p>如果你曾修改过教务系统的帐号密码，请使用新密码再试一试。</p>");
+		Error("<p><b>学号或密码不对啊</b></p><p>如果你曾修改过教务系统的帐号密码，请使用新密码再试一试。</p>");
 		return false;
 	}
 	m_login_not_auth = strstr(m_result, "密码不正确");
@@ -1554,7 +1574,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	m_login_not_auth = strstr(m_result, "数据库");
 	if (m_login_not_auth != NULL)
 	{
-		Error("<p>教务系统君说数据库繁忙 :P</p><p>先等等再试咯~</p>");
+		Error("<p>学院系统君说数据库繁忙</p><p>请先等等再来吧~</p>");
 		return false;
 	}
 	char *m_login_success = strstr(m_result, "学分制综合教务");
@@ -1594,6 +1614,12 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 
 	sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
+
+	// 对密码做URL解码
+	int len = url_decode(p_password, strlen(p_password));
+	char temp[128] = { 0 };
+	left(temp, p_password, len);
+	strcpy(p_password, temp);
 
 	if (id == NULL) // 无记录，则写入数据库
 	{
@@ -1849,7 +1875,7 @@ void parse_QuickQuery_Result()
 			char m_query_score[512] = { 0 };
 			sprintf(m_query_score, REQUEST_TXT_SCORES, m_txt_req_path);
 			CCurlTask req3;
-			referer.clear();
+			referer.erase();
 			referer = strformat(REFERER_REQUEST_TXT_SCORES, m_paramsID);
 			referer.insert(0, SERVER_URL);
 			req3.SetReferer(referer);
@@ -2076,7 +2102,7 @@ void parse_QuickQuery_Result()
 		cout << GLOBAL_HEADER;
 
 		char m_query_time[512] = { 0 };
-		sprintf(m_query_time, "<br /><center>本次查询耗时 %.2f 秒</center>", (double)((clock() - g_start_time) / 1000));
+		sprintf(m_query_time, "<br /><center>本次查询耗时 %.2f 秒</center>", (float)(clock() - g_start_time) / 1000.0);
 		m_list.append(m_query_time);
 
 		if (m_xhgs > 1)
@@ -2120,7 +2146,7 @@ void OAuth2_Association(bool isPOST)
 	char *pStr1 = strstr(CGI_QUERY_STRING, "release=");
 	if (pStr1 != NULL)
 	{
-		char student_id[36] = { 0 };
+		char student_id[512] = { 0 };
 		get_student_id(student_id);
 		if (student_id == NULL)
 		{
@@ -2214,7 +2240,7 @@ void OAuth2_Association(bool isPOST)
 
 		// 如果传进 sid，则自动填写学号、并且从数据库中拿密码。
 		pStr1 = strstr(CGI_QUERY_STRING, "stid=");
-		char stid[36] = { 0 };
+		char stid[128] = { 0 };
 		if (pStr1 != NULL)
 		{
 			pStr2 = strstr(pStr1 + 5, "&");
@@ -2226,10 +2252,11 @@ void OAuth2_Association(bool isPOST)
 			{
 				mid(stid, pStr1 + 5, pStr2 - pStr1 - 5, 0);
 			}
+			DeCodeStr(stid);
 		}
 
 		char pass[512] = {0};
-		if (strlen(stid) != 0)
+		if (strlen(stid) != 0 && strcmp(stid, "NONE") != 0)
 		{
 			// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
 			std::string query("SELECT password FROM URPScoreHelper WHERE id='");
@@ -2278,7 +2305,7 @@ void OAuth2_Association(bool isPOST)
 		title += SOFTWARE_NAME;
 		cout << strformat( header.c_str(), title.c_str());
 
-		if (strlen(stid) == 0)
+		if (strlen(stid) == 0 || strcmp(stid, "NONE") == 0)
 		{
 			cout << strformat( m_lpszHomepage.c_str(), SOFTWARE_NAME, openid, "感谢使用QQ登录，请先绑定自己的学号吧 :)",
 				 "flex", "", "flex", pass);
@@ -2427,7 +2454,7 @@ void parse_teaching_evaluation()
 	m_result = strstr(m_rep_body, "非教学评估时期，或评估时间已过");
 	if (m_result != NULL)
 	{
-		Error("<p>学校还未开放评教呢，或者来晚了哦</p>");
+		Error("<p>学院还没有开放评教呢，或者你来晚了哦</p>");
 		return;
 	}
 
@@ -2500,7 +2527,7 @@ void parse_teaching_evaluation()
 
 	std::string title = "一键评教 - ";
 	title += SOFTWARE_NAME;
-	cout << strformat( header.c_str(), title.c_str());
+	cout << strformat(header.c_str(), title.c_str());
 	bool need_eval = true;
 	if (to_eval && counts)
 	{

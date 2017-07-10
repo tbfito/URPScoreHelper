@@ -189,3 +189,42 @@ int split(char dst[][128], char* str, const char* spliter)
 	}
 	return n;
 }
+
+int Hex2Ascii(char* hex, char* ascii)
+{
+	int len = strlen(hex), tlen, i, cnt;
+
+	for (i = 0, cnt = 0, tlen = 0; i<len; i++)
+	{
+		char c = toupper(hex[i]);
+
+		if ((c >= '0'&& c <= '9') || (c >= 'A'&& c <= 'F'))
+		{
+			unsigned char t = (c >= 'A') ? c - 'A' + 10 : c - '0';
+
+			if (cnt)
+				ascii[tlen++] += t, cnt = 0;
+			else
+				ascii[tlen] = t << 4, cnt = 1;
+		}
+	}
+
+	return tlen;
+}
+
+int Ascii2Hex(char* ascii, char* hex)
+{
+	int i, len = strlen(ascii);
+	char chHex[] = "0123456789ABCDEF";
+
+	for (i = 0; i<len; i++)
+	{
+		hex[i * 2] = chHex[((unsigned char)ascii[i]) >> 4];
+		hex[i * 2 + 1] = chHex[((unsigned char)ascii[i]) & 0xf];
+		//hex[i * 3 + 2] = ' ';
+	}
+
+	hex[len * 2] = '\0';
+
+	return len * 2;
+}

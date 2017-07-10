@@ -50,7 +50,7 @@ bool CCurlTask::Exec(bool headonly, std::string url, std::string cookie, bool is
 		curl_easy_setopt(curl, CURLOPT_POST, 1);
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postdata.c_str());
 	}
-	curl_easy_setopt(curl, CURLOPT_TIMEOUT, CURL_TIMEOUT);
+	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, CURL_TIMEOUT);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &this->result);
 	if (!cookie.empty())
 	{
@@ -64,6 +64,7 @@ bool CCurlTask::Exec(bool headonly, std::string url, std::string cookie, bool is
 		curl_easy_setopt(curl, CURLOPT_PROXY, CURL_PROXY_URL);
 	}
 	CURLcode ret = curl_easy_perform(curl);
+
 	if (ret != CURLE_OK)
 	{
 		return false;

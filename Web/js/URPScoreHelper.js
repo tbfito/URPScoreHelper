@@ -1,70 +1,32 @@
-function createxmlHttpRequest() {
-	if (window.ActiveXObject) {
-		return new ActiveXObject("Microsoft.XMLHTTP");
-	} else if (window.XMLHttpRequest) {
-		return new XMLHttpRequest();
-	}
-}
-function convertData(data) {
-	if (typeof data === 'object') {
-		var convertResult = "";
-		for (var c in data) {
-			convertResult += c + "=" + data[c] + "&";
-		}
-		convertResult = convertResult.substring(0, convertResult.length - 1);
-		return convertResult;
-	} else {
-		return data;
-	}
-}
-function ajax() {
-	var ajaxData = {
-		type: arguments[0].type || "GET",
-		url: arguments[0].url || "",
-		async: arguments[0].async || "true",
-		data: arguments[0].data || null,
-		dataType: arguments[0].dataType || "text",
-		contentType: arguments[0].contentType || "application/x-www-form-urlencoded",
-		beforeSend: arguments[0].beforeSend ||
-		function() {},
-		success: arguments[0].success ||
-		function() {},
-		error: arguments[0].error ||
-		function() {}
-	}
-	ajaxData.beforeSend();
-	var xhr = createxmlHttpRequest();
-	xhr.responseType = ajaxData.dataType;
-	xhr.open(ajaxData.type, ajaxData.url, ajaxData.async);
-	xhr.setRequestHeader("Content-Type", ajaxData.contentType);
-	xhr.send(convertData(ajaxData.data));
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState == 4) {
-			if (xhr.status == 200) {
-				ajaxData.success(xhr.responseText)
-			} else {
-				ajaxData.error(xhr.responseText)
-			}
-		}
-	}
-}
-
 function get_captcha() {
 	var obj = document.getElementById("login_captcha");
 	if(obj == undefined)
 		return;
-	ajax({
+	$.ajax({
 		type: "GET",
 		url: "captcha.fcgi",
+		dataType : "text",
 		beforeSend: function() {
 			obj.src = "img/loading.gif";
 		},
-		success: function(msg) {
-			obj.src = msg;
+		success: function(data) {
+			if(data == "LOGGED-IN")
+			{
+				$.toast("已登录过, 正在跳转", "text");
+				window.location.href = "main.fcgi";
+			}
+			else if(data == "REQUEST-FAILED")
+			{
+				$.toast("验证码获取失败，学院系统可能发生故障", "text");
+				obj.src = "img/refresh.png";
+			}
+			else
+			{
+				obj.src = data;
+			}
 		},
-		error: function(msg) {
+		error: function() {
 			obj.src = "img/refresh.png";
-			$.toast(msg, "text");
 		}
 	})
 }
@@ -154,5 +116,11 @@ $(function () {
 					return false;
 				}
 				$.showLoading("请稍候");
+		});
+		$(".weui-grid.js_grid").not("#logout").on("click", function(e) {
+			$.showLoading("请稍候");
+		});
+		$(".return").on("click", function(e) {
+			$.showLoading("请稍候");
 		});
 });

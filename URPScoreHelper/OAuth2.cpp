@@ -2,6 +2,7 @@
 #include "OAuth2.h"
 #include "StringHelper.h"
 #include "General.h"
+#include "Encrypt.h"
 
 using namespace std;
 
@@ -48,6 +49,7 @@ void OAuth2_process()
 			{
 				mid(sid, pStr1 + 5, pStr2 - pStr1 - 5, 0);
 			}
+			DeCodeStr(sid);
 			stid = sid;
 		}
 	}
@@ -135,7 +137,7 @@ void OAuth2_CallBack()
 
 	std::string html;
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
-	curl_easy_setopt(curl, CURLOPT_TIMEOUT, CURL_TIMEOUT);
+	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, CURL_TIMEOUT);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &html);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, OAuth2_curl_receive);
 	curl_easy_setopt(curl, CURLOPT_URL, access_token_req);
@@ -144,7 +146,7 @@ void OAuth2_CallBack()
 
 	if (ret != CURLE_OK)
 	{
-		Error("curl 操作失败！");
+		Error("curl 操作失败");
 		delete[]access_token_req;
 		delete[]code;
 		curl_easy_cleanup(curl);
@@ -203,7 +205,7 @@ void OAuth2_CallBack()
 	char *openid = new char[strlen(html)];
 	memset(openid, 0, strlen(html));
 	mid(openid, pStr1 + 14, pStr2 - pStr1 - 14, 0);*/
-	html.clear();
+	html.erase();
 	curl_easy_cleanup(curl);
 
 	curl = curl_easy_init();
@@ -217,7 +219,7 @@ void OAuth2_CallBack()
 	char openid_req[512] = { 0 };
 	sprintf(openid_req, OAUTH2_GET_OPENID, access_token);
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
-	curl_easy_setopt(curl, CURLOPT_TIMEOUT, CURL_TIMEOUT);
+	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, CURL_TIMEOUT);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &html);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, OAuth2_curl_receive);
 	curl_easy_setopt(curl, CURLOPT_URL,openid_req);
@@ -226,12 +228,13 @@ void OAuth2_CallBack()
 
 	if (ret != CURLE_OK)
 	{
-		Error("curl 操作失败！");
+		Error("curl 操作失败");
 		delete[]access_token_req;
 		delete[]code;
 		curl_easy_cleanup(curl);
 		return;
 	}
+	curl_easy_cleanup(curl);
 
 	pStr1 = strstr((char *)html.c_str(), "\"openid\":\"");
 	if (pStr1 == NULL)
@@ -242,7 +245,6 @@ void OAuth2_CallBack()
 		Error(err.c_str());
 		delete[]access_token_req;
 		delete[]code;
-		curl_easy_cleanup(curl);
 		return;
 	}
 
@@ -252,7 +254,6 @@ void OAuth2_CallBack()
 		Error("获取 access_token 失败！(Json_right)");
 		delete[]access_token_req;
 		delete[]code;
-		curl_easy_cleanup(curl);
 		return;
 	}
 
@@ -261,8 +262,6 @@ void OAuth2_CallBack()
 	mid(openid, pStr1 + 10, pStr2 - pStr1 - 10, 0);
 
 	//  成功拿到 access_token 和 openid
-
-
 
 	// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
 	std::string query("SELECT id, password FROM URPScoreHelper WHERE openid='");
@@ -284,7 +283,6 @@ void OAuth2_CallBack()
 		delete[]access_token_req;
 		delete[]openid;
 		delete[]code;
-		curl_easy_cleanup(curl);
 		return;
 	}
 
@@ -301,7 +299,7 @@ void OAuth2_CallBack()
 	if (id == NULL || password == NULL) // 无记录，跳转至 OAuth2Assoc.fcgi
 	{
 		pStr1 = strstr(CGI_QUERY_STRING, "state=");
-		char id[36] = { 0 };
+		char id[128] = { 0 };
 		if (pStr1 != NULL)
 		{
 			pStr2 = strstr(pStr1 + 6, "&");
@@ -313,6 +311,7 @@ void OAuth2_CallBack()
 			{
 				mid(id, pStr1 + 6, pStr2 - pStr1 - 6, 0);
 			}
+			EnCodeStr(id, id);
 		}
 
 		cout << "Status: 302 Found\r\n";
@@ -330,20 +329,26 @@ void OAuth2_CallBack()
 		delete[]access_token_req;
 		delete[]openid;
 		delete[]code;
-		curl_easy_cleanup(curl);
 		return;
 	}
 
+	char *encrypt_pass = new char[strlen((char *)password) * 4 + 1];
+	char *encrypt_id = new char[strlen((char *)id) * 4 + 1];
+	strcpy(encrypt_id, (char *)id);
+	strcpy(encrypt_pass, (char *)password);
+	EnCodeStr(encrypt_id, encrypt_id);
+	EnCodeStr(encrypt_pass, encrypt_pass);
 	cout << "Status: 302 Found\r\n"
-		<< "Location: index.fcgi?id=" << id << "&pass=" << password << "\r\n"
+		<< "Location: index.fcgi?id=" << encrypt_id << "&pass=" << encrypt_pass << "\r\n"
 		<< GLOBAL_HEADER;
 	
 	sqlite3_finalize(stmt);
+	delete[]encrypt_id;
+	delete[]encrypt_pass;
 	delete[]access_token;
 	delete[]access_token_req;
 	delete[]openid;
 	delete[]code;
-	curl_easy_cleanup(curl);
 }
 
 size_t OAuth2_curl_receive(char *buffer, size_t size, size_t nmemb, std::string *html)

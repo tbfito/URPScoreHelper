@@ -75,7 +75,7 @@
 		  ÔÂÖÐ²¹»ºÇå¿¼
 		</p>
 	  </a>
-		 <a onclick="logout();" href="javascript:void(0);" class="weui-grid js_grid">
+		 <a id="logout" onclick="logout();" href="javascript:void(0);" class="weui-grid js_grid">
 		<div class="weui-grid__icon">
 		  <img src="img/logout.png" alt="">
 		</div>
