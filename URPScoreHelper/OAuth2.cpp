@@ -26,7 +26,7 @@ void getRedirectUri(char *http_host, char *m_Domain)
 // 处理QQ登录入口请求
 void OAuth2_process()
 {
-	char m_Domain[512] = { 0 };
+	char m_Domain[2048] = { 0 };
 	if (CGI_HTTP_HOST == NULL)
 	{
 		cout << "Status: 500 Internal Server Error\r\n";
@@ -87,7 +87,7 @@ void OAuth2_process()
 // QQ授权回调
 void OAuth2_CallBack()
 {
-	char m_Domain[512] = { 0 };
+	char m_Domain[4096] = { 0 };
 	if (CGI_HTTP_HOST == NULL)
 	{
 		Error("错误：缺少 HTTP_HOST 环境变量，请检查 FastCGI 接口设定。");
