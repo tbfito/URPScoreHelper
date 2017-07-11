@@ -3,7 +3,7 @@
 		%s
 	</h1>
 	<div class="weui-cells__title status">
-		QQ登录功能
+		欢迎使用 QQ登录功能
 	</div>
 </header>
 <div class="content">
@@ -12,7 +12,7 @@
 			%s
 		</div>
 		<div class="signbox">
-			<div class="weui-cell" style="display:%s">
+			<div class="weui-cell weui-cell_vcode" style="display:%s">
 				<div class="weui-cell__hd">
 					<label class="weui-label">
 						学号
@@ -20,6 +20,11 @@
 				</div>
 				<div class="weui-cell__bd">
 					<input class="weui-input" id="i_xh" name="xh" type="text" placeholder="输入学号" value="%s" />
+				</div>
+				<div class="weui-cell__ft">
+					<button type="button" class="weui-vcode-btn" onclick="autoreset();">
+						清空数据
+					</button>
 				</div>
 			</div>
 			<div class="weui-cell weui-cell_vcode" style="display:%s">
@@ -33,7 +38,7 @@
 				</div>
 				<div class="weui-cell__ft">
 					<button type="button" class="weui-vcode-btn" onclick="autofill();">
-						自动填写密码
+						自动补充
 					</button>
 				</div>
 			</div>
@@ -44,10 +49,10 @@
 					</label>
 				</div>
 				<div class="weui-cell__bd">
-					<input class="weui-input" name="yzm" id="i_yzm" type="text" placeholder="输入验证码" />
+					<input class="weui-input" name="yzm" id="i_yzm" type="text" placeholder="输入右侧验证码" />
 				</div>
 				<div class="weui-cell__ft">
-					<img onclick="get_captcha();" class="weui-vcode-img" id="login_captcha" alt="验证码" src="img/refresh.png" width="125" height="44" />
+					<div class="weui-vcode-img"><img onclick="get_captcha();" id="login_captcha" alt="验证码" src="img/refresh.png" width="60" height="20" /></div>
 				</div>
 			</div>
 		</div>

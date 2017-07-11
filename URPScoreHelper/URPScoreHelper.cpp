@@ -479,7 +479,7 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 			char *pStr2 = strstr(pStr1 + 11, ";");
 			if (pStr2 == NULL)
 			{
-				Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 结尾失败。</p>");
+				Error("<p>无法获取 Session ID</p><p>Cookie 结尾失败</p>");
 				p_photo_uri.erase();
 				return -1;
 			}
@@ -489,13 +489,13 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 		}
 		else // 如果 Cookie 还能用，就获取它。
 		{
-			char *pStr1 = strstr((char *)CGI_HTTP_COOKIE, "JSESSIONID=");
+			char *pStr1 = strstr(CGI_HTTP_COOKIE, "JSESSIONID=");
 			if (pStr1 != NULL)
 			{
 				char *pStr2 = strstr(pStr1 + 11, ";");
 				if (pStr2 == NULL) // 如果这条 Cookie 在最后一条
 				{
-					right(JSESSIONID, (char *)CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - (pStr1 - CGI_HTTP_COOKIE) - 11);
+					right(JSESSIONID, CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - (pStr1 - CGI_HTTP_COOKIE) - 11);
 				}
 				else
 				{
@@ -517,14 +517,14 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 		char *pStr1 = strstr(m_rep_header, "JSESSIONID=");
 		if (pStr1 == NULL)
 		{
-			Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 标头失败。</p>");
+			Error("<p>无法获取 Session ID</p><p>Cookie 标头失败</p>");
 			p_photo_uri.erase();
 			return -1;
 		}
 		char *pStr2 = strstr(pStr1 + 11, ";");
 		if (pStr2 == NULL)
 		{
-			Error("<p>无法获取 Servlet Session ID。</p><p>Cookie 结尾失败。</p>");
+			Error("<p>无法获取 Session ID</p><p>Cookie 结尾失败</p>");
 			p_photo_uri.erase();
 			return -1;
 		}
@@ -631,6 +631,19 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 			return -1;
 		}
 		free(m_post_data);
+		char m_xuehaoe[1024] = { 0 };
+		strcpy(m_xuehaoe, m_xuehao);
+		char m_passworde[1024] = { 0 };
+		strcpy(m_passworde, m_password);
+		EnCodeStr(m_xuehaoe, m_xuehaoe);
+		EnCodeStr(m_passworde, m_passworde);
+		std::string token(m_xuehaoe);
+		token += "X";
+		token += m_passworde;
+		char token_e[4096] = { 0 };
+		strcpy(token_e, token.c_str());
+		EnCodeStr(token_e, token_e);
+		cout << "Set-Cookie: token=" << token_e << "; path=/\r\n";
 	}
 	if (p_photo.empty())
 	{
@@ -712,6 +725,8 @@ int parse_index()
 	// 如果是QQ登录回来，则自动填充帐号密码。
 	char *m_xh = NULL;
 	char *m_mm = NULL;
+	char *token_xh = NULL;
+	char *token_mm = NULL;
 	char *pStr1 = strstr((char *)CGI_QUERY_STRING, "id=");
 	if (pStr1 != NULL)
 	{
@@ -744,6 +759,38 @@ int parse_index()
 			m_mm = pass;
 		}
 	}
+	else
+	{
+		char token[4096] = { 0 };
+		char *pStr = strstr(CGI_HTTP_COOKIE, "token=");
+		if (pStr != NULL)
+		{
+			char *pStr2 = strstr(pStr + 6, ";");
+			if (pStr2 == NULL) // 如果这条 Cookie 在最后一条
+			{
+				right(token, CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - (pStr - CGI_HTTP_COOKIE) - 6);
+			}
+			else
+			{
+				mid(token, pStr, pStr2 - pStr - 6, 6);
+			}
+		}
+		DeCodeStr(token);
+		token_xh = (char *)malloc(1024);
+		token_mm = (char *)malloc(1024);
+		if (sscanf(token, "%[^X]%s", token_xh, token_mm) != 2)
+		{
+			free(token_xh);
+			free(token_mm);
+			token_xh = NULL;
+			token_mm = NULL;
+		}
+		else
+		{
+			DeCodeStr(token_xh);
+			DeCodeStr(token_mm);
+		}
+	}
 
 	// 读入主页面文件
 	std::string m_lpszHomepage = ReadTextFileToMem(CGI_PATH_TRANSLATED);
@@ -753,8 +800,16 @@ int parse_index()
 
 	if (m_xh == NULL || m_mm == NULL)
 	{
-		cout << strformat( m_lpszHomepage.c_str(), SOFTWARE_NAME, g_users, g_QueryCount, 
-						"输入你的教务系统帐号来登录吧 :)", "flex", "", "flex", "", "block", "block", "none");
+		if (token_xh != NULL && token_mm != NULL)
+		{
+			cout << strformat(m_lpszHomepage.c_str(), SOFTWARE_NAME, g_users, g_QueryCount,
+				"输入你的教务系统帐号来登录吧 :)", "flex", token_xh, "flex", token_mm, "block", "block", "none");
+		}
+		else
+		{
+			cout << strformat(m_lpszHomepage.c_str(), SOFTWARE_NAME, g_users, g_QueryCount,
+				"输入你的教务系统帐号来登录吧 :)", "flex", "", "flex", "", "block", "block", "none");
+		}
 	}
 	else 
 	{
@@ -767,6 +822,10 @@ int parse_index()
 		delete[]m_xh;
 	if (m_mm != NULL)
 		delete[]m_mm;
+	if (token_xh != NULL)
+		free(token_xh);
+	if (token_mm != NULL)
+		free(token_mm);
 	return 0;
 }
 
@@ -781,7 +840,7 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 	if (m_need_update_cookie)
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 	
-	if (!m_photo.empty()) // 登录了就通报已经登录
+	if (!m_photo.empty() && !m_need_update_cookie) // 登录了就通报已经登录
 	{
 		cout << "Content-Type: text/plain; charset=gb2312\r\n\r\nLOGGED-IN";
 		return;

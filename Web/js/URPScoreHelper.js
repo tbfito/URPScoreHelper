@@ -30,6 +30,13 @@ function get_captcha() {
 		}
 	})
 }
+function autoreset() {
+	obj1 = document.getElementById("i_xh");
+	obj2 = document.getElementById("i_mm");
+	obj1.value = "";
+	obj2.value = "";
+	obj1.focus();
+}
 function autofill() {
 	obj = document.getElementById("i_xh");
 	if(obj.value=="")
@@ -39,6 +46,7 @@ function autofill() {
 	}
 	$.toptip("已自动填入密码，密码与学号相同方可用", 3000, 'success');
 	document.getElementById("i_mm").value = obj.value;
+	document.getElementById("i_yzm").focus();
 }
 function checkRows() {
 	var rows = document.getElementById("i_xh").value.split(/\r?\n|\r/).length;
@@ -49,11 +57,11 @@ function getcharnum() {
 	document.getElementById("i_xhhs").innerHTML = nums;
 }
 function logout() {
-		$.confirm("确认要退出系统吗？", function() {
-			$.showLoading("正在登出...");
-			window.location.href = "index.fcgi?act=logout";
-		}, function() {
-		});
+	$.confirm("确认要退出系统吗？", function() {
+		$.showLoading("正在登出...");
+		window.location.href = "index.fcgi?act=logout";
+	}, function() {
+	});
 }
 function releaseAssoc(id) {
 	$.confirm("确定要解除学号与QQ号的关联吗？", function() {
@@ -63,64 +71,73 @@ function releaseAssoc(id) {
 	});
 }
 function check_password() {
-		var r1 = document.getElementById("i_xhs").value;
-		if(r1=="")
-		{
-			$.toast("请输入新密码","cancel");
-			return false;
-		}
-		var patrn=/^(\w){6,12}$/;
-		if (!patrn.exec(r1)){
-			$.toast("只能输入6-12个字母、数字、下划线", "text");
-			return false;
-		}
-		if(!document.getElementById("i_chk").checked){
-			$.toast("滑动右边开关来确认输入无误 :-)", "text");
-			return false;
-		}
-		$.showLoading("正在修改");
-		return true;
+	var r1 = document.getElementById("i_xhs").value;
+	if(r1=="")
+	{
+		$.toast("请输入新密码","cancel");
+		return false;
+	}
+	var patrn=/^(\w){6,12}$/;
+	if (!patrn.exec(r1)){
+		$.toast("只能输入6-12个字母、数字、下划线", "text");
+		return false;
+	}
+	if(!document.getElementById("i_chk").checked){
+		$.toast("滑动右边开关来确认输入无误 :-)", "text");
+		return false;
+	}
+	$.showLoading("正在修改");
+	return true;
 }
 $(function () {
 	get_captcha();
-		$(document).on("click", "#i_submit", function(e) {
-				document.oncontextmenu=new Function("event.returnValue=false;");
-				   var r1 = document.getElementById("i_xh");
-				   var r2 = document.getElementById("i_mm");
-				   var r3 = document.getElementById("i_yzm");
-				   var r4 = document.getElementById("weuiAgree");
-				   var r5 = document.getElementById("i_jxpj");
-				if(r1 != undefined && r1.value=="")
-				{
-					$.toast("学号还没输呢","cancel");
-					return false;
-				}
-				if(r2 != undefined && r2.value=="")
-				{
-					$.toast("密码还没输呢","cancel");
-					return false;
-				}
-				if(r3 != undefined && r3.value=="")
-				{
-					$.toast("验证码还没输呢","cancel");
-					return false;
-				}
-				if(r4 != undefined && !r4.checked)
-				{
-					$.toast("必须同意条款哦","cancel");
-					return false;
-				}
-				if(r5 != undefined && r5.value=="")
-				{
-					$.toast("没写主观评价啊","cancel");
-					return false;
-				}
-				$.showLoading("请稍候");
-		});
-		$(".weui-grid.js_grid").not("#logout").on("click", function(e) {
-			$.showLoading("请稍候");
-		});
-		$(".return").on("click", function(e) {
-			$.showLoading("请稍候");
-		});
+	var r1 = document.getElementById("i_xh");
+	var r2 = document.getElementById("i_mm");
+	var r3 = document.getElementById("i_yzm");
+	if(r1 != undefined && r1.value=="")
+	{
+		r1.focus();
+	}
+	if(r1 != undefined && r1.value != "" && r2 != undefined && r2.value != "")
+	{
+		r3.focus();
+	}
+	$(document).on("click", "#i_submit", function(e) {
+		document.oncontextmenu=new Function("event.returnValue=false;");
+		
+		var r4 = document.getElementById("weuiAgree");
+		var r5 = document.getElementById("i_jxpj");
+		if(r1 != undefined && r1.value=="")
+		{
+			$.toast("学号还没输呢","cancel");
+			return false;
+		}
+		if(r2 != undefined && r2.value=="")
+		{
+			$.toast("密码还没输呢","cancel");
+			return false;
+		}
+		if(r3 != undefined && r3.value=="")
+		{
+			$.toast("验证码还没输呢","cancel");
+			return false;
+		}
+		if(r4 != undefined && !r4.checked)
+		{
+			$.toast("必须同意条款哦","cancel");
+			return false;
+		}
+		if(r5 != undefined && r5.value=="")
+		{
+			$.toast("没写主观评价啊","cancel");
+			return false;
+		}
+		$.showLoading("请稍候");
+	});
+	$(".weui-grid.js_grid").not("#logout").on("click", function(e) {
+		$.showLoading("请稍候");
+	});
+	$(".return").on("click", function(e) {
+		$.showLoading("请稍候");
+	});
 });

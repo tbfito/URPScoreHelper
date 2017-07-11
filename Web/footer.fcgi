@@ -2,23 +2,13 @@
 		<p class="weui-footer__links">
 			<a href="main.fcgi" class="weui-footer__link">唯扬小助手</a>
 		</p>
-		<p class="weui-footer__text">Copyright &copy; 2012-2017 iEdon Inside</p>
+		<p class="weui-footer__text">—— 扬大人自己的掌上教务</p>
+		<p class="weui-footer__text">&copy; 2012-2017 iEdon, N加青年</p>
 	</div>
 	<br />
 	<script charset="utf-8" src="js/jquery.min.js"></script>
 	<script charset="utf-8" src="js/jquery-weui.min.js"></script>
 	<script charset="gb2312" src="js/URPScoreHelper.js"></script>
-	<script>
-		var _mtac = {};
-		(function() {
-		var mta = document.createElement("script");
-		mta.src = "http://pingjs.qq.com/h5/stats.js?v2.0.4";
-		mta.setAttribute("name", "MTAH5");
-		mta.setAttribute("sid", "500426153");
-		var s = document.getElementsByTagName("script")[0];
-		s.parentNode.insertBefore(mta, s);
-		})();
-	</script>
 	<script>
 		var _hmt = _hmt || [];
 		(function() {

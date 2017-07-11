@@ -1,5 +1,5 @@
 <div class="i_page-navbar">
-	<a href="main.fcgi" class="return">返 回</a>
+	<a href="main.fcgi" class="return">&lt; 返 回</a>
 	一键教学评估
 </div>
 <div class="content">

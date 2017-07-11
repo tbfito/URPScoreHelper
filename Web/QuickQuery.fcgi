@@ -9,7 +9,7 @@
 <div class="content">
 	<form action="query.fcgi?act=QuickQuery" method="post" class="weui-cells weui-cells_form">
 		<div class="weui-cells__title">
-			输入学号来查询成绩，暂时只支持广陵学院 :)
+			输入学号来查询成绩，仅支持广陵学院 :)
 		</div>
 		<div class="signbox">
 			<div class="weui-cells weui-cells_form bigbox">
@@ -28,7 +28,7 @@
 			</span>
 		</label>
 		<div class="weui-btn-area">
-			<input id="i_submit" type="submit" value="免密查询" class="weui-btn weui-btn_primary" />
+			<input id="i_submit" type="submit" value="免密查询 (期末成绩)" class="weui-btn weui-btn_primary" />
 			<a title="&lt;&lt; 登录后综合查询" class="weui-btn weui-btn_default" href="/">
 				&lt;&lt; 登录后综合查询
 			</a>

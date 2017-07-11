@@ -1,5 +1,5 @@
 <div class="i_page-navbar">
-	<a href="main.fcgi" class="return">返 回</a>
+	<a href="main.fcgi" class="return">&lt; 返 回</a>
 	教务密码修改
 </div>
 <div class="content">
