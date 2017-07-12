@@ -132,19 +132,13 @@ std::string strformat(const char *format, ...)
 {
 	va_list arg_list;
 	va_start(arg_list, format);
-	// SUSv2 version doesn't work for buf NULL/size 0, so try printing
-	// into a small buffer that avoids the double-rendering and alloca path too...
-	char short_buf[256];
-	const size_t needed = vsnprintf(short_buf, 256, format, arg_list) + 1;
-	if (needed <= 256)
-	{
-		std::string str(short_buf);
-		return str;
-	}
-
-	// need more space...
-	char* p = static_cast<char*>(alloca(needed));
+	int needed = vsnprintf(NULL, 0, format, arg_list) + 1;
+	va_end(arg_list);
+	char *p = (char *)malloc(needed);
+	va_start(arg_list, format);
 	vsnprintf(p, needed, format, arg_list);
+	va_end(arg_list);
 	std::string str(p);
+	free(p);
 	return str;
 }

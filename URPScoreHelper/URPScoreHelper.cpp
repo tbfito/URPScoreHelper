@@ -1416,7 +1416,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	}
 
 	char m_query_time[128] = { 0 };
-	sprintf(m_query_time, "<br /><center>本次查询耗时 %.2f 秒</center>", (float)(clock() - g_start_time) / 1000.0);
+	sprintf(m_query_time, "<br /><center>本次查询耗时 %.2f 秒</center>", (float)(clock() - g_start_time) / (double)CLOCKS_PER_SEC);
 	m_Output.append(m_query_time);
 
 	cout << GLOBAL_HEADER;
@@ -1561,7 +1561,6 @@ int system_registration()
 	char m_post_req[8192] = { 0 };
 	sprintf(m_post_req, REQUEST_POST_REGISTER_INTERFACE, m_regval);
 
-	req.~CCurlTask(); // 释放上次 curl 句柄，为下面做准备。
 	CCurlTask req2;
 	// 开始电子注册
 	if (!req2.Exec(false, m_post_req, CGI_HTTP_COOKIE, true, m_post_reg_info))
@@ -1869,8 +1868,6 @@ void parse_QuickQuery_Result()
 			pStr1 = NULL;
 			pStr2 = NULL;
 
-			req.~CCurlTask(); // 显示析构，释放上一个 curl 句柄。
-
 			char m_query_report[128] = { 0 };
 			sprintf(m_query_report, REQUEST_REPORT_FILES, m_paramsID);
 			CCurlTask req2;
@@ -1919,7 +1916,6 @@ void parse_QuickQuery_Result()
 			}
 			char m_txt_req_path[512] = { 0 };
 			mid(m_txt_req_path, pStr1 + 45, pStr2 - pStr1 - 45, 0);
-			req2.~CCurlTask();
 
 			char m_query_score[512] = { 0 };
 			sprintf(m_query_score, REQUEST_TXT_SCORES, m_txt_req_path);
@@ -2151,7 +2147,7 @@ void parse_QuickQuery_Result()
 		cout << GLOBAL_HEADER;
 
 		char m_query_time[512] = { 0 };
-		sprintf(m_query_time, "<br /><center>本次查询耗时 %.2f 秒</center>", (float)(clock() - g_start_time) / 1000.0);
+		sprintf(m_query_time, "<br /><center>本次查询耗时 %.2f 秒</center>", (float)(clock() - g_start_time) / (double)CLOCKS_PER_SEC);
 		m_list.append(m_query_time);
 
 		if (m_xhgs > 1)
@@ -2716,8 +2712,6 @@ void teaching_evaluation()
 			to_eval++;
 	}
 
-	req.~CCurlTask();
-
 	std::string outer;
 	char out_head[1024] = { 0 };
 	char last[64] = {0};
@@ -2799,7 +2793,6 @@ void teaching_evaluation()
 				post_data = post_data + te[i].wjbm + "&bpr=" + te[i].bpr + "&pgnr=" + te[i].pgnr + "&xumanyzg=zg&wjbz=" + rank + "zgpj=";
 				post_data += zgpj;
 
-				req2.~CCurlTask();
 				// 检查这门课是否需要教学评估
 				CCurlTask req3;
 				if (!req3.Exec(false, POST_TEACH_EVAL, CGI_HTTP_COOKIE, true, post_data.c_str()))

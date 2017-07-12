@@ -332,8 +332,8 @@ void OAuth2_CallBack()
 		return;
 	}
 
-	char *encrypt_pass = new char[strlen((char *)password) * 4 + 1];
-	char *encrypt_id = new char[strlen((char *)id) * 4 + 1];
+	char encrypt_pass[512];
+	char encrypt_id[512];
 	strcpy(encrypt_id, (char *)id);
 	strcpy(encrypt_pass, (char *)password);
 	EnCodeStr(encrypt_id, encrypt_id);
@@ -343,8 +343,6 @@ void OAuth2_CallBack()
 		<< GLOBAL_HEADER;
 	
 	sqlite3_finalize(stmt);
-	delete[]encrypt_id;
-	delete[]encrypt_pass;
 	delete[]access_token;
 	delete[]access_token_req;
 	delete[]openid;
