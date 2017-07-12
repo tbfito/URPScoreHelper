@@ -42,7 +42,6 @@ int main(int argc, const char* argv[])
 
 	while (FCGX_Accept_r(&request) == 0)
 	{
-		g_start_time = clock();
 		if (isdbReady)
 		{
 			SetUsersCounter();
@@ -1415,10 +1414,6 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		m_Output.insert(0, m_jiaquanfen);
 	}
 
-	char m_query_time[128] = { 0 };
-	sprintf(m_query_time, "<br /><center>本次查询耗时 %.2f 秒</center>", (float)(clock() - g_start_time) / (double)CLOCKS_PER_SEC);
-	m_Output.append(m_query_time);
-
 	cout << GLOBAL_HEADER;
 
 	std::string title(m_Student);
@@ -2145,10 +2140,6 @@ void parse_QuickQuery_Result()
 		}
 
 		cout << GLOBAL_HEADER;
-
-		char m_query_time[512] = { 0 };
-		sprintf(m_query_time, "<br /><center>本次查询耗时 %.2f 秒</center>", (float)(clock() - g_start_time) / (double)CLOCKS_PER_SEC);
-		m_list.append(m_query_time);
 
 		if (m_xhgs > 1)
 		{

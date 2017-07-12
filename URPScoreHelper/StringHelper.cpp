@@ -49,7 +49,7 @@ char * right(char *dst, char *src, int n)
 }
 
 // 将字符串中指定子字符串用指定字符串代替，targ_str 是被替换的，val是替换的字符串
-void replace_string(char * source_str, char * targ_str, const char *val)
+void replace_string(char * source_str, const char * targ_str, const char *val)
 {
 	char * temp_sstr = new char[strlen(source_str) + 1];
 	char * result = new char[strlen(source_str) + 1];
@@ -162,7 +162,7 @@ int url_decode(char *str, int len)
 		data++;
 		dest++;
 	}
-	*dest = '/0';
+	*dest = '\0';
 	return dest - str;
 }
 

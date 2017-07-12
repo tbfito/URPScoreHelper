@@ -7,8 +7,7 @@ std::string footer;
 std::string error;
 
 FILE *g_fQueryCount;
-unsigned long long g_QueryCount;
-clock_t g_start_time;
+long long g_QueryCount;
 int g_users;
 sqlite3 *db;
 

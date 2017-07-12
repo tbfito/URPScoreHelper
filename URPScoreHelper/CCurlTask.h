@@ -4,7 +4,7 @@ public:
 	CCurlTask();
 	~CCurlTask();
 	bool Exec(bool headonly, std::string url, std::string cookie = "", bool isPOST = false, std::string postdata = "");
-	bool CCurlTask::SetReferer(std::string & referer);
+	bool SetReferer(std::string & referer);
 	char *GetResult();
 	size_t GetLength();
 	

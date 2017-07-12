@@ -42,8 +42,14 @@ extern "C"
 #endif
 }
 
-#ifndef MAX_PATH
-	#define MAX_PATH 260
+// Unix ºÊ»› Win ∫Í∂®“Â
+#ifdef ZeroMemory
+#undef ZeroMemory
+#endif
+#define ZeroMemory(Destination,Length) memset((Destination),0,(Length))
+#ifdef MAX_PATH
+#undef MAX_PATH
+#define MAX_PATH 260
 #endif
 
 /*
