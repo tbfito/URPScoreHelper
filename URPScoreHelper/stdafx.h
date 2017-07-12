@@ -6,9 +6,11 @@
 #pragma once
 #define _CRT_SECURE_NO_WARNINGS
 
-#include <cstdio>
-#include <cstdlib>
-#include <ctime>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
+#include <malloc.h>
 #include <iostream>
 #include <string>
 #include "libfcgi/fcgio.h"

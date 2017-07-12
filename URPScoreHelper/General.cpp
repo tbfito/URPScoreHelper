@@ -143,7 +143,7 @@ std::string strformat(const char *format, ...)
 	}
 
 	// need more space...
-	char* p = static_cast<char*>(_alloca(needed));
+	char* p = static_cast<char*>(alloca(needed));
 	vsnprintf(p, needed, format, arg_list);
 	std::string str(p);
 	return str;
