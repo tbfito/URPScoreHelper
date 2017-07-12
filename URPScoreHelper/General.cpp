@@ -135,8 +135,8 @@ std::string strformat(const char *format, ...)
 	// SUSv2 version doesn't work for buf NULL/size 0, so try printing
 	// into a small buffer that avoids the double-rendering and alloca path too...
 	char short_buf[256];
-	const size_t needed = vsnprintf(short_buf, sizeof(short_buf), format, arg_list) + 1;
-	if (needed <= sizeof(short_buf))
+	const size_t needed = vsnprintf(short_buf, 256, format, arg_list) + 1;
+	if (needed <= 256)
 	{
 		std::string str(short_buf);
 		return str;
