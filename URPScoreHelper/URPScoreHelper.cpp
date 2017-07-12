@@ -17,16 +17,6 @@
 #include "INIReader.h"
 #include "Encrypt.h"
 
-#ifdef _WIN64
-#include "resource.h"
-#else
-#ifdef _WIN32
-#include "resource.h"
-#endif
-#endif
-
-using namespace std;
-
 // 入口函数 (FastCGI 处理循环)
 int main(int argc, const char* argv[])
 {
