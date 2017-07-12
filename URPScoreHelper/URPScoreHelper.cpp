@@ -24,7 +24,7 @@ int main(int argc, const char* argv[])
 	LoadConfig();
 	FCGX_Init();
 	curl_global_init(CURL_GLOBAL_ALL);
-	static char *emptystr = "";
+	static const char *emptystr = "";
 	isPageSrcLoadSuccess = false;
 
 	int FCGX_SocketId = 0;
@@ -95,7 +95,7 @@ int main(int argc, const char* argv[])
 		}
 		if (CGI_HTTP_COOKIE == NULL)
 		{
-			CGI_HTTP_COOKIE = emptystr;
+			CGI_HTTP_COOKIE = (char *)emptystr;
 		}
 
 		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0) // 如果是 GET 请求
@@ -411,7 +411,7 @@ void SetUsersCounter()
 	g_QueryCount = 0;
 	if (g_fQueryCount != NULL)
 	{
-		fscanf(g_fQueryCount, "%ld", &g_QueryCount);
+		fscanf(g_fQueryCount, "%lld", &g_QueryCount);
 	}
 	else
 	{
@@ -982,7 +982,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		g_fQueryCount = fopen("QueryCount.bin", "w+");
 		if (g_fQueryCount != NULL)
 		{
-			fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
+			fprintf(g_fQueryCount, "%lld", ++g_QueryCount);
 			fclose(g_fQueryCount);
 		}
 
@@ -1039,7 +1039,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		g_fQueryCount = fopen("QueryCount.bin", "w+");
 		if (g_fQueryCount != NULL)
 		{
-			fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
+			fprintf(g_fQueryCount, "%lld", ++g_QueryCount);
 			fclose(g_fQueryCount);
 		}
 
@@ -1095,7 +1095,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		g_fQueryCount = fopen("QueryCount.bin", "w+");
 		if (g_fQueryCount != NULL)
 		{
-			fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
+			fprintf(g_fQueryCount, "%lld", ++g_QueryCount);
 			fclose(g_fQueryCount);
 		}
 
@@ -1157,7 +1157,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		g_fQueryCount = fopen("QueryCount.bin", "w+");
 		if (g_fQueryCount != NULL)
 		{
-			fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
+			fprintf(g_fQueryCount, "%lld", ++g_QueryCount);
 			fclose(g_fQueryCount);
 		}
 
@@ -1220,7 +1220,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		g_fQueryCount = fopen("QueryCount.bin", "w+");
 		if (g_fQueryCount != NULL)
 		{
-			fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
+			fprintf(g_fQueryCount, "%lld", ++g_QueryCount);
 			fclose(g_fQueryCount);
 		}
 		free(m_prep);
@@ -1428,7 +1428,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	g_fQueryCount = fopen("QueryCount.bin", "w+");
 	if (g_fQueryCount != NULL)
 	{
-		fprintf(g_fQueryCount, "%ld", ++g_QueryCount);
+		fprintf(g_fQueryCount, "%lld", ++g_QueryCount);
 		fclose(g_fQueryCount);
 	}
 	free(p_lpszScore);
@@ -1580,7 +1580,7 @@ int system_registration()
 bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 {
 	// 发送登陆请求。
-	char *m_origin = "zjh1=&tips=&lx=&evalue=&eflag=&fs=&dzslh=&zjh=%s&mm=%s&v_yzm=%s";
+	const char *m_origin = "zjh1=&tips=&lx=&evalue=&eflag=&fs=&dzslh=&zjh=%s&mm=%s&v_yzm=%s";
 	char m_padding[512] = { 0 };
 	sprintf(m_padding, m_origin, p_xuehao, p_password, p_captcha);
 
@@ -2164,7 +2164,7 @@ void parse_QuickQuery_Result()
 		g_fQueryCount = fopen("QueryCount.bin", "w+");
 		if (g_fQueryCount != NULL)
 		{
-			fprintf(g_fQueryCount, "%ld", g_QueryCount);
+			fprintf(g_fQueryCount, "%lld", g_QueryCount);
 			fclose(g_fQueryCount);
 		}
 }
