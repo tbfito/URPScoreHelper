@@ -61,7 +61,7 @@ int main(int argc, const char* argv[])
 		CGI_CONTENT_LENGTH = FCGX_GetParam("CONTENT_LENGTH", request.envp); // 数据长度
 		CGI_SCRIPT_NAME = FCGX_GetParam("SCRIPT_NAME", request.envp); // 脚本名称
 		CGI_QUERY_STRING = FCGX_GetParam("QUERY_STRING", request.envp); // 查询参数
-		CGI_PATH_TRANSLATED = FCGX_GetParam("PATH_TRANSLATED", request.envp); // 脚本位置
+		CGI_SCRIPT_FILENAME = FCGX_GetParam("SCRIPT_FILENAME", request.envp); // 脚本位置
 		CGI_HTTP_COOKIE = FCGX_GetParam("HTTP_COOKIE", request.envp); // Cookie
 		CGI_HTTPS = FCGX_GetParam("HTTPS", request.envp);
 		CGI_HTTP_HOST = FCGX_GetParam("HTTP_HOST", request.envp);
@@ -87,7 +87,7 @@ int main(int argc, const char* argv[])
 		}
 
 		if (CGI_REQUEST_METHOD == NULL || CGI_SCRIPT_NAME == NULL || CGI_QUERY_STRING == NULL ||
-			CGI_PATH_TRANSLATED == NULL || CGI_CONTENT_LENGTH == NULL)
+			CGI_SCRIPT_FILENAME == NULL || CGI_CONTENT_LENGTH == NULL)
 		{
 			cout << "Status: 500 Internal Server Error\r\n"
 				<< GLOBAL_HEADER
@@ -252,11 +252,11 @@ int main(int argc, const char* argv[])
 void LoadPageSrc()
 {
 	// 读入主页面文件
-	char *pStr = strstr(CGI_PATH_TRANSLATED, "\\");
+	char *pStr = strstr(CGI_SCRIPT_FILENAME, "\\");
 	bool isUnixBasedPath = (pStr == NULL);
 	if (isUnixBasedPath)
 	{
-		pStr = strstr(CGI_PATH_TRANSLATED, "/");
+		pStr = strstr(CGI_SCRIPT_FILENAME, "/");
 	}
 	if (pStr == NULL)
 	{
@@ -279,7 +279,7 @@ void LoadPageSrc()
 	char *doc_root = new char[MAX_PATH];
 	memset(doc_root, 0, MAX_PATH);
 
-	mid(doc_root, CGI_PATH_TRANSLATED, Last - CGI_PATH_TRANSLATED + 1, 0);
+	mid(doc_root, CGI_SCRIPT_FILENAME, Last - CGI_SCRIPT_FILENAME + 1, 0);
 	char *file_root = new char[MAX_PATH];
 	memset(file_root, 0, MAX_PATH);
 
@@ -646,7 +646,7 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 		}
 	}
 	// 读入主页面文件
-	std::string m_lpszHomepage = ReadTextFileToMem(CGI_PATH_TRANSLATED);
+	std::string m_lpszHomepage = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
 	char m_student_name[512] = {0};
 	char m_student_id[512] = { 0 };
@@ -783,7 +783,7 @@ int parse_index()
 	}
 
 	// 读入主页面文件
-	std::string m_lpszHomepage = ReadTextFileToMem(CGI_PATH_TRANSLATED);
+	std::string m_lpszHomepage = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
 	cout << GLOBAL_HEADER;
 	cout << strformat( header.c_str(), SOFTWARE_NAME);
@@ -912,7 +912,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	char m_Student[64] = { 0 };
 	get_student_name(m_Student);
 
-	std::string m_lpszQuery = ReadTextFileToMem(CGI_PATH_TRANSLATED);
+	std::string m_lpszQuery = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
 	char *p_lpszScore = (char *)malloc(p_strlpszScore.length() + 1);
 	strcpy(p_lpszScore, p_strlpszScore.c_str());
@@ -1752,7 +1752,7 @@ void parse_QuickQuery_Intro()
 	std::string nullphoto;
 	process_cookie(&m_need_update_cookie, nullphoto);
 
-	std::string m_lpszQuery = ReadTextFileToMem(CGI_PATH_TRANSLATED);
+	std::string m_lpszQuery = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
 	if (m_need_update_cookie)
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
@@ -1773,7 +1773,7 @@ void parse_QuickQuery_Result()
 	std::string nullphoto;
 	process_cookie(&m_need_update_cookie, nullphoto);
 
-	std::string m_lpszQuery = ReadTextFileToMem(CGI_PATH_TRANSLATED);
+	std::string m_lpszQuery = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
 	// 获取 POST 数据。
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
@@ -2342,7 +2342,7 @@ void OAuth2_Association(bool isPOST)
 			sqlite3_finalize(stmt);
 		}
 
-		std::string m_lpszHomepage = ReadTextFileToMem(CGI_PATH_TRANSLATED);
+		std::string m_lpszHomepage = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
 		// 输出网页
 		if (m_need_update_cookie)
@@ -2567,7 +2567,7 @@ void parse_teaching_evaluation()
 	}
 	to_eval_list += "</div>";
 
-	std::string m_lpszTeachEvalPage = ReadTextFileToMem(CGI_PATH_TRANSLATED);
+	std::string m_lpszTeachEvalPage = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
 	std::string outer;
 	char out_head[1024] = { 0 };
@@ -2838,7 +2838,7 @@ void parse_change_password()
 		return;
 	}
 
-	std::string m_lpszQuery = ReadTextFileToMem(CGI_PATH_TRANSLATED);
+	std::string m_lpszQuery = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
 	if (m_need_update_cookie)
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";

@@ -1,0 +1,9 @@
+server{ 
+        index index.fcgi,index.html,index.htm;
+        root /home/iedon/webroot;
+        location ~.*.fcgi$ { 
+                include /etc/nginx/conf/fastcgi_params;
+                fastcgi_index index.fcgi;
+                fastcgi_pass  127.0.0.1:9000;
+        }
+}

@@ -18,7 +18,7 @@ char *CGI_REQUEST_URI; // 请求URI
 char *CGI_REQUEST_METHOD; // 请求方法
 char *CGI_CONTENT_LENGTH; // 数据长度
 char *CGI_QUERY_STRING; // 查询参数
-char *CGI_PATH_TRANSLATED; // 脚本位置
+char *CGI_SCRIPT_FILENAME; // 脚本位置
 char *CGI_HTTP_COOKIE; // Cookie
 char *CGI_HTTP_HOST;
 char *CGI_HTTPS;

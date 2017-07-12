@@ -21,7 +21,7 @@ extern char *CGI_REQUEST_URI; // 请求URI
 extern char *CGI_REQUEST_METHOD; // 请求方法
 extern char *CGI_CONTENT_LENGTH; // 数据长度
 extern char *CGI_QUERY_STRING; // 查询参数
-extern char *CGI_PATH_TRANSLATED; // 脚本位置
+extern char *CGI_SCRIPT_FILENAME; // 脚本位置
 extern char *CGI_HTTP_COOKIE; // Cookie
 extern char *CGI_HTTP_HOST;
 extern char *CGI_HTTPS;
