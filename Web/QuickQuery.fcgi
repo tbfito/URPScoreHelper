@@ -3,7 +3,7 @@
 		%s
 	</h1>
 	<div class="weui-cells__title status">
-		共&nbsp;<big>%d</big>&nbsp;位同学进行了&nbsp;<big>%ld</big>&nbsp;次查询
+		共&nbsp;<big>%d</big>&nbsp;位同学进行了&nbsp;<big>%lld</big>&nbsp;次查询
 	</div>
 </header>
 <div class="content">
