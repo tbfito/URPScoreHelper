@@ -24,7 +24,6 @@ extern "C"
 #ifdef _WIN64
 	#include <direct.h>
 	#define getcwd _getcwd
-	#define alloca _alloca
 	#include "resource.h"
 	#pragma comment(lib, "libfcgi/libfcgi_win64.lib")
 	#pragma comment(lib, "sqlite/sqlite3_win64.lib")
@@ -33,7 +32,6 @@ extern "C"
 	#ifdef _WIN32
 		#include <direct.h>
 		#define getcwd _getcwd
-		#define alloca _alloca
 		#include "resource.h"
 		#pragma comment(lib, "libfcgi/libfcgi_win32.lib")
 		#pragma comment(lib, "sqlite/sqlite3_win32.lib")
