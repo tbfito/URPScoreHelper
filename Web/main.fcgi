@@ -8,9 +8,9 @@
 						<h1>%s</h1>
 						<p><small>%s</small></p>
 						<div style="padding-top:5px">
-							<a href="/changePassword.fcgi">�޸�����</a> | <a style="display:%s" href="index.fcgi?act=requestAssoc">��QQ�ʺ�</a>
+							<a href="/changePassword.fcgi">修改密码</a> | <a style="display:%s" href="index.fcgi?act=requestAssoc">绑定QQ帐号</a>
 							<div style="display:%s">
-								<span style="color:rgb(0, 255, 90)">QQ�Ѱ�</span> | <a href="javascript:void(0);" onclick="releaseAssoc('%s');">�����</a>
+								<span style="color:rgb(0, 255, 90)">QQ已绑定</span> | <a href="javascript:void(0);" onclick="releaseAssoc('%s');">解除绑定</a>
 							</div>
 						</div>
 					</div>
@@ -24,7 +24,7 @@
 		  <img src="img/TeachEval.png" alt="">
 		</div>
 		<p class="weui-grid__label">
-		  һ������
+		  一键评教
 		</p>
 	  </a>
 	  <a href="query.fcgi" class="weui-grid js_grid">
@@ -32,7 +32,7 @@
 		  <img src="img/query.png" alt="">
 		</div>
 		<p class="weui-grid__label">
-		  ��ѧ�ڳɼ�
+		  本学期成绩
 		</p>
 	  </a>
 	  <a href="query.fcgi?order=schedule" class="weui-grid js_grid">
@@ -40,7 +40,7 @@
 		  <img src="img/schedule.png" alt="">
 		</div>
 		<p class="weui-grid__label">
-		  �ҵĿγ̱�
+		  我的课程表
 		</p>
 	  </a>
 		<a href="query.fcgi?order=passed" class="weui-grid js_grid">
@@ -48,7 +48,7 @@
 		  <img src="img/passed.png" alt="">
 		</div>
 		<p class="weui-grid__label">
-		  �ѹ���Ŀ
+		  已过科目
 		</p>
 	  </a>
 	  	<a href="query.fcgi?order=byplan" class="weui-grid js_grid">
@@ -56,7 +56,7 @@
 		  <img src="img/plan.png" alt="">
 		</div>
 		<p class="weui-grid__label">
-		  �ҵ�רҵ
+		  我的专业
 		</p>
 	  </a>
 	    <a href="query.fcgi?order=failed" class="weui-grid js_grid">
@@ -64,7 +64,7 @@
 		  <img src="img/failed.png" alt="">
 		</div>
 		<p class="weui-grid__label">
-		  �ҿƲ�ѯ
+		  挂科查询
 		</p>
 	  </a>
 	   <a href="query.fcgi?order=tests" class="weui-grid js_grid">
@@ -72,7 +72,7 @@
 		  <img src="img/tests.png" alt="">
 		</div>
 		<p class="weui-grid__label">
-		  ���в����忼
+		  月中补缓清考
 		</p>
 	  </a>
 		 <a id="logout" onclick="logout();" href="javascript:void(0);" class="weui-grid js_grid">
@@ -80,7 +80,7 @@
 		  <img src="img/logout.png" alt="">
 		</div>
 		<p class="weui-grid__label">
-		  �˳���¼
+		  退出登录
 		</p>
 	  </a>
 	</div>

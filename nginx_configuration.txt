@@ -1,5 +1,5 @@
 server{ 
-        index index.fcgi,index.html,index.htm;
+        index index.fcgi index.html index.htm;
         root /home/iedon/webroot;
         location ~.*.fcgi$ { 
                 include /etc/nginx/conf/fastcgi_params;

@@ -1,6 +1,6 @@
 <div class="i_page-navbar">
-	<a href="main.fcgi" class="return">&lt; ·µ »Ø</a>
-	²éÑ¯½á¹û ¡¤ %s
+	<a href="main.fcgi" class="return">&lt; è¿” å›ž</a>
+	æŸ¥è¯¢ç»“æžœ Â· %s
 </div>
 <div class="content">
 	%s

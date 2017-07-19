@@ -1,21 +1,23 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "General.h"
 
 char JSESSIONID[256] = {0};
 
 const char* GLOBAL_HEADER = "X-Powered-By: iEdon-URPScoreHelper\r\n\
-Content-Type: text/html; charset=gb2312\r\n\
+Content-Type: text/html; charset=utf-8\r\n\
 Cache-Control: no-cache\r\n\
 Pragma: no-cache\r\n\
 Expires: -1\r\n\r\n";
 
-// ·ÖÊıÏÔÊ¾¿é
-const char *BEFORE_TEMPLATE = "<div id=\"list_page\" style=\"background-color:transparent !important\"><table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"titleTop2\" style=\"background-color:transparent !important;border:none\"><tbody><tr><td class=\"pageAlign\"><table cellpadding=\"0\" width=\"100%\" class=\"displayTag\" cellspacing=\"1\" border=\"0\" id=\"user\"><thead><tr><th align=\"center\" width=\"30%\" class=\"sortable\">¿Î³ÌÃû³Æ</th><th align=\"center\" width=\"10%\" class=\"sortable\">³É¼¨</th><th align=\"center\" width=\"10%\" class=\"sortable\">¾ù·Ö</th><th align=\"center\" width=\"10%\" class=\"sortable\">×î¸ß</th><th align=\"center\" width=\"10%\" class=\"sortable\">×îµÍ</th><th align=\"center\" width=\"10%\" class=\"sortable\">Ãû´Î</th><th align=\"center\" width=\"10%\" class=\"sortable\">Ñ§·Ö</th><th align=\"center\" width=\"10%\" class=\"sortable\">¼¨µã</th></tr></thead><tbody>";
-const char *AFTER_TEMPLATE = "</tbody></table></td></tr></tbody></table></div>";
-const char *SCORE_TEMPLATE = "<tr class=\"even\" onmouseout=\"this.className='even';\" onmouseover=\"this.className='evenfocus';\"><td align=\"center\" style=\"%s\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%.1f</td></tr>";
-const char *QUICK_SCORE = "<div class=\"weui-cell\"><div class=\"weui-cell__bd\"><p>%s</p></div><div class=\"weui-cell__ft\">%s</div></div>";
+// åˆ†æ•°æ˜¾ç¤ºå—
+const char *BEFORE_TEMPLATE = u8"<div id=\"list_page\" style=\"background-color:transparent !important\"><table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"titleTop2\" style=\"background-color:transparent !important;border:none\"><tbody><tr><td class=\"pageAlign\"><table cellpadding=\"0\" width=\"100%\" class=\"displayTag\" cellspacing=\"1\" border=\"0\" id=\"user\"><thead><tr><th align=\"center\" width=\"30%\" class=\"sortable\">è¯¾ç¨‹åç§°</th><th align=\"center\" width=\"10%\" class=\"sortable\">æˆç»©</th><th align=\"center\" width=\"10%\" class=\"sortable\">å‡åˆ†</th><th align=\"center\" width=\"10%\" class=\"sortable\">æœ€é«˜</th><th align=\"center\" width=\"10%\" class=\"sortable\">æœ€ä½</th><th align=\"center\" width=\"10%\" class=\"sortable\">åæ¬¡</th><th align=\"center\" width=\"10%\" class=\"sortable\">å­¦åˆ†</th><th align=\"center\" width=\"10%\" class=\"sortable\">ç»©ç‚¹</th></tr></thead><tbody>";
+const char *AFTER_TEMPLATE = u8"</tbody></table></td></tr></tbody></table></div>";
+const char *SCORE_TEMPLATE = u8"<tr class=\"even\" onmouseout=\"this.className='even';\" onmouseover=\"this.className='evenfocus';\"><td align=\"center\" style=\"%s\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%.1f</td></tr>";
+const char *QUICK_SCORE = u8"<div class=\"weui-cell\"><div class=\"weui-cell__bd\"><p>%s</p></div><div class=\"weui-cell__ft\">%s</div></div>";
+const char *OAUTH2_LOGIN_HTML = u8"<a title=\"QQå¿«é€Ÿç™»å½•\" class=\"weui-btn weui-btn_default col-50\" href=\"OAuth2.fcgi\">QQå¿«é€Ÿç™»å½•</a>";
+const char *QUICKQUERY_HTML = u8"<div class=\"quickquery\"><a class=\"weui-btn weui-btn_warn\" href=\"QuickQuery.fcgi\">å…å¯†å¿«é€ŸæŸ¥è¯¢å…¥å£ &gt;&gt;</a></div>";
 
-// ´íÎóÒ³ÃæºÍÅäÖÃ³õÊ¼»¯
+// é”™è¯¯é¡µé¢å’Œé…ç½®åˆå§‹åŒ–
 std::string ERROR_HTML;
 char *SERVER_URL = NULL;
 char *USER_AGENT = NULL;
@@ -24,9 +26,10 @@ char *OAUTH2_APPID = NULL;
 char *OAUTH2_SECRET = NULL;
 bool CURL_USE_PROXY = false;
 char *CURL_PROXY_URL = NULL;
+char *APP_NAME = NULL;
 
 /*
-Êä³ö´íÎóÒ³Ãæ
+è¾“å‡ºé”™è¯¯é¡µé¢
 @Params: char* error message
 @Return: none
 */
@@ -37,7 +40,7 @@ void Error(const char *p_ErrMsg)
 }
 
 /*
-BASE64 ±àÂë
+BASE64 ç¼–ç 
 @Params: source bin, in buffer, in length
 @Return char* base64 code
 */
@@ -83,7 +86,7 @@ char * base64_encode(const unsigned char * bindata, char * base64, int binlength
 
 
 /*
-½«ÎÄ±¾ÎÄ¼ş¶ÁÈëÄÚ´æ
+å°†æ–‡æœ¬æ–‡ä»¶è¯»å…¥å†…å­˜
 @Params: const char* file path
 @Return: std::string filedata
 */
@@ -95,9 +98,9 @@ std::string ReadTextFileToMem(const char *lpszLocalPath)
 	{
 		return fdata;
 	}
-	fseek(m_file, 0, SEEK_END); // ÒÆµ½Î²
-	int m_file_length = ftell(m_file); // È¡µÃ³¤¶È
-	fseek(m_file, 0, SEEK_SET); // ÒÆµ½Ê×
+	fseek(m_file, 0, SEEK_END); // ç§»åˆ°å°¾
+	int m_file_length = ftell(m_file); // å–å¾—é•¿åº¦
+	fseek(m_file, 0, SEEK_SET); // ç§»åˆ°é¦–
 	char *m_lpszfdata = (char *)malloc(m_file_length + 1);
 	ZeroMemory(m_lpszfdata, m_file_length + 1);
 	if (fread(m_lpszfdata, m_file_length, 1, m_file) != 1)
@@ -112,19 +115,19 @@ std::string ReadTextFileToMem(const char *lpszLocalPath)
 }
 
 /*
-½«³É¼¨×ª»¯Îª¼¨µã
+å°†æˆç»©è½¬åŒ–ä¸ºç»©ç‚¹
 @Params: float cj
 @Return: float jidian point
 */
 float cj2jd(float cj)
 {
 	if (cj <= 59)
-		return 0;
+		return 0.0;
 	return ((((int)cj % 60) / 10.0) + 1.0);
 }
 
 /*
-ÊµÏÖ std::string µÄ¸ñÊ½»¯¹¦ÄÜ
+å®ç° std::string çš„æ ¼å¼åŒ–åŠŸèƒ½
 @Params: const char *format
 @Return: std::string
 */
@@ -141,4 +144,22 @@ std::string strformat(const char *format, ...)
 	std::string str(p);
 	free(p);
 	return str;
+}
+
+std::string getAppURL()
+{
+	std::string text;
+	if (CGI_HTTPS != NULL && strcmp(CGI_HTTPS, "") != 0
+		&& strcmp(CGI_HTTPS, "off") != 0
+		&& strcmp(CGI_HTTPS, "OFF") != 0
+		&& strcmp(CGI_HTTPS, "0") != 0)
+	{
+		text.append("https://");
+	}
+	else
+	{
+		text.append("http://");
+	}
+	text.append(CGI_HTTP_HOST);
+	return text;
 }

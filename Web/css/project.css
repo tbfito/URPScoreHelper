@@ -10,7 +10,7 @@
 .weui-cells:before{border-top:0}
 .weui-cells:after{border-bottom:0}
 .weui-cells.weui-cells_form.bigbox{margin-left:15px;border:1px solid rgba(81, 203, 238, 1);border-radius:3px}
-#login_captcha{margin:10px}
+#login_captcha{margin:10px;border-radius:2px}
 .content{margin:0 auto;width:30%}
 @media screen and (max-width:1300px){.content{width:35%}}
 @media screen and (max-width:1200px){.content{width:40%}}

@@ -1,27 +1,27 @@
 <div class="i_page-navbar">
-	<a href="main.fcgi" class="return">&lt; ·µ »Ø</a>
-	½ÌÎñÃÜÂëÐÞ¸Ä
+	<a href="main.fcgi" class="return">&lt; è¿” å›ž</a>
+	æ•™åŠ¡å¯†ç ä¿®æ”¹
 </div>
 <div class="content">
-	<div id="i_total"><p>ÐÞ¸ÄÃÜÂëÒª<b>É÷ÖØ</b>ÄÅ£¬¶ªÁË¿É<b>ÕÒ²»»ØÀ´</b>£¬³ý·ÇÕÒ½ÌÎñ´¦ :)</p></div>
+	<div id="i_total"><p>ä¿®æ”¹å¯†ç è¦<b>æ…Žé‡</b>å‘ï¼Œä¸¢äº†å¯<b>æ‰¾ä¸å›žæ¥</b>ï¼Œé™¤éžæ‰¾æ•™åŠ¡å¤„ :)</p></div>
 	<form action="changePassword.fcgi" method="post" class="weui-cells weui-cells_form">
 				<div class="weui-cell">
 					<div class="weui-cell_hd">
-						<label class="weui_label">ÐÂÃÜÂë£º&nbsp;&nbsp;</label>
+						<label class="weui_label">æ–°å¯†ç ï¼š&nbsp;&nbsp;</label>
 					</div>
 					<div class="weui-cell_bd">
-						<input id="i_xhs" name="mm" tabindex="1" class="weui-input" type="password" placeholder="×î³¤12Î»" />
+						<input id="i_xhs" name="mm" tabindex="1" class="weui-input" type="password" placeholder="æœ€é•¿12ä½" />
 					</div>
 				</div>
 				<div class="weui-cell weui-cell_switch">
-					<div class="weui-cell__bd">È·ÈÏÎÞÎó</div>
+					<div class="weui-cell__bd">ç¡®è®¤æ— è¯¯</div>
 					<div class="weui-cell__ft">
 					  <input id="i_chk" tabindex="2" class="weui-switch" type="checkbox">
 					</div>
 				</div>
 		<div class="weui-btn-area">
-			<input onclick="return check_password();" type="submit" value="È·ÈÏÐÞ¸Ä" class="weui-btn weui-btn_primary" />
-			<a href="main.fcgi" class="weui-btn weui-btn_default">&lt;&lt; ²»ÕûÁË£¬»ØÈ¥</a>
+			<input onclick="return check_password();" type="submit" value="ç¡®è®¤ä¿®æ”¹" class="weui-btn weui-btn_primary" />
+			<a href="main.fcgi" class="weui-btn weui-btn_default">&lt;&lt; ä¸æ•´äº†ï¼Œå›žåŽ»</a>
 		</div>
 	</form>
 	<br />

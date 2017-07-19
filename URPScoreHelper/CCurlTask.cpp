@@ -1,6 +1,7 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "General.h"
 #include "CCurlTask.h"
+#include "gbkutf8.h"
 
 CCurlTask::CCurlTask()
 {
@@ -29,6 +30,11 @@ size_t CCurlTask::GetLength()
 bool CCurlTask::SetReferer(std::string & referer)
 {
 	return (curl_easy_setopt(curl, CURLOPT_REFERER, referer.c_str()) == CURLE_OK);
+}
+
+std::string & CCurlTask::GetResultString()
+{
+	return result;
 }
 
 bool CCurlTask::Exec(bool headonly, std::string url, std::string cookie, bool isPOST, std::string postdata)

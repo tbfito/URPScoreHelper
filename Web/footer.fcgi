@@ -1,14 +1,14 @@
 	<div class="weui-footer">
 		<p class="weui-footer__links">
-			<a href="main.fcgi" class="weui-footer__link">Î¨ÑïÐ¡ÖúÊÖ</a>
+			<a href="main.fcgi" class="weui-footer__link">NåŠ é’å¹´</a>
 		</p>
-		<p class="weui-footer__text">¡ª¡ª Ñï´óÈË×Ô¼ºµÄÕÆÉÏ½ÌÎñ</p>
-		<p class="weui-footer__text">&copy; 2012-2017 iEdon, N¼ÓÇàÄê</p>
+		<p class="weui-footer__text">%s - æ‰¬å¤§äººè‡ªå·±çš„æŽŒä¸Šæ•™åŠ¡</p>
+		<p class="weui-footer__text">Powered by %s</p>
 	</div>
 	<br />
 	<script charset="utf-8" src="js/jquery.min.js"></script>
 	<script charset="utf-8" src="js/jquery-weui.min.js"></script>
-	<script charset="gb2312" src="js/URPScoreHelper.js"></script>
+	<script charset="utf-8" src="js/URPScoreHelper.js?ver=17.7.20"></script>
 	<script>
 		var _hmt = _hmt || [];
 		(function() {

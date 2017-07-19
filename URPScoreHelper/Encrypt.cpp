@@ -1,13 +1,13 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "Encrypt.h"
 #include "General.h"
 #include "StringHelper.h"
 
-//str±ØĞëÎª¿É´òÓ¡×Ö·û0x20 -- 0x7F  
-//str±ØĞëÒÔ'\0'½áÎ²,  
-//¼ÓÃÜĞ§¹û½ÏºÃ
-// ¼ÓÃÜ½á¹ûÎª¿É´òÓ¡×Ö·û0x20 -- 0x7F  
-// Êä³ö»º³åÇø±ØĞëÊÇ×Ö·û»º³åÇøµÄËÄ±¶
+//strå¿…é¡»ä¸ºå¯æ‰“å°å­—ç¬¦0x20 -- 0x7F  
+//strå¿…é¡»ä»¥'\0'ç»“å°¾,  
+//åŠ å¯†æ•ˆæœè¾ƒå¥½
+// åŠ å¯†ç»“æœä¸ºå¯æ‰“å°å­—ç¬¦0x20 -- 0x7F  
+// è¾“å‡ºç¼“å†²åŒºå¿…é¡»æ˜¯å­—ç¬¦ç¼“å†²åŒºçš„å››å€
 void EnCodeStr(char *str, char *out)
 {
 	int randOffset = rand() % 96;
@@ -15,7 +15,7 @@ void EnCodeStr(char *str, char *out)
 	int i = 0;
 	for (; str[i] != '\0'; i++)
 	{
-		ResChar = randOffset + str[i] + i * 33; //33¿ÉÒÔÎªÆäËûºÏÊÊµÄÊı×Ö  
+		ResChar = randOffset + str[i] + i * 33; //33å¯ä»¥ä¸ºå…¶ä»–åˆé€‚çš„æ•°å­—  
 		while (ResChar > 127)
 		{
 			ResChar -= 96;
@@ -29,12 +29,12 @@ void EnCodeStr(char *str, char *out)
 	memset(tmp, 0, len);
 	Ascii2Hex(str, tmp);
 	for (int x = 0; tmp[x]; x++)
-		tmp[x] = tmp[x] ^ SOFTWARE_NAME[x % strlen(SOFTWARE_NAME)];
+		tmp[x] = tmp[x] ^ APP_NAME[x % strlen(APP_NAME)];
 	Ascii2Hex(tmp, out);
 	free(tmp);
 }
-//str±ØĞëÎª¿É´òÓ¡×Ö·û 0x20 -- 0x7F  
-//str±ØĞëÒÔ'\0'½áÎ²,  
+//strå¿…é¡»ä¸ºå¯æ‰“å°å­—ç¬¦ 0x20 -- 0x7F  
+//strå¿…é¡»ä»¥'\0'ç»“å°¾,  
 void DeCodeStr(char *pCode)
 {
 	int len = strlen(pCode);
@@ -43,7 +43,7 @@ void DeCodeStr(char *pCode)
 	len = Hex2Ascii(pCode, strCode);
 	strcpy(pCode, strCode);
 	for (int x = 0; pCode[x]; x++)
-		pCode[x] = pCode[x] ^ SOFTWARE_NAME[x % strlen(SOFTWARE_NAME)];
+		pCode[x] = pCode[x] ^ APP_NAME[x % strlen(APP_NAME)];
 	memset(strCode, 0, len);
 	Hex2Ascii(pCode, strCode);
 	strcpy(pCode, strCode);

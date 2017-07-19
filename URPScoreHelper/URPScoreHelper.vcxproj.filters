@@ -51,6 +51,9 @@
     <ClInclude Include="Encrypt.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="gbkutf8.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -81,6 +84,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Encrypt.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="gbkutf8.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

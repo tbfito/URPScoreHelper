@@ -1,8 +1,8 @@
-/*
+ï»¿/*
 ******************************************
-********** iEdon-URPScoreHelper **********
-**********       Î¨ÑïĞ¡ÖúÊÖ       **********
-********** CPP MVC - Controller **********
+********** iEdon URPScoreHelper **********
+**********       å”¯æ‰¬å°åŠ©æ‰‹      *********
+********** C++ MVC - Controller **********
 **********  Copyright (C) iEdon **********
 ******************************************
 */
@@ -16,12 +16,14 @@
 #include "URPRequests.h"
 #include "INIReader.h"
 #include "Encrypt.h"
+#include "gbkutf8.h"
 
-// Èë¿Úº¯Êı (FastCGI ´¦ÀíÑ­»·)
+// å…¥å£å‡½æ•° (FastCGI å¤„ç†å¾ªç¯)
 int main(int argc, const char* argv[])
 {
 	/*EnableMemLeakCheck();*/
 	LoadConfig();
+	str_normalize_init();
 	FCGX_Init();
 	curl_global_init(CURL_GLOBAL_ALL);
 	static const char *emptystr = "";
@@ -55,12 +57,12 @@ int main(int argc, const char* argv[])
 		cout.rdbuf(&cout_fcgi_streambuf);
 		cerr.rdbuf(&cerr_fcgi_streambuf);
 
-		CGI_REQUEST_URI = FCGX_GetParam("REQUEST_URI", request.envp); // ÇëÇóURI
-		CGI_REQUEST_METHOD = FCGX_GetParam("REQUEST_METHOD", request.envp); // ÇëÇó·½·¨
-		CGI_CONTENT_LENGTH = FCGX_GetParam("CONTENT_LENGTH", request.envp); // Êı¾İ³¤¶È
-		CGI_SCRIPT_NAME = FCGX_GetParam("SCRIPT_NAME", request.envp); // ½Å±¾Ãû³Æ
-		CGI_QUERY_STRING = FCGX_GetParam("QUERY_STRING", request.envp); // ²éÑ¯²ÎÊı
-		CGI_SCRIPT_FILENAME = FCGX_GetParam("SCRIPT_FILENAME", request.envp); // ½Å±¾Î»ÖÃ
+		CGI_REQUEST_URI = FCGX_GetParam("REQUEST_URI", request.envp); // è¯·æ±‚URI
+		CGI_REQUEST_METHOD = FCGX_GetParam("REQUEST_METHOD", request.envp); // è¯·æ±‚æ–¹æ³•
+		CGI_CONTENT_LENGTH = FCGX_GetParam("CONTENT_LENGTH", request.envp); // æ•°æ®é•¿åº¦
+		CGI_SCRIPT_NAME = FCGX_GetParam("SCRIPT_NAME", request.envp); // è„šæœ¬åç§°
+		CGI_QUERY_STRING = FCGX_GetParam("QUERY_STRING", request.envp); // æŸ¥è¯¢å‚æ•°
+		CGI_SCRIPT_FILENAME = FCGX_GetParam("SCRIPT_FILENAME", request.envp); // è„šæœ¬ä½ç½®
 		CGI_HTTP_COOKIE = FCGX_GetParam("HTTP_COOKIE", request.envp); // Cookie
 		CGI_HTTPS = FCGX_GetParam("HTTPS", request.envp);
 		CGI_HTTP_HOST = FCGX_GetParam("HTTP_HOST", request.envp);
@@ -69,7 +71,7 @@ int main(int argc, const char* argv[])
 		{
 			cout << "Status: 500 Internal Server Error\r\n"
 				<< GLOBAL_HEADER
-				<< "<p><b>Êı¾İ¿â´ò¿ªÊ§°Ü</b></p><p>Çë¼ì²é Database.db ÊÇ·ñ´æÔÚ¡£</p>";
+				<< "<p><b>æ•°æ®åº“æ‰“å¼€å¤±è´¥</b></p><p>è¯·æ£€æŸ¥ Database.db æ˜¯å¦å­˜åœ¨ã€‚</p>";
 			goto END_REQUEST;
 		}
 
@@ -80,7 +82,7 @@ int main(int argc, const char* argv[])
 			{
 				cout << "Status: 500 Internal Server Error\r\n"
 					<< GLOBAL_HEADER
-					<< "<p>ÍøÒ³Ä£°åÎÄ¼şÈ±Ê§»òÒì³£¡£</p>";
+					<< "<p>ç½‘é¡µæ¨¡æ¿æ–‡ä»¶ç¼ºå¤±æˆ–å¼‚å¸¸ã€‚</p>";
 				goto END_REQUEST;
 			}
 		}
@@ -90,7 +92,7 @@ int main(int argc, const char* argv[])
 		{
 			cout << "Status: 500 Internal Server Error\r\n"
 				<< GLOBAL_HEADER
-				<< "<p>FastCGI ½Ó¿ÚÒì³££¬Çë¼ì²éÉèÖÃ¡£</p>";
+				<< "<p>FastCGI æ¥å£å¼‚å¸¸ï¼Œè¯·æ£€æŸ¥è®¾ç½®ã€‚</p>";
 			goto END_REQUEST;
 		}
 		if (CGI_HTTP_COOKIE == NULL)
@@ -98,14 +100,14 @@ int main(int argc, const char* argv[])
 			CGI_HTTP_COOKIE = (char *)emptystr;
 		}
 
-		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0) // Èç¹ûÊÇ GET ÇëÇó
+		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0) // å¦‚æœæ˜¯ GET è¯·æ±‚
 		{
 			if (strcmp(CGI_SCRIPT_NAME, "/") == 0 || strcmp(CGI_SCRIPT_NAME, "/index.fcgi") == 0)
 			{
 				if (strcmp(CGI_QUERY_STRING, "act=logout") == 0)
 				{
 					student_logout();
-					cout << "Status: 302 Found\r\n" << "Location: /\r\n" << GLOBAL_HEADER;
+					cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 					goto END_REQUEST;
 				}
 				if (strcmp(CGI_QUERY_STRING, "act=requestAssoc") == 0)
@@ -115,19 +117,19 @@ int main(int argc, const char* argv[])
 					process_cookie(&m_need_update_cookie, photo);
 					if (photo.empty())
 					{
-						cout << "Status: 302 Found\r\n" << "Location: /index.fcgi\r\n" << GLOBAL_HEADER;
+						cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
 						goto END_REQUEST;
 					}
 					char student_id[512] = { 0 };
 					get_student_id(student_id);
 					student_logout();
 					EnCodeStr(student_id, student_id);
-					cout << "Status: 302 Found\r\n" << "Location: OAuth2.fcgi?stid=" << student_id << "\r\n" << GLOBAL_HEADER;
+					cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/OAuth2.fcgi?stid=" << student_id << "\r\n" << GLOBAL_HEADER;
 					goto END_REQUEST;
 				}
 				if (strcmp(CGI_REQUEST_URI, "/index.fcgi") == 0)
 				{
-					cout << "Status: 302 Found\r\n" << "Location: /\r\n" << GLOBAL_HEADER;
+					cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 					goto END_REQUEST;
 				}
 				parse_index();
@@ -186,10 +188,10 @@ int main(int argc, const char* argv[])
 				goto END_REQUEST;
 			}
 			cout << "Status: 404 Not Found\r\n";
-			Error("<p>ÕÒ²»µ½¸ÃÒ³Ãæ¡£</p>");
+			Error(u8"<p>æ‰¾ä¸åˆ°è¯¥é¡µé¢ã€‚</p>");
 			goto END_REQUEST;
 		}
-		if (strcmp(CGI_REQUEST_METHOD, "POST") == 0) // Èç¹ûÊÇ POST ÇëÇó
+		if (strcmp(CGI_REQUEST_METHOD, "POST") == 0) // å¦‚æœæ˜¯ POST è¯·æ±‚
 		{
 			if (strcmp(CGI_SCRIPT_NAME, "/changePassword.fcgi") == 0)
 			{
@@ -227,12 +229,12 @@ int main(int argc, const char* argv[])
 			}
 		}
 		cout << "Status: 500 Internal Server Error\r\n";
-		Error("<p>·¢Éú´íÎó£¬Î´¾­´¦ÀíµÄÒì³£¡£</p>");
+		Error(u8"<p>å‘ç”Ÿé”™è¯¯ï¼Œæœªç»å¤„ç†çš„å¼‚å¸¸ã€‚</p>");
 		goto END_REQUEST;
 
 		END_REQUEST:
 			ZeroMemory(JSESSIONID, 256);
-			//FCGX_Finish_r(&request); ×¢£º FCGI ¿âÀïÃæÃ¿´ÎÖ´ĞĞ Accept£¬ÒÑ¾­°ï×öºÃÁË Finish ¶¯×÷¡£
+			//FCGX_Finish_r(&request); æ³¨ï¼š FCGI åº“é‡Œé¢æ¯æ¬¡æ‰§è¡Œ Acceptï¼Œå·²ç»å¸®åšå¥½äº† Finish åŠ¨ä½œã€‚
 			//_CrtDumpMemoryLeaks();
 			continue;
 	}
@@ -244,13 +246,14 @@ int main(int argc, const char* argv[])
 		free(OAUTH2_APPID);
 		free(OAUTH2_SECRET);
 		free(CURL_PROXY_URL);
+		free(APP_NAME);
 		return 0;
 }
 
-// Ô¤¼ÓÔØÍ·²¿ºÍÎ²²¿Ò³Ãæ(header.fcgi, footer.fcgi, error.fcgi)
+// é¢„åŠ è½½å¤´éƒ¨å’Œå°¾éƒ¨é¡µé¢(header.fcgi, footer.fcgi, error.fcgi)
 void LoadPageSrc()
 {
-	// ¶ÁÈëÖ÷Ò³ÃæÎÄ¼ş
+	// è¯»å…¥ä¸»é¡µé¢æ–‡ä»¶
 	char *pStr = strstr(CGI_SCRIPT_FILENAME, "\\");
 	bool isUnixBasedPath = (pStr == NULL);
 	if (isUnixBasedPath)
@@ -290,21 +293,21 @@ void LoadPageSrc()
 	strcpy(file_root, doc_root);
 	strcat(file_root, "footer.fcgi");
 	
-	footer = ReadTextFileToMem(file_root);
+	footer = strformat(ReadTextFileToMem(file_root).c_str(), APP_NAME, SOFTWARE_NAME);
 
 	strcpy(file_root, doc_root);
 	strcat(file_root, "error.fcgi");
 	
 	error = ReadTextFileToMem(file_root);
-	// Î´ÄÜ¼ÓÔØÕâĞ©Ä£°å
+	// æœªèƒ½åŠ è½½è¿™äº›æ¨¡æ¿
 	if (header.empty() || footer.empty() || error.empty())
 	{
 		isPageSrcLoadSuccess = false;
 		return;
 	}
 	
-	std::string title("ÌáÊ¾ - ");
-	title.append(SOFTWARE_NAME);
+	std::string title(u8"æç¤º - ");
+	title.append(APP_NAME);
 	ERROR_HTML = strformat(header.c_str(), title.c_str());
 	ERROR_HTML += error + footer;
 
@@ -313,7 +316,7 @@ void LoadPageSrc()
 	isPageSrcLoadSuccess = true;
 }
 
-// ¼ÓÔØÅäÖÃ
+// åŠ è½½é…ç½®
 void LoadConfig()
 {
 	SERVER_URL = (char *)malloc(1024);
@@ -321,6 +324,7 @@ void LoadConfig()
 	OAUTH2_APPID = (char *)malloc(1024);
 	OAUTH2_SECRET = (char *)malloc(1024);
 	CURL_PROXY_URL = (char *)malloc(1024);
+	APP_NAME = (char *)malloc(4096);
 	char *lpvBuffer = (char *)malloc(128);
 
 	memset(SERVER_URL, 0, 1024);
@@ -328,6 +332,7 @@ void LoadConfig()
 	memset(OAUTH2_APPID, 0, 1024);
 	memset(OAUTH2_SECRET, 0, 1024);
 	memset(CURL_PROXY_URL, 0, 1024);
+	memset(APP_NAME, 0, 4096);
 	memset(lpvBuffer, 0, 128);
 
 	char *Dir = (char *)malloc(260);
@@ -347,8 +352,9 @@ void LoadConfig()
 	INIReader reader(Dir);
 	if (reader.ParseError() != 0) {
 		strcpy(SERVER_URL, "http://127.0.0.1");
-		strcpy(USER_AGENT, SOFTWARE_NAME);
-		strcpy(lpvBuffer, "3");
+		strcpy(APP_NAME, "NULL");
+		strcpy(USER_AGENT, APP_NAME);
+		strcpy(lpvBuffer, "2");
 		strcpy(OAUTH2_APPID, "NULL");
 		strcpy(OAUTH2_SECRET, "NULL");
 		strcpy(CURL_PROXY_URL, "");
@@ -356,8 +362,9 @@ void LoadConfig()
 	else
 	{
 		strcpy(SERVER_URL, reader.Get("Config", "SERVER_URL", "http://127.0.0.1").c_str());
-		strcpy(USER_AGENT, reader.Get("Config", "USER_AGENT", SOFTWARE_NAME).c_str());
-		strcpy(lpvBuffer, reader.Get("Config", "CURL_TIMEOUT", "3").c_str());
+		strcpy(APP_NAME, reader.Get("Config", "APP_NAME", "NULL").c_str());
+		strcpy(USER_AGENT, reader.Get("Config", "USER_AGENT", APP_NAME).c_str());
+		strcpy(lpvBuffer, reader.Get("Config", "CURL_TIMEOUT", "2").c_str());
 		strcpy(OAUTH2_APPID, reader.Get("Config", "OAUTH2_APPID", "NULL").c_str());
 		strcpy(OAUTH2_SECRET, reader.Get("Config", "OAUTH2_SECRET", "NULL").c_str());
 		strcpy(CURL_PROXY_URL, reader.Get("Config", "CURL_PROXY_URL", "").c_str());
@@ -365,7 +372,7 @@ void LoadConfig()
 		
 	CURL_TIMEOUT = atoi(lpvBuffer);
 	if (CURL_TIMEOUT <= 0)
-		CURL_TIMEOUT = 3;
+		CURL_TIMEOUT = 2;
 	memset(lpvBuffer, 0, 128);
 	if (reader.ParseError() == 0)
 	{
@@ -392,7 +399,6 @@ void LoadConfig()
 	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
 	if (db_ret != SQLITE_OK)
 	{
-		printf( "fuck!" );
 		sqlite3_finalize(stmt);
 		return;
 	}
@@ -403,10 +409,10 @@ void LoadConfig()
 	sqlite3_finalize(stmt);
 }
 
-// ¸üĞÂÓÃ»§ÊıÁ¿¼ÆÊıÆ÷
+// æ›´æ–°ç”¨æˆ·æ•°é‡è®¡æ•°å™¨
 void SetUsersCounter()
 {
-	// »ñÈ¡¶àÉÙÓÃ»§Ê¹ÓÃÁËÎÒÃÇµÄ·şÎñ :)
+	// è·å–å¤šå°‘ç”¨æˆ·ä½¿ç”¨äº†æˆ‘ä»¬çš„æœåŠ¡ :)
 	g_fQueryCount = fopen("QueryCount.bin", "r+");
 	g_QueryCount = 0;
 	if (g_fQueryCount != NULL)
@@ -449,10 +455,10 @@ void SetUsersCounter()
 	sqlite3_finalize(stmt);
 }
 
-// ´¦Àí Cookie¡¢ÕÕÆ¬(p_photo_uri Îª¿Õ´ú±í²»ÒªÕÕÆ¬, Ëæ±ãÉèÖÃÄÚÈİ²»Îª¿ÕÔò»áÏòÀïÃæĞ´ÈëÕÕÆ¬Êı¾İ)
+// å¤„ç† Cookieã€ç…§ç‰‡(p_photo_uri ä¸ºç©ºä»£è¡¨ä¸è¦ç…§ç‰‡, éšä¾¿è®¾ç½®å†…å®¹ä¸ä¸ºç©ºåˆ™ä¼šå‘é‡Œé¢å†™å…¥ç…§ç‰‡æ•°æ®)
 int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 {
-	if (strcmp(CGI_HTTP_COOKIE, "") != 0) // Èç¹û¿Í»§¶ËÒÑ¾­ÄÃµ½ JSESSIONID£¬¿´¿´Ô­ Cookie ÊÇ·ñ¹ıÆÚ¡¢ÓĞĞ§£¨¼´·şÎñÆ÷ÊÇ·ñÉèÖÃÁËĞÂ Cookie£©
+	if (strcmp(CGI_HTTP_COOKIE, "") != 0) // å¦‚æœå®¢æˆ·ç«¯å·²ç»æ‹¿åˆ° JSESSIONIDï¼Œçœ‹çœ‹åŸ Cookie æ˜¯å¦è¿‡æœŸã€æœ‰æ•ˆï¼ˆå³æœåŠ¡å™¨æ˜¯å¦è®¾ç½®äº†æ–° Cookieï¼‰
 	{
 		CCurlTask req;
 		if (!req.Exec(true, REQUEST_HOME_PAGE, CGI_HTTP_COOKIE))
@@ -468,21 +474,21 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 			char *pStr2 = strstr(pStr1 + 11, ";");
 			if (pStr2 == NULL)
 			{
-				Error("<p>ÎŞ·¨»ñÈ¡ Session ID</p><p>Cookie ½áÎ²Ê§°Ü</p>");
+				Error(u8"<p>æ— æ³•è·å– Session ID</p><p>Cookie ç»“å°¾å¤±è´¥</p>");
 				p_photo_uri.erase();
 				return -1;
 			}
-			mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11); // ³É¹¦»ñµÃĞÂ Session ID¡£
+			mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11); // æˆåŠŸè·å¾—æ–° Session IDã€‚
 			*p_need_update_cookie = true;
 			return -1;
 		}
-		else // Èç¹û Cookie »¹ÄÜÓÃ£¬¾Í»ñÈ¡Ëü¡£
+		else // å¦‚æœ Cookie è¿˜èƒ½ç”¨ï¼Œå°±è·å–å®ƒã€‚
 		{
 			char *pStr1 = strstr(CGI_HTTP_COOKIE, "JSESSIONID=");
 			if (pStr1 != NULL)
 			{
 				char *pStr2 = strstr(pStr1 + 11, ";");
-				if (pStr2 == NULL) // Èç¹ûÕâÌõ Cookie ÔÚ×îºóÒ»Ìõ
+				if (pStr2 == NULL) // å¦‚æœè¿™æ¡ Cookie åœ¨æœ€åä¸€æ¡
 				{
 					right(JSESSIONID, CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - (pStr1 - CGI_HTTP_COOKIE) - 11);
 				}
@@ -502,30 +508,30 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 			return -1;
 		}
 		char *m_rep_header = req.GetResult();
-		// »ñÈ¡ Session ID¡£
+		// è·å– Session IDã€‚
 		char *pStr1 = strstr(m_rep_header, "JSESSIONID=");
 		if (pStr1 == NULL)
 		{
-			Error("<p>ÎŞ·¨»ñÈ¡ Session ID</p><p>Cookie ±êÍ·Ê§°Ü</p>");
+			Error(u8"<p>æ— æ³•è·å– Session ID</p><p>Cookie æ ‡å¤´å¤±è´¥</p>");
 			p_photo_uri.erase();
 			return -1;
 		}
 		char *pStr2 = strstr(pStr1 + 11, ";");
 		if (pStr2 == NULL)
 		{
-			Error("<p>ÎŞ·¨»ñÈ¡ Session ID</p><p>Cookie ½áÎ²Ê§°Ü</p>");
+			Error(u8"<p>æ— æ³•è·å– Session ID</p><p>Cookie ç»“å°¾å¤±è´¥</p>");
 			p_photo_uri.erase();
 			return -1;
 		}
 
-		mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11); // ³É¹¦»ñµÃ Session ID¡£
+		mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11); // æˆåŠŸè·å¾— Session IDã€‚
 		*p_need_update_cookie = true;
 	}
 
 	if (p_photo_uri.empty())
-		return -1;  // p_photo_uri Ö¸¶¨ÁË NULL ´ú±í²»ĞèÒªÕÕÆ¬¡£
+		return -1;  // p_photo_uri æŒ‡å®šäº† NULL ä»£è¡¨ä¸éœ€è¦ç…§ç‰‡ã€‚
 
-	// ¿´¿´µÇÂ¼Ã»
+	// çœ‹çœ‹ç™»å½•æ²¡
 	std::string Jsess ("JSESSIONID=");
 	Jsess += JSESSIONID;
 
@@ -536,8 +542,7 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 		return -1;
 	}
 	char *m_photo = req.GetResult();
-
-	if (strstr(m_photo, "µÇÂ¼") == NULL)
+	if (strstr(m_photo, "ç™»å½•") == NULL)
 	{
 		int m_photoLength = req.GetLength();
 
@@ -559,27 +564,27 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 	return 1;
 }
 
-// ´¦Àí GET /main.fcgi
+// å¤„ç† GET /main.fcgi
 int parse_main(bool p_need_set_cookie, std::string & p_photo)
 {
 	if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
 	{
-		// »ñÈ¡ POST Êı¾İ¡£
+		// è·å– POST æ•°æ®ã€‚
 		int m_post_length = atoi(CGI_CONTENT_LENGTH);
 		if (m_post_length <= 0 || m_post_length > 127)
 		{
-			Error("<p><b>·¢Éú´íÎó£¬POST Êı¾İ³¤¶ÈÒì³£</b></p><p>ÕÊºÅ»òÃÜÂëÊäÈëÓĞÎÊÌâÅ¶£¬ÇëÖØÊÔ</p>");
+			Error(u8"<p><b>å‘ç”Ÿé”™è¯¯ï¼ŒPOST æ•°æ®é•¿åº¦å¼‚å¸¸</b></p><p>å¸å·æˆ–å¯†ç è¾“å…¥æœ‰é—®é¢˜å“¦ï¼Œè¯·é‡è¯•</p>");
 			return -1;
 		}
 		char *m_post_data = (char *)malloc(m_post_length + 2);
 		FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
 
-		// »ñÈ¡Ñ§ºÅ
+		// è·å–å­¦å·
 		char *pStr1 = strstr(m_post_data, "xh=");
 		if (pStr1 == NULL)
 		{
 			free(m_post_data);
-			Error("<p>ÎŞ·¨»ñÈ¡Ñ§ºÅĞÅÏ¢¡£</p>");
+			Error(u8"<p>æ— æ³•è·å–å­¦å·ä¿¡æ¯ã€‚</p>");
 			return -1;
 		}
 		char *pStr2 = strstr(pStr1 + 3, "&");
@@ -588,12 +593,12 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 		pStr1 = NULL;
 		pStr2 = NULL;
 
-		// »ñÈ¡ÃÜÂë
+		// è·å–å¯†ç 
 		pStr1 = strstr(m_post_data, "mm=");
 		if (pStr1 == NULL)
 		{
 			free(m_post_data);
-			Error("<p>ÎŞ·¨»ñÈ¡ÃÜÂëĞÅÏ¢¡£</p>");
+			Error(u8"<p>æ— æ³•è·å–å¯†ç ä¿¡æ¯ã€‚</p>");
 			return -1;
 		}
 		pStr2 = strstr(pStr1 + 3, "&");
@@ -602,12 +607,12 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 		pStr1 = NULL;
 		pStr2 = NULL;
 
-		// »ñÈ¡ÑéÖ¤Âë
+		// è·å–éªŒè¯ç 
 		pStr1 = strstr(m_post_data, "yzm=");
 		if (pStr1 == NULL)
 		{
 			free(m_post_data);
-			Error("<p>ÎŞ·¨»ñÈ¡ÑéÖ¤ÂëĞÅÏ¢¡£</p>");
+			Error(u8"<p>æ— æ³•è·å–éªŒè¯ç ä¿¡æ¯ã€‚</p>");
 			return -1;
 		}
 		char m_captcha[128] = { 0 };
@@ -615,7 +620,7 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 
 		if (!student_login(m_xuehao, m_password, m_captcha))
 		{
-			// ÆäÓà×ÊÔ´ÇåÀíÒÑÔÚÑ§ÉúµÇÂ¼ÀïÃæ×ö¹ıÁË¡£
+			// å…¶ä½™èµ„æºæ¸…ç†å·²åœ¨å­¦ç”Ÿç™»å½•é‡Œé¢åšè¿‡äº†ã€‚
 			free(m_post_data);
 			return -1;
 		}
@@ -636,15 +641,15 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 	}
 	if (p_photo.empty())
 	{
-		p_photo = " "; // ÈÃ p_photo ÓĞÄÚÈİ£¬À´ÈÃ process_cookie ÀïµÄÕÕÆ¬»ñÈ¡ÄÜ½øĞĞ¡£
+		p_photo = " "; // è®© p_photo æœ‰å†…å®¹ï¼Œæ¥è®© process_cookie é‡Œçš„ç…§ç‰‡è·å–èƒ½è¿›è¡Œã€‚
 		int ret = process_cookie(&p_need_set_cookie, p_photo);
 		if (p_photo.empty())
 		{
-			cout << "Status: 302 Found\r\nLocation: index.fcgi\r\n" << GLOBAL_HEADER;
+			cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
 			return -1;
 		}
 	}
-	// ¶ÁÈëÖ÷Ò³ÃæÎÄ¼ş
+	// è¯»å…¥ä¸»é¡µé¢æ–‡ä»¶
 	std::string m_lpszHomepage = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
 	char m_student_name[512] = {0};
@@ -652,17 +657,17 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 	get_student_name(m_student_name);
 	get_student_id(m_student_id);
 
-	// Êä³öÍøÒ³
+	// è¾“å‡ºç½‘é¡µ
 	if (p_need_set_cookie)
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 
 	cout << GLOBAL_HEADER;
 
 	std::string title(m_student_name);
-	title += " - ";
-	title += SOFTWARE_NAME;
+	title += u8" - ";
+	title += APP_NAME;
 
-	// SQLite3 Êı¾İ¿â£¬¿âÃû main£¬±í URLScoreHelper£¬×Ö¶Î text id(36), text password(36), text openid(128)¡£
+	// SQLite3 æ•°æ®åº“ï¼Œåº“å mainï¼Œè¡¨ URLScoreHelperï¼Œå­—æ®µ text id(36), text password(36), text openid(128)ã€‚
 	std::string query("SELECT openid FROM URPScoreHelper WHERE id='");
 	query.append(m_student_id);
 	query.append("';");
@@ -673,7 +678,7 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 
 	if (db_ret != SQLITE_OK)
 	{
-		std::string Err_Msg("<b>Êı¾İ¿â×¼±¸Ê§°Ü£¡ÇëÈ·ÈÏÊı¾İ¿âºÏ·¨ĞÔ¡£</b><p>(");
+		std::string Err_Msg(u8"<b>æ•°æ®åº“å‡†å¤‡å¤±è´¥ï¼è¯·ç¡®è®¤æ•°æ®åº“åˆæ³•æ€§ã€‚</b><p>(");
 		Err_Msg.append(sqlite3_errmsg(db));
 		Err_Msg.append(")</p>");
 		Error(Err_Msg.c_str());
@@ -708,26 +713,26 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 	return 0;
 }
 
-// ´¦ÀíÖ÷Ò³ÃæÇëÇó (GET / /index.fcgi)
+// å¤„ç†ä¸»é¡µé¢è¯·æ±‚ (GET / /index.fcgi)
 int parse_index()
 {
-	// Èç¹ûÊÇQQµÇÂ¼»ØÀ´£¬Ôò×Ô¶¯Ìî³äÕÊºÅÃÜÂë¡£
+	// å¦‚æœæ˜¯QQç™»å½•å›æ¥ï¼Œåˆ™è‡ªåŠ¨å¡«å……å¸å·å¯†ç ã€‚
 	char *m_xh = NULL;
 	char *m_mm = NULL;
 	char *token_xh = NULL;
 	char *token_mm = NULL;
-	char *pStr1 = strstr((char *)CGI_QUERY_STRING, "id=");
+	char *pStr1 = strstr((char *)CGI_QUERY_STRING, "stid=");
 	if (pStr1 != NULL)
 	{
-		char *pStr2 = strstr(pStr1 + 3, "&");
+		char *pStr2 = strstr(pStr1 + 5, "&");
 		char *id = new char[strlen(CGI_QUERY_STRING)];
 		if (pStr2 == NULL)
 		{
-			right(id, pStr1 + 3, strlen(CGI_QUERY_STRING) - 3);
+			right(id, pStr1 + 5, strlen(CGI_QUERY_STRING) - 5);
 		}
 		else
 		{
-			mid(id, pStr1 + 3, pStr2 - pStr1 - 3, 0);
+			mid(id, pStr1 + 5, pStr2 - pStr1 - 5, 0);
 		}
 		DeCodeStr(id);
 		m_xh = id;
@@ -755,7 +760,7 @@ int parse_index()
 		if (pStr != NULL)
 		{
 			char *pStr2 = strstr(pStr + 6, ";");
-			if (pStr2 == NULL) // Èç¹ûÕâÌõ Cookie ÔÚ×îºóÒ»Ìõ
+			if (pStr2 == NULL) // å¦‚æœè¿™æ¡ Cookie åœ¨æœ€åä¸€æ¡
 			{
 				right(token, CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - (pStr - CGI_HTTP_COOKIE) - 6);
 			}
@@ -781,29 +786,31 @@ int parse_index()
 		}
 	}
 
-	// ¶ÁÈëÖ÷Ò³ÃæÎÄ¼ş
+	// è¯»å…¥ä¸»é¡µé¢æ–‡ä»¶
 	std::string m_lpszHomepage = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
 	cout << GLOBAL_HEADER;
-	cout << strformat( header.c_str(), SOFTWARE_NAME);
+	cout << strformat( header.c_str(), APP_NAME);
 
 	if (m_xh == NULL || m_mm == NULL)
 	{
 		if (token_xh != NULL && token_mm != NULL)
 		{
-			cout << strformat(m_lpszHomepage.c_str(), SOFTWARE_NAME, g_users, g_QueryCount,
-				"ÊäÈëÄãµÄ½ÌÎñÏµÍ³ÕÊºÅÀ´µÇÂ¼°É :)", "flex", token_xh, "flex", token_mm, "block", "block", "none");
+			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCount,
+				u8"è¾“å…¥ä½ çš„æ•™åŠ¡ç³»ç»Ÿå¸å·æ¥ç™»å½•å§ :)", token_xh, token_mm, u8"ç™»å½•", " col-50",
+				OAUTH2_LOGIN_HTML, QUICKQUERY_HTML);
 		}
 		else
 		{
-			cout << strformat(m_lpszHomepage.c_str(), SOFTWARE_NAME, g_users, g_QueryCount,
-				"ÊäÈëÄãµÄ½ÌÎñÏµÍ³ÕÊºÅÀ´µÇÂ¼°É :)", "flex", "", "flex", "", "block", "block", "none");
+			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCount,
+				u8"è¾“å…¥ä½ çš„æ•™åŠ¡ç³»ç»Ÿå¸å·æ¥ç™»å½•å§ :)", "", "", u8"ç™»å½•", " col-50",
+				OAUTH2_LOGIN_HTML, QUICKQUERY_HTML);
 		}
 	}
 	else 
 	{
-		cout << strformat( m_lpszHomepage.c_str(), SOFTWARE_NAME, g_users, g_QueryCount,
-						"QQµÇÂ¼³É¹¦£¬ÊäÈëÑéÖ¤Âë¼ÌĞø°É :)", "none", m_xh, "none", m_mm, "none", "none", "block");
+		cout << strformat( m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCount,
+						u8"QQç™»å½•æˆåŠŸï¼Œè¾“å…¥éªŒè¯ç ç»§ç»­å§ :)", m_xh, m_mm, u8"ç»§ç»­", "", "", "");
 	}
 
 	cout << footer.c_str();
@@ -818,30 +825,30 @@ int parse_index()
 	return 0;
 }
 
-// ´¦ÀíÑéÖ¤Âë Ajax ÇëÇó
+// å¤„ç†éªŒè¯ç  Ajax è¯·æ±‚
 void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 {
-	cout << "Cache-Control: no-cache\r\nPragma: no-cache\r\nExpires: -1\r\n";
+	cout << "Cache-Control: no-cache\r\nPragma: no-cache\r\nExpires: -1\r\nContent-Type: text/plain; charset=utf-8\r\n";
 	bool m_need_update_cookie = false;
-	std::string m_photo(" "); // ÓĞÊı¾İ£¬ĞèÒª»ñÈ¡ÕÕÆ¬
+	std::string m_photo(" "); // æœ‰æ•°æ®ï¼Œéœ€è¦è·å–ç…§ç‰‡
 	process_cookie(&m_need_update_cookie, m_photo);
 
 	if (m_need_update_cookie)
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-	
-	if (!m_photo.empty() && !m_need_update_cookie) // µÇÂ¼ÁË¾ÍÍ¨±¨ÒÑ¾­µÇÂ¼
+
+	if (!m_photo.empty() && !m_need_update_cookie) // ç™»å½•äº†å°±é€šæŠ¥å·²ç»ç™»å½•
 	{
-		cout << "Content-Type: text/plain; charset=gb2312\r\n\r\nLOGGED-IN";
+		cout << "\r\nLOGGED-IN";
 		return;
 	}
 
-	// ÖÃËæ»úÊıÖÖ×Ó£¬²¢È¡µÃÒ»¸öËæ»úÊı£¬ÓÃÓÚ»ñÈ¡ÑéÖ¤Âë¡£
+	// ç½®éšæœºæ•°ç§å­ï¼Œå¹¶å–å¾—ä¸€ä¸ªéšæœºæ•°ï¼Œç”¨äºè·å–éªŒè¯ç ã€‚
 	srand((int)time(0));
 	int m_rand = rand();
 	char Captcha[256] = { 0 };
 	sprintf(Captcha, REQUEST_CAPTCHA, m_rand);
 
-	// ·¢ËÍÑéÖ¤ÂëÇëÇó£¬»ñÈ¡ÑéÖ¤ÂëÊı¾İ¡£
+	// å‘é€éªŒè¯ç è¯·æ±‚ï¼Œè·å–éªŒè¯ç æ•°æ®ã€‚
 	CCurlTask req;
 	std::string cookie;
 	if (m_need_update_cookie)
@@ -855,57 +862,57 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 	}
 	if (!req.Exec(false, Captcha, cookie))
 	{
-		cout << "Content-Type: text/plain; charset=gb2312\r\n\r\nREQUEST-FAILED";
+		cout << "\r\nREQUEST-FAILED";
 		return;
 	}
 	char *m_rep_body = req.GetResult();
 
-	int m_CaptchaLength = req.GetLength(); // ÑéÖ¤ÂëÍ¼Æ¬µÄ´óĞ¡
+	int m_CaptchaLength = req.GetLength(); // éªŒè¯ç å›¾ç‰‡çš„å¤§å°
 
-	// ½«ÑéÖ¤Âë×ª»¯Îª base64 ±àÂëºóµÄ DataURL£¬ä¯ÀÀÆ÷Ö±½ÓÏÔÊ¾£¬¹©ÓÃ»§²é¿´¡£
+	// å°†éªŒè¯ç è½¬åŒ–ä¸º base64 ç¼–ç åçš„ DataURLï¼Œæµè§ˆå™¨ç›´æ¥æ˜¾ç¤ºï¼Œä¾›ç”¨æˆ·æŸ¥çœ‹ã€‚
 	char *m_base64 = new char[m_CaptchaLength * 2 + 1];
 	base64_encode((const unsigned char *)m_rep_body, m_base64, m_CaptchaLength);
 	char *m_DataURL = new char[m_CaptchaLength * 2 + 24];;
 	strcpy(m_DataURL, "data:image/jpg;base64,");
 	strcat(m_DataURL, m_base64);
 
-	cout << "Content-Type: text/plain\r\n\r\n";
+	cout << "\r\n";
 	cout << m_DataURL;
 
 	delete[]m_base64;
 	delete[]m_DataURL;
 }
 
-// ´¦Àí²éÑ¯Ò³ÃæÇëÇó (GET /query.fcgi)
+// å¤„ç†æŸ¥è¯¢é¡µé¢è¯·æ±‚ (GET /query.fcgi)
 int parse_query()
 {
 	bool m_need_update_cookie = false;
-	std::string m_photo(" "); // ÓĞÊı¾İ£¬ĞèÒª»ñÈ¡ÕÕÆ¬
+	std::string m_photo(" "); // æœ‰æ•°æ®ï¼Œéœ€è¦è·å–ç…§ç‰‡
 	process_cookie(&m_need_update_cookie, m_photo);
 
-	if (m_photo.empty()) // »¹Ã»µÇÂ½¾Í¶ªÈ¥µÇÂ½¡£
+	if (m_photo.empty()) // è¿˜æ²¡ç™»é™†å°±ä¸¢å»ç™»é™†ã€‚
 	{
-		cout << "Status: 302 Found\r\nLocation: index.fcgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
 		return 0;
 	}
 
-	// ¿ªÊ¼²é·Ö(±¾Ñ§ÆÚ)¡£
+	// å¼€å§‹æŸ¥åˆ†(æœ¬å­¦æœŸ)ã€‚
 	CCurlTask req;
 	if (!req.Exec(false, REQUEST_QUERY_SCORE, CGI_HTTP_COOKIE))
 	{
-		Error("<p><b>½ÓÊÕÊı¾İÊ§°Ü</b></p><p>curl ²Ù×÷Ê§°Ü</p>");
+		Error(u8"<p><b>æ¥æ”¶æ•°æ®å¤±è´¥</b></p><p>curl æ“ä½œå¤±è´¥</p>");
 		student_logout();
 		return -1;
 	}
 	char *m_rep_body = req.GetResult();
 
-	// ÓÅ»¯½ÓÊÜ½á¹û£¬ÏÔÊ¾²éÑ¯Ò³Ãæ
+	// ä¼˜åŒ–æ¥å—ç»“æœï¼Œæ˜¾ç¤ºæŸ¥è¯¢é¡µé¢
 	string result(m_rep_body);
 	parse_friendly_score(result);
 	return 0;
 }
 
-// Êä³ö·ÖÊıÒ³Ãæ
+// è¾“å‡ºåˆ†æ•°é¡µé¢
 void parse_friendly_score(std::string & p_strlpszScore)
 {
 	char m_Student[64] = { 0 };
@@ -916,12 +923,12 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	char *p_lpszScore = (char *)malloc(p_strlpszScore.length() + 1);
 	strcpy(p_lpszScore, p_strlpszScore.c_str());
 
-	char *m_query_not_reg = strstr(p_lpszScore, "Ã»ÓĞ×¢²á");
+	char *m_query_not_reg = strstr(p_lpszScore, "æ²¡æœ‰æ³¨å†Œ");
 	if (m_query_not_reg != NULL)
 	{
-		std::string m_original_str ("<p><b>Ç×°®µÄ%s£¬Äú±¾Ñ§ÆÚ»¹Ã»ÓĞµç×Ó×¢²á</b></p><p>²»×¢²áµÄ»°£¬ÊÇ²é²»ÁËĞÅÏ¢µÄÅ¶£¡</p><p>ÎÒ¿ÉÒÔÊ©Õ¹·¨Êõ£¬\
-<b>Ò»¼ü°ïÄãÔÚ½ÌÎñÏµÍ³×¢²áÅ¶~</b></p><p>--&gt; µã°´ÏÂ·½°´Å¥£¬×Ô¶¯×¢²á£¬Ö±´ï²é·Ö½çÃæ :P &lt;--</p>\
-<div class=\"weui-msg__opr-area\"><p class=\"weui-btn-area\"><a style=\"color:#fff\" href=\"query.fcgi?act=system_registration\" class=\"weui-btn weui-btn_primary\">Ò»¼ü×¢²á</a></p></div>");
+		std::string m_original_str (u8"<p><b>äº²çˆ±çš„%sï¼Œæ‚¨æœ¬å­¦æœŸè¿˜æ²¡æœ‰ç”µå­æ³¨å†Œ</b></p><p>ä¸æ³¨å†Œçš„è¯ï¼Œæ˜¯æŸ¥ä¸äº†ä¿¡æ¯çš„å“¦ï¼</p><p>æˆ‘å¯ä»¥æ–½å±•æ³•æœ¯ï¼Œ\
+<b>ä¸€é”®å¸®ä½ åœ¨æ•™åŠ¡ç³»ç»Ÿæ³¨å†Œå“¦~</b></p><p>--&gt; ç‚¹æŒ‰ä¸‹æ–¹æŒ‰é’®ï¼Œè‡ªåŠ¨æ³¨å†Œï¼Œç›´è¾¾æŸ¥åˆ†ç•Œé¢ :P &lt;--</p>\
+<div class=\"weui-msg__opr-area\"><p class=\"weui-btn-area\"><a style=\"color:#fff\" href=\"query.fcgi?act=system_registration\" class=\"weui-btn weui-btn_primary\">ä¸€é”®æ³¨å†Œ</a></p></div>");
 		m_original_str = strformat(m_original_str.c_str(), m_Student);
 		Error(m_original_str.c_str());
 		return;
@@ -932,14 +939,21 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		CCurlTask req;
 		if (!req.Exec(false, GET_SMALL_TEST_SCORE, CGI_HTTP_COOKIE))
 		{
-			Error("<p><b>½ÓÊÕÊı¾İÊ§°Ü</b></p><p>curl ²Ù×÷Ê§°Ü</p>");
+			Error(u8"<p><b>æ¥æ”¶æ•°æ®å¤±è´¥</b></p><p>curl æ“ä½œå¤±è´¥</p>");
 			return;
 		}
-		char *m_rep_body = req.GetResult();
+
+		unsigned int rep_len = req.GetLength() * 3 + 1;
+		char *m_rep_body = (char *)malloc(rep_len);
+		gbk_to_utf8(req.GetResult(), (unsigned int)req.GetLength(), &m_rep_body, &rep_len);
+		req.GetResultString() = m_rep_body;
+		free(m_rep_body);
+		m_rep_body = req.GetResult();
+
 		char *m_result = strstr(m_rep_body, "<table cellpadding=\"0\" width=\"100%\" class=\"displayTag\" cellspacing=\"1\" border=\"0\" id=\"user\">");
 		if (m_result == NULL)
 		{
-			Error("<p><b>´Ó·şÎñÆ÷À­È¡·ÖÊıÊ§°Ü¡£(BeginOfTable)</b></p><p>½ÌÎñ¾ı¿ÉÄÜÔÂÏß·±Ã¦£¬666 ÇëÉÔºòÔÙÊÔ¡£</p><p>Èç¹ûÔÂÏßÕıÃ¦£¬»ò´æÔÚÊı¾İÏÔÊ¾ÒÅÂ©£¬¶àË¢ĞÂ¼¸´Î¼´¿É¡£</p>");
+			Error(u8"<p><b>ä»æœåŠ¡å™¨æ‹‰å–åˆ†æ•°å¤±è´¥ã€‚(BeginOfTable)</b></p><p>æ•™åŠ¡å›å¯èƒ½æœˆçº¿ç¹å¿™ï¼Œè¯·ç¨å€™å†è¯•ã€‚</p><p>å¦‚æœæœˆçº¿æ­£å¿™ï¼Œæˆ–å­˜åœ¨æ•°æ®æ˜¾ç¤ºé—æ¼ï¼Œå¤šåˆ·æ–°å‡ æ¬¡å³å¯ã€‚</p>");
 			return;
 		}
 		m_result += 93;
@@ -953,13 +967,13 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (m_result == NULL)
 		{
 			free(m_prep);
-			Error("<p>´Ó·şÎñÆ÷À­È¡·ÖÊıÊ§°Ü¡£(EndOfBodyNotFound)</p>");
+			Error(u8"<p>ä»æœåŠ¡å™¨æ‹‰å–åˆ†æ•°å¤±è´¥ã€‚(EndOfBodyNotFound)</p>");
 			return;
 		}
 		m_result -= 93;
 		cout << GLOBAL_HEADER;
 		char m_before[512] = { 0 };
-		sprintf(m_before, "<a name=\"qb_731\"></a><table width=\"100%%\" border=\"0\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td class=\"Linetop\"></td></tr></tbody></table><table width=\"100%%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\"><tbody><tr><td width=\"100%%\"><table border=\"0\" align=\"left\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td>&nbsp;</td><td valign=\"middle\">&nbsp;<b>%s</b> &nbsp;</td></tr></tbody></table></td></tr></tbody></table>", "³É¼¨Çåµ¥£¨ÔÂ¿¼/ÆÚÖĞ/²¹¿¼/»º¿¼/Çå¿¼£©");
+		sprintf(m_before, "<a name=\"qb_731\"></a><table width=\"100%%\" border=\"0\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td class=\"Linetop\"></td></tr></tbody></table><table width=\"100%%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\"><tbody><tr><td width=\"100%%\"><table border=\"0\" align=\"left\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td>&nbsp;</td><td valign=\"middle\">&nbsp;<b>%s</b> &nbsp;</td></tr></tbody></table></td></tr></tbody></table>", u8"æˆç»©æ¸…å•ï¼ˆæœˆè€ƒ/æœŸä¸­/è¡¥è€ƒ/ç¼“è€ƒ/æ¸…è€ƒï¼‰");
 		*(m_end_body + 8) = '<';
 		*(m_end_body + 9) = '/';
 		*(m_end_body + 10) = 'd';
@@ -972,8 +986,8 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		strcat(m_prep, m_result);
 
 		std::string title(m_Student);
-		title += "µÄ¿¼ÊÔ³É¼¨ - ";
-		title += SOFTWARE_NAME;
+		title += u8"çš„è€ƒè¯•æˆç»© - ";
+		title += APP_NAME;
 
 		cout << strformat( header.c_str(), title.c_str());
 		cout << strformat( m_lpszQuery.c_str(), m_Student, m_prep);
@@ -996,14 +1010,21 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		CCurlTask req;
 		if (!req.Exec(false, GET_GRADE_BY_QBINFO, CGI_HTTP_COOKIE))
 		{
-			Error("<p><b>½ÓÊÕÊı¾İÊ§°Ü</b></p><p>curl ²Ù×÷Ê§°Ü</p>");
+			Error(u8"<p><b>æ¥æ”¶æ•°æ®å¤±è´¥</b></p><p>curl æ“ä½œå¤±è´¥</p>");
 			return;
 		}
-		char *m_rep_body = req.GetResult();
+
+		unsigned int rep_len = req.GetLength() * 3 + 1;
+		char *m_rep_body = (char *)malloc(rep_len);
+		gbk_to_utf8(req.GetResult(), (unsigned int)req.GetLength(), &m_rep_body, &rep_len);
+		req.GetResultString() = m_rep_body;
+		free(m_rep_body);
+		m_rep_body = req.GetResult();
+
 		char *m_result = strstr(m_rep_body, "<body leftmargin=\"0\" topmargin=\"0\" marginwidth=\"0\" marginheight=\"0\" style=\"overflow:auto;\">");
 		if (m_result == NULL)
 		{
-			Error("<p><b>´Ó·şÎñÆ÷À­È¡·ÖÊıÊ§°Ü¡£(BeginOfRet)</b></p><p>½ÌÎñ¾ı¿ÉÄÜÔÂÏß·±Ã¦£¬666 ÇëÉÔºòÔÙÊÔ¡£</p><p>Èç¹ûÔÂÏßÕıÃ¦£¬»ò´æÔÚÊı¾İÏÔÊ¾ÒÅÂ©£¬¶àË¢ĞÂ¼¸´Î¼´¿É¡£</p>");
+			Error(u8"<p><b>ä»æœåŠ¡å™¨æ‹‰å–åˆ†æ•°å¤±è´¥ã€‚(BeginOfRet)</b></p><p>æ•™åŠ¡å›å¯èƒ½æœˆçº¿ç¹å¿™ï¼Œè¯·ç¨å€™å†è¯•ã€‚</p><p>å¦‚æœæœˆçº¿æ­£å¿™ï¼Œæˆ–å­˜åœ¨æ•°æ®æ˜¾ç¤ºé—æ¼ï¼Œå¤šåˆ·æ–°å‡ æ¬¡å³å¯ã€‚</p>");
 			return;
 		}
 		m_result += 92;
@@ -1017,7 +1038,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (m_result == NULL)
 		{
 			free(m_prep);
-			Error("<p>´Ó·şÎñÆ÷À­È¡·ÖÊıÊ§°Ü¡£(EndOfBodyNotFound)</p>");
+			Error(u8"<p>ä»æœåŠ¡å™¨æ‹‰å–åˆ†æ•°å¤±è´¥ã€‚(EndOfBodyNotFound)</p>");
 			return;
 		}
 		cout << GLOBAL_HEADER;
@@ -1029,8 +1050,8 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		strcat(m_prep, m_result);
 
 		std::string title(m_Student);
-		title += "µÄÍ¨¹ı¿ÆÄ¿ - ";
-		title += SOFTWARE_NAME;
+		title += u8"çš„é€šè¿‡ç§‘ç›® - ";
+		title += APP_NAME;
 
 		cout << strformat( header.c_str(), title.c_str());
 		cout << strformat( m_lpszQuery.c_str(), m_Student, m_prep);
@@ -1053,14 +1074,21 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		CCurlTask req;
 		if (!req.Exec(false, GET_GRADE_BY_PLAN, CGI_HTTP_COOKIE))
 		{
-			Error("<p><b>½ÓÊÕÊı¾İÊ§°Ü</b></p><p>curl ²Ù×÷Ê§°Ü</p>");
+			Error(u8"<p><b>æ¥æ”¶æ•°æ®å¤±è´¥</b></p><p>curl æ“ä½œå¤±è´¥</p>");
 			return;
 		}
-		char *m_rep_body = req.GetResult();
+		
+		unsigned int rep_len = req.GetLength() * 3 + 1;
+		char *m_rep_body = (char *)malloc(rep_len);
+		gbk_to_utf8(req.GetResult(), (unsigned int)req.GetLength(), &m_rep_body, &rep_len);
+		req.GetResultString() = m_rep_body;
+		free(m_rep_body);
+		m_rep_body = req.GetResult();
+
 		char *m_result = strstr(m_rep_body, "<body leftmargin=\"0\" topmargin=\"0\" marginwidth=\"0\" marginheight=\"0\" style=\"overflow:auto;\">");
 		if (m_result == NULL)
 		{
-			Error("<p><b>´Ó·şÎñÆ÷À­È¡·ÖÊıÊ§°Ü¡£(BeginOfRet)</b></p><p>½ÌÎñ¾ı¿ÉÄÜÔÂÏß·±Ã¦£¬666 ÇëÉÔºòÔÙÊÔ¡£</p><p>Èç¹ûÔÂÏßÕıÃ¦£¬»ò´æÔÚÊı¾İÏÔÊ¾ÒÅÂ©£¬¶àË¢ĞÂ¼¸´Î¼´¿É¡£</p>");
+			Error(u8"<p><b>ä»æœåŠ¡å™¨æ‹‰å–åˆ†æ•°å¤±è´¥ã€‚(BeginOfRet)</b></p><p>æ•™åŠ¡å›å¯èƒ½æœˆçº¿ç¹å¿™ï¼Œè¯·ç¨å€™å†è¯•ã€‚</p><p>å¦‚æœæœˆçº¿æ­£å¿™ï¼Œæˆ–å­˜åœ¨æ•°æ®æ˜¾ç¤ºé—æ¼ï¼Œå¤šåˆ·æ–°å‡ æ¬¡å³å¯ã€‚</p>");
 			return;
 		}
 		m_result += 92;
@@ -1074,7 +1102,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (m_result == NULL)
 		{
 			free(m_prep);
-			Error("<p>´Ó·şÎñÆ÷À­È¡·ÖÊıÊ§°Ü¡£(EndOfBodyNotFound)</p>");
+			Error(u8"<p>ä»æœåŠ¡å™¨æ‹‰å–åˆ†æ•°å¤±è´¥ã€‚(EndOfBodyNotFound)</p>");
 			return;
 		}
 		cout << GLOBAL_HEADER;
@@ -1086,8 +1114,8 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		strcat(m_prep, m_result);
 
 		std::string title(m_Student);
-		title += "µÄ×¨Òµ·½°¸ - ";
-		title += SOFTWARE_NAME;
+		title += u8"çš„ä¸“ä¸šæ–¹æ¡ˆ - ";
+		title += APP_NAME;
 
 		cout << strformat( header.c_str(), title.c_str());
 		cout << strformat( m_lpszQuery.c_str(), m_Student, m_prep);
@@ -1109,20 +1137,27 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		CCurlTask req;
 		if (!req.Exec(false, GET_GRADE_BY_FAILED, CGI_HTTP_COOKIE))
 		{
-			Error("<p><b>½ÓÊÕÊı¾İÊ§°Ü</b></p><p>curl ²Ù×÷Ê§°Ü</p>");
+			Error(u8"<p><b>æ¥æ”¶æ•°æ®å¤±è´¥</b></p><p>curl æ“ä½œå¤±è´¥</p>");
 			return;
 		}
-		char *m_rep_body = req.GetResult();
+		
+		unsigned int rep_len = req.GetLength() * 3 + 1;
+		char *m_rep_body = (char *)malloc(rep_len);
+		gbk_to_utf8(req.GetResult(), (unsigned int)req.GetLength(), &m_rep_body, &rep_len);
+		req.GetResultString() = m_rep_body;
+		free(m_rep_body);
+		m_rep_body = req.GetResult();
+
 		char *m_result = strstr(m_rep_body, "<table width=\"100%\"  border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\">");
 		if (m_result == NULL)
 		{
-			Error("<p><b>´Ó·şÎñÆ÷À­È¡·ÖÊıÊ§°Ü¡£(BeginOfRet)</b></p><p>½ÌÎñ¾ı¿ÉÄÜÔÂÏß·±Ã¦£¬666 ÇëÉÔºòÔÙÊÔ¡£</p><p>Èç¹ûÔÂÏßÕıÃ¦£¬»ò´æÔÚÊı¾İÏÔÊ¾ÒÅÂ©£¬¶àË¢ĞÂ¼¸´Î¼´¿É¡£</p>");
+			Error(u8"<p><b>ä»æœåŠ¡å™¨æ‹‰å–åˆ†æ•°å¤±è´¥ã€‚(BeginOfRet)</b></p><p>æ•™åŠ¡å›å¯èƒ½æœˆçº¿ç¹å¿™ï¼Œè¯·ç¨å€™å†è¯•ã€‚</p><p>å¦‚æœæœˆçº¿æ­£å¿™ï¼Œæˆ–å­˜åœ¨æ•°æ®æ˜¾ç¤ºé—æ¼ï¼Œå¤šåˆ·æ–°å‡ æ¬¡å³å¯ã€‚</p>");
 			return;
 		}
 		m_result = strstr(m_result + 92, "<table width=\"100%\"  border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\">");
 		if (m_result == NULL)
 		{
-			Error("<p><b>´Ó·şÎñÆ÷À­È¡·ÖÊıÊ§°Ü¡£(MidOfRet-Table)</b></p><p>½ÌÎñ¾ı¿ÉÄÜÔÂÏß·±Ã¦£¬666 ÇëÉÔºòÔÙÊÔ¡£</p><p>Èç¹ûÔÂÏßÕıÃ¦£¬»ò´æÔÚÊı¾İÏÔÊ¾ÒÅÂ©£¬¶àË¢ĞÂ¼¸´Î¼´¿É¡£</p>");
+			Error(u8"<p><b>ä»æœåŠ¡å™¨æ‹‰å–åˆ†æ•°å¤±è´¥ã€‚(MidOfRet-Table)</b></p><p>æ•™åŠ¡å›å¯èƒ½æœˆçº¿ç¹å¿™ï¼Œè¯·ç¨å€™å†è¯•ã€‚</p><p>å¦‚æœæœˆçº¿æ­£å¿™ï¼Œæˆ–å­˜åœ¨æ•°æ®æ˜¾ç¤ºé—æ¼ï¼Œå¤šåˆ·æ–°å‡ æ¬¡å³å¯ã€‚</p>");
 			return;
 		}
 		char *m_prep = (char *)malloc(req.GetLength());
@@ -1135,7 +1170,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (m_result == NULL)
 		{
 			free(m_prep);
-			Error("<p>´Ó·şÎñÆ÷À­È¡·ÖÊıÊ§°Ü¡£(EndOfBodyNotFound)</p>");
+			Error(u8"<p>ä»æœåŠ¡å™¨æ‹‰å–åˆ†æ•°å¤±è´¥ã€‚(EndOfBodyNotFound)</p>");
 			return;
 		}
 		cout << GLOBAL_HEADER;
@@ -1147,8 +1182,8 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		strcat(m_prep, m_result);
 
 		std::string title(m_Student);
-		title += "µÄÎ´Í¨¹ı¿ÆÄ¿ - ";
-		title += SOFTWARE_NAME;
+		title += u8"çš„æœªé€šè¿‡ç§‘ç›® - ";
+		title += APP_NAME;
 
 		cout << strformat( header.c_str(), title.c_str());
 		cout << strformat( m_lpszQuery.c_str(), m_Student, m_prep);
@@ -1171,14 +1206,21 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		CCurlTask req;
 		if (!req.Exec(false, REQUEST_SCHEDULE, CGI_HTTP_COOKIE))
 		{
-			Error("<p><b>½ÓÊÕÊı¾İÊ§°Ü</b></p><p>curl ²Ù×÷Ê§°Ü</p>");
+			Error(u8"<p><b>æ¥æ”¶æ•°æ®å¤±è´¥</b></p><p>curl æ“ä½œå¤±è´¥</p>");
 			return;
 		}
-		char *m_rep_body = req.GetResult();
+		
+		unsigned int rep_len = req.GetLength() * 3 + 1;
+		char *m_rep_body = (char *)malloc(rep_len);
+		gbk_to_utf8(req.GetResult(), (unsigned int)req.GetLength(), &m_rep_body, &rep_len);
+		req.GetResultString() = m_rep_body;
+		free(m_rep_body);
+		m_rep_body = req.GetResult();
+
 		char *m_result = strstr(m_rep_body, "<table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"titleTop2\">");
 		if (m_result == NULL)
 		{
-			Error("<p><b>´Ó·şÎñÆ÷À­È¡¿Î³Ì±íÊ§°Ü¡£(BeginOfTable)</b></p><p>½¨ÒéÄãÉÔºóÔÙÊÔ</p>");
+			Error(u8"<p><b>ä»æœåŠ¡å™¨æ‹‰å–è¯¾ç¨‹è¡¨å¤±è´¥ã€‚(BeginOfTable)</b></p><p>å»ºè®®ä½ ç¨åå†è¯•</p>");
 			return;
 		}
 		m_result += 81;
@@ -1192,13 +1234,13 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (m_result == NULL)
 		{
 			free(m_prep);
-			Error("<p>´Ó·şÎñÆ÷À­È¡¿Î³Ì±íÊ§°Ü¡£(EndOfBodyNotFound)</p>");
+			Error(u8"<p>ä»æœåŠ¡å™¨æ‹‰å–è¯¾ç¨‹è¡¨å¤±è´¥ã€‚(EndOfBodyNotFound)</p>");
 			return;
 		}
 		m_result -= 81;
 		cout << GLOBAL_HEADER;
 		char m_before[512] = { 0 };
-		sprintf(m_before, "<a name=\"qb_731\"></a><table width=\"100%%\" border=\"0\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td class=\"Linetop\"></td></tr></tbody></table><table width=\"100%%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\"><tbody><tr><td width=\"100%%\"><table border=\"0\" align=\"left\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td>&nbsp;</td><td valign=\"middle\">&nbsp;<b>%s</b> &nbsp;</td></tr></tbody></table></td></tr></tbody></table>", "ÎÒµÄ¿Î³Ì±í / Ñ¡¿Î½á¹û");
+		sprintf(m_before, "<a name=\"qb_731\"></a><table width=\"100%%\" border=\"0\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td class=\"Linetop\"></td></tr></tbody></table><table width=\"100%%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\"><tbody><tr><td width=\"100%%\"><table border=\"0\" align=\"left\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td>&nbsp;</td><td valign=\"middle\">&nbsp;<b>%s</b> &nbsp;</td></tr></tbody></table></td></tr></tbody></table>", u8"æˆ‘çš„è¯¾ç¨‹è¡¨ / é€‰è¯¾ç»“æœ");
 		*(m_end_body + 8) = '<';
 		*(m_end_body + 9) = '/';
 		*(m_end_body + 10) = 'd';
@@ -1210,8 +1252,8 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		strcat(m_prep, m_before);
 		strcat(m_prep, m_result);
 
-		std::string title("±¾Ñ§ÆÚ¿Î³Ì±í - ");
-		title += SOFTWARE_NAME;
+		std::string title(u8"æœ¬å­¦æœŸè¯¾ç¨‹è¡¨ - ");
+		title += APP_NAME;
 
 		cout << strformat(header.c_str(), title.c_str());
 		cout << strformat(m_lpszQuery.c_str(), m_Student, m_prep);
@@ -1227,7 +1269,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		return;
 	}
 
-	// ¶¨Î»µ½µÚÒ»Ïî³É¼¨
+	// å®šä½åˆ°ç¬¬ä¸€é¡¹æˆç»©
 	char *pStr1 = strstr(p_lpszScore,"<tr class=\"odd\" onMouseOut=\"this.className='even';\" onMouseOver=\"this.className='evenfocus';\">");
 	bool hasChengji = true;
 	if (pStr1 == NULL)
@@ -1240,7 +1282,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	char *pStr2 = NULL;
 	char *pStr3 = NULL;
 
-	// Ñ­»·»ñÈ¡Ã¿Ò»Ïî³É¼¨ĞÅÏ¢
+	// å¾ªç¯è·å–æ¯ä¸€é¡¹æˆç»©ä¿¡æ¯
 
 	double m_Total_xuefen = 0.0;
 	double m_Total_pointsxxuefen = 0.0;
@@ -1268,7 +1310,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_subXuefen[128] = { 0 };
 		mid(m_subXuefen, pStr2, pStr3 - pStr2 - 19, 19);
-		//if (atof(m_subXuefen) == 0) sprintf(m_subXuefen, "ÔİÎŞÊı¾İ");
+		//if (atof(m_subXuefen) == 0) sprintf(m_subXuefen, "æš‚æ— æ•°æ®");
 
 		pStr2 = pStr3;
 		pStr2 = strstr(pStr2 + 19, "<td align=\"center\">");
@@ -1277,7 +1319,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_subzuigaofen[128] = { 0 };
 		mid(m_subzuigaofen, pStr2, pStr3 - pStr2 - 19, 19);
-		//if (atof(m_subzuigaofen) == 0) sprintf(m_subzuigaofen, "ÔİÎŞÊı¾İ");
+		//if (atof(m_subzuigaofen) == 0) sprintf(m_subzuigaofen, "æš‚æ— æ•°æ®");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
 		if (pStr2 == NULL) break;
@@ -1285,7 +1327,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_subzuidifen[128] = { 0 };
 		mid(m_subzuidifen, pStr2, pStr3 - pStr2 - 19, 19);
-		//if (atof(m_subzuidifen) == 0) sprintf(m_subzuidifen, "ÔİÎŞÊı¾İ");
+		//if (atof(m_subzuidifen) == 0) sprintf(m_subzuidifen, "æš‚æ— æ•°æ®");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
 		if (pStr2 == NULL) break;
@@ -1293,7 +1335,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_subjunfen[128] = { 0 };
 		mid(m_subjunfen, pStr2, pStr3 - pStr2 - 19, 19);
-		//if (atof(m_subjunfen) == 0) sprintf(m_subjunfen, "ÔİÎŞÊı¾İ");
+		//if (atof(m_subjunfen) == 0) sprintf(m_subjunfen, "æš‚æ— æ•°æ®");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
 		if (pStr2 == NULL) break;
@@ -1301,19 +1343,19 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_subchengji[256] = { 0 };
 		mid(m_subchengji, pStr2, pStr3 - pStr2 - 19, 19);
-		if (strstr(m_subchengji, "ÓÅĞã") != NULL)
+		if (strstr(m_subchengji, "ä¼˜ç§€") != NULL)
 		{
 			strcpy(m_subchengji,"95");
 		}
-		if (strstr(m_subchengji, "Á¼ºÃ") != NULL)
+		if (strstr(m_subchengji, "è‰¯å¥½") != NULL)
 		{
 			strcpy(m_subchengji, "85");
 		}
-		if (strstr(m_subchengji, "ÖĞµÈ") != NULL)
+		if (strstr(m_subchengji, "ä¸­ç­‰") != NULL)
 		{
 			strcpy(m_subchengji, "75");
 		}
-		if (strstr(m_subchengji, "¼°¸ñ") != NULL)
+		if (strstr(m_subchengji, "åŠæ ¼") != NULL)
 		{
 			if (atoi(m_subzuidifen) > 60)
 			{
@@ -1325,12 +1367,12 @@ void parse_friendly_score(std::string & p_strlpszScore)
 			}
 			
 		}
-		if (strstr(m_subchengji, "²»¼°¸ñ") != NULL)
+		if (strstr(m_subchengji, "ä¸åŠæ ¼") != NULL)
 		{
 				strcpy(m_subchengji, "55");
 				isPassed = false;
 		}
-		//if (atoi(m_subchengji) == 0) strcpy(m_subchengji, "ÔİÎŞÊı¾İ");
+		//if (atoi(m_subchengji) == 0) strcpy(m_subchengji, "æš‚æ— æ•°æ®");
 		if (atof(m_subchengji) < 60) 
 		{
 
@@ -1351,14 +1393,14 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_submingci[128] = { 0 };
 		mid(m_submingci, pStr2, pStr3 - pStr2 - 19, 19);
-		//if (atof(m_submingci) == 0) sprintf(m_submingci, "ÔİÎŞÊı¾İ");
+		//if (atof(m_submingci) == 0) sprintf(m_submingci, "æš‚æ— æ•°æ®");
 
-		// £¨·ÖÊıxÑ§·Ö£©È«¶¼¼ÓÆğÀ´/×ÜÑ§·Ö = ¼ÓÈ¨·Ö£¬ÅÅ³ıÌåÓıºÍ¿Î³ÌÉè¼Æ
+		// ï¼ˆåˆ†æ•°xå­¦åˆ†ï¼‰å…¨éƒ½åŠ èµ·æ¥/æ€»å­¦åˆ† = åŠ æƒåˆ†ï¼Œæ’é™¤ä½“è‚²å’Œè¯¾ç¨‹è®¾è®¡
 		float m_xuefen = atof(m_subXuefen);
 		float m_chengji = atof(m_subchengji);
 		float m_kcxfjd = m_xuefen * cj2jd(m_chengji);
-		if (strstr(m_subName, "ÌåÓı") == NULL && strstr(m_subName, "¾üÊÂÑµÁ·") == NULL 
-			&& strstr(m_subName, "Êµ¼ù") == NULL)
+		if (strstr(m_subName, "ä½“è‚²") == NULL && strstr(m_subName, "å†›äº‹è®­ç»ƒ") == NULL 
+			&& strstr(m_subName, "å®è·µ") == NULL)
 		{
 			if (m_chengji != 0 || atof(m_subzuidifen) != 0 || atof(m_subzuigaofen) != 0 || atof(m_subjunfen) != 0)
 			{
@@ -1380,36 +1422,43 @@ void parse_friendly_score(std::string & p_strlpszScore)
 			}*/
 		}
 
-		char *m_StrTmp = new char[strlen(SCORE_TEMPLATE) + 50 + +strlen(m_subName) + strlen(m_subchengji) + strlen(m_subjunfen) + strlen(m_subzuigaofen) + strlen(m_subzuidifen) + strlen(m_submingci) + strlen(m_subXuefen) + 16 + 1];
+		char *m_StrTmp = new char[strlen(SCORE_TEMPLATE) + 50 + strlen(m_subName) + strlen(m_subchengji) + strlen(m_subjunfen) + strlen(m_subzuigaofen) + strlen(m_subzuidifen) + strlen(m_submingci) + strlen(m_subXuefen) + 16 + 1];
 		sprintf(m_StrTmp, SCORE_TEMPLATE, isPassed ? "": "background-color: rgba(255, 0, 0, 0.5);color:#fff", m_subName, m_subchengji, m_subjunfen, m_subzuigaofen, m_subzuidifen,
 			m_submingci, m_subXuefen, m_kcxfjd);
-		m_Output.append(m_StrTmp);
+
+		char *u8strtmp = (char *)malloc(strlen(m_StrTmp) * 3 + 1);
+		unsigned int u8len = 0;
+		gbk_to_utf8(m_StrTmp, (unsigned int)strlen(m_StrTmp), &u8strtmp, &u8len);
+
+		m_Output.append(u8strtmp);
+
+		free(u8strtmp);
 		delete[]m_StrTmp;
-		m_success = true; // ²éµ½Ò»¸öËãÒ»¸ö
+		m_success = true; // æŸ¥åˆ°ä¸€ä¸ªç®—ä¸€ä¸ª
 		pStr1 = strstr(pStr3, "<tr class=\"odd\" onMouseOut=\"this.className='even';\" onMouseOver=\"this.className='evenfocus';\">");
 	}
 	
-	// ¼ÙÈç·¢ÉúÁË´íÎó
+	// å‡å¦‚å‘ç”Ÿäº†é”™è¯¯
 	if (!m_success) 
 	{
 		free(p_lpszScore);
-		Error("<p>²»ºÃ£¬²éÑ¯Ê±·¢ÉúÒâÍâ´íÎóÀ²¡£</p>");
+		Error(u8"<p>ä¸å¥½ï¼ŒæŸ¥è¯¢æ—¶å‘ç”Ÿæ„å¤–é”™è¯¯å•¦ã€‚</p>");
 		return;
 	}
 	if (hasChengji == false)
 	{
-		char *m_StrTmp = new char[strlen(SCORE_TEMPLATE) + 17 + 64 + 1];
-		sprintf(m_StrTmp, SCORE_TEMPLATE, "", "±¾Ñ§ÆÚ»¹Î´³ö³É¼¨", "", "", "", "","", "", "");
+		char *m_StrTmp = new char[strlen(SCORE_TEMPLATE) + 25 + 64 + 1];
+		sprintf(m_StrTmp, SCORE_TEMPLATE, "", u8"æœ¬å­¦æœŸè¿˜æœªå‡ºæˆç»©", "", "", "", "","", "", "");
 		m_Output.append(m_StrTmp);
 		delete[]m_StrTmp;
 	}
 	m_Output.append(AFTER_TEMPLATE);
 
-	// Ìî³ä·µ»ØÒ³Ãæ
+	// å¡«å……è¿”å›é¡µé¢
 	if (m_Total_pointsxxuefen != 0 || m_Total_xuefen != 0)
 	{
-		char m_jiaquanfen[512] = { 0 };
-		sprintf(m_jiaquanfen, "<div id=\"i_total\"><p>¼ÓÈ¨Æ½¾ù·Ö / GPA(Æ½¾ù¼¨µã)£º</p><center>%.1f&nbsp;&nbsp;&nbsp;&nbsp;%.2f</center></div>",
+		char m_jiaquanfen[1024] = { 0 };
+		sprintf(m_jiaquanfen, u8"<div id=\"i_total\"><p>åŠ æƒå¹³å‡åˆ† / GPA(å¹³å‡ç»©ç‚¹)ï¼š</p><center>%.1f&nbsp;&nbsp;&nbsp;&nbsp;%.2f</center></div>",
 				m_Total_pointsxxuefen / m_Total_xuefen, m_Total_jidian / m_Total_xuefen);
 		m_Output.insert(0, m_jiaquanfen);
 	}
@@ -1417,8 +1466,8 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	cout << GLOBAL_HEADER;
 
 	std::string title(m_Student);
-	title += "µÄ±¾Ñ§ÆÚ³É¼¨ - ";
-	title += SOFTWARE_NAME;
+	title += u8"çš„æœ¬å­¦æœŸæˆç»© - ";
+	title += APP_NAME;
 
 	cout << strformat( header.c_str(), title.c_str());
 	cout << strformat( m_lpszQuery.c_str(), m_Student, m_Output.c_str());
@@ -1434,7 +1483,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	free(p_lpszScore);
 }
 
-// »ñÈ¡Ñ§ÉúĞÕÃû
+// è·å–å­¦ç”Ÿå§“å
 void get_student_name(char *p_lpszBuffer)
 {
 	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
@@ -1450,8 +1499,8 @@ void get_student_name(char *p_lpszBuffer)
 		return;
 	}
 	char *m_rep_header = req.GetResult();
-	// À­È¡Ñ§ÉúĞÕÃû
-	char *pStr1 = strstr(m_rep_header, "<td class=\"fieldName\">ĞÕÃû:&nbsp;</td>");
+	// æ‹‰å–å­¦ç”Ÿå§“å
+	char *pStr1 = strstr(m_rep_header, "<td class=\"fieldName\">å§“å:&nbsp;</td>");
 	if (pStr1 == NULL)
 	{
 		strcpy(p_lpszBuffer, "\0");
@@ -1470,9 +1519,14 @@ void get_student_name(char *p_lpszBuffer)
 		return;
 	}
 	mid(p_lpszBuffer, pStr1, pStr2 - pStr1 - 4, 4);
+	char *temp = (char *)malloc(512);
+	unsigned int u8len = 0;
+	gbk_to_utf8(p_lpszBuffer, (unsigned int)strlen(p_lpszBuffer), &temp, &u8len);
+	strcpy(p_lpszBuffer, temp);
+	free(temp);
 }
 
-// »ñÈ¡Ñ§ÉúÕÊºÅ
+// è·å–å­¦ç”Ÿå¸å·
 void get_student_id(char *p_lpszBuffer)
 {
 	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
@@ -1489,8 +1543,8 @@ void get_student_id(char *p_lpszBuffer)
 	}
 
 	char *m_rep_header = req.GetResult();
-	// À­È¡Ñ§ÉúĞÕÃû
-	char *pStr1 = strstr(m_rep_header, "µ±Ç°ÓÃ»§:");
+	// æ‹‰å–å­¦ç”Ÿå§“å
+	char *pStr1 = strstr(m_rep_header, "å½“å‰ç”¨æˆ·:");
 	if (pStr1 == NULL)
 	{
 		strcpy(p_lpszBuffer, "\0");
@@ -1505,81 +1559,81 @@ void get_student_id(char *p_lpszBuffer)
 	mid(p_lpszBuffer, pStr1, pStr2 - pStr1 - 9, 9);
 }
 
-// ½ÌÎñÏµÍ³µç×Ó×¢²á (GET /query.fcgi?act=system_registration)
+// æ•™åŠ¡ç³»ç»Ÿç”µå­æ³¨å†Œ (GET /query.fcgi?act=system_registration)
 int system_registration()
 {
 	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
 	{
-		cout << "Status: 302 Found\r\n" << "Location: index.fcgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
 		return -1;
 	}
 
-	// ·¢ËÍÇëÇó£¬»ñÈ¡µç×Ó×¢²áĞÅÏ¢¡£
+	// å‘é€è¯·æ±‚ï¼Œè·å–ç”µå­æ³¨å†Œä¿¡æ¯ã€‚
 	CCurlTask req;
 	if (!req.Exec(false, REQUEST_GET_REGISTER_INTERFACE, CGI_HTTP_COOKIE))
 	{
-		Error("<p><b>Í¶µİµç×Ó×¢²áĞÅÏ¢Ê§°Ü</b></p><p>curl ²Ù×÷Ê§°Ü</p>");
+		Error(u8"<p><b>æŠ•é€’ç”µå­æ³¨å†Œä¿¡æ¯å¤±è´¥</b></p><p>curl æ“ä½œå¤±è´¥</p>");
 		return -1;
 	}
 	char *m_rep_header = req.GetResult();
-	// ²éÕÒĞèÒªµç×Ó×¢²áµÄÑ§ÆÚĞÅÏ¢¡£
+	// æŸ¥æ‰¾éœ€è¦ç”µå­æ³¨å†Œçš„å­¦æœŸä¿¡æ¯ã€‚
 	char *pStr1 = strstr(m_rep_header, "selected>");
 	if (pStr1 == NULL)
 	{
-		Error("<p>Êı¾İ´íÎó¡£²»ºÃÒâË¼£¬×Ô¶¯×¢²áÊ§°Ü£¬ÀÍÇë´óÀĞÈ¥½ÌÎñÏµÍ³¿´¿´°É~ (1)</p>");
+		Error(u8"<p>æ•°æ®é”™è¯¯ã€‚ä¸å¥½æ„æ€ï¼Œè‡ªåŠ¨æ³¨å†Œå¤±è´¥ï¼ŒåŠ³è¯·å¤§ä½¬å»æ•™åŠ¡ç³»ç»Ÿçœ‹çœ‹å§~ (1)</p>");
 		return -1;
 	}
 	pStr1 -= 70;
 	char *pStr2 = strstr(pStr1, "<option value=\"");
 	if (pStr2 == NULL)
 	{
-		Error("<p>Êı¾İ´íÎó¡£²»ºÃÒâË¼£¬×Ô¶¯×¢²áÊ§°Ü£¬ÀÍÇë´óÀĞÈ¥½ÌÎñÏµÍ³¿´¿´°É~ (2)</p>");
+		Error(u8"<p>æ•°æ®é”™è¯¯ã€‚ä¸å¥½æ„æ€ï¼Œè‡ªåŠ¨æ³¨å†Œå¤±è´¥ï¼ŒåŠ³è¯·å¤§ä½¬å»æ•™åŠ¡ç³»ç»Ÿçœ‹çœ‹å§~ (2)</p>");
 		return -1;
 	}
 	pStr1 = pStr2;
 	pStr2 = strstr(pStr1 + 16, "\"");
 	if (pStr2 == NULL)
 	{
-		Error("<p>Êı¾İ´íÎó¡£²»ºÃÒâË¼£¬×Ô¶¯×¢²áÊ§°Ü£¬ÀÍÇë´óÀĞÈ¥½ÌÎñÏµÍ³¿´¿´°É~ (3)</p>");
+		Error(u8"<p>æ•°æ®é”™è¯¯ã€‚ä¸å¥½æ„æ€ï¼Œè‡ªåŠ¨æ³¨å†Œå¤±è´¥ï¼ŒåŠ³è¯·å¤§ä½¬å»æ•™åŠ¡ç³»ç»Ÿçœ‹çœ‹å§~ (3)</p>");
 		return -1;
 	}
 
 	char m_regval[4096] = { 0 };
 	mid(m_regval, pStr1, pStr2 - pStr1 - 15, 15);
 
-	// Ìî³äµç×Ó×¢²áĞÅÏ¢
+	// å¡«å……ç”µå­æ³¨å†Œä¿¡æ¯
 	char m_post_reg_info[4096] = "zxjxjhh=";
 	strcat(m_post_reg_info, m_regval);
 	int m_post_reg_info_length = strlen(m_post_reg_info);
 
-	// Ìî³ä×¢²áÇëÇó
+	// å¡«å……æ³¨å†Œè¯·æ±‚
 	char m_post_req[8192] = { 0 };
 	sprintf(m_post_req, REQUEST_POST_REGISTER_INTERFACE, m_regval);
 
 	CCurlTask req2;
-	// ¿ªÊ¼µç×Ó×¢²á
+	// å¼€å§‹ç”µå­æ³¨å†Œ
 	if (!req2.Exec(false, m_post_req, CGI_HTTP_COOKIE, true, m_post_reg_info))
 	{
-		Error("<p><b>POSTµç×Ó×¢²áĞÅÏ¢Ê§°Ü</b></p><p>curl ²Ù×÷Ê§°Ü</p>");
+		Error(u8"<p><b>POSTç”µå­æ³¨å†Œä¿¡æ¯å¤±è´¥</b></p><p>curl æ“ä½œå¤±è´¥</p>");
 		return -1;
 	}
 	m_rep_header = req2.GetResult();
-	// ¼ì²éÊÇ·ñ×¢²á³É¹¦¡£
-	pStr1 = strstr(m_rep_header, "×¢²á³É¹¦");
+	// æ£€æŸ¥æ˜¯å¦æ³¨å†ŒæˆåŠŸã€‚
+	pStr1 = strstr(m_rep_header, "æ³¨å†ŒæˆåŠŸ");
 	if (pStr1 == NULL)
 	{
-		Error("<p>²»ºÃÒâË¼£¬×Ô¶¯×¢²áÊ§°Ü£¬ÀÍÇë´óÀĞÈ¥½ÌÎñÏµÍ³¿´¿´°É~ (4)</p>");
+		Error(u8"<p>ä¸å¥½æ„æ€ï¼Œè‡ªåŠ¨æ³¨å†Œå¤±è´¥ï¼ŒåŠ³è¯·å¤§ä½¬å»æ•™åŠ¡ç³»ç»Ÿçœ‹çœ‹å§~ (4)</p>");
 		return -1;
 	}
 
-	cout << "Status: 302 Found\r\n" << "Location: query.fcgi\r\n" << GLOBAL_HEADER;
+	cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/query.fcgi\r\n" << GLOBAL_HEADER;
 	return 0;
 }
 
-// µÇÂ¼Ñ§Éú
+// ç™»å½•å­¦ç”Ÿ
 bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 {
-	// ·¢ËÍµÇÂ½ÇëÇó¡£
+	// å‘é€ç™»é™†è¯·æ±‚ã€‚
 	const char *m_origin = "zjh1=&tips=&lx=&evalue=&eflag=&fs=&dzslh=&zjh=%s&mm=%s&v_yzm=%s";
 	char m_padding[512] = { 0 };
 	sprintf(m_padding, m_origin, p_xuehao, p_password, p_captcha);
@@ -1587,47 +1641,47 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	CCurlTask req;
 	if (!req.Exec(false, REQUEST_LOGIN, CGI_HTTP_COOKIE, true, m_padding))
 	{
-		Error("<p><b>µÇÂ¼Ê§°Ü</b></p><p>curl ²Ù×÷Ê§°Ü</p>");
+		Error(u8"<p><b>ç™»å½•å¤±è´¥</b></p><p>curl æ“ä½œå¤±è´¥</p>");
 		return false;
 	}
 	char *m_rep_body = req.GetResult();
 
-	// À­È¡µÇÂ¼½á¹û¡£
+	// æ‹‰å–ç™»å½•ç»“æœã€‚
 	char *m_result = m_rep_body;
 
-	// ´¦ÀíµÇÂ¼½á¹û¡£
-	char *m_login_not_auth = strstr(m_result, "Ö¤¼şºÅ"); // for some urp systems
+	// å¤„ç†ç™»å½•ç»“æœã€‚
+	char *m_login_not_auth = strstr(m_result, "è¯ä»¶å·"); // for some urp systems
 	if (m_login_not_auth != NULL)
 	{
-		Error("<p><b>Ñ§ºÅ»òÃÜÂë²»¶Ô°¡</b></p><p>Èç¹ûÄãÔøĞŞ¸Ä¹ı½ÌÎñÏµÍ³µÄÕÊºÅÃÜÂë£¬ÇëÊ¹ÓÃĞÂÃÜÂëÔÙÊÔÒ»ÊÔ¡£</p>");
+		Error(u8"<p><b>å­¦å·æˆ–å¯†ç ä¸å¯¹å•Š</b></p><p>å¦‚æœä½ æ›¾ä¿®æ”¹è¿‡æ•™åŠ¡ç³»ç»Ÿçš„å¸å·å¯†ç ï¼Œè¯·ä½¿ç”¨æ–°å¯†ç å†è¯•ä¸€è¯•ã€‚</p>");
 		return false;
 	}
-	m_login_not_auth = strstr(m_result, "ÃÜÂë²»ÕıÈ·");
+	m_login_not_auth = strstr(m_result, "å¯†ç ä¸æ­£ç¡®");
 	if (m_login_not_auth != NULL)
 	{
-		Error("<p><b>Ñ§ºÅ»òÃÜÂë²»¶Ô°¡¡£</b></p><p>Èç¹ûÄãÔøĞŞ¸Ä¹ı½ÌÎñÏµÍ³µÄÕÊºÅÃÜÂë£¬ÇëÊ¹ÓÃĞÂÃÜÂëÔÙÊÔÒ»ÊÔ¡£</p>");
+		Error(u8"<p><b>å­¦å·æˆ–å¯†ç ä¸å¯¹å•Šã€‚</b></p><p>å¦‚æœä½ æ›¾ä¿®æ”¹è¿‡æ•™åŠ¡ç³»ç»Ÿçš„å¸å·å¯†ç ï¼Œè¯·ä½¿ç”¨æ–°å¯†ç å†è¯•ä¸€è¯•ã€‚</p>");
 		return false;
 	}
-	m_login_not_auth = strstr(m_result, "ÑéÖ¤Âë´íÎó");
+	m_login_not_auth = strstr(m_result, "éªŒè¯ç é”™è¯¯");
 	if (m_login_not_auth != NULL)
 	{
-		Error("<p>ÑéÖ¤Âë²»¶Ô£¬ÇëÖØÊÔ</p>");
+		Error(u8"<p>éªŒè¯ç ä¸å¯¹ï¼Œè¯·é‡è¯•</p>");
 		return false;
 	}
-	m_login_not_auth = strstr(m_result, "Êı¾İ¿â");
+	m_login_not_auth = strstr(m_result, "æ•°æ®åº“");
 	if (m_login_not_auth != NULL)
 	{
-		Error("<p>Ñ§ÔºÏµÍ³¾ıËµÊı¾İ¿â·±Ã¦</p><p>ÇëÏÈµÈµÈÔÙÀ´°É~</p>");
+		Error(u8"<p>å­¦é™¢ç³»ç»Ÿå›è¯´æ•°æ®åº“ç¹å¿™</p><p>è¯·å…ˆç­‰ç­‰å†æ¥å§~</p>");
 		return false;
 	}
-	char *m_login_success = strstr(m_result, "Ñ§·ÖÖÆ×ÛºÏ½ÌÎñ");
+	char *m_login_success = strstr(m_result, "å­¦åˆ†åˆ¶ç»¼åˆæ•™åŠ¡");
 	if (m_login_success == NULL)
 	{
-		Error("<p>ÌìÄÅ¡£·¢ÉúÁËÃÕÒ»°ãµÄÎÊÌâ£¡½ÌÎñÏµÍ³ÉñÒşÁË</p><p>½¨ÒéÄãÉÔºòÔÙÊÔÊÔ°É¡£</p>");
+		Error(u8"<p>å¤©å‘ã€‚å‘ç”Ÿäº†è°œä¸€èˆ¬çš„é—®é¢˜ï¼æ•™åŠ¡ç³»ç»Ÿç¥éšäº†</p><p>å»ºè®®ä½ ç¨å€™å†è¯•è¯•å§ã€‚</p>");
 		return false;
 	}
 
-	// SQLite3 Êı¾İ¿â£¬¿âÃû main£¬±í URLScoreHelper£¬×Ö¶Î text id(36), text password(36), text openid(128)¡£
+	// SQLite3 æ•°æ®åº“ï¼Œåº“å mainï¼Œè¡¨ URLScoreHelperï¼Œå­—æ®µ text id(36), text password(36), text openid(128)ã€‚
 	std::string query("SELECT id FROM URPScoreHelper WHERE id='");
 	query += p_xuehao;
 	query += "';";
@@ -1639,7 +1693,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	if (db_ret != SQLITE_OK)
 	{
 		student_logout();
-		std::string Err_Msg = "<b>Êı¾İ¿â×¼±¸Ê§°Ü£¡ÇëÈ·ÈÏÊı¾İ¿âºÏ·¨ĞÔ¡£</b><p>(";
+		std::string Err_Msg = "<b>æ•°æ®åº“å‡†å¤‡å¤±è´¥ï¼è¯·ç¡®è®¤æ•°æ®åº“åˆæ³•æ€§ã€‚</b><p>(";
 		Err_Msg += sqlite3_errmsg(db);
 		Err_Msg += ")</p>";
 		Error(Err_Msg.c_str());
@@ -1658,13 +1712,13 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
 
-	// ¶ÔÃÜÂë×öURL½âÂë
+	// å¯¹å¯†ç åšURLè§£ç 
 	int len = url_decode(p_password, strlen(p_password));
 	char temp[128] = { 0 };
 	left(temp, p_password, len);
 	strcpy(p_password, temp);
 
-	if (id == NULL) // ÎŞ¼ÇÂ¼£¬ÔòĞ´ÈëÊı¾İ¿â
+	if (id == NULL) // æ— è®°å½•ï¼Œåˆ™å†™å…¥æ•°æ®åº“
 	{
 		std::string query("INSERT INTO URPScoreHelper (id, password, openid, lastlogin) VALUES ('");
 		query += p_xuehao;
@@ -1683,7 +1737,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		if (db_ret != SQLITE_OK)
 		{
 			student_logout();
-			std::string Err_Msg("<b>ºÜ±§Ç¸£¬µÇÂ¼Ê§°Ü¡£</b><p>Êı¾İ¿â´íÎó (");
+			std::string Err_Msg(u8"<b>å¾ˆæŠ±æ­‰ï¼Œç™»å½•å¤±è´¥ã€‚</b><p>æ•°æ®åº“é”™è¯¯ (");
 			Err_Msg += sqlite3_errmsg(db);
 			Err_Msg += ")</p>";
 			Error(Err_Msg.c_str());
@@ -1693,9 +1747,9 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		sqlite3_step(stmt);
 		sqlite3_finalize(stmt);
 	}
-	else // Îª³É¹¦µÇÂ¼µÄÑ§Éú¸üĞÂ¼ÇÂ¼
+	else // ä¸ºæˆåŠŸç™»å½•çš„å­¦ç”Ÿæ›´æ–°è®°å½•
 	{
-		// SQLite3 Êı¾İ¿â£¬¿âÃû main£¬±í URLScoreHelper£¬×Ö¶Î text id(36), text password(36), text openid(128) text lastlogin(64)¡£
+		// SQLite3 æ•°æ®åº“ï¼Œåº“å mainï¼Œè¡¨ URLScoreHelperï¼Œå­—æ®µ text id(36), text password(36), text openid(128) text lastlogin(64)ã€‚
 		std::string query("UPDATE URPScoreHelper SET password='");
 		char m_time[128] = { 0 };
 		get_time(m_time);
@@ -1713,7 +1767,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		if (db_ret != SQLITE_OK)
 		{
 			student_logout();
-			std::string Err_Msg("<b>µÇÂ¼Êı¾İ¿â¼ÇÂ¼Ê§°Ü£¬ÇëÉÔºóÔÙÊÔ¡£</b><p>(");
+			std::string Err_Msg(u8"<b>ç™»å½•æ•°æ®åº“è®°å½•å¤±è´¥ï¼Œè¯·ç¨åå†è¯•ã€‚</b><p>(");
 			Err_Msg += sqlite3_errmsg(db);
 			Err_Msg += ")</p>";
 			Error(Err_Msg.c_str());
@@ -1726,11 +1780,11 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		}
 		sqlite3_finalize(stmt);
 	}
-	// ÖÁ´Ë£¬Ñ§ÉúµÇÂ¼³É¹¦
+	// è‡³æ­¤ï¼Œå­¦ç”Ÿç™»å½•æˆåŠŸ
 	return true;
 }
 
-// µÇ³öÑ§Éú
+// ç™»å‡ºå­¦ç”Ÿ
 void student_logout()
 {
 	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
@@ -1739,7 +1793,7 @@ void student_logout()
 	req.Exec(true, REQUEST_LOGOUT, CGI_HTTP_COOKIE);
 }
 
-// ÃâÃÜ²éÑ¯Èë¿Ú (/QuickQuery.fcgi)
+// å…å¯†æŸ¥è¯¢å…¥å£ (/QuickQuery.fcgi)
 void parse_QuickQuery_Intro()
 {
 	bool m_need_update_cookie = false;
@@ -1752,15 +1806,15 @@ void parse_QuickQuery_Intro()
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 	cout << GLOBAL_HEADER;
 
-	std::string title("ÃâÃÜ³É¼¨²éÑ¯ - ");
-	title += SOFTWARE_NAME;
+	std::string title(u8"å…å¯†æˆç»©æŸ¥è¯¢ - ");
+	title += APP_NAME;
 
 	cout << strformat( header.c_str(), title.c_str());
-	cout << strformat( m_lpszQuery.c_str(), SOFTWARE_NAME, g_users, g_QueryCount);
+	cout << strformat( m_lpszQuery.c_str(), APP_NAME, g_users, g_QueryCount);
 	cout << footer.c_str();
 }
 
-// ÃâÃÜ²éÑ¯½á¹û (/query.fcgi?act=QuickQuery)
+// å…å¯†æŸ¥è¯¢ç»“æœ (/query.fcgi?act=QuickQuery)
 void parse_QuickQuery_Result()
 {
 	bool m_need_update_cookie = false;
@@ -1769,26 +1823,26 @@ void parse_QuickQuery_Result()
 
 	std::string m_lpszQuery = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
-	// »ñÈ¡ POST Êı¾İ¡£
+	// è·å– POST æ•°æ®ã€‚
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0)
 	{
 		if (m_need_update_cookie)
 			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-		Error("<p>·¢Éú´íÎó£¬POST Êı¾İ³¤¶ÈÒì³£¡£</p>");
+		Error(u8"<p>å‘ç”Ÿé”™è¯¯ï¼ŒPOST æ•°æ®é•¿åº¦å¼‚å¸¸ã€‚</p>");
 		return;
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);	// TORESEARCH
 	FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
 
-	// »ñÈ¡Ñ§ºÅ
+	// è·å–å­¦å·
 	char *pStr1 = strstr(m_post_data, "xh=");
 	if (pStr1 == NULL)
 	{
 		free(m_post_data);
 		if (m_need_update_cookie)
 			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-		Error("<p>ÎŞ·¨»ñÈ¡Ñ§ºÅĞÅÏ¢¡£</p>");
+		Error(u8"<p>æ— æ³•è·å–å­¦å·ä¿¡æ¯ã€‚</p>");
 		return;
 	}
 	char *pStr2 = strstr(pStr1 + 3, "&");
@@ -1810,7 +1864,7 @@ void parse_QuickQuery_Result()
 		free(m_post_data);
 		if (m_need_update_cookie)
 			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-		Error("<p>ÊäÈëµÄÑ§ºÅ¸öÊı´æÔÚÎÊÌâ£¬ÇëÈ·ÈÏ£¡</p>");
+		Error(u8"<p>è¾“å…¥çš„å­¦å·ä¸ªæ•°å­˜åœ¨é—®é¢˜ï¼Œè¯·ç¡®è®¤ï¼</p>");
 		return;
 	}
 	
@@ -1824,7 +1878,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error("<p>ÊäÈëµÄÑ§ºÅÖĞÓĞ³¤¶È´æÔÚÎÊÌâ£¬ÇëÈ·ÈÏ£¡</p>");
+				Error(u8"<p>è¾“å…¥çš„å­¦å·ä¸­æœ‰é•¿åº¦å­˜åœ¨é—®é¢˜ï¼Œè¯·ç¡®è®¤ï¼</p>");
 				return;
 			}
 
@@ -1837,7 +1891,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error("<p>Í¶µİÃâÃÜ²éÑ¯ÇëÇóÊ§°Ü¡£</p><p>ÇëÈ·ÈÏ½ÌÎñÏµÍ³ÊÇ¿ÉÓÃµÄ¡£</p>");
+				Error(u8"<p>æŠ•é€’å…å¯†æŸ¥è¯¢è¯·æ±‚å¤±è´¥ã€‚</p><p>è¯·ç¡®è®¤æ•™åŠ¡ç³»ç»Ÿæ˜¯å¯ç”¨çš„ã€‚</p>");
 				return;
 			}
 
@@ -1847,7 +1901,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error("<p>»ñÈ¡±¨±íID´íÎó¡£(1)</p>");
+				Error(u8"<p>è·å–æŠ¥è¡¨IDé”™è¯¯ã€‚(1)</p>");
 				return;
 			}
 			pStr2 = strstr(pStr1 + 16, "\r\n");
@@ -1855,7 +1909,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error("<p>»ñÈ¡±¨±íID´íÎó¡£(2)</p>");
+				Error(u8"<p>è·å–æŠ¥è¡¨IDé”™è¯¯ã€‚(2)</p>");
 				return;
 			}
 			char m_paramsID[512] = { 0 };
@@ -1874,21 +1928,17 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error("<p>Í¨¹ıIDÃâÃÜ²éÑ¯Ê§°Ü¡£</p><p>·¢ÉúÁËÌìÖªµÀµÄ´íÎó¡£</p>");
+				Error(u8"<p>é€šè¿‡IDå…å¯†æŸ¥è¯¢å¤±è´¥ã€‚</p><p>å‘ç”Ÿäº†å¤©çŸ¥é“çš„é”™è¯¯ã€‚</p>");
 				return;
 			}
 			m_lpvBuffer = req2.GetResult();
 			pStr1 = strstr(m_lpvBuffer, "Exception: ");
 			if (pStr1 != NULL)
 			{
-				pStr2 = strstr(pStr1, "at");
-				if (pStr2 != NULL)
-				{
-					if (m_need_update_cookie)
-						cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-					Error("<p>½ÌÎñÏµÍ³³ö´íÁË£¬ÃâÃÜ²éÑ¯Ê§°Ü£¬ÇëÉÔºóÖØÊÔ~</p>");
-					return;
-				}
+				if (m_need_update_cookie)
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+				Error(u8"<p>æ•™åŠ¡ç³»ç»Ÿå‡ºé”™äº†ï¼Œå…å¯†æŸ¥è¯¢å¤±è´¥ï¼Œè¯·ç¨åé‡è¯•~</p>");
+				return;
 			}
 			pStr1 = NULL;
 			pStr2 = NULL;
@@ -1898,7 +1948,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error("<p>ÃâÃÜ²éÑ¯·µ»Ø²ÎÊı´íÎó¡£(1)</p>");
+				Error(u8"<p>å…å¯†æŸ¥è¯¢è¿”å›å‚æ•°é”™è¯¯ã€‚(1)</p>");
 				return;
 			}
 			pStr2 = strstr(pStr1 + 46, "\";");
@@ -1906,7 +1956,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error("<p>ÃâÃÜ²éÑ¯·µ»Ø²ÎÊı´íÎó¡£(2)</p>");
+				Error(u8"<p>å…å¯†æŸ¥è¯¢è¿”å›å‚æ•°é”™è¯¯ã€‚(2)</p>");
 				return;
 			}
 			char m_txt_req_path[512] = { 0 };
@@ -1924,17 +1974,17 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error("<p>½ÓÊÜ·ÖÊıĞÅÏ¢Ê§°Ü£¡</p>");
+				Error(u8"<p>æ¥æ”¶åˆ†æ•°ä¿¡æ¯å¤±è´¥ï¼</p>");
 				return;
 			}
 
 			m_lpvBuffer = req3.GetResult();
-			pStr1 = strstr(m_lpvBuffer, "ĞÕÃû\t");
+			pStr1 = strstr(m_lpvBuffer, "å§“å\t");
 			if (pStr1 == NULL)
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error("<p>Ñ§ÉúĞÕÃû»ñÈ¡Ê§°Ü£¡(1)</p>");
+				Error(u8"<p>å­¦ç”Ÿå§“åè·å–å¤±è´¥ï¼(1)</p>");
 				return;
 			}
 			pStr2 = strstr(pStr1 + 4, "\t\t");
@@ -1942,7 +1992,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error("<p>Ñ§ÉúĞÕÃû»ñÈ¡Ê§°Ü£¡(2)</p>");
+				Error(u8"<p>å­¦ç”Ÿå§“åè·å–å¤±è´¥ï¼(2)</p>");
 				return;
 			}
 
@@ -1952,7 +2002,7 @@ void parse_QuickQuery_Result()
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error, 
-					"<p><b>ßÀ£¬»ñÈ¡Ê§°ÜÁË¡£ÇëÈ·ÈÏËùÊäĞÅÏ¢ÊÇÕıÈ·µÄ¡£</b></p><p>·¢Éú´íÎóµÄÑ§ºÅ: %s</p>", 
+					"<p><b>å‘ƒï¼Œè·å–å¤±è´¥äº†ã€‚è¯·ç¡®è®¤æ‰€è¾“ä¿¡æ¯æ˜¯æ­£ç¡®çš„ã€‚</b></p><p>å‘ç”Ÿé”™è¯¯çš„å­¦å·: %s</p>", 
 					m_xh[xh_index]);
 				Error(m_friendly_error);
 				return;
@@ -1964,24 +2014,30 @@ void parse_QuickQuery_Result()
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error,
-					"<p><b>»ñÈ¡ĞÅÏ¢Ê§°Ü£¬ÇëÈ·ÈÏÊäÈëÕıÈ·¡£</b></p><p>·¢Éú´íÎóµÄÑ§ºÅ: %s</p>",
+					"<p><b>è·å–ä¿¡æ¯å¤±è´¥ï¼Œè¯·ç¡®è®¤è¾“å…¥æ­£ç¡®ã€‚</b></p><p>å‘ç”Ÿé”™è¯¯çš„å­¦å·: %s</p>",
 					m_xh[xh_index]);
 				Error(m_friendly_error);
 				return;
 			}
-			char m_xxmz_html[128] = { 0 };
-			sprintf(m_xxmz_html, "<div class=\"weui-cells__title\">%s</div>", m_xxmz);
+			char m_xxmz_div[128] = { 0 };
+			sprintf(m_xxmz_div, "<div class=\"weui-cells__title\">%s</div>", m_xxmz);
+
+			char *m_xxmz_htmlu8 = (char *)malloc(512);
+			unsigned int u8len = 0;
+			gbk_to_utf8(m_xxmz_div, (unsigned int)strlen(m_xxmz_div), &m_xxmz_htmlu8, &u8len);
+			std::string m_xxmz_html(m_xxmz_htmlu8);
+			free(m_xxmz_htmlu8);
 
 			pStr1 = NULL;
 			pStr2 = NULL;
-			pStr1 = strstr(m_lpvBuffer, "¿¼ÊÔÊ±¼ä\t\t\n");
+			pStr1 = strstr(m_lpvBuffer, "è€ƒè¯•æ—¶é—´\t\t\n");
 			if (pStr1 == NULL)
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error,
-					"<p><b>½ÓÊÜµ½µÄ±¨±í´æÔÚÎÊÌâ¡£</b></p><p>·¢Éú´íÎóµÄÑ§ºÅ: %s</p>",
+					"<p><b>æ¥å—åˆ°çš„æŠ¥è¡¨å­˜åœ¨é—®é¢˜ã€‚</b></p><p>å‘ç”Ÿé”™è¯¯çš„å­¦å·: %s</p>",
 					m_xh[xh_index]);
 				Error(m_friendly_error);
 				return;
@@ -1993,7 +2049,7 @@ void parse_QuickQuery_Result()
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error,
-					"<p><b>ÊÕµ½µÄ±¨±í´óĞ¡´æÔÚÎÊÌâ¡£</b></p><p>·¢Éú´íÎóµÄÑ§ºÅ: %s</p>",
+					"<p><b>æ”¶åˆ°çš„æŠ¥è¡¨å¤§å°å­˜åœ¨é—®é¢˜ã€‚</b></p><p>å‘ç”Ÿé”™è¯¯çš„å­¦å·: %s</p>",
 					m_xh[xh_index]);
 				Error(m_friendly_error);
 				return;
@@ -2023,7 +2079,7 @@ void parse_QuickQuery_Result()
 
 				char m_xf[64] = { 0 };
 				mid(m_xf, pStr1, pStr2 - pStr1, 0);
-				pStr1 = pStr2 + 1; // Ñ§·Ö
+				pStr1 = pStr2 + 1; // å­¦åˆ†
 				pStr2 = strstr(pStr1, "\t");
 				if (pStr2 == NULL)
 				{
@@ -2051,10 +2107,10 @@ void parse_QuickQuery_Result()
 
 				char m_lb[64] = { 0 };
 				mid(m_lb, pStr1, pStr2 - pStr1, 0);
-				if (strstr(m_lb, "ÖØĞŞ") != NULL)
+				if (strstr(m_lb, "é‡ä¿®") != NULL)
 				{
 					char m_kcmz_cx[256] = { 0 };
-					strcat(m_kcmz_cx, "<b style=\"color:#f57c00\">[ÖØĞŞ]</b> ");
+					strcat(m_kcmz_cx, "<b style=\"color:#f57c00\">[é‡ä¿®]</b> ");
 					strcat(m_kcmz_cx, m_kcmz);
 					strcpy(m_kcmz, m_kcmz_cx);
 				}
@@ -2093,7 +2149,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error("<p>±§Ç¸£¬ÃâÃÜ²éÑ¯¹ı³ÌÖĞÊ§°Ü£¬ÇëÉÔºóÔÙÊÔ¡£</p>");
+				Error(u8"<p>æŠ±æ­‰ï¼Œå…å¯†æŸ¥è¯¢è¿‡ç¨‹ä¸­å¤±è´¥ï¼Œè¯·ç¨åå†è¯•ã€‚</p>");
 				return;
 			}
 
@@ -2120,20 +2176,28 @@ void parse_QuickQuery_Result()
 
 			for (int i = 0; i < m_index; i++)
 			{
-				if (m_interval >= 3) // Èç¹ûÁ½´Î³É¼¨Ïà¸ô´óÓÚ3¸öÔÂ£¬ÔòÏÔÊ¾µ±ÆÚ³É¼¨
+				if (m_interval >= 3) // å¦‚æœä¸¤æ¬¡æˆç»©ç›¸éš”å¤§äº3ä¸ªæœˆï¼Œåˆ™æ˜¾ç¤ºå½“æœŸæˆç»©
 				{
 					if (m_test_info[i].date == m_max_date)
 					{
 						char m_temp[1024] = { 0 };
 						sprintf(m_temp, QUICK_SCORE, m_test_info[i].kcmz, m_test_info[i].cj);
-						m_list.append(m_temp);
+						char *m_u8tmp = (char *)malloc(4096);
+						unsigned int u8len = 0;
+						gbk_to_utf8(m_temp, (unsigned int)strlen(m_temp), &m_u8tmp, &u8len);
+						m_list.append(m_u8tmp);
+						free(m_u8tmp);
 					}
 				}
 				else if (m_test_info[i].date == m_max_date || m_test_info[i].date == m_secondary_max)
 				{
 					char m_temp[1024] = { 0 };
 					sprintf(m_temp, QUICK_SCORE, m_test_info[i].kcmz, m_test_info[i].cj);
-					m_list.append(m_temp);
+					char *m_u8tmp = (char *)malloc(4096);
+					unsigned int u8len = 0;
+					gbk_to_utf8(m_temp, (unsigned int)strlen(m_temp), &m_u8tmp, &u8len);
+					m_list.append(m_u8tmp);
+					free(m_u8tmp);
 				}
 			}
 			m_list.append("</div>");
@@ -2143,20 +2207,26 @@ void parse_QuickQuery_Result()
 
 		if (m_xhgs > 1)
 		{
-			std::string title("¶àÈË²éÑ¯ - ÃâÃÜ³É¼¨²éÑ¯ - ");
-			title += SOFTWARE_NAME;
+			std::string title(u8"å¤šäººæŸ¥è¯¢ - å…å¯†æˆç»©æŸ¥è¯¢ - ");
+			title += APP_NAME;
 
 			cout << strformat( header.c_str(), title.c_str());
-			cout << strformat( m_lpszQuery.c_str(), "¶àÈË²éÑ¯", m_list.c_str());
+			cout << strformat( m_lpszQuery.c_str(), u8"å¤šäººæŸ¥è¯¢", m_list.c_str());
 		}
 		else
 		{
-			std::string title(m_xxmz);
-			title += " - ÃâÃÜ³É¼¨²éÑ¯ - ";
-			title += SOFTWARE_NAME;
+			char *m_xxmz_u8 = (char *)malloc(512);
+			unsigned int u8len = 0;
+			gbk_to_utf8(m_xxmz, (unsigned int)strlen(m_xxmz), &m_xxmz_u8, &u8len);
+			std::string title(m_xxmz_u8);
+
+			title += u8" - å…å¯†æˆç»©æŸ¥è¯¢ - ";
+			title += APP_NAME;
 
 			cout << strformat( header.c_str(), title.c_str());
-			cout << strformat( m_lpszQuery.c_str(), m_xxmz, m_list.c_str());
+			cout << strformat( m_lpszQuery.c_str(), m_xxmz_u8, m_list.c_str());
+
+			free(m_xxmz_u8);
 		}
 		cout << footer.c_str();
 
@@ -2169,16 +2239,16 @@ void parse_QuickQuery_Result()
 		}
 }
 
-// QQÕÊºÅ°ó¶¨Èë¿ÚÓë½â°óÂß¼­ (/OAuth2Assoc.fcgi)
+// QQå¸å·ç»‘å®šå…¥å£ä¸è§£ç»‘é€»è¾‘ (/OAuth2Assoc.fcgi)
 void OAuth2_Association(bool isPOST)
 {
 	if (CGI_QUERY_STRING == NULL)
 	{
-		Error("²ÎÊı´íÎó (Null QUERY_STRING)");
+		Error(u8"å‚æ•°é”™è¯¯ (Null QUERY_STRING)");
 		return;
 	}
 
-	// ½â³ı°ó¶¨Âß¼­
+	// è§£é™¤ç»‘å®šé€»è¾‘
 	char *pStr1 = strstr(CGI_QUERY_STRING, "release=");
 	if (pStr1 != NULL)
 	{
@@ -2186,7 +2256,7 @@ void OAuth2_Association(bool isPOST)
 		get_student_id(student_id);
 		if (student_id == NULL)
 		{
-			Error("·Ç·¨²Ù×÷£¡ (ÉĞÎ´µÇÂ¼)");
+			Error(u8"éæ³•æ“ä½œï¼ (å°šæœªç™»å½•)");
 			return;
 		}
 		char *pStr2 = strstr(pStr1 + 8, "&");
@@ -2201,11 +2271,11 @@ void OAuth2_Association(bool isPOST)
 		}
 		if (strcmp(releaseid, student_id) != 0)
 		{
-			Error("·Ç·¨²Ù×÷£¡ (Éí·İ´íÎó)");
+			Error(u8"éæ³•æ“ä½œï¼ (èº«ä»½é”™è¯¯)");
 			return;
 		}
 
-		// SQLite3 Êı¾İ¿â£¬¿âÃû main£¬±í URLScoreHelper£¬×Ö¶Î text id(36), text password(36), text openid(128)¡£
+		// SQLite3 æ•°æ®åº“ï¼Œåº“å mainï¼Œè¡¨ URLScoreHelperï¼Œå­—æ®µ text id(36), text password(36), text openid(128)ã€‚
 		/*char *query = new char[strlen("DELETE FROM URPScoreHelper WHERE id='") + 36 + 1];
 		memset(query, 0, strlen("DELETE FROM URPScoreHelper WHERE id='") + 36 + 1);
 		strcpy(query, "DELETE FROM URPScoreHelper WHERE id='");
@@ -2221,7 +2291,7 @@ void OAuth2_Association(bool isPOST)
 
 		if (db_ret != SQLITE_OK)
 		{
-			std::string Err_Msg("<b>½â³ı°ó¶¨Ê§°Ü£¬ÇëÉÔºóÔÙÊÔ¡£</b><p>(");
+			std::string Err_Msg(u8"<b>è§£é™¤ç»‘å®šå¤±è´¥ï¼Œè¯·ç¨åå†è¯•ã€‚</b><p>(");
 			Err_Msg += sqlite3_errmsg(db);
 			Err_Msg += ")</p>";
 			Error(Err_Msg.c_str());
@@ -2235,14 +2305,14 @@ void OAuth2_Association(bool isPOST)
 		}
 
 		sqlite3_finalize(stmt);
-		cout << "Status: 302 Found\r\nLocation: main.fcgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/main.fcgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
 	pStr1 = strstr(CGI_QUERY_STRING, "openid=");
 	if (pStr1 == NULL)
 	{
-		Error("¼øÈ¨Ê§°Ü (Null openid)");
+		Error(u8"é‰´æƒå¤±è´¥ (Null openid)");
 		return;
 	}
 	char *pStr2 = strstr(pStr1 + 7, "&");
@@ -2257,24 +2327,7 @@ void OAuth2_Association(bool isPOST)
 	}
 	if (!isPOST)
 	{
-		bool m_need_update_cookie = false;
-		std::string m_photo(" "); // ĞèÒªÕÕÆ¬
-		process_cookie(&m_need_update_cookie, m_photo);
-
-		if (!m_photo.empty()) // Èç¹û¶¼µÇÂ¼ÁË£¿ÄÇ¾ÍÌßµ½Ö÷Ò³ÃæÈ¥¡£
-		{
-			if (strcmp(CGI_SCRIPT_NAME, "/main.fcgi") == 0)
-			{
-				parse_main(m_need_update_cookie, m_photo);
-				delete[]openid;
-				return;
-			}
-			cout << "Status: 302 Found\r\nLocation: main.fcgi\r\n" << GLOBAL_HEADER;
-			delete[]openid;
-			return;
-		}
-
-		// Èç¹û´«½ø sid£¬Ôò×Ô¶¯ÌîĞ´Ñ§ºÅ¡¢²¢ÇÒ´ÓÊı¾İ¿âÖĞÄÃÃÜÂë¡£
+		// å¦‚æœä¼ è¿› sidï¼Œåˆ™è‡ªåŠ¨å¡«å†™å­¦å·ã€å¹¶ä¸”ä»æ•°æ®åº“ä¸­æ‹¿å¯†ç ã€‚
 		pStr1 = strstr(CGI_QUERY_STRING, "stid=");
 		char stid[128] = { 0 };
 		if (pStr1 != NULL)
@@ -2294,7 +2347,7 @@ void OAuth2_Association(bool isPOST)
 		char pass[512] = {0};
 		if (strlen(stid) != 0 && strcmp(stid, "NONE") != 0)
 		{
-			// SQLite3 Êı¾İ¿â£¬¿âÃû main£¬±í URLScoreHelper£¬×Ö¶Î text id(36), text password(36), text openid(128)¡£
+			// SQLite3 æ•°æ®åº“ï¼Œåº“å mainï¼Œè¡¨ URLScoreHelperï¼Œå­—æ®µ text id(36), text password(36), text openid(128)ã€‚
 			std::string query("SELECT password FROM URPScoreHelper WHERE id='");
 			query += stid;
 			query += "';";
@@ -2305,7 +2358,7 @@ void OAuth2_Association(bool isPOST)
 
 			if (db_ret != SQLITE_OK)
 			{
-				char Err_Msg[512] = "<b>Êı¾İ¿â×¼±¸Ê§°Ü£¡ÇëÈ·ÈÏÊı¾İ¿âºÏ·¨ĞÔ¡£</b><p>(";
+				char Err_Msg[1024] = u8"<b>æ•°æ®åº“å‡†å¤‡å¤±è´¥ï¼è¯·ç¡®è®¤æ•°æ®åº“åˆæ³•æ€§ã€‚</b><p>(";
 				strcat(Err_Msg, sqlite3_errmsg(db));
 				strcat(Err_Msg, ")</p>");
 				Error(Err_Msg);
@@ -2331,52 +2384,48 @@ void OAuth2_Association(bool isPOST)
 
 		std::string m_lpszHomepage = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
-		// Êä³öÍøÒ³
-		if (m_need_update_cookie)
-			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-
 		cout << GLOBAL_HEADER;
 
-		std::string title("QQÓÃ»§°ó¶¨ - ");
-		title += SOFTWARE_NAME;
+		std::string title(u8"QQç”¨æˆ·ç»‘å®š - ");
+		title += APP_NAME;
 		cout << strformat( header.c_str(), title.c_str());
 
 		if (strlen(stid) == 0 || strcmp(stid, "NONE") == 0)
 		{
-			cout << strformat( m_lpszHomepage.c_str(), SOFTWARE_NAME, openid, "¸ĞĞ»Ê¹ÓÃQQµÇÂ¼£¬ÇëÏÈ°ó¶¨×Ô¼ºµÄÑ§ºÅ°É :)",
-				 "flex", "", "flex", pass);
+			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, u8"æ„Ÿè°¢ä½¿ç”¨QQç™»å½•ï¼Œè¯·å…ˆç»‘å®šè‡ªå·±çš„å­¦å·å§ :)",
+				 "", pass);
 		}
 		else if(strlen(pass) == 0)
 		{
-			cout << strformat( m_lpszHomepage.c_str(), SOFTWARE_NAME, openid, "¸ĞĞ»Ê¹ÓÃQQµÇÂ¼£¬ÇëÊäÈëÑ§ºÅ¶ÔÓ¦ÃÜÂëÀ´¼ÌĞø²Ù×÷ :)",
-				"none", stid, "flex", pass);
+			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, u8"æ„Ÿè°¢ä½¿ç”¨QQç™»å½•ï¼Œè¯·è¾“å…¥å¯†ç æ¥ç»§ç»­æ“ä½œ :)",
+				stid, "");
 		}
 		else
 		{
-			cout << strformat( m_lpszHomepage.c_str(), SOFTWARE_NAME, openid, "¸ĞĞ»Ê¹ÓÃQQµÇÂ¼£¬ÇëÊäÈëÑéÖ¤ÂëÀ´¼ÌĞø²Ù×÷ :)",
-				"none", stid, "none", pass);
+			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, u8"æ„Ÿè°¢ä½¿ç”¨QQç™»å½•ï¼Œè¯·è¾“å…¥éªŒè¯ç æ¥ç»§ç»­æ“ä½œ :)",
+				stid, pass);
 		}
 		cout << footer.c_str();
 	}
-	else // Ìá½»ÕÊºÅÃÜÂëÑéÖ¤Âë£¬´òËãµÇÂ¼°ó¶¨ÁË
+	else // æäº¤å¸å·å¯†ç éªŒè¯ç ï¼Œæ‰“ç®—ç™»å½•ç»‘å®šäº†
 	{
-		// »ñÈ¡ POST Êı¾İ¡£
+		// è·å– POST æ•°æ®ã€‚
 		int m_post_length = atoi(CGI_CONTENT_LENGTH);
 		if (m_post_length <= 0)
 		{
-			Error("<p>·¢Éú´íÎó£¬POST Êı¾İ³¤¶ÈÒì³£¡£</p>");
+			Error(u8"<p>å‘ç”Ÿé”™è¯¯ï¼ŒPOST æ•°æ®é•¿åº¦å¼‚å¸¸ã€‚</p>");
 			delete[]openid;
 			return;
 		}
 		char *m_post_data = (char *)malloc(m_post_length + 2);
 		FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
 
-		// »ñÈ¡Ñ§ºÅ
+		// è·å–å­¦å·
 		char *pStr1 = strstr(m_post_data, "xh=");
 		if (pStr1 == NULL)
 		{
 			free(m_post_data);
-			Error("<p>ÎŞ·¨»ñÈ¡Ñ§ºÅĞÅÏ¢¡£</p>");
+			Error(u8"<p>æ— æ³•è·å–å­¦å·ä¿¡æ¯ã€‚</p>");
 			delete[]openid;
 			return;
 		}
@@ -2386,12 +2435,12 @@ void OAuth2_Association(bool isPOST)
 		pStr1 = NULL;
 		pStr2 = NULL;
 
-		// »ñÈ¡ÃÜÂë
+		// è·å–å¯†ç 
 		pStr1 = strstr(m_post_data, "mm=");
 		if (pStr1 == NULL)
 		{
 			free(m_post_data);
-			Error("<p>ÎŞ·¨»ñÈ¡ÃÜÂëĞÅÏ¢¡£</p>");
+			Error(u8"<p>æ— æ³•è·å–å¯†ç ä¿¡æ¯ã€‚</p>");
 			delete[]openid;
 			return;
 		}
@@ -2401,12 +2450,12 @@ void OAuth2_Association(bool isPOST)
 		pStr1 = NULL;
 		pStr2 = NULL;
 
-		// »ñÈ¡ÑéÖ¤Âë
+		// è·å–éªŒè¯ç 
 		pStr1 = strstr(m_post_data, "yzm=");
 		if (pStr1 == NULL)
 		{
 			free(m_post_data);
-			Error("<p>ÎŞ·¨»ñÈ¡ÑéÖ¤ÂëĞÅÏ¢¡£</p>");
+			Error(u8"<p>æ— æ³•è·å–éªŒè¯ç ä¿¡æ¯ã€‚</p>");
 			delete[]openid;
 			return;
 		}
@@ -2420,8 +2469,8 @@ void OAuth2_Association(bool isPOST)
 			return;
 		}
 
-		// ÕâÀï±íÊ¾µÇÂ¼³É¹¦£¬Ó¦¸ÃĞ´ÈëÊı¾İ¿âÁË¡£
-		// SQLite3 Êı¾İ¿â£¬¿âÃû main£¬±í URLScoreHelper£¬×Ö¶Î text id(36), text password(36), text openid(128)¡£
+		// è¿™é‡Œè¡¨ç¤ºç™»å½•æˆåŠŸï¼Œåº”è¯¥å†™å…¥æ•°æ®åº“äº†ã€‚
+		// SQLite3 æ•°æ®åº“ï¼Œåº“å mainï¼Œè¡¨ URLScoreHelperï¼Œå­—æ®µ text id(36), text password(36), text openid(128)ã€‚
 		std::string query("UPDATE URPScoreHelper SET openid='");
 		query += openid;
 		query += "' WHERE id='";
@@ -2434,9 +2483,9 @@ void OAuth2_Association(bool isPOST)
 
 		if (db_ret != SQLITE_OK)
 		{
-			char Err_Msg[1024] = "<b>ºÜ±§Ç¸£¬QQ°ó¶¨Ê§°Ü¡£</b><p>Êı¾İ¿â´íÎó (";
+			char Err_Msg[1024] = u8"<b>å¾ˆæŠ±æ­‰ï¼ŒQQç»‘å®šå¤±è´¥ã€‚</b><p>æ•°æ®åº“é”™è¯¯ (";
 			strcat(Err_Msg, sqlite3_errmsg(db));
-			strcat(Err_Msg, ")</p><p>µ«ÊÇ±ğ·½ß¹£¬»¹¿ÉÒÔÕı³£µÇÂ¼µÄ¡£</p>");
+			strcat(Err_Msg, u8")</p><p>ä½†æ˜¯åˆ«æ–¹å–ï¼Œè¿˜å¯ä»¥æ­£å¸¸ç™»å½•çš„ã€‚</p>");
 			Error(Err_Msg);
 			sqlite3_finalize(stmt);
 			free(m_post_data);
@@ -2448,7 +2497,7 @@ void OAuth2_Association(bool isPOST)
 		sqlite3_finalize(stmt);
 
 		cout << "Status: 302 Found\r\n";
-		cout << "Location: main.fcgi\r\n";
+		cout << "Location: " << getAppURL().c_str() << "/main.cgi\r\n";
 		cout << GLOBAL_HEADER;
 		
 		free(m_post_data);
@@ -2458,45 +2507,45 @@ void OAuth2_Association(bool isPOST)
 	return;
 }
 
-// ½ÌÑ§ÆÀ¹ÀÒ³Ãæ (/TeachEval.fcgi)
+// æ•™å­¦è¯„ä¼°é¡µé¢ (/TeachEval.fcgi)
 void parse_teaching_evaluation()
 {
 	bool m_need_update_cookie = false;
-	std::string m_photo(" "); // ÓĞÊı¾İ£¬ĞèÒª»ñÈ¡ÕÕÆ¬
+	std::string m_photo(" "); // æœ‰æ•°æ®ï¼Œéœ€è¦è·å–ç…§ç‰‡
 	process_cookie(&m_need_update_cookie, m_photo);
 
-	if (m_photo.empty()) // »¹Ã»µÇÂ½¾Í¶ªÈ¥µÇÂ½¡£
+	if (m_photo.empty()) // è¿˜æ²¡ç™»é™†å°±ä¸¢å»ç™»é™†ã€‚
 	{
-		cout << "Status: 302 Found\r\nLocation: index.fcgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
-	// ¼ì²éÊÇ·ñĞèÒª½ÌÑ§ÆÀ¹À
+	// æ£€æŸ¥æ˜¯å¦éœ€è¦æ•™å­¦è¯„ä¼°
 	CCurlTask req;
 	if (!req.Exec(false, GET_TEACH_EVAL_LIST, CGI_HTTP_COOKIE))
 	{
-		Error("<p><b>½ÌÑ§ÆÀ¹ÀÇëÇóÍ¶µİÊ§°Ü</b></p><p>curl ²Ù×÷Ê§°Ü</p>");
+		Error(u8"<p><b>æ•™å­¦è¯„ä¼°è¯·æ±‚æŠ•é€’å¤±è´¥</b></p><p>curl æ“ä½œå¤±è´¥</p>");
 		return;
 	}
 
 	char *m_rep_body = req.GetResult();
-	char *m_result = strstr(m_rep_body, "Ñ§ÉúÆÀ¹ÀÎÊ¾íÁĞ±í");
+	char *m_result = strstr(m_rep_body, "å­¦ç”Ÿè¯„ä¼°é—®å·åˆ—è¡¨");
 	if (m_result == NULL)
 	{
-		Error("<p>´Ó·şÎñÆ÷À­È¡½ÌÑ§ÆÀ¹ÀĞÅÏ¢Ê§°Ü¡£</p>");
+		Error(u8"<p>ä»æœåŠ¡å™¨æ‹‰å–æ•™å­¦è¯„ä¼°ä¿¡æ¯å¤±è´¥ã€‚</p>");
 		return;
 	}
 
-	m_result = strstr(m_rep_body, "·Ç½ÌÑ§ÆÀ¹ÀÊ±ÆÚ£¬»òÆÀ¹ÀÊ±¼äÒÑ¹ı");
+	m_result = strstr(m_rep_body, "éæ•™å­¦è¯„ä¼°æ—¶æœŸï¼Œæˆ–è¯„ä¼°æ—¶é—´å·²è¿‡");
 	if (m_result != NULL)
 	{
-		Error("<p>Ñ§Ôº»¹Ã»ÓĞ¿ª·ÅÆÀ½ÌÄØ£¬»òÕßÄãÀ´ÍíÁËÅ¶</p>");
+		Error(u8"<p>å­¦é™¢è¿˜æ²¡æœ‰å¼€æ”¾è¯„æ•™å‘¢ï¼Œæˆ–è€…ä½ æ¥æ™šäº†å“¦</p>");
 		return;
 	}
 
 	int counts = 0;
 	teach_eval te[200];
-	char *m_result1 = strstr(m_rep_body, "<td align=\"center\">ÊÇ</td>");
+	char *m_result1 = strstr(m_rep_body, "<td align=\"center\">æ˜¯</td>");
 	m_result = strstr(m_rep_body, "<img name=\"");
 
 	while (m_result != NULL)
@@ -2509,7 +2558,7 @@ void parse_teaching_evaluation()
 
 		if (m_result2 == NULL)
 		{
-			Error("<p>´Ó·şÎñÆ÷À­È¡´ıÆÀÁĞ±íÊ§°Ü¡£</p>");
+			Error(u8"<p>ä»æœåŠ¡å™¨æ‹‰å–å¾…è¯„åˆ—è¡¨å¤±è´¥ã€‚</p>");
 			return;
 		}
 		char img_txt[128] = { 0 };
@@ -2520,7 +2569,7 @@ void parse_teaching_evaluation()
 
 		if (split_ret != 6)
 		{
-			Error("<p>ÆÀ½ÌÌõÄ¿ÊıÄ¿·Ö¸îÊ§°Ü¡£</p>");
+			Error(u8"<p>è¯„æ•™æ¡ç›®æ•°ç›®åˆ†å‰²å¤±è´¥ã€‚</p>");
 			return;
 		}
 
@@ -2530,7 +2579,7 @@ void parse_teaching_evaluation()
 		strcpy(te[counts].name, dst[4]);
 
 		counts++;
-		m_result1 = strstr(m_result, "<td align=\"center\">ÊÇ</td>");
+		m_result1 = strstr(m_result, "<td align=\"center\">æ˜¯</td>");
 		m_result = strstr(m_result + 11, "<img name=\"");
 	}
 
@@ -2543,12 +2592,12 @@ void parse_teaching_evaluation()
 			to_eval_list += "</p></div><div class=\"weui-cell__ft\">";
 			if (te[i].evaled == false)
 			{
-				to_eval_list += "Î´ÆÀ¼Û";
+				to_eval_list += u8"æœªè¯„ä»·";
 				to_eval++;
 			}
 			else
 			{
-				to_eval_list += "<b style=\"color:#00a70e\">ÒÑÆÀ¼Û</b>";
+				to_eval_list += u8"<b style=\"color:#00a70e\">å·²è¯„ä»·</b>";
 			}
 			to_eval_list += "</div></div>";
 	}
@@ -2561,19 +2610,19 @@ void parse_teaching_evaluation()
 
 	cout << GLOBAL_HEADER;
 
-	std::string title = "Ò»¼üÆÀ½Ì - ";
-	title += SOFTWARE_NAME;
+	std::string title = u8"ä¸€é”®è¯„æ•™ - ";
+	title += APP_NAME;
 	cout << strformat(header.c_str(), title.c_str());
 	bool need_eval = true;
 	if (to_eval && counts)
 	{
 		sprintf(out_head, 
-			"<div class=\"weui-cells__title\">àÅ£¬µ±Ç°»¹ÓĞ %d ÃÅ¿Î³ÌĞèÒªÆÀ¹À£¬×Ü¹² %d ÃÅ¡£</div>", 
+			u8"<div class=\"weui-cells__title\">å—¯ï¼Œå½“å‰è¿˜æœ‰ %d é—¨è¯¾ç¨‹éœ€è¦è¯„ä¼°ï¼Œæ€»å…± %d é—¨ã€‚</div>", 
 			to_eval, counts);
 	}
 	else
 	{
-		strcpy(out_head, "<div class=\"weui-cells__title\"><p>àÅ£¬Äã¶¼ÆÀ¼ÛºÃÀ²¡£ÕæÊÇºÃ±¦±¦ O(¡É_¡É)O</div>");
+		strcpy(out_head, u8"<div class=\"weui-cells__title\"><p>å—¯ï¼Œä½ éƒ½è¯„ä»·å¥½å•¦ã€‚çœŸæ˜¯å¥½å®å® O(âˆ©_âˆ©)O</div>");
 		need_eval = false;
 	}
 
@@ -2582,41 +2631,41 @@ void parse_teaching_evaluation()
 
 	cout << strformat(
 		m_lpszTeachEvalPage.c_str(),
-		need_eval ? "ÀÏÊ¦ºÜĞÁ¿à£¬¸ø¸öÔŞßÂ¡£Ä¬ÈÏÈ«ºÃÆÀ£¬Äã¶®µÄ :)" : "",
+		need_eval ? u8"è€å¸ˆå¾ˆè¾›è‹¦ï¼Œç»™ä¸ªèµå‘—ã€‚é»˜è®¤å…¨å¥½è¯„ï¼Œä½ æ‡‚çš„ :)" : "",
 		need_eval ? "block" : "none"
 		, outer.c_str());
 	cout << footer.c_str();
 }
 
-// ½ÌÑ§ÆÀ¹ÀÁ÷³Ì (POST /TeachEval.fcgi?act=Evaluate)
+// æ•™å­¦è¯„ä¼°æµç¨‹ (POST /TeachEval.fcgi?act=Evaluate)
 void teaching_evaluation()
 {
 	bool m_need_update_cookie = false;
-	std::string m_photo(" "); // ÓĞÊı¾İ£¬ĞèÒª»ñÈ¡ÕÕÆ¬
+	std::string m_photo(" "); // æœ‰æ•°æ®ï¼Œéœ€è¦è·å–ç…§ç‰‡
 	process_cookie(&m_need_update_cookie, m_photo);
 
-	if (m_photo.empty()) // »¹Ã»µÇÂ½¾Í¶ªÈ¥µÇÂ½¡£
+	if (m_photo.empty()) // è¿˜æ²¡ç™»é™†å°±ä¸¢å»ç™»é™†ã€‚
 	{
-		cout << "Status: 302 Found\r\nLocation: index.fcgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
-	// »ñÈ¡ POST Êı¾İ¡£
+	// è·å– POST æ•°æ®ã€‚
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0)
 	{
-		Error("<p>·¢Éú´íÎó£¬POST Êı¾İ³¤¶ÈÒì³£¡£</p>");
+		Error(u8"<p>å‘ç”Ÿé”™è¯¯ï¼ŒPOST æ•°æ®é•¿åº¦å¼‚å¸¸ã€‚</p>");
 		return;
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);
 	FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
 
-	// »ñÈ¡Ö÷¹ÛÆÀ¼Û
+	// è·å–ä¸»è§‚è¯„ä»·
 	char *pStr1 = strstr(m_post_data, "nr=");
 	if (pStr1 == NULL)
 	{
 		free(m_post_data);
-		Error("<p>ÎŞ·¨»ñÈ¡Ö÷¹ÛÆÀ¼ÛÄÚÈİ¡£</p>");
+		Error(u8"<p>æ— æ³•è·å–ä¸»è§‚è¯„ä»·å†…å®¹ã€‚</p>");
 		return;
 	}
 
@@ -2624,32 +2673,32 @@ void teaching_evaluation()
 	left(zgpj, pStr1 + 3, m_post_length - 3);
 	free(m_post_data);
 
-	// ¼ì²éÊÇ·ñĞèÒª½ÌÑ§ÆÀ¹À
+	// æ£€æŸ¥æ˜¯å¦éœ€è¦æ•™å­¦è¯„ä¼°
 	CCurlTask req;
 	if (!req.Exec(false, GET_TEACH_EVAL_LIST, CGI_HTTP_COOKIE))
 	{
-		Error("<p><b>½ÌÑ§ÆÀ¹ÀÇëÇóÍ¶µİÊ§°Ü</b></p><p>curl ²Ù×÷Ê§°Ü</p>");
+		Error(u8"<p><b>æ•™å­¦è¯„ä¼°è¯·æ±‚æŠ•é€’å¤±è´¥</b></p><p>curl æ“ä½œå¤±è´¥</p>");
 		return;
 	}
 
 	char *m_rep_body = req.GetResult();
-	char *m_result = strstr(m_rep_body, "Ñ§ÉúÆÀ¹ÀÎÊ¾íÁĞ±í");
+	char *m_result = strstr(m_rep_body, "å­¦ç”Ÿè¯„ä¼°é—®å·åˆ—è¡¨");
 	if (m_result == NULL)
 	{
-		Error("<p>´Ó·şÎñÆ÷À­È¡½ÌÑ§ÆÀ¹ÀĞÅÏ¢Ê§°Ü¡£</p>");
+		Error(u8"<p>ä»æœåŠ¡å™¨æ‹‰å–æ•™å­¦è¯„ä¼°ä¿¡æ¯å¤±è´¥ã€‚</p>");
 		return;
 	}
 
-	m_result = strstr(m_rep_body, "·Ç½ÌÑ§ÆÀ¹ÀÊ±ÆÚ£¬»òÆÀ¹ÀÊ±¼äÒÑ¹ı");
+	m_result = strstr(m_rep_body, "éæ•™å­¦è¯„ä¼°æ—¶æœŸï¼Œæˆ–è¯„ä¼°æ—¶é—´å·²è¿‡");
 	if (m_result != NULL)
 	{
-		Error("<p><b>°¡Å¶£¬³ö´íÎóÀ²</b></p><p>·Ç½ÌÑ§ÆÀ¹ÀÊ±ÆÚ£¬»òÆÀ¹ÀÊ±¼äÒÑ¹ı¡£</p>");
+		Error(u8"<p><b>å•Šå“¦ï¼Œå‡ºé”™è¯¯å•¦</b></p><p>éæ•™å­¦è¯„ä¼°æ—¶æœŸï¼Œæˆ–è¯„ä¼°æ—¶é—´å·²è¿‡ã€‚</p>");
 		return;
 	}
 
 	int counts = 0;
 	teach_eval te[200];
-	char *m_result1 = strstr(m_rep_body, "<td align=\"center\">ÊÇ</td>");
+	char *m_result1 = strstr(m_rep_body, "<td align=\"center\">æ˜¯</td>");
 	m_result = strstr(m_rep_body, "<img name=\"");
 
 	while (m_result != NULL)
@@ -2662,7 +2711,7 @@ void teaching_evaluation()
 
 		if (m_result2 == NULL)
 		{
-			Error("<p>´Ó·şÎñÆ÷À­È¡´ıÆÀÁĞ±íÊ§°Ü¡£</p>");
+			Error(u8"<p>ä»æœåŠ¡å™¨æ‹‰å–å¾…è¯„åˆ—è¡¨å¤±è´¥ã€‚</p>");
 			return;
 		}
 		char img_txt[128] = { 0 };
@@ -2673,7 +2722,7 @@ void teaching_evaluation()
 
 		if (split_ret != 6)
 		{
-			Error("<p>ÆÀ½ÌÌõÄ¿ÊıÄ¿·Ö¸îÊ§°Ü¡£</p>");
+			Error(u8"<p>è¯„æ•™æ¡ç›®æ•°ç›®åˆ†å‰²å¤±è´¥ã€‚</p>");
 			return;
 		}
 
@@ -2690,7 +2739,7 @@ void teaching_evaluation()
 		left(te[counts].pgnrm, tmp, new_len);
 
 		counts++;
-		m_result1 = strstr(m_result, "<td align=\"center\">ÊÇ</td>");
+		m_result1 = strstr(m_result, "<td align=\"center\">æ˜¯</td>");
 		m_result = strstr(m_result + 11, "<img name=\"");
 
 		free(tmp);
@@ -2719,16 +2768,16 @@ void teaching_evaluation()
 				CCurlTask req2;
 				if (!req2.Exec(false, POST_PRE_TEACH_EVAL, CGI_HTTP_COOKIE, true, pre_post.c_str()))
 				{
-					Error("<p><b>×¼±¸ÆÀ¹ÀÊ±·¢ÉúÁË´íÎó¡£</b></p><p>curl ²Ù×÷Ê§°Ü</p>");
+					Error(u8"<p><b>å‡†å¤‡è¯„ä¼°æ—¶å‘ç”Ÿäº†é”™è¯¯ã€‚</b></p><p>curl æ“ä½œå¤±è´¥</p>");
 					return;
 				}
 
 				m_rep_body = req2.GetResult();
-				char *m_result = strstr(m_rep_body, "ÎÊ¾íÆÀ¹ÀÒ³Ãæ");
+				char *m_result = strstr(m_rep_body, "é—®å·è¯„ä¼°é¡µé¢");
 				if (m_result == NULL)
 				{
-					std::string err_msg = "<p>ßÀ£¬³ö´íÁËÄØ</p><p>ºÜ±§Ç¸£¬ÔÚÆÀ¹À¡¶";
-					err_msg = err_msg + te[i].name + "¡·¿Î³ÌÊ±³öÏÖÁË´íÎó¡£</p><p>(½øÈëÏêÏ¸Ò³ÃæÊ§°Ü)</p>";
+					std::string err_msg = "<p>å‘ƒï¼Œå‡ºé”™äº†å‘¢</p><p>å¾ˆæŠ±æ­‰ï¼Œåœ¨è¯„ä¼°ã€Š";
+					err_msg = err_msg + te[i].name + "ã€‹è¯¾ç¨‹æ—¶å‡ºç°äº†é”™è¯¯ã€‚</p><p>(è¿›å…¥è¯¦ç»†é¡µé¢å¤±è´¥)</p>";
 					Error(err_msg.c_str());
 					return;
 				}
@@ -2740,8 +2789,8 @@ void teaching_evaluation()
 					char *p1 = strstr(m_result + 26, "\"");
 					if (p1 == NULL)
 					{
-						std::string err_msg = "<p>ßÀ£¬³ö´íÁËÄØ</p><p>ºÜ±§Ç¸£¬ÔÚÆÀ¹À¡¶";
-						err_msg = err_msg + te[i].name + "¡·¿Î³ÌÊ±³öÏÖÁË´íÎó¡£</p><p>(Ãû³ÆÌõÄ¿ÒıºÅ±ÕºÏÊ§°Ü)</p>";
+						std::string err_msg = "<p>å‘ƒï¼Œå‡ºé”™äº†å‘¢</p><p>å¾ˆæŠ±æ­‰ï¼Œåœ¨è¯„ä¼°ã€Š";
+						err_msg = err_msg + te[i].name + "ã€‹è¯¾ç¨‹æ—¶å‡ºç°äº†é”™è¯¯ã€‚</p><p>(åç§°æ¡ç›®å¼•å·é—­åˆå¤±è´¥)</p>";
 						Error(err_msg.c_str());
 						return;
 					}
@@ -2759,16 +2808,16 @@ void teaching_evaluation()
 					char *p2 = strstr(p1 + 1, "value=\"");
 					if (p2 == NULL)
 					{
-						std::string err_msg = "<p>ßÀ£¬³ö´íÁËÄØ</p><p>ºÜ±§Ç¸£¬ÔÚÆÀ¹À¡¶";
-						err_msg = err_msg + te[i].name + "¡·¿Î³ÌÊ±³öÏÖÁË´íÎó¡£</p><p>(ÖµÌõÄ¿ÒıºÅ¿ªÆôÊ§°Ü)</p>";
+						std::string err_msg = "<p>å‘ƒï¼Œå‡ºé”™äº†å‘¢</p><p>å¾ˆæŠ±æ­‰ï¼Œåœ¨è¯„ä¼°ã€Š";
+						err_msg = err_msg + te[i].name + "ã€‹è¯¾ç¨‹æ—¶å‡ºç°äº†é”™è¯¯ã€‚</p><p>(å€¼æ¡ç›®å¼•å·å¼€å¯å¤±è´¥)</p>";
 						Error(err_msg.c_str());
 						return;
 					}
 					char *p3 = strstr(p2 + 7, "\"");
 					if (p2 == NULL)
 					{
-						std::string err_msg = "<p>ßÀ£¬³ö´íÁËÄØ</p><p>ºÜ±§Ç¸£¬ÔÚÆÀ¹À¡¶";
-						err_msg = err_msg + te[i].name + "¡·¿Î³ÌÊ±³öÏÖÁË´íÎó¡£</p><p>(ÖµÌõÄ¿ÒıºÅ±ÕºÏÊ§°Ü)</p>";
+						std::string err_msg = "<p>å‘ƒï¼Œå‡ºé”™äº†å‘¢</p><p>å¾ˆæŠ±æ­‰ï¼Œåœ¨è¯„ä¼°ã€Š";
+						err_msg = err_msg + te[i].name + "ã€‹è¯¾ç¨‹æ—¶å‡ºç°äº†é”™è¯¯ã€‚</p><p>(å€¼æ¡ç›®å¼•å·é—­åˆå¤±è´¥)</p>";
 						Error(err_msg.c_str());
 						return;
 					}
@@ -2784,41 +2833,41 @@ void teaching_evaluation()
 				post_data = post_data + te[i].wjbm + "&bpr=" + te[i].bpr + "&pgnr=" + te[i].pgnr + "&xumanyzg=zg&wjbz=" + rank + "zgpj=";
 				post_data += zgpj;
 
-				// ¼ì²éÕâÃÅ¿ÎÊÇ·ñĞèÒª½ÌÑ§ÆÀ¹À
+				// æ£€æŸ¥è¿™é—¨è¯¾æ˜¯å¦éœ€è¦æ•™å­¦è¯„ä¼°
 				CCurlTask req3;
 				if (!req3.Exec(false, POST_TEACH_EVAL, CGI_HTTP_COOKIE, true, post_data.c_str()))
 				{
-					std::string err_msg = "<p>ßÀ£¬³ö´íÁËÄØ</p><p>ºÜ±§Ç¸£¬ÔÚÆÀ¹À¡¶";
-					err_msg = err_msg + te[i].name + "¡·¿Î³ÌÊ±³öÏÖÁË´íÎó¡£</p><p>curl ²Ù×÷Ê§°Ü</p>";
+					std::string err_msg = "<p>å‘ƒï¼Œå‡ºé”™äº†å‘¢</p><p>å¾ˆæŠ±æ­‰ï¼Œåœ¨è¯„ä¼°ã€Š";
+					err_msg = err_msg + te[i].name + "ã€‹è¯¾ç¨‹æ—¶å‡ºç°äº†é”™è¯¯ã€‚</p><p>curl æ“ä½œå¤±è´¥</p>";
 					Error(err_msg.c_str());
 				}
 
 				m_rep_body = req3.GetResult();
-				m_result = strstr(m_rep_body, "³É¹¦");
+				m_result = strstr(m_rep_body, "æˆåŠŸ");
 				if (m_result == NULL)
 				{
-					std::string err_msg = "<p>ßÀ£¬³ö´íÁËÄØ</p><p>ºÜ±§Ç¸£¬ÔÚÆÀ¹À¡¶";
-					err_msg = err_msg + te[i].name + "¡·¿Î³ÌÊ±³öÏÖÁË´íÎó¡£</p>";
+					std::string err_msg = "<p>å‘ƒï¼Œå‡ºé”™äº†å‘¢</p><p>å¾ˆæŠ±æ­‰ï¼Œåœ¨è¯„ä¼°ã€Š";
+					err_msg = err_msg + te[i].name + "ã€‹è¯¾ç¨‹æ—¶å‡ºç°äº†é”™è¯¯ã€‚</p>";
 					Error(err_msg.c_str());
 					return;
 				}
 			}
 		}
 	}
-	cout << "Status: 302 Found\r\nLocation: TeachEval.fcgi\r\n" << GLOBAL_HEADER;
+	cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/TeachEval.fcgi\r\n" << GLOBAL_HEADER;
 	return;
 }
 
-// ĞŞ¸ÄÃÜÂëÒ³Ãæ (/changePassword.fcgi)
+// ä¿®æ”¹å¯†ç é¡µé¢ (/changePassword.fcgi)
 void parse_change_password()
 {
 	bool m_need_update_cookie = false;
-	std::string m_photo(" "); // ÓĞÊı¾İ£¬ĞèÒª»ñÈ¡ÕÕÆ¬
+	std::string m_photo(" "); // æœ‰æ•°æ®ï¼Œéœ€è¦è·å–ç…§ç‰‡
 	process_cookie(&m_need_update_cookie, m_photo);
 
-	if (m_photo.empty()) // »¹Ã»µÇÂ½¾Í¶ªÈ¥µÇÂ½¡£
+	if (m_photo.empty()) // è¿˜æ²¡ç™»é™†å°±ä¸¢å»ç™»é™†ã€‚
 	{
-		cout << "Status: 302 Found\r\nLocation: index.fcgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
@@ -2828,8 +2877,8 @@ void parse_change_password()
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 	cout << GLOBAL_HEADER;
 
-	std::string title("ĞŞ¸ÄÃÜÂë - ");
-	title += SOFTWARE_NAME;
+	std::string title(u8"ä¿®æ”¹å¯†ç  - ");
+	title += APP_NAME;
 
 	cout << strformat( header.c_str(), title.c_str());
 	cout << strformat( m_lpszQuery.c_str());
@@ -2837,36 +2886,36 @@ void parse_change_password()
 	cout << footer.c_str();
 }
 
-// ĞŞ¸ÄÃÜÂë (POST /changePassword.fcgi)
+// ä¿®æ”¹å¯†ç  (POST /changePassword.fcgi)
 void do_change_password() //(POST /changePassword.fcgi)
 {
 	// modifyPassWordAction.do?pwd=
 	bool m_need_update_cookie = false;
-	std::string m_photo(" "); // ÓĞÊı¾İ£¬ĞèÒª»ñÈ¡ÕÕÆ¬
+	std::string m_photo(" "); // æœ‰æ•°æ®ï¼Œéœ€è¦è·å–ç…§ç‰‡
 	process_cookie(&m_need_update_cookie, m_photo);
 
-	if (m_photo.empty()) // »¹Ã»µÇÂ½¾Í¶ªÈ¥µÇÂ½¡£
+	if (m_photo.empty()) // è¿˜æ²¡ç™»é™†å°±ä¸¢å»ç™»é™†ã€‚
 	{
-		cout << "Status: 302 Found\r\nLocation: index.fcgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
-	// »ñÈ¡ POST Êı¾İ¡£
+	// è·å– POST æ•°æ®ã€‚
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0 || m_post_length > 127)
 	{
-		Error("<p>·¢Éú´íÎó£¬POST Êı¾İ³¤¶ÈÒì³£¡£</p>");
+		Error(u8"<p>å‘ç”Ÿé”™è¯¯ï¼ŒPOST æ•°æ®é•¿åº¦å¼‚å¸¸ã€‚</p>");
 		return;
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);
 	FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
 
-	// »ñÈ¡ĞÂÃÜÂë
+	// è·å–æ–°å¯†ç 
 	char *pStr1 = strstr(m_post_data, "mm=");
 	if (pStr1 == NULL)
 	{
 		free(m_post_data);
-		Error("<p>·¢ÉúÁË´íÎó£¬ÎŞ·¨»ñÈ¡ POST Êı¾İ¡£</p>");
+		Error(u8"<p>å‘ç”Ÿäº†é”™è¯¯ï¼Œæ— æ³•è·å– POST æ•°æ®ã€‚</p>");
 		return;
 	}
 
@@ -2880,7 +2929,7 @@ void do_change_password() //(POST /changePassword.fcgi)
 
 	if (len > 12 || len <= 0)
 	{
-		Error("<p>ĞÂÃÜÂë³¤¶È²»ÄÜ³¬¹ı12¸ö×Ö·û£¡</p>");
+		Error(u8"<p>æ–°å¯†ç é•¿åº¦ä¸èƒ½è¶…è¿‡12ä¸ªå­—ç¬¦ï¼</p>");
 		return;
 	}
 
@@ -2890,20 +2939,20 @@ void do_change_password() //(POST /changePassword.fcgi)
 	CCurlTask req;
 	if (!req.Exec(false, GET_RET, CGI_HTTP_COOKIE))
 	{
-		Error("<p><b>ĞŞ¸ÄÃÜÂëÊ±·¢ÉúÁË´íÎó</b></p><p>curl ²Ù×÷Ê§°Ü</p>");
+		Error(u8"<p><b>ä¿®æ”¹å¯†ç æ—¶å‘ç”Ÿäº†é”™è¯¯</b></p><p>curl æ“ä½œå¤±è´¥</p>");
 		return;
 	}
 
-	// À­È¡¸ÄÃÜ½á¹û
+	// æ‹‰å–æ”¹å¯†ç»“æœ
 	char *m_rep_header = req.GetResult();
-	pStr1 = strstr(m_rep_header, "³É¹¦");
+	pStr1 = strstr(m_rep_header, "æˆåŠŸ");
 	if (pStr1 == NULL)
 	{
-		Error("<p>ÃÜÂëĞŞ¸ÄÊ§°Ü£¬ÇëÈ·ÈÏÊÇ·ñÊäÈëÁË·Ç·¨×Ö·û£¬»òÇëÉÔºóÔÙÊÔ¡£</p>");
+		Error(u8"<p>å¯†ç ä¿®æ”¹å¤±è´¥ï¼Œè¯·ç¡®è®¤æ˜¯å¦è¾“å…¥äº†éæ³•å­—ç¬¦ï¼Œæˆ–è¯·ç¨åå†è¯•ã€‚</p>");
 		return;
 	}
 
-	// SQLite3 Êı¾İ¿â£¬¿âÃû main£¬±í URLScoreHelper£¬×Ö¶Î text id(36), text password(36), text openid(128) text lastlogin(64)¡£
+	// SQLite3 æ•°æ®åº“ï¼Œåº“å mainï¼Œè¡¨ URLScoreHelperï¼Œå­—æ®µ text id(36), text password(36), text openid(128) text lastlogin(64)ã€‚
 	std::string query("UPDATE URPScoreHelper SET password='");
 	char m_time[128] = { 0 };
 	get_time(m_time);
@@ -2922,7 +2971,7 @@ void do_change_password() //(POST /changePassword.fcgi)
 
 	if (db_ret != SQLITE_OK)
 	{
-		std::string Err_Msg("<b>ÃÜÂëĞŞ¸Ä³É¹¦£¬µ«µÇÂ¼Êı¾İ¿â¼ÇÂ¼Ê§°Ü£¬ÇëÉÔºóÔÙÊÔ¡£(ÇëÊ¹ÓÃĞÂÃÜÂëµÇÂ¼)</b><p>(");
+		std::string Err_Msg(u8"<b>å¯†ç ä¿®æ”¹æˆåŠŸï¼Œä½†ç™»å½•æ•°æ®åº“è®°å½•å¤±è´¥ï¼Œè¯·ç¨åå†è¯•ã€‚(è¯·ä½¿ç”¨æ–°å¯†ç ç™»å½•)</b><p>(");
 		Err_Msg += sqlite3_errmsg(db);
 		Err_Msg += ")</p>";
 		Error(Err_Msg.c_str());
@@ -2938,5 +2987,5 @@ void do_change_password() //(POST /changePassword.fcgi)
 	sqlite3_finalize(stmt);
 
 	student_logout();
-	cout << "Status: 302 Found\r\nLocation: index.fcgi\r\n" << GLOBAL_HEADER;
+	cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
 }

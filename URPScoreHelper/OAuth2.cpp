@@ -1,10 +1,8 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "OAuth2.h"
 #include "StringHelper.h"
 #include "General.h"
 #include "Encrypt.h"
-
-using namespace std;
 
 void getRedirectUri(char *http_host, char *m_Domain)
 {
@@ -23,14 +21,14 @@ void getRedirectUri(char *http_host, char *m_Domain)
 	strcat(m_Domain, "/OAuth2CallBack.fcgi");
 }
 
-// ´¦ÀíQQµÇÂ¼Èë¿ÚÇëÇó
+// å¤„ç†QQç™»å½•å…¥å£è¯·æ±‚
 void OAuth2_process()
 {
 	char m_Domain[2048] = { 0 };
 	if (CGI_HTTP_HOST == NULL)
 	{
 		cout << "Status: 500 Internal Server Error\r\n";
-		Error("´íÎó£ºÈ±ÉÙ HTTP_HOST »·¾³±äÁ¿£¬Çë¼ì²é FastCGI ½Ó¿ÚÉè¶¨¡£");
+		Error(u8"é”™è¯¯ï¼šç¼ºå°‘ HTTP_HOST ç¯å¢ƒå˜é‡ï¼Œè¯·æ£€æŸ¥ FastCGI æ¥å£è®¾å®šã€‚");
 		return;
 	}
 	char *stid = NULL;
@@ -84,26 +82,26 @@ void OAuth2_process()
 	delete[]m_lpszURL;
 }
 
-// QQÊÚÈ¨»Øµ÷
+// QQæˆæƒå›è°ƒ
 void OAuth2_CallBack()
 {
 	char m_Domain[4096] = { 0 };
 	if (CGI_HTTP_HOST == NULL)
 	{
-		Error("´íÎó£ºÈ±ÉÙ HTTP_HOST »·¾³±äÁ¿£¬Çë¼ì²é FastCGI ½Ó¿ÚÉè¶¨¡£");
+		Error(u8"é”™è¯¯ï¼šç¼ºå°‘ HTTP_HOST ç¯å¢ƒå˜é‡ï¼Œè¯·æ£€æŸ¥ FastCGI æ¥å£è®¾å®šã€‚");
 		return;
 	}
 	getRedirectUri(CGI_HTTP_HOST, m_Domain);
 
 	if (CGI_QUERY_STRING == NULL)
 	{
-		Error("¼øÈ¨Ê§°Ü (Null QUERY_STRING)");
+		Error(u8"é‰´æƒå¤±è´¥ (Null QUERY_STRING)");
 		return;
 	}
 	char *pStr1 = strstr(CGI_QUERY_STRING, "code=");
 	if (pStr1 == NULL)
 	{
-		Error("¼øÈ¨Ê§°Ü (Null Code)");
+		Error(u8"é‰´æƒå¤±è´¥ (Null Code)");
 		return;
 	}
 	char *pStr2 = strstr(pStr1 + 5, "&");
@@ -129,7 +127,7 @@ void OAuth2_CallBack()
 
 	if (curl == NULL)
 	{
-		Error("ÎŞ·¨³õÊ¼»¯ curl");
+		Error(u8"æ— æ³•åˆå§‹åŒ– curl");
 		delete[]access_token_req;
 		delete[]code;
 		return;
@@ -146,7 +144,7 @@ void OAuth2_CallBack()
 
 	if (ret != CURLE_OK)
 	{
-		Error("curl ²Ù×÷Ê§°Ü");
+		Error(u8"curl æ“ä½œå¤±è´¥");
 		delete[]access_token_req;
 		delete[]code;
 		curl_easy_cleanup(curl);
@@ -156,7 +154,7 @@ void OAuth2_CallBack()
 	pStr1 = strstr((char *)html.c_str(), "access_token=");
 	if (pStr1 == NULL)
 	{
-		std::string err("<p><b>ÎŞ·¨¶ÁÈ¡ access_token</b></p><p>");
+		std::string err("<p><b>æ— æ³•è¯»å– access_token</b></p><p>");
 		err.append(html);
 		err.append("</p>");
 		Error(err.c_str());
@@ -169,7 +167,7 @@ void OAuth2_CallBack()
 	pStr2 = strstr(pStr1 + 14, "&");
 	if (pStr2 == NULL)
 	{
-		Error("»ñÈ¡ access_token Ê§°Ü£¡(Json_right)");
+		Error(u8"è·å– access_token å¤±è´¥ï¼(Json_right)");
 		delete[]access_token_req;
 		delete[]code;
 		curl_easy_cleanup(curl);
@@ -195,7 +193,7 @@ void OAuth2_CallBack()
 	if (pStr2 == NULL)
 	{
 		cout << "Status: 500 Internal Server Error\r\n";
-		Error("»ñÈ¡ access_token Ê§°Ü£¡(Json_right)");
+		Error(u8"è·å– access_token å¤±è´¥ï¼(Json_right)");
 		free(html);
 		delete[]access_token_req;
 		delete[]code;
@@ -211,7 +209,7 @@ void OAuth2_CallBack()
 	curl = curl_easy_init();
 	if (curl == NULL)
 	{
-		Error("ÎŞ·¨³õÊ¼»¯ curl");
+		Error(u8"æ— æ³•åˆå§‹åŒ– curl");
 		delete[]access_token_req;
 		delete[]code;
 		return;
@@ -228,7 +226,7 @@ void OAuth2_CallBack()
 
 	if (ret != CURLE_OK)
 	{
-		Error("curl ²Ù×÷Ê§°Ü");
+		Error(u8"curl æ“ä½œå¤±è´¥");
 		delete[]access_token_req;
 		delete[]code;
 		curl_easy_cleanup(curl);
@@ -239,7 +237,7 @@ void OAuth2_CallBack()
 	pStr1 = strstr((char *)html.c_str(), "\"openid\":\"");
 	if (pStr1 == NULL)
 	{
-		std::string err("<p><b>ÎŞ·¨¶ÁÈ¡ openid</b></p><p>");
+		std::string err("<p><b>æ— æ³•è¯»å– openid</b></p><p>");
 		err.append(html);
 		err.append("</p>");
 		Error(err.c_str());
@@ -251,7 +249,7 @@ void OAuth2_CallBack()
 	pStr2 = strstr(pStr1 + 11, "\"");
 	if (pStr2 == NULL)
 	{
-		Error("»ñÈ¡ access_token Ê§°Ü£¡(Json_right)");
+		Error(u8"è·å– access_token å¤±è´¥ï¼(Json_right)");
 		delete[]access_token_req;
 		delete[]code;
 		return;
@@ -261,9 +259,9 @@ void OAuth2_CallBack()
 	memset(openid, 0, html.length());
 	mid(openid, pStr1 + 10, pStr2 - pStr1 - 10, 0);
 
-	//  ³É¹¦ÄÃµ½ access_token ºÍ openid
+	//  æˆåŠŸæ‹¿åˆ° access_token å’Œ openid
 
-	// SQLite3 Êı¾İ¿â£¬¿âÃû main£¬±í URLScoreHelper£¬×Ö¶Î text id(36), text password(36), text openid(128)¡£
+	// SQLite3 æ•°æ®åº“ï¼Œåº“å mainï¼Œè¡¨ URLScoreHelperï¼Œå­—æ®µ text id(36), text password(36), text openid(128)ã€‚
 	std::string query("SELECT id, password FROM URPScoreHelper WHERE openid='");
 	query += openid;
 	query += "';";
@@ -274,7 +272,7 @@ void OAuth2_CallBack()
 
 	if (db_ret != SQLITE_OK)
 	{
-		char Err_Msg[512] = "<b>Êı¾İ¿â×¼±¸Ê§°Ü£¡ÇëÈ·ÈÏÊı¾İ¿âºÏ·¨ĞÔ¡£</b><p>(";
+		char Err_Msg[1024] = u8"<b>æ•°æ®åº“å‡†å¤‡å¤±è´¥ï¼è¯·ç¡®è®¤æ•°æ®åº“åˆæ³•æ€§ã€‚</b><p>(";
 		strcat(Err_Msg, sqlite3_errmsg(db));
 		strcat(Err_Msg, ")</p>");
 		Error(Err_Msg);
@@ -296,7 +294,7 @@ void OAuth2_CallBack()
 		break;
 	}
 
-	if (id == NULL || password == NULL) // ÎŞ¼ÇÂ¼£¬Ìø×ªÖÁ OAuth2Assoc.fcgi
+	if (id == NULL || password == NULL) // æ— è®°å½•ï¼Œè·³è½¬è‡³ OAuth2Assoc.fcgi
 	{
 		pStr1 = strstr(CGI_QUERY_STRING, "state=");
 		char id[128] = { 0 };
@@ -317,11 +315,11 @@ void OAuth2_CallBack()
 		cout << "Status: 302 Found\r\n";
 		if (strcmp(id, "NONE") == 0)
 		{
-			cout << "Location: OAuth2Assoc.fcgi?openid=" << openid << "\r\n";
+			cout << "Location: " << getAppURL().c_str() << "/OAuth2Assoc.fcgi?openid=" << openid << "\r\n";
 		}
 		else
 		{
-			cout << "Location: OAuth2Assoc.fcgi?openid=" << openid << "&stid=" << id << "\r\n";
+			cout << "Location: " << getAppURL().c_str() << "/OAuth2Assoc.fcgi?openid=" << openid << "&stid=" << id << "\r\n";
 		}
 		cout << GLOBAL_HEADER;
 		sqlite3_finalize(stmt);
@@ -339,7 +337,7 @@ void OAuth2_CallBack()
 	EnCodeStr(encrypt_id, encrypt_id);
 	EnCodeStr(encrypt_pass, encrypt_pass);
 	cout << "Status: 302 Found\r\n"
-		<< "Location: index.fcgi?id=" << encrypt_id << "&pass=" << encrypt_pass << "\r\n"
+		<< "Location: " << getAppURL().c_str() << "/index.fcgi?stid=" << encrypt_id << "&pass=" << encrypt_pass << "\r\n"
 		<< GLOBAL_HEADER;
 	
 	sqlite3_finalize(stmt);
