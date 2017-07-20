@@ -49,6 +49,9 @@ function get_avatar() {
 			{
 				obj.src = data;
 			}
+		},
+		error: function() {
+			$.toast("照片飘到火星啦，请刷新重试。", "text");
 		}
 	})
 }
@@ -108,7 +111,6 @@ function check_password() {
 		$.toast("滑动右边开关来确认输入无误 :-)", "text");
 		return false;
 	}
-	$.showLoading("正在修改");
 	return true;
 }
 function getQueryString(name) {
@@ -183,12 +185,5 @@ $(function () {
 			$.toast("没写主观评价啊","cancel");
 			return false;
 		}
-		$.showLoading("请稍候");
-	});
-	$(".weui-grid.js_grid").not("#logout").on("click", function(e) {
-		$.showLoading("请稍候");
-	});
-	$(".return").on("click", function(e) {
-		$.showLoading("请稍候");
 	});
 });

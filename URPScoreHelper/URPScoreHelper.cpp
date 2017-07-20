@@ -1319,6 +1319,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		title += u8"的专业方案 - ";
 		title += APP_NAME;
 
+		cout << GLOBAL_HEADER;
 		cout << strformat(header.c_str(), title.c_str());
 		cout << strformat(m_lpszQuery.c_str(), m_Student, m_Output.c_str());
 		cout << footer.c_str();
