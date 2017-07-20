@@ -7,7 +7,7 @@
 	</div>
 </header>
 <div class="content">
-	<form action="OAuth2Assoc.fcgi?openid=%s" method="post" class="weui-cells weui-cells_form">
+	<form action="/OAuth2Assoc.fcgi?openid=%s" method="post" class="weui-cells weui-cells_form">
 		<div class="weui-cells__title">
 			%s
 		</div>
@@ -52,7 +52,7 @@
 					<input class="weui-input" name="yzm" id="i_yzm" type="text" placeholder="输入右侧验证码" />
 				</div>
 				<div class="weui-cell__ft">
-					<div class="weui-vcode-img"><img onclick="get_captcha();" id="login_captcha" alt="验证码" src="img/refresh.png" width="60" height="20" /></div>
+					<div class="weui-vcode-img"><img onclick="get_captcha();" id="login_captcha" alt="验证码" src="/img/refresh.png" width="60" height="20" /></div>
 				</div>
 			</div>
 		</div>

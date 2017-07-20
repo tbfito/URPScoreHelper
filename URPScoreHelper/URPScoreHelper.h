@@ -24,7 +24,7 @@ char *CGI_HTTPS;
 bool isPageSrcLoadSuccess;
 bool isdbReady;
 
-int parse_main(bool p_need_set_cookie, std::string & p_photo);
+int parse_main();
 int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri);
 int parse_index();
 int parse_query();
@@ -45,6 +45,7 @@ void parse_change_password();
 void do_change_password();
 void parse_ajax_captcha();
 void SetUsersCounter();
+void parse_ajax_avatar();
 
 typedef struct test_info
 {

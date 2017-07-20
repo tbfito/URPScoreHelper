@@ -1,6 +1,6 @@
 	<div class="weui-footer">
 		<p class="weui-footer__links">
-			<a href="main.fcgi" class="weui-footer__link">N加青年</a>
+			<a href="/index.fcgi" class="weui-footer__link">N加青年</a>
 		</p>
 		<p class="weui-footer__text">%s - 扬大人自己的掌上教务</p>
 		<p class="weui-footer__text">Powered by %s</p>
@@ -8,7 +8,7 @@
 	<br />
 	<script charset="utf-8" src="js/jquery.min.js"></script>
 	<script charset="utf-8" src="js/jquery-weui.min.js"></script>
-	<script charset="utf-8" src="js/URPScoreHelper.js?ver=17.7.20"></script>
+	<script charset="utf-8" src="js/URPScoreHelper.js?ver=17.7.20.1"></script>
 	<script>
 		var _hmt = _hmt || [];
 		(function() {

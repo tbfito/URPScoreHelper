@@ -13,14 +13,14 @@
 <html>
 <head>
 <meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>%s | 扬州大学成绩查询</title>
-<meta name="keywords" content="iEdon,唯扬小助手,URPScoreHelper,扬州大学,扬州大学成绩查询,扬州大学教学评估,扬州大学一键评教,扬州大学URP综合教务系统,扬州大学注册中心">
-<meta name="description" content="由iEdon开发的唯扬小助手(iEdon URPScoreHelper)，这里是扬州大学的唯扬小助手页面，可以在这里查询成绩、排名以及GPA等多种教务信息。">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
 <meta name="viewport" content="initial-scale=1, maximum-scale=1">
-<link rel="stylesheet" href="css/weui.min.css">
-<link rel="stylesheet" href="css/jquery-weui.min.css">
-<link rel="stylesheet" href="css/project.css?ver=17.7.20">
+<title>%s：扬州大学综合教务,成绩查询,课表查询,排名系统,教学评估,注册中心</title>
+<meta name="keywords" content="唯扬小助手,iEdon,URPScoreHelper,扬州大学,综合教务,成绩查询,课表查询,排名系统,教学评估,注册中心,URP,教务系统">
+<meta name="description" content="唯扬小助手，提供跨平台多屏综合教务功能，包含成绩、课表、排名、GPA等查询功能，一键电子注册，一键教学评估，是你不可多得的教务小帮手。">
+<link rel="stylesheet" href="/css/weui.min.css">
+<link rel="stylesheet" href="/css/jquery-weui.min.css">
+<link rel="stylesheet" href="/css/project.css?ver=17.7.20.1">
 <link rel="shortcut icon" href="URPScoreHelper.ico">
 </head>
-<body ontouchstart>
+<body>

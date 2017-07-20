@@ -10,3 +10,4 @@ void get_time(char *lpszTime);
 int split(char dst[][128], char* str, const char* spliter);
 int Hex2Ascii(char* hex, char* ascii);
 int Ascii2Hex(char* ascii, char* hex);
+void Trim(char *s);

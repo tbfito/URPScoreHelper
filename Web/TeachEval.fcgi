@@ -1,10 +1,10 @@
 <div class="i_page-navbar">
-	<a href="main.fcgi" class="return">&lt; 返 回</a>
+	<a href="/main.fcgi" class="return">&lt; 返 回</a>
 	一键教学评估
 </div>
 <div class="content">
 	<div id="i_total"><p>%s</p></div>
-	<form action="TeachEval.fcgi?act=Evaluate" method="post" class="weui-cells weui-cells_form" style="display:%s">
+	<form action="/TeachEval.fcgi?act=Evaluate" method="post" class="weui-cells weui-cells_form" style="display:%s">
 		<div class="weui-cells weui-cells_form bigbox">
 			<div class="weui-cell">
 				<div class="weui-cell_bd">

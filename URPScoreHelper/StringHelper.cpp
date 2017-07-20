@@ -228,3 +228,20 @@ int Ascii2Hex(char* ascii, char* hex)
 
 	return len * 2;
 }
+
+void Trim(char *str)
+{
+	char *ptr = str;
+	while (isspace(*ptr) || *ptr == '\t' || *ptr == '\r' || *ptr == '\n') ++ptr;
+
+	char *end = ptr;
+	while (*end) ++end;
+
+	if (end > ptr)
+	{
+		for (--end; end >= ptr && (isspace(*end) || *end == '\t' || *end == '\r' || *end == '\n'); --end);
+	}
+	
+	memmove(str, ptr, end - ptr + 1);
+	str[end - ptr + 1] = 0;
+}

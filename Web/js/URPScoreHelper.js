@@ -4,21 +4,22 @@ function get_captcha() {
 		return;
 	$.ajax({
 		type: "GET",
-		url: "captcha.fcgi",
-		dataType : "text",
+		url: "/captcha.fcgi",
+		dataType: "text",
+		cache: false,
 		beforeSend: function() {
-			obj.src = "img/loading.gif";
+			obj.src = "/img/loading.gif";
 		},
 		success: function(data) {
 			if(data == "LOGGED-IN")
 			{
 				$.toast("已登录过, 正在跳转", "text");
-				window.location.href = "main.fcgi";
+				window.location.href = "/main.fcgi";
 			}
 			else if(data == "REQUEST-FAILED")
 			{
-				$.toast("验证码获取失败，学院系统可能发生故障", "text");
-				obj.src = "img/refresh.png";
+				$.toast("验证码失踪了！学院系统可能发生故障", "text");
+				obj.src = "/img/refresh.png";
 			}
 			else
 			{
@@ -26,7 +27,28 @@ function get_captcha() {
 			}
 		},
 		error: function() {
-			obj.src = "img/refresh.png";
+			obj.src = "/img/refresh.png";
+		}
+	})
+}
+function get_avatar() {
+	var obj = document.getElementsByClassName("i_user-photo")[0];
+	if(obj == undefined)
+		return;
+	$.ajax({
+		type: "GET",
+		url: "/avatar.fcgi",
+		dataType: "text",
+		success: function(data) {
+			if(data == "LOGGED-OUT")
+			{
+				$.toast("尚未登录，请登录！", "text");
+				window.location.href = "/index.fcgi";
+			}
+			else
+			{
+				obj.src = data;
+			}
 		}
 	})
 }
@@ -59,14 +81,14 @@ function getcharnum() {
 function logout() {
 	$.confirm("确认要退出系统吗？", function() {
 		$.showLoading("正在登出...");
-		window.location.href = "index.fcgi?act=logout";
+		window.location.href = "/index.fcgi?act=logout";
 	}, function() {
 	});
 }
 function releaseAssoc(id) {
 	$.confirm("确定要解除学号与QQ号的关联吗？", function() {
 		$.showLoading("正在解绑...");
-		window.location.href = "OAuth2Assoc.fcgi?release="+id;
+		window.location.href = "/OAuth2Assoc.fcgi?release=" + id;
 	}, function() {
 	});
 }
@@ -114,8 +136,9 @@ function adjust_form() {
 	}
 }
 $(function () {
-	get_captcha();
 	adjust_form();
+	get_captcha();
+	get_avatar();
 	var r1 = document.getElementById("i_xh");
 	var r2 = document.getElementById("i_mm");
 	var r3 = document.getElementById("i_yzm");
@@ -133,7 +156,6 @@ $(function () {
 	}
 	$(document).on("click", "#i_submit", function(e) {
 		document.oncontextmenu=new Function("event.returnValue=false;");
-		
 		var r4 = document.getElementById("weuiAgree");
 		var r5 = document.getElementById("i_jxpj");
 		if(r1 != undefined && r1.value=="")

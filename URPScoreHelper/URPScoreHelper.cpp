@@ -107,7 +107,7 @@ int main(int argc, const char* argv[])
 				if (strcmp(CGI_QUERY_STRING, "act=logout") == 0)
 				{
 					student_logout();
-					cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
+					cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
 					goto END_REQUEST;
 				}
 				if (strcmp(CGI_QUERY_STRING, "act=requestAssoc") == 0)
@@ -129,7 +129,7 @@ int main(int argc, const char* argv[])
 				}
 				if (strcmp(CGI_REQUEST_URI, "/index.fcgi") == 0)
 				{
-					cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
+					cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
 					goto END_REQUEST;
 				}
 				parse_index();
@@ -137,9 +137,7 @@ int main(int argc, const char* argv[])
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/main.fcgi") == 0)
 			{
-				bool need_update_cookie = false;
-				std::string nullphoto;
-				parse_main(need_update_cookie, nullphoto);
+				parse_main();
 				goto END_REQUEST;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2.fcgi") == 0)
@@ -187,6 +185,11 @@ int main(int argc, const char* argv[])
 				parse_ajax_captcha();
 				goto END_REQUEST;
 			}
+			if (strcmp(CGI_SCRIPT_NAME, "/avatar.fcgi") == 0)
+			{
+				parse_ajax_avatar();
+				goto END_REQUEST;
+			}
 			cout << "Status: 404 Not Found\r\n";
 			Error(u8"<p>找不到该页面。</p>");
 			goto END_REQUEST;
@@ -210,8 +213,7 @@ int main(int argc, const char* argv[])
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/main.fcgi") == 0)
 			{
-				std::string nullphoto;
-				parse_main(false, nullphoto);
+				parse_main();
 				goto END_REQUEST;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.fcgi") == 0)
@@ -303,6 +305,8 @@ void LoadPageSrc()
 	if (header.empty() || footer.empty() || error.empty())
 	{
 		isPageSrcLoadSuccess = false;
+		delete[]doc_root;
+		delete[]file_root;
 		return;
 	}
 	
@@ -565,7 +569,7 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 }
 
 // 处理 GET /main.fcgi
-int parse_main(bool p_need_set_cookie, std::string & p_photo)
+int parse_main()
 {
 	if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
 	{
@@ -639,16 +643,7 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 		EnCodeStr(token_e, token_e);
 		cout << "Set-Cookie: token=" << token_e << "; path=/\r\n";
 	}
-	if (p_photo.empty())
-	{
-		p_photo = " "; // 让 p_photo 有内容，来让 process_cookie 里的照片获取能进行。
-		int ret = process_cookie(&p_need_set_cookie, p_photo);
-		if (p_photo.empty())
-		{
-			cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
-			return -1;
-		}
-	}
+
 	// 读入主页面文件
 	std::string m_lpszHomepage = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
@@ -656,10 +651,6 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 	char m_student_id[512] = { 0 };
 	get_student_name(m_student_name);
 	get_student_id(m_student_id);
-
-	// 输出网页
-	if (p_need_set_cookie)
-		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 
 	cout << GLOBAL_HEADER;
 
@@ -700,13 +691,12 @@ int parse_main(bool p_need_set_cookie, std::string & p_photo)
 
 	if (openid == NULL)
 	{
-		cout << strformat( m_lpszHomepage.c_str(), p_photo.c_str(), m_student_name, m_student_id,
-			"inline-block", "none", "");
+		cout << strformat(m_lpszHomepage.c_str(), m_student_name, m_student_id, ASSOC_LINK_HTML);
 	}
 	else
 	{
-		cout << strformat( m_lpszHomepage.c_str(), p_photo.c_str(), m_student_name, m_student_id,
-			"none", "inline-block", m_student_id);
+		cout << strformat(m_lpszHomepage.c_str(), m_student_name, m_student_id,
+							strformat(RLS_ASSOC_LINK_HTML, m_student_id).c_str());
 	}
 
 	cout << footer.c_str();
@@ -883,6 +873,26 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 	delete[]m_DataURL;
 }
 
+// 处理头像 Ajax 请求
+void parse_ajax_avatar()
+{
+	cout << "Cache-Control: no-cache\r\nPragma: no-cache\r\nExpires: -1\r\nContent-Type: text/plain; charset=utf-8\r\n";
+	bool m_need_update_cookie = false;
+	std::string m_photo(" "); // 有数据，需要获取照片
+	process_cookie(&m_need_update_cookie, m_photo);
+
+	if (m_need_update_cookie)
+		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+
+	if (m_photo.empty() || m_need_update_cookie)
+	{
+		cout << "\r\nLOGGED-OUT";
+		return;
+	}
+	cout << "\r\n";
+	cout << m_photo.c_str();
+}
+
 // 处理查询页面请求 (GET /query.fcgi)
 int parse_query()
 {
@@ -904,18 +914,16 @@ int parse_query()
 		student_logout();
 		return -1;
 	}
-	char *m_rep_body = req.GetResult();
 
 	// 优化接受结果，显示查询页面
-	string result(m_rep_body);
-	parse_friendly_score(result);
+	parse_friendly_score(req.GetResultString());
 	return 0;
 }
 
 // 输出分数页面
 void parse_friendly_score(std::string & p_strlpszScore)
 {
-	char m_Student[64] = { 0 };
+	char m_Student[128] = { 0 };
 	get_student_name(m_Student);
 
 	std::string m_lpszQuery = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
@@ -926,6 +934,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	char *m_query_not_reg = strstr(p_lpszScore, "没有注册");
 	if (m_query_not_reg != NULL)
 	{
+		free(p_lpszScore);
 		std::string m_original_str (u8"<p><b>亲爱的%s，您本学期还没有电子注册</b></p><p>不注册的话，是查不了信息的哦！</p><p>我可以施展法术，\
 <b>一键帮你在教务系统注册哦~</b></p><p>--&gt; 点按下方按钮，自动注册，直达查分界面 :P &lt;--</p>\
 <div class=\"weui-msg__opr-area\"><p class=\"weui-btn-area\"><a style=\"color:#fff\" href=\"query.fcgi?act=system_registration\" class=\"weui-btn weui-btn_primary\">一键注册</a></p></div>");
@@ -1078,12 +1087,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 			return;
 		}
 		
-		unsigned int rep_len = req.GetLength() * 3 + 1;
-		char *m_rep_body = (char *)malloc(rep_len);
-		gbk_to_utf8(req.GetResult(), (unsigned int)req.GetLength(), &m_rep_body, &rep_len);
-		req.GetResultString() = m_rep_body;
-		free(m_rep_body);
-		m_rep_body = req.GetResult();
+		char *m_rep_body = req.GetResult();
 
 		char *m_result = strstr(m_rep_body, "<body leftmargin=\"0\" topmargin=\"0\" marginwidth=\"0\" marginheight=\"0\" style=\"overflow:auto;\">");
 		if (m_result == NULL)
@@ -1091,34 +1095,232 @@ void parse_friendly_score(std::string & p_strlpszScore)
 			Error(u8"<p><b>从服务器拉取分数失败。(BeginOfRet)</b></p><p>教务君可能月线繁忙，请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
 			return;
 		}
+
+		std::string m_Output;
 		m_result += 92;
-		char *m_prep = (char *)malloc(req.GetLength());
-		replace_string(m_result, "&nbsp;", "");
-		replace_string(m_result, "\t", "");
-		replace_string(m_result, "\r", "");
-		replace_string(m_result, "\n", "");
-		strcpy(m_prep, "<div id=\"list_page\">");
-		char *m_end_body = strstr(m_result, "</body>");
-		if (m_result == NULL)
+
+		char *p1 = strstr(m_result, "<td class=\"legend\">");
+		if (p1 != NULL)
 		{
-			free(m_prep);
-			Error(u8"<p>从服务器拉取分数失败。(EndOfBodyNotFound)</p>");
+			char *p2 = strstr(p1 + 20, "</td>");
+			if (p2 != NULL)
+			{
+				char zymc[128] = { 0 };
+				mid(zymc, p1 + 19, p2 - p1 - 19, 0);
+				char *u8strtmp = (char *)malloc(strlen(zymc) * 3 + 1);
+				unsigned int u8len = 0;
+				gbk_to_utf8(zymc, (unsigned int)strlen(zymc), &u8strtmp, &u8len);
+				m_Output.append("<div id=\"i_total\"><p style=\"font-size: 16px\"><b>").append(u8strtmp).append(u8"</b>：</p>");
+				free(u8strtmp);
+				p1 = strstr(p2, "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" id=\"tblView\">");
+				if (p1 != NULL)
+				{
+					p2 = strstr(p1 + 64, "</table>");
+					if (p2 != NULL)
+					{
+						char info[1024] = { 0 };
+						mid(info, p1, p2 - p1 + 9, 0);
+						replace_string(info, " style=\"font-weight: bold\"", "");
+						replace_string(info, "tblView", "plan_tag");
+						char *u8strtmp = (char *)malloc(strlen(info) * 3 + 1);
+						unsigned int u8len = 0;
+						gbk_to_utf8(info, (unsigned int)strlen(info), &u8strtmp, &u8len);
+						m_Output.append(u8strtmp);
+						free(u8strtmp);
+					}
+				}
+				m_Output.append("</div>");
+			}
+		}
+
+		m_Output.append(BEFORE_TEMPLATE_BY_PLAN);
+
+		p1 = strstr(m_result, "<td align=\"center\">");
+		bool isSuccess = true;
+		enum byplan_item_flags { kechenghao , kexuhao, kechengming, yingwenkechengming, xuefen, shuxing, chengji, weiguoyuanyin};
+		int flags = kechenghao;
+
+		char m_kechenghao[128] = { 0 };
+		char m_kexuhao[128] = { 0 };
+		char m_kechengming[1024] = { 0 };
+		char m_yingwenkechengming[1024] = { 0 };
+		char m_xuefen[64] = { 0 };
+		char m_shuxing[64] = { 0 };
+		char m_chengji[64] = { 0 };
+		char m_weiguoyuanyin[2048] = { 0 };
+		float f_xuefen = 0.0;
+		float f_chengji = 0.0;
+		float f_jidian = 0.0;
+		bool hasChengji = true;
+
+		if (p1 == NULL)
+		{
+			hasChengji = false;
+		}
+		while (p1 != NULL)
+		{
+			char *p2 = NULL;
+			if (flags == weiguoyuanyin || flags == chengji)
+			{
+				p2 = strstr(p1 + 19, "</P>");
+			}
+			else
+			{
+				p2 = strstr(p1 + 20, "</td>");
+			}
+
+			if (p2 == NULL)
+			{
+				isSuccess = false;
+				break;
+			}
+			switch (flags) {
+				case kechenghao:
+				{
+					mid(m_kechenghao, p1 + 20, p2 - p1 - 20, 0);
+					Trim(m_kechenghao);
+					flags++;
+					break;
+				}
+				case kexuhao:
+				{
+					mid(m_kexuhao, p1 + 20, p2 - p1 - 20, 0);
+					Trim(m_kexuhao);
+					flags++;
+					break;
+				}
+				case kechengming:
+				{
+					mid(m_kechengming, p1 + 20, p2 - p1 - 20, 0);
+					Trim(m_kechengming);
+					flags++;
+					break;
+				}
+				case yingwenkechengming:
+				{
+					mid(m_yingwenkechengming, p1 + 20, p2 - p1 - 20, 0);
+					Trim(m_yingwenkechengming);
+					flags++;
+					break;
+				}
+				case xuefen:
+				{
+					mid(m_xuefen, p1 + 20, p2 - p1 - 20, 0);
+					Trim(m_xuefen);
+					f_xuefen = atof(m_xuefen);
+					flags++;
+					break;
+				}
+				case shuxing:
+				{
+					mid(m_shuxing, p1 + 20, p2 - p1 - 20, 0);
+					Trim(m_shuxing);
+					flags++;
+					break;
+				}
+				case chengji:
+				{
+					mid(m_chengji, p1, p2 - p1, 0);
+					char *p3 = strstr(m_chengji, "<p align=\"center\">");
+					if (p3 != NULL)
+					{
+						mid(m_chengji, p3 + 18, strlen(m_chengji), 0);
+					}
+					Trim(m_chengji);
+					f_chengji = atof(m_chengji);
+					if (strstr(m_chengji, "优秀") != NULL)
+					{
+						f_chengji = 95;
+					}
+					if (strstr(m_chengji, "良好") != NULL)
+					{
+						f_chengji = 85;
+					}
+					if (strstr(m_chengji, "中等") != NULL)
+					{
+						f_chengji = 75;
+					}
+					if (strstr(m_chengji, "及格") != NULL)
+					{
+						f_chengji = 60;
+					}
+					if (strstr(m_chengji, "不及格") != NULL)
+					{
+						f_chengji = 55;
+					}
+					f_jidian = cj2jd(f_chengji) * f_xuefen;
+					if (f_chengji < 60 && f_xuefen != 0)
+					{
+						char temp[512] = "<b style=\"color:#f6383a\">";
+						strcat(temp, m_chengji);
+						strcat(temp, "</b>");
+						strcpy(m_chengji, temp);
+					}
+					flags++;
+					break;
+				}
+				case weiguoyuanyin:
+				{
+					mid(m_weiguoyuanyin, p1 + 18, p2 - p1 - 19, 0);
+					Trim(m_weiguoyuanyin);
+					char *m_StrTmp = new char[8192];
+					sprintf(m_StrTmp, SCORE_TEMPLATE_BY_PLAN,
+						(f_chengji < 60 && f_xuefen != 0) ? "background-color:rgba(255,0,0,0.5);color:#fff" : "",
+						m_kechengming, m_shuxing, m_chengji, m_xuefen, f_jidian, m_weiguoyuanyin);
+
+					char *u8strtmp = (char *)malloc(strlen(m_StrTmp) * 3 + 1);
+					unsigned int u8len = 0;
+					gbk_to_utf8(m_StrTmp, (unsigned int)strlen(m_StrTmp), &u8strtmp, &u8len);
+
+					m_Output.append(u8strtmp);
+					free(u8strtmp);
+					delete[]m_StrTmp;
+					flags = kechenghao;
+					memset(m_kechenghao, 0, 128);
+					memset(m_kexuhao, 0, 128);
+					memset(m_kechengming, 0, 1024);
+					memset(m_yingwenkechengming, 0, 1024);
+					memset(m_xuefen, 0, 64);
+					memset(m_shuxing, 0, 64);
+					memset(m_chengji, 0, 64);
+					memset(m_weiguoyuanyin, 0, 2048);
+					f_xuefen = 0.0;
+					f_chengji = 0.0;
+					f_jidian = 0.0;
+					break;
+				}
+			}
+			if (flags == weiguoyuanyin || flags == chengji)
+			{
+				p1 = strstr(p2 + 6, "<p align=\"center\">");
+			}
+			else
+			{
+				p1 = strstr(p2 + 6, "<td align=\"center\">");
+			}
+			
+		}
+		// 假如发生了错误
+		if (!isSuccess)
+		{
+			Error(u8"<p>不好，查询时发生意外错误啦。</p>");
 			return;
 		}
-		cout << GLOBAL_HEADER;
-		*(m_end_body + 2) = 'd';
-		*(m_end_body + 3) = 'i';
-		*(m_end_body + 4) = 'v';
-		*(m_end_body + 5) = '>';
-		*(m_end_body + 6) = '\0';
-		strcat(m_prep, m_result);
+		if (hasChengji == false)
+		{
+			char *m_StrTmp = new char[strlen(SCORE_TEMPLATE_BY_PLAN) + 25 + 64 + 1];
+			sprintf(m_StrTmp, SCORE_TEMPLATE_BY_PLAN, "", u8"还没有任何成绩", "", "", "", 0.0, "");
+			m_Output.append(m_StrTmp);
+			delete[]m_StrTmp;
+		}
 
+		m_Output.append(AFTER_TEMPLATE);
 		std::string title(m_Student);
 		title += u8"的专业方案 - ";
 		title += APP_NAME;
 
-		cout << strformat( header.c_str(), title.c_str());
-		cout << strformat( m_lpszQuery.c_str(), m_Student, m_prep);
+		cout << strformat(header.c_str(), title.c_str());
+		cout << strformat(m_lpszQuery.c_str(), m_Student, m_Output.c_str());
 		cout << footer.c_str();
 		g_fQueryCount = fopen("QueryCount.bin", "w+");
 		if (g_fQueryCount != NULL)
@@ -1126,8 +1328,6 @@ void parse_friendly_score(std::string & p_strlpszScore)
 			fprintf(g_fQueryCount, "%lld", ++g_QueryCount);
 			fclose(g_fQueryCount);
 		}
-
-		free(m_prep);
 		return;
 	}
 
@@ -1302,6 +1502,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_subName[512] = { 0 };
 		mid(m_subName, pStr2, pStr3 - pStr2 - 19, 19);
+		Trim(m_subName);
 
 		pStr2 = pStr3;
 		pStr2 = strstr(pStr2 + 19, "<td align=\"center\">");
@@ -1310,6 +1511,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_subXuefen[128] = { 0 };
 		mid(m_subXuefen, pStr2, pStr3 - pStr2 - 19, 19);
+		Trim(m_subXuefen);
 		//if (atof(m_subXuefen) == 0) sprintf(m_subXuefen, "暂无数据");
 
 		pStr2 = pStr3;
@@ -1319,6 +1521,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_subzuigaofen[128] = { 0 };
 		mid(m_subzuigaofen, pStr2, pStr3 - pStr2 - 19, 19);
+		Trim(m_subzuigaofen);
 		//if (atof(m_subzuigaofen) == 0) sprintf(m_subzuigaofen, "暂无数据");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
@@ -1327,6 +1530,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_subzuidifen[128] = { 0 };
 		mid(m_subzuidifen, pStr2, pStr3 - pStr2 - 19, 19);
+		Trim(m_subzuidifen);
 		//if (atof(m_subzuidifen) == 0) sprintf(m_subzuidifen, "暂无数据");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
@@ -1335,6 +1539,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_subjunfen[128] = { 0 };
 		mid(m_subjunfen, pStr2, pStr3 - pStr2 - 19, 19);
+		Trim(m_subjunfen);
 		//if (atof(m_subjunfen) == 0) sprintf(m_subjunfen, "暂无数据");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
@@ -1343,6 +1548,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_subchengji[256] = { 0 };
 		mid(m_subchengji, pStr2, pStr3 - pStr2 - 19, 19);
+		Trim(m_subchengji);
 		if (strstr(m_subchengji, "优秀") != NULL)
 		{
 			strcpy(m_subchengji,"95");
@@ -1393,6 +1599,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_submingci[128] = { 0 };
 		mid(m_submingci, pStr2, pStr3 - pStr2 - 19, 19);
+		Trim(m_submingci);
 		//if (atof(m_submingci) == 0) sprintf(m_submingci, "暂无数据");
 
 		// （分数x学分）全都加起来/总学分 = 加权分，排除体育和课程设计
@@ -1423,7 +1630,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		}
 
 		char *m_StrTmp = new char[strlen(SCORE_TEMPLATE) + 50 + strlen(m_subName) + strlen(m_subchengji) + strlen(m_subjunfen) + strlen(m_subzuigaofen) + strlen(m_subzuidifen) + strlen(m_submingci) + strlen(m_subXuefen) + 16 + 1];
-		sprintf(m_StrTmp, SCORE_TEMPLATE, isPassed ? "": "background-color: rgba(255, 0, 0, 0.5);color:#fff", m_subName, m_subchengji, m_subjunfen, m_subzuigaofen, m_subzuidifen,
+		sprintf(m_StrTmp, SCORE_TEMPLATE, isPassed ? "": "background-color:rgba(255,0,0,0.5);color:#fff", m_subName, m_subchengji, m_subjunfen, m_subzuigaofen, m_subzuidifen,
 			m_submingci, m_subXuefen, m_kcxfjd);
 
 		char *u8strtmp = (char *)malloc(strlen(m_StrTmp) * 3 + 1);
@@ -1448,7 +1655,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	if (hasChengji == false)
 	{
 		char *m_StrTmp = new char[strlen(SCORE_TEMPLATE) + 25 + 64 + 1];
-		sprintf(m_StrTmp, SCORE_TEMPLATE, "", u8"本学期还未出成绩", "", "", "", "","", "", "");
+		sprintf(m_StrTmp, SCORE_TEMPLATE, "", u8"本学期还未出成绩", "", "", "", "","", "", 0.0);
 		m_Output.append(m_StrTmp);
 		delete[]m_StrTmp;
 	}
@@ -2497,7 +2704,7 @@ void OAuth2_Association(bool isPOST)
 		sqlite3_finalize(stmt);
 
 		cout << "Status: 302 Found\r\n";
-		cout << "Location: " << getAppURL().c_str() << "/main.cgi\r\n";
+		cout << "Location: " << getAppURL().c_str() << "/main.fcgi\r\n";
 		cout << GLOBAL_HEADER;
 		
 		free(m_post_data);

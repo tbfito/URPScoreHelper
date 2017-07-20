@@ -16,13 +16,17 @@ extern char *CGI_HTTP_COOKIE; // Cookie
 extern char *CGI_HTTP_HOST; // Host
 extern char *CGI_HTTPS; // is secure HTTP
 
-extern const char* GLOBAL_HEADER;
-extern const char* SCORE_TEMPLATE;
-extern const char* BEFORE_TEMPLATE;
-extern const char* AFTER_TEMPLATE;
-extern const char* QUICK_SCORE;
+extern const char *GLOBAL_HEADER;
+extern const char *SCORE_TEMPLATE;
+extern const char *BEFORE_TEMPLATE;
+extern const char *AFTER_TEMPLATE;
+extern const char *BEFORE_TEMPLATE_BY_PLAN;
+extern const char *SCORE_TEMPLATE_BY_PLAN;
+extern const char *QUICK_SCORE;
 extern const char *OAUTH2_LOGIN_HTML;
 extern const char *QUICKQUERY_HTML;
+extern const char *ASSOC_LINK_HTML;
+extern const char *RLS_ASSOC_LINK_HTML;
 
 extern sqlite3 * db;
 extern int CURL_TIMEOUT;
