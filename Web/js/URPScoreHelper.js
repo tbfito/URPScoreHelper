@@ -83,14 +83,12 @@ function getcharnum() {
 }
 function logout() {
 	$.confirm("确认要退出系统吗？", function() {
-		$.showLoading("正在登出...");
 		window.location.href = "/index.fcgi?act=logout";
 	}, function() {
 	});
 }
 function releaseAssoc(id) {
 	$.confirm("确定要解除学号与QQ号的关联吗？", function() {
-		$.showLoading("正在解绑...");
 		window.location.href = "/OAuth2Assoc.fcgi?release=" + id;
 	}, function() {
 	});
