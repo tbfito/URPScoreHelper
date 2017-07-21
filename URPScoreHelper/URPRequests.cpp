@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "URPRequests.h"
 
 const char * REQUEST_HOME_PAGE = "/";

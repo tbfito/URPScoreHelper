@@ -6,7 +6,7 @@ public:
 	bool Exec(bool headonly, std::string url, std::string cookie = "", bool isPOST = false, std::string postdata = "");
 	bool SetReferer(std::string & referer);
 	char *GetResult();
-	std::string & CCurlTask::GetResultString();
+	std::string & GetResultString();
 	size_t GetLength();
 	
 private:

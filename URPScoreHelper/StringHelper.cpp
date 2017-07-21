@@ -1,7 +1,7 @@
-ï»¿#include "stdafx.h"
+#include "stdafx.h"
 #include "StringHelper.h"
 
-// å–æ–‡æœ¬å·¦è¾¹
+// È¡ÎÄ±¾×ó±ß
 char * left(char *dst, char *src, int n)
 {
 	char	*p = src;
@@ -11,30 +11,30 @@ char * left(char *dst, char *src, int n)
 		n = len;
 	while (n--)
 		*(q++) = *(p++);
-	*(q++) = '\0';                                  /*æœ‰å¿…è¦å—ï¼Ÿå¾ˆæœ‰å¿…è¦*/
+	*(q++) = '\0';                                  /*ÓĞ±ØÒªÂğ£¿ºÜÓĞ±ØÒª*/
 	return(dst);
 }
 
-// å–æ–‡æœ¬ä¸­é—´
-char * mid(char *dst, char *src, int n, int m)        /*nä¸ºé•¿åº¦ï¼Œmä¸ºä½ç½®*/
+// È¡ÎÄ±¾ÖĞ¼ä
+char * mid(char *dst, char *src, int n, int m)        /*nÎª³¤¶È£¬mÎªÎ»ÖÃ*/
 {
 	char	*p = src;
 	char	*q = dst;
 	int	len = strlen(src);
 	if (n > len)
-		n = len - m;                            /*ä»ç¬¬mä¸ªåˆ°æœ€å*/
+		n = len - m;                            /*´ÓµÚm¸öµ½×îºó*/
 	if (m < 0)
-		m = 0;                                  /*ä»ç¬¬ä¸€ä¸ªå¼€å§‹*/
+		m = 0;                                  /*´ÓµÚÒ»¸ö¿ªÊ¼*/
 	if (m > len)
 		return(NULL);
 	p += m;
 	while (n--)
 		*(q++) = *(p++);
-	*(q++) = '\0';                                  /*æœ‰å¿…è¦å—ï¼Ÿå¾ˆæœ‰å¿…è¦*/
+	*(q++) = '\0';                                  /*ÓĞ±ØÒªÂğ£¿ºÜÓĞ±ØÒª*/
 	return(dst);
 }
 
-// å–æ–‡æœ¬å³è¾¹
+// È¡ÎÄ±¾ÓÒ±ß
 char * right(char *dst, char *src, int n)
 {
 	char	*p = src;
@@ -42,13 +42,13 @@ char * right(char *dst, char *src, int n)
 	int	len = strlen(src);
 	if (n > len)
 		n = len;
-	p += (len - n); /*ä»å³è¾¹ç¬¬nä¸ªå­—ç¬¦å¼€å§‹ï¼Œåˆ°0ç»“æŸï¼Œå¾ˆå·§å•Š*/
+	p += (len - n); /*´ÓÓÒ±ßµÚn¸ö×Ö·û¿ªÊ¼£¬µ½0½áÊø£¬ºÜÇÉ°¡*/
 	while (*(q++) = *(p++))
 		;
 	return(dst);
 }
 
-// å°†å­—ç¬¦ä¸²ä¸­æŒ‡å®šå­å­—ç¬¦ä¸²ç”¨æŒ‡å®šå­—ç¬¦ä¸²ä»£æ›¿ï¼Œtarg_str æ˜¯è¢«æ›¿æ¢çš„ï¼Œvalæ˜¯æ›¿æ¢çš„å­—ç¬¦ä¸²
+// ½«×Ö·û´®ÖĞÖ¸¶¨×Ó×Ö·û´®ÓÃÖ¸¶¨×Ö·û´®´úÌæ£¬targ_str ÊÇ±»Ìæ»»µÄ£¬valÊÇÌæ»»µÄ×Ö·û´®
 void replace_string(char * source_str, const char * targ_str, const char *val)
 {
 	char * temp_sstr = new char[strlen(source_str) + 1];
@@ -176,7 +176,7 @@ void get_time(char *lpszTime)
 		tm_now->tm_year + 1900, tm_now->tm_mon + 1, tm_now->tm_mday, tm_now->tm_hour, tm_now->tm_min, tm_now->tm_sec);
 }
 
-// å°†strå­—ç¬¦ä»¥spliteråˆ†å‰²,å­˜äºdstä¸­ï¼Œå¹¶è¿”å›å­å­—ç¬¦ä¸²æ•°é‡
+// ½«str×Ö·ûÒÔspliter·Ö¸î,´æÓÚdstÖĞ£¬²¢·µ»Ø×Ó×Ö·û´®ÊıÁ¿
 int split(char dst[][128], char* str, const char* spliter)
 {
 	int n = 0;

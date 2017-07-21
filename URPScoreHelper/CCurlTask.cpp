@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "General.h"
 #include "CCurlTask.h"
 #include "gbkutf8.h"

@@ -1,13 +1,13 @@
-ï»¿#include "stdafx.h"
+#include "stdafx.h"
 #include "Encrypt.h"
 #include "General.h"
 #include "StringHelper.h"
 
-//strå¿…é¡»ä¸ºå¯æ‰“å°å­—ç¬¦0x20 -- 0x7F  
-//strå¿…é¡»ä»¥'\0'ç»“å°¾,  
-//åŠ å¯†æ•ˆæœè¾ƒå¥½
-// åŠ å¯†ç»“æœä¸ºå¯æ‰“å°å­—ç¬¦0x20 -- 0x7F  
-// è¾“å‡ºç¼“å†²åŒºå¿…é¡»æ˜¯å­—ç¬¦ç¼“å†²åŒºçš„å››å€
+//str±ØĞëÎª¿É´òÓ¡×Ö·û0x20 -- 0x7F  
+//str±ØĞëÒÔ'\0'½áÎ²,  
+//¼ÓÃÜĞ§¹û½ÏºÃ
+// ¼ÓÃÜ½á¹ûÎª¿É´òÓ¡×Ö·û0x20 -- 0x7F  
+// Êä³ö»º³åÇø±ØĞëÊÇ×Ö·û»º³åÇøµÄËÄ±¶
 void EnCodeStr(char *str, char *out)
 {
 	int randOffset = rand() % 96;
@@ -15,7 +15,7 @@ void EnCodeStr(char *str, char *out)
 	int i = 0;
 	for (; str[i] != '\0'; i++)
 	{
-		ResChar = randOffset + str[i] + i * 33; //33å¯ä»¥ä¸ºå…¶ä»–åˆé€‚çš„æ•°å­—  
+		ResChar = randOffset + str[i] + i * 33; //33¿ÉÒÔÎªÆäËûºÏÊÊµÄÊı×Ö  
 		while (ResChar > 127)
 		{
 			ResChar -= 96;
@@ -33,8 +33,8 @@ void EnCodeStr(char *str, char *out)
 	Ascii2Hex(tmp, out);
 	free(tmp);
 }
-//strå¿…é¡»ä¸ºå¯æ‰“å°å­—ç¬¦ 0x20 -- 0x7F  
-//strå¿…é¡»ä»¥'\0'ç»“å°¾,  
+//str±ØĞëÎª¿É´òÓ¡×Ö·û 0x20 -- 0x7F  
+//str±ØĞëÒÔ'\0'½áÎ²,  
 void DeCodeStr(char *pCode)
 {
 	int len = strlen(pCode);
