@@ -1,17 +1,17 @@
-#pragma once
+ï»¿#pragma once
 
 #define SOFTWARE_NAME "iEdon URPScoreHelper"
-#define SOFTWARE_COPYRIGHT "Copyright (C) 2012-2017 iEdon Inside"
+#define SOFTWARE_COPYRIGHT "Copyright Â© 2012-2017 iEdon Inside"
 
 
-// Íâ²¿Ê¹ÓÃµÄ±äÁ¿
+// å¤–éƒ¨ä½¿ç”¨çš„å˜é‡
 
-extern char *CGI_SCRIPT_NAME; // ½Å±¾Ãû×Ö
-extern char *CGI_REQUEST_URI; // ÇëÇóURI
-extern char *CGI_REQUEST_METHOD; // ÇëÇó·½·¨
-extern char *CGI_CONTENT_LENGTH; // Êı¾İ³¤¶È
-extern char *CGI_QUERY_STRING; // ²éÑ¯²ÎÊı
-extern char *CGI_SCRIPT_FILENAME; // ½Å±¾Î»ÖÃ
+extern char *CGI_SCRIPT_NAME; // è„šæœ¬åå­—
+extern char *CGI_REQUEST_URI; // è¯·æ±‚URI
+extern char *CGI_REQUEST_METHOD; // è¯·æ±‚æ–¹æ³•
+extern char *CGI_CONTENT_LENGTH; // æ•°æ®é•¿åº¦
+extern char *CGI_QUERY_STRING; // æŸ¥è¯¢å‚æ•°
+extern char *CGI_SCRIPT_FILENAME; // è„šæœ¬ä½ç½®
 extern char *CGI_HTTP_COOKIE; // Cookie
 extern char *CGI_HTTP_HOST; // Host
 extern char *CGI_HTTPS; // is secure HTTP

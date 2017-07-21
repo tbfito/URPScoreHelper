@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #ifndef URPSCOREHELPER_H
 #define URPSCOREHELPER_H
 
@@ -11,13 +11,13 @@ long long g_QueryCount;
 int g_users;
 sqlite3 *db;
 
-FCGX_Request request; //ȫ�ֿ���ʹ�õ�����
-char *CGI_SCRIPT_NAME; // �ű�����
-char *CGI_REQUEST_URI; // ����URI
-char *CGI_REQUEST_METHOD; // ���󷽷�
-char *CGI_CONTENT_LENGTH; // ���ݳ���
-char *CGI_QUERY_STRING; // ��ѯ����
-char *CGI_SCRIPT_FILENAME; // �ű�λ��
+FCGX_Request request; //全局可以使用的请求
+char *CGI_SCRIPT_NAME; // 脚本名字
+char *CGI_REQUEST_URI; // 请求URI
+char *CGI_REQUEST_METHOD; // 请求方法
+char *CGI_CONTENT_LENGTH; // 数据长度
+char *CGI_QUERY_STRING; // 查询参数
+char *CGI_SCRIPT_FILENAME; // 脚本位置
 char *CGI_HTTP_COOKIE; // Cookie
 char *CGI_HTTP_HOST;
 char *CGI_HTTPS;
