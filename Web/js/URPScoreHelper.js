@@ -83,12 +83,14 @@ function getcharnum() {
 }
 function logout() {
 	$.confirm("确认要退出系统吗？", function() {
+		$.toptip("正在登出...", 5000, 'success');
 		window.location.href = "/index.fcgi?act=logout";
 	}, function() {
 	});
 }
 function releaseAssoc(id) {
 	$.confirm("确定要解除学号与QQ号的关联吗？", function() {
+		$.toptip("正在解绑...", 5000, 'success');
 		window.location.href = "/OAuth2Assoc.fcgi?release=" + id;
 	}, function() {
 	});
@@ -109,15 +111,8 @@ function check_password() {
 		$.toast("滑动右边开关来确认输入无误 :-)", "text");
 		return false;
 	}
+	$.toptip("正在修改...", 5000, 'success');
 	return true;
-}
-function getQueryString(name) {
-    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
-    var r = window.location.search.substr(1).match(reg);
-    if (r != null) {
-        return unescape(r[2]);
-    }
-    return null;
 }
 function adjust_form() {
 	if(window.location.pathname == "/") {
@@ -135,7 +130,7 @@ function adjust_form() {
 		document.getElementsByClassName("weui-cell weui-cell_vcode")[1].style.display = "none";
 	}
 }
-$(function () {
+$(document).ready(function(){
 	adjust_form();
 	get_captcha();
 	get_avatar();
@@ -154,34 +149,43 @@ $(function () {
 	{
 		r3.focus();
 	}
-	$(document).on("click", "#i_submit", function(e) {
-		document.oncontextmenu=new Function("event.returnValue=false;");
+	$("#i_submit").on("click", function(e) {
 		var r4 = document.getElementById("weuiAgree");
 		var r5 = document.getElementById("i_jxpj");
-		if(r1 != undefined && r1.value=="")
+		if(r1 != undefined && r1.value == "")
 		{
 			$.toast("学号还没输呢","cancel");
 			return false;
 		}
-		if(r2 != undefined && r2.value=="")
+		if(r2 != undefined && r2.value == "")
 		{
 			$.toast("密码还没输呢","cancel");
 			return false;
 		}
-		if(r3 != undefined && r3.value=="")
+		if(r3 != undefined && r3.value == "")
 		{
 			$.toast("验证码还没输呢","cancel");
 			return false;
 		}
 		if(r4 != undefined && !r4.checked)
 		{
-			$.toast("必须同意条款哦","cancel");
+			$.toast("请同意条款哦","cancel");
 			return false;
 		}
-		if(r5 != undefined && r5.value=="")
+		if(r5 != undefined && r5.value == "")
 		{
 			$.toast("没写主观评价啊","cancel");
 			return false;
 		}
+		$.toptip("正在加载中...", 5000, 'success');
+		return true;
+	});
+	$(".weui-grid.js_grid").not("#logout").on("click", function(e) {
+		$.toptip("正在加载中...", 5000, 'success');
+		return true;
+	});
+	$(".return").on("click", function(e) {
+		$.toptip("正在加载中...", 5000, 'success');
+		return true;
 	});
 });

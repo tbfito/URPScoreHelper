@@ -1,9 +1,9 @@
-.demos-title:before{content:"";margin-left:45%;position:absolute;width:80px;height:20px;background-color:rgba(255,255,255,.5);transform:rotate(-75deg);animation:logoLights 1s ease-in 1s infinite}
-@keyframes logoLights {0%{left:-100px;top: 0}to{left:120px;top: 100px}}
-@keyframes fade-in {0% {opacity: 0;padding-top:40px}100%{opacity: 1;padding-top:0px}}
-.content {animation:fade-in;animation-duration:0.5s}
+.demos-title:before{content:"";margin-left:45%;position:absolute;width:80px;height:20px;background-color:rgba(255,255,255,.5);will-change:transform;transform:rotate(-75deg);animation:logoLights 1s ease-in 1s infinite}
+@keyframes logoLights {0%{left:-100px;top: 0}to{left:120px;top:100px}}
+@keyframes fade-in {0%{opacity:0;top:30px}100%{opacity:1;top:0px;will-change:auto}}
+.content {position:relative;margin:0 auto;width:30%;animation:fade-in;animation-duration:0.5s;will-change:transform;transform:translate3d(0,0,0)}
 .demos-header{padding-top:35px}
-.demos-title{text-align: center;font-size: 34px;color: #3cc51f;font-weight: 400;margin: 0 15%}
+.demos-title{text-align: center;font-size: 34px;color: #3cc51f;font-weight:400;margin: 0 15%}
 .signbox{padding-right:15px}
 .col-50{width: 48% !important;float:left;margin:0 1% 0 1% !important}
 .quickquery{width:92%;margin:72px auto 0 auto}
@@ -15,7 +15,6 @@
 .weui-cells:after{border-bottom:0}
 .weui-cells.weui-cells_form.bigbox{margin-left:15px;border:1px solid rgba(81, 203, 238, 1);border-radius:3px}
 #login_captcha{margin:10px;border-radius:2px}
-.content{margin:0 auto;width:30%}
 .info_tag{padding-top:5px}
 @media screen and (max-width:1300px){.content{width:35%}}
 @media screen and (max-width:1200px){.content{width:40%}}
@@ -41,6 +40,7 @@
 .i_user-info-container p,.i_user-info-container a{font-size:14px}
 .i_user-info-container a{color:#fff}
 .i_user-photo{border-radius:50%;border:4px solid #6cc8e2}
+#i_submit{cursor:pointer}
 #i_total p{padding:10px 0 0 20px}
 #i_total center{margin:0 auto;font-family:'LeagueGothic',Impact;font-size:3em;color:#0092bf}
 #list_page{background-color:#FFF}
@@ -55,7 +55,7 @@
 #list_page table.displayTag tr.oddSelected{background-color:#FFFF97;text-decoration:none;font-size:12px;height:20px}
 #list_page table.displayTag tr.evenSelected{background-color:#FFFF97;text-decoration:none;font-size:12px;height:20px}
 #list_page table.displayTag tr td.sortable{background-color:#D7E7FF;font-size:12px;font-weight:bold;color:#000000;text-decoration:none;text-align:center;padding-right:5px;padding-left:5px;height:20px;white-space:nowrap}
-#list_page table.displayTag th.sortable{word-wrap:break-word;background-color:#E1EDFF;font-size:12px;font-weight:bold;color:#000000;text-decoration:none;text-align:center;padding-right:5px;padding-left:5px;height:20px;white-space:break-word}
+#list_page table.displayTag th.sortable{word-wrap:break-word;background-color:#E1EDFF;font-size:12px;font-weight:bold;color:#000000;text-decoration:none;text-align:center;padding-right:5px;padding-left:5px;height:20px}
 #list_page table.displayTag{background-color:#238BD4}
 #list_page table.displayTag2{background-color:#ffffff}
 #list_page table.fieldsettop{border-right-width:0px;border-left-width:10px;border-right-style:solid;border-left-style:solid;border-right-color:#ffffff;border-left-color:#ffffff;border-top-width:8px;border-top-style:solid;border-top-color:#ffffff}
