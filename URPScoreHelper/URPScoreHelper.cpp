@@ -2330,7 +2330,7 @@ void parse_QuickQuery_Result()
 				if (strstr(m_lb, "\xd6\xd8\xd0\xde" /*"重修"*/) != NULL)
 				{
 					char m_kcmz_cx[256] = { 0 };
-					strcat(m_kcmz_cx, u8"<b style=\"color:#f57c00\">[重修]</b> ");
+					strcat(m_kcmz_cx, "<b style=\"color:#f57c00\">[重修]</b> "); // 这里不用做U8转换，因为下面做过了
 					strcat(m_kcmz_cx, m_kcmz);
 					strcpy(m_kcmz, m_kcmz_cx);
 				}
