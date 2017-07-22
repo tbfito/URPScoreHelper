@@ -1447,13 +1447,14 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		replace_string(m_result, "\r", "");
 		replace_string(m_result, "\n", "");
 
-		replace_string(m_result, "\xd0\xc7\xc6\xda\xd2\xbb", "\xd2\xbb" /*"星期一", "一"*/);
-		replace_string(m_result, "\xd0\xc7\xc6\xda\xb6\xfe", "\xb6\xfe" /*"星期二", "二"*/);
-		replace_string(m_result, "\xd0\xc7\xc6\xda\xc8\xfd", "\xc8\xfd" /*"星期三", "三"*/);
-		replace_string(m_result, "\xd0\xc7\xc6\xda\xcb\xc4", "\xcb\xc4" /*"星期四", "四"*/);
-		replace_string(m_result, "\xd0\xc7\xc6\xda\xce\xe5", "\xce\xe5" /*"星期五", "五"*/);
-		replace_string(m_result, "\xd0\xc7\xc6\xda\xc1\xf9", "\xc1\xf9" /*"星期六", "六"*/);
-		replace_string(m_result, "\xd0\xc7\xc6\xda\xc8\xd5", "\xc8\xd5" /*"星期日", "日"*/);
+		// 因为上面已经做了u8转换，所以下面不再需要手工gbk编码了，直接U8替换。
+		replace_string(m_result, /*"\xd0\xc7\xc6\xda\xd2\xbb", "\xd2\xbb"*/ u8"星期一", u8"一");
+		replace_string(m_result, /*"\xd0\xc7\xc6\xda\xb6\xfe", "\xb6\xfe"*/ u8"星期二", u8"二");
+		replace_string(m_result, /*"\xd0\xc7\xc6\xda\xc8\xfd", "\xc8\xfd"*/ u8"星期三", u8"三");
+		replace_string(m_result, /*"\xd0\xc7\xc6\xda\xcb\xc4", "\xcb\xc4"*/ u8"星期四", u8"四");
+		replace_string(m_result, /*"\xd0\xc7\xc6\xda\xce\xe5", "\xce\xe5"*/ u8"星期五", u8"五");
+		replace_string(m_result, /*"\xd0\xc7\xc6\xda\xc1\xf9", "\xc1\xf9"*/ u8"星期六", u8"六");
+		replace_string(m_result, /*"\xd0\xc7\xc6\xda\xc8\xd5", "\xc8\xd5"*/ u8"星期日", u8"日");
 
 		strcpy(m_prep, "<div id=\"list_page\">");
 		char *m_end_body = strstr(m_result, "</table>");
