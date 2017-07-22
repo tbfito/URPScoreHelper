@@ -931,7 +931,7 @@ int parse_query()
 		return -1;
 	}
 
-	// 优化接受结果，显示查询页面
+	// 优化接收结果，显示查询页面
 	parse_friendly_score(req.GetResultString());
 	return 0;
 }
@@ -1446,6 +1446,15 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		replace_string(m_result, "\t", "");
 		replace_string(m_result, "\r", "");
 		replace_string(m_result, "\n", "");
+
+		replace_string(m_result, "\xd0\xc7\xc6\xda\xd2\xbb", "\xd2\xbb" /*"星期一", "一"*/);
+		replace_string(m_result, "\xd0\xc7\xc6\xda\xb6\xfe", "\xb6\xfe" /*"星期二", "二"*/);
+		replace_string(m_result, "\xd0\xc7\xc6\xda\xc8\xfd", "\xc8\xfd" /*"星期三", "三"*/);
+		replace_string(m_result, "\xd0\xc7\xc6\xda\xcb\xc4", "\xcb\xc4" /*"星期四", "四"*/);
+		replace_string(m_result, "\xd0\xc7\xc6\xda\xce\xe5", "\xce\xe5" /*"星期五", "五"*/);
+		replace_string(m_result, "\xd0\xc7\xc6\xda\xc1\xf9", "\xc1\xf9" /*"星期六", "六"*/);
+		replace_string(m_result, "\xd0\xc7\xc6\xda\xc8\xd5", "\xc8\xd5" /*"星期日", "日"*/);
+
 		strcpy(m_prep, "<div id=\"list_page\">");
 		char *m_end_body = strstr(m_result, "</table>");
 		if (m_result == NULL)
@@ -1804,21 +1813,21 @@ int system_registration()
 	char *pStr1 = strstr(m_rep_header, "selected>");
 	if (pStr1 == NULL)
 	{
-		Error(u8"<p>数据错误。不好意思，自动注册失败，劳请大佬去教务系统看看吧~ (1)</p>");
+		Error(u8"<p>数据错误。不好意思，自动注册失败，请登录教务系统查看具体原因。 (1)</p>");
 		return -1;
 	}
 	pStr1 -= 70;
 	char *pStr2 = strstr(pStr1, "<option value=\"");
 	if (pStr2 == NULL)
 	{
-		Error(u8"<p>数据错误。不好意思，自动注册失败，劳请大佬去教务系统看看吧~ (2)</p>");
+		Error(u8"<p>数据错误。不好意思，自动注册失败，请登录教务系统查看具体原因。 (2)</p>");
 		return -1;
 	}
 	pStr1 = pStr2;
 	pStr2 = strstr(pStr1 + 16, "\"");
 	if (pStr2 == NULL)
 	{
-		Error(u8"<p>数据错误。不好意思，自动注册失败，劳请大佬去教务系统看看吧~ (3)</p>");
+		Error(u8"<p>数据错误。不好意思，自动注册失败，请登录教务系统查看具体原因。 (3)</p>");
 		return -1;
 	}
 
@@ -1846,7 +1855,7 @@ int system_registration()
 	pStr1 = strstr(m_rep_header, "\xd7\xa2\xb2\xe1\xb3\xc9\xb9\xa6" /*注册成功*/);
 	if (pStr1 == NULL)
 	{
-		Error(u8"<p>不好意思，自动注册失败，劳请大佬去教务系统看看吧~ (4)</p>");
+		Error(u8"<p>不好意思，自动注册失败，请登录教务系统查看具体原因。 (4)</p>");
 		return -1;
 	}
 
@@ -1883,7 +1892,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	m_login_not_auth = strstr(m_result, "\xc3\xdc\xc2\xeb\xb2\xbb\xd5\xfd\xc8\xb7" /*密码不正确*/);
 	if (m_login_not_auth != NULL)
 	{
-		Error(u8"<p><b>学号或密码不对啊。</b></p><p>如果你曾修改过教务系统的帐号密码，请使用新密码再试一试。</p>");
+		Error(u8"<p><b>学号或密码不对啊</b></p><p>如果你曾修改过教务系统的帐号密码，请使用新密码再试一试。</p>");
 		return false;
 	}
 	m_login_not_auth = strstr(m_result, "\xd1\xe9\xd6\xa4\xc2\xeb\xb4\xed\xce\xf3" /*验证码错误*/);
@@ -1898,7 +1907,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		Error(u8"<p>学院系统君说数据库繁忙</p><p>请先等等再来吧~</p>");
 		return false;
 	}
-	char *m_login_success = strstr(m_result, "\xd1\xa7\xb7\xd6\xd6\xc6\xd7\xdb\xba\xcf\xbd\xcc\xce\xf1" /*学分制综合教*/);
+	char *m_login_success = strstr(m_result, "\xd1\xa7\xb7\xd6\xd6\xc6\xd7\xdb\xba\xcf\xbd\xcc\xce\xf1" /*学分制综合教务*/);
 	if (m_login_success == NULL)
 	{
 		Error(u8"<p>天呐。发生了谜一般的问题！教务系统神隐了</p><p>建议你稍候再试试吧。</p>");
@@ -2049,7 +2058,7 @@ void parse_QuickQuery_Result()
 
 	// 获取 POST 数据。
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
-	if (m_post_length <= 0 || m_post_length >= 127)
+	if (m_post_length <= 0 || m_post_length >= 512)
 	{
 		if (m_need_update_cookie)
 			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
@@ -2070,11 +2079,11 @@ void parse_QuickQuery_Result()
 		return;
 	}
 	char *pStr2 = strstr(pStr1 + 3, "&");
-	char m_xuehao[128] = { 0 };
+	char m_xuehao[1024] = { 0 };
 	right(m_xuehao, pStr1, strlen(pStr1) - 3);
 	replace_string(m_xuehao, "%0D%0A", "|");
 	char *p = strtok(m_xuehao, "|");
-	char *m_xh[10] = { NULL };
+	char *m_xh[512] = { NULL };
 	int m_xhgs = 0;
 	while (p)
 	{
@@ -2093,12 +2102,12 @@ void parse_QuickQuery_Result()
 	}
 	
 	std::string m_list;
-	char m_xxmz[128] = { 0 };
+	char m_xxmz[512] = { 0 };
 	free(m_post_data);
 
 	for (int xh_index = 0; xh_index < m_xhgs; xh_index++)
 		{
-			if (strlen(m_xh[xh_index]) != 9)
+			if (strlen(m_xh[xh_index]) > 36)
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
@@ -2226,7 +2235,7 @@ void parse_QuickQuery_Result()
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error, 
-					u8"<p><b>呃，获取失败了。请确认所输信息是正确的。</b></p><p>发生错误的学号: %s</p>", 
+					u8"<p><b>呃，获取失败了。请确认所输信息是正确的</b></p><p>发生错误的学号: %s</p>", 
 					m_xh[xh_index]);
 				Error(m_friendly_error);
 				return;
@@ -2261,7 +2270,7 @@ void parse_QuickQuery_Result()
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error,
-					u8"<p><b>接受到的报表存在问题。</b></p><p>发生错误的学号: %s</p>",
+					u8"<p><b>接收到的报表存在问题。</b></p><p>发生错误的学号: %s</p>",
 					m_xh[xh_index]);
 				Error(m_friendly_error);
 				return;
@@ -2273,7 +2282,7 @@ void parse_QuickQuery_Result()
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error,
-					u8"<p><b>收到的报表大小存在问题。</b></p><p>发生错误的学号: %s</p>",
+					u8"<p><b>收到的报表大小存在问题</b></p><p>发生错误的学号: %s</p>",
 					m_xh[xh_index]);
 				Error(m_friendly_error);
 				return;
@@ -2373,7 +2382,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error(u8"<p>抱歉，免密查询过程中失败，请稍后再试。</p>");
+				Error(u8"<p>抱歉，免密查询过程中失败，请稍后再试</p>");
 				return;
 			}
 
