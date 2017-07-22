@@ -101,6 +101,10 @@ int main(int argc, const char* argv[])
 		{
 			CGI_HTTP_COOKIE = (char *)emptystr;
 		}
+		if (CGI_HTTP_HOST == NULL)
+		{
+			CGI_HTTP_HOST = (char *)emptystr;
+		}
 
 		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0) // 如果是 GET 请求
 		{
@@ -2330,7 +2334,7 @@ void parse_QuickQuery_Result()
 				if (strstr(m_lb, "\xd6\xd8\xd0\xde" /*"重修"*/) != NULL)
 				{
 					char m_kcmz_cx[256] = { 0 };
-					strcat(m_kcmz_cx, "<b style=\"color:#f57c00\">[重修]</b> "); // 这里不用做U8转换，因为下面做过了
+					strcat(m_kcmz_cx, "\x3c\x62\x20\x73\x74\x79\x6c\x65\x3d\x22\x63\x6f\x6c\x6f\x72\x3a\x23\x66\x35\x37\x63\x30\x30\x22\x3e\x5b\xd6\xd8\xd0\xde\x5d\x3c\x2f\x62\x3e\x20" /*"<b style=\"color:#f57c00\">[重修]</b> "*/); // 这里不用做U8转换，因为下面做过了
 					strcat(m_kcmz_cx, m_kcmz);
 					strcpy(m_kcmz, m_kcmz_cx);
 				}
