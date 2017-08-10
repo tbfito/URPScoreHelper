@@ -31,6 +31,29 @@ function get_captcha() {
 		}
 	})
 }
+function ocr_captcha(dataURI) {
+	$.ajax({
+		type: "POST",
+		url: "https://api.iedon.com/captcha",
+		data:{"pic":dataURI}, 
+		success: function(msg) {
+			if(msg != null && msg.length != 0) {
+				if(msg == '__ERROR')
+				{
+					get_captcha();
+					return;
+				}
+				var patrn=/^(\w){4,4}$/;
+				if (!patrn.exec(msg))
+				{
+					get_captcha();
+					return;
+				}
+				document.getElementById("i_yzm").value = msg;
+			}
+		},
+	})
+}
 function get_avatar() {
 	var obj = document.getElementsByClassName("i_user-photo")[0];
 	if(obj == undefined)
@@ -48,6 +71,7 @@ function get_avatar() {
 			else
 			{
 				obj.src = data;
+				ocr_captcha();
 			}
 		},
 		error: function() {
