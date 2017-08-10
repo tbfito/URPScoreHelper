@@ -49,7 +49,7 @@ function get_captcha() {
 			else
 			{
 				obj.src = data;
-				ocr_captcha();
+				ocr_captcha(data);
 			}
 		},
 		error: function() {
