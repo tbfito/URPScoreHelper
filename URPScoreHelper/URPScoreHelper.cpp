@@ -1814,7 +1814,7 @@ int system_registration()
 	char *pStr1 = strstr(m_rep_header, "selected>");
 	if (pStr1 == NULL)
 	{
-		Error(u8"<p>数据错误。不好意思，自动注册失败，请登录教务系统查看具体原因。 (1)</p>");
+		Error(u8"<p><b>不好意思，自动注册失败。</b></p><p>本学期学费是否已交齐？或请登录教务系统查看具体原因。</p>");
 		return -1;
 	}
 	pStr1 -= 70;
