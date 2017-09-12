@@ -470,8 +470,9 @@ void InitCounter()
 		g_QueryCounter = atoi((const char *)query_counts);
 	}
 
-	query = "SELECT COUNT(*) FROM URPScoreHelper;";
+	sqlite3_finalize(stmt);
 
+	query = "SELECT COUNT(*) FROM URPScoreHelper;";
 	db_Result = NULL;
 	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
 
