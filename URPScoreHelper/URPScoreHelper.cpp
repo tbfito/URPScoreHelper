@@ -461,7 +461,14 @@ void InitCounter()
 		query_counts = sqlite3_column_text(stmt, 0);
 		break;
 	}
-	g_QueryCounter = atoi((const char *)query_counts);
+	if (query_counts == NULL)
+	{
+		g_QueryCounter = 0;
+	}
+	else
+	{
+		g_QueryCounter = atoi((const char *)query_counts);
+	}
 
 	query = "SELECT COUNT(*) FROM URPScoreHelper;";
 
@@ -491,7 +498,7 @@ void InitCounter()
 // 置查询计数器
 void SetQueryCounter(int current_counts)
 {
-	std::string query("UPDATE Settings SET QueryCounts='");
+	std::string query("UPDATE Settings SET QueryCounter='");
 	char counts[128] = { 0 };
 	itoa(current_counts, counts, 10);
 	query += counts;
