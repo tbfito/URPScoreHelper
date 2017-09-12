@@ -422,7 +422,20 @@ void LoadConfig()
 		break;
 	}
 	sqlite3_finalize(stmt);
-	query = "CREATE TABLE IF NOT EXISTS \"Settings\" (\"QueryCounter\"  INTEGER NOT NULL DEFAULT 1);";
+	query = "CREATE TABLE IF NOT EXISTS \"Settings\" (\"name\"  TEXT(36) NOT NULL, \"value\"  TEXT(128) NOT NULL, PRIMARY KEY (\"name\"));";
+	db_Result = NULL;
+	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+	if (db_ret != SQLITE_OK)
+	{
+		sqlite3_finalize(stmt);
+		return;
+	}
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+	{
+		break;
+	}
+	sqlite3_finalize(stmt);
+	query = "INSERT OR IGNORE INTO `Settings` (\"name\", \"value\") VALUES ('QueryCounter', 0);";
 	db_Result = NULL;
 	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
 	if (db_ret != SQLITE_OK)
@@ -441,7 +454,7 @@ void LoadConfig()
 void UpdateCounter()
 {
 	// 获取多少用户使用了我们的服务 :)
-	std::string query("SELECT QueryCounter FROM Settings;");
+	std::string query("SELECT value FROM Settings WHERE name='QueryCounter';");
 
 	char **db_Result = NULL;
 	sqlite3_stmt *stmt;
@@ -499,11 +512,11 @@ void UpdateCounter()
 // 置查询计数器
 void SetQueryCounter(int current_counts)
 {
-	std::string query("UPDATE Settings SET QueryCounter=");
+	std::string query("UPDATE Settings SET value='");
 	char counts[128] = { 0 };
 	itoa(current_counts, counts, 10);
 	query += counts;
-	query += ";";
+	query += "' WHERE name='QueryCounter';";
 
 	char **db_Result = NULL;
 	sqlite3_stmt *stmt;
