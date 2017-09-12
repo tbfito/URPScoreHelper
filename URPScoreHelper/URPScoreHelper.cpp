@@ -48,7 +48,7 @@ int main(int argc, const char* argv[])
 	{
 		if (isdbReady)
 		{
-			InitCounter();
+			UpdateCounter();
 		}
 
 		fcgi_streambuf cin_fcgi_streambuf(request.in);
@@ -422,7 +422,7 @@ void LoadConfig()
 		break;
 	}
 	sqlite3_finalize(stmt);
-	query = "CREATE TABLE IF NOT EXISTS \"Settings\" (\"QueryCounter\"  INTEGER NOT NULL DEFAULT 0);";
+	query = "CREATE TABLE IF NOT EXISTS \"Settings\" (\"QueryCounter\"  INTEGER NOT NULL DEFAULT 1);";
 	db_Result = NULL;
 	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
 	if (db_ret != SQLITE_OK)
@@ -437,8 +437,8 @@ void LoadConfig()
 	sqlite3_finalize(stmt);
 }
 
-// 初始化用户数量、查询计数器
-void InitCounter()
+// 更新用户数量、查询计数器
+void UpdateCounter()
 {
 	// 获取多少用户使用了我们的服务 :)
 	std::string query("SELECT QueryCounter FROM Settings;");
