@@ -6,8 +6,7 @@ std::string header;
 std::string footer;
 std::string error;
 
-FILE *g_fQueryCount;
-long long g_QueryCount;
+int g_QueryCounter;
 int g_users;
 sqlite3 *db;
 
@@ -44,8 +43,9 @@ void teaching_evaluation();
 void parse_change_password();
 void do_change_password();
 void parse_ajax_captcha();
-void SetUsersCounter();
+void InitCounter();
 void parse_ajax_avatar();
+void SetQueryCounter(int current_counts);
 
 typedef struct test_info
 {

@@ -48,7 +48,7 @@ int main(int argc, const char* argv[])
 	{
 		if (isdbReady)
 		{
-			SetUsersCounter();
+			InitCounter();
 		}
 
 		fcgi_streambuf cin_fcgi_streambuf(request.in);
@@ -422,34 +422,26 @@ void LoadConfig()
 		break;
 	}
 	sqlite3_finalize(stmt);
+	query = "CREATE TABLE IF NOT EXISTS \"Settings\" (\"QueryCounter\"  INTEGER NOT NULL DEFAULT 0);";
+	db_Result = NULL;
+	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+	if (db_ret != SQLITE_OK)
+	{
+		sqlite3_finalize(stmt);
+		return;
+	}
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+	{
+		break;
+	}
+	sqlite3_finalize(stmt);
 }
 
-// 更新用户数量计数器
-void SetUsersCounter()
+// 初始化用户数量、查询计数器
+void InitCounter()
 {
 	// 获取多少用户使用了我们的服务 :)
-	g_fQueryCount = fopen("QueryCount.bin", "r+");
-	g_QueryCount = 0;
-	if (g_fQueryCount != NULL)
-	{
-		int ret = fscanf(g_fQueryCount, "%lld", &g_QueryCount);
-		if(!ret) // a hack to ignore gcc warning
-		{
-			fseek(g_fQueryCount, 0, SEEK_SET);
-			ret = fscanf(g_fQueryCount, "%lld", &g_QueryCount);
-		}
-	}
-	else
-	{
-		g_fQueryCount = fopen("QueryCount.bin", "w+");
-	}
-	if (g_fQueryCount != NULL)
-	{
-		fseek(g_fQueryCount, 0, SEEK_SET);
-		fclose(g_fQueryCount);
-	}
-
-	std::string query("SELECT COUNT(*) FROM URPScoreHelper;");
+	std::string query("SELECT QueryCounter FROM Settings;");
 
 	char **db_Result = NULL;
 	sqlite3_stmt *stmt;
@@ -457,10 +449,31 @@ void SetUsersCounter()
 
 	if (db_ret != SQLITE_OK)
 	{
+		g_QueryCounter = 0;
 		sqlite3_finalize(stmt);
 		return;
 	}
 
+	const unsigned char *query_counts = NULL;
+
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+	{
+		query_counts = sqlite3_column_text(stmt, 0);
+		break;
+	}
+	g_QueryCounter = atoi((const char *)query_counts);
+
+	query = "SELECT COUNT(*) FROM URPScoreHelper;";
+
+	db_Result = NULL;
+	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+
+	if (db_ret != SQLITE_OK)
+	{
+		sqlite3_finalize(stmt);
+		return;
+	}
+	
 	const unsigned char *counts = NULL;
 	g_users = 0;
 	while (sqlite3_step(stmt) == SQLITE_ROW)
@@ -471,6 +484,31 @@ void SetUsersCounter()
 	if (counts != NULL)
 	{
 		g_users = atoi((const char *)counts);
+	}
+	sqlite3_finalize(stmt);
+}
+
+// 置查询计数器
+void SetQueryCounter(int current_counts)
+{
+	std::string query("UPDATE Settings SET QueryCounts='");
+	char counts[128] = { 0 };
+	itoa(current_counts, counts, 10);
+	query += counts;
+	query += "';";
+
+	char **db_Result = NULL;
+	sqlite3_stmt *stmt;
+	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+
+	if (db_ret != SQLITE_OK)
+	{
+		sqlite3_finalize(stmt);
+		return;
+	}
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+	{
+		break;
 	}
 	sqlite3_finalize(stmt);
 }
@@ -802,20 +840,20 @@ int parse_index()
 	{
 		if (token_xh != NULL && token_mm != NULL)
 		{
-			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCount,
+			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter,
 				u8"输入你的教务系统帐号来登录吧 :)", token_xh, token_mm, u8"登录", " col-50",
 				OAUTH2_LOGIN_HTML, QUICKQUERY_HTML);
 		}
 		else
 		{
-			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCount,
+			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter,
 				u8"输入你的教务系统帐号来登录吧 :)", "", "", u8"登录", " col-50",
 				OAUTH2_LOGIN_HTML, QUICKQUERY_HTML);
 		}
 	}
 	else 
 	{
-		cout << strformat( m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCount,
+		cout << strformat( m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter,
 						u8"QQ登录成功，输入验证码继续吧 :)", m_xh, m_mm, u8"继续", "", "", "");
 	}
 
@@ -951,9 +989,9 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	if (m_query_not_reg != NULL)
 	{
 		free(p_lpszScore);
-		std::string m_original_str (u8"<p><b>亲爱的%s，您本学期还没有电子注册</b></p><p>不注册的话，是查不了信息的哦！</p><p>我可以施展法术，\
+		std::string m_original_str (u8"<p><b>亲爱的%s，每学期首次使用需要电子注册</b></p><p>不注册的话，是查不了信息的哦！</p><p>我可以施展法术，\
 <b>一键帮你在教务系统注册哦~</b></p><p>--&gt; 点按下方按钮，自动注册，直达查分界面 :P &lt;--</p>\
-<div class=\"weui-msg__opr-area\"><p class=\"weui-btn-area\"><a style=\"color:#fff\" href=\"query.fcgi?act=system_registration\" class=\"weui-btn weui-btn_primary\">一键注册</a></p></div>");
+<div class=\"weui-msg__opr-area\"><p class=\"weui-btn-area\"><a style=\"color:#fff\" href=\"query.fcgi?act=system_registration\" class=\"weui-btn weui-btn_primary\">【点我】一键注册</a></p></div>");
 		m_original_str = strformat(m_original_str.c_str(), m_Student);
 		Error(m_original_str.c_str());
 		return;
@@ -1018,12 +1056,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		cout << strformat( m_lpszQuery.c_str(), m_Student, m_prep);
 		cout << footer.c_str();
 
-		g_fQueryCount = fopen("QueryCount.bin", "w+");
-		if (g_fQueryCount != NULL)
-		{
-			fprintf(g_fQueryCount, "%lld", ++g_QueryCount);
-			fclose(g_fQueryCount);
-		}
+		SetQueryCounter(++g_QueryCounter);
 
 		free(m_prep);
 		return;
@@ -1082,12 +1115,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		cout << strformat( m_lpszQuery.c_str(), m_Student, m_prep);
 		cout << footer.c_str();
 
-		g_fQueryCount = fopen("QueryCount.bin", "w+");
-		if (g_fQueryCount != NULL)
-		{
-			fprintf(g_fQueryCount, "%lld", ++g_QueryCount);
-			fclose(g_fQueryCount);
-		}
+		SetQueryCounter(++g_QueryCounter);
 
 		free(m_prep);
 		return;
@@ -1339,12 +1367,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		cout << strformat(header.c_str(), title.c_str());
 		cout << strformat(m_lpszQuery.c_str(), m_Student, m_Output.c_str());
 		cout << footer.c_str();
-		g_fQueryCount = fopen("QueryCount.bin", "w+");
-		if (g_fQueryCount != NULL)
-		{
-			fprintf(g_fQueryCount, "%lld", ++g_QueryCount);
-			fclose(g_fQueryCount);
-		}
+		SetQueryCounter(++g_QueryCounter);
 		return;
 	}
 
@@ -1406,12 +1429,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		cout << strformat( m_lpszQuery.c_str(), m_Student, m_prep);
 		cout << footer.c_str();
 
-		g_fQueryCount = fopen("QueryCount.bin", "w+");
-		if (g_fQueryCount != NULL)
-		{
-			fprintf(g_fQueryCount, "%lld", ++g_QueryCount);
-			fclose(g_fQueryCount);
-		}
+		SetQueryCounter(++g_QueryCounter);
 
 		free(m_prep);
 		return;
@@ -1486,12 +1504,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		cout << strformat(m_lpszQuery.c_str(), m_Student, m_prep);
 		cout << footer.c_str();
 
-		g_fQueryCount = fopen("QueryCount.bin", "w+");
-		if (g_fQueryCount != NULL)
-		{
-			fprintf(g_fQueryCount, "%lld", ++g_QueryCount);
-			fclose(g_fQueryCount);
-		}
+		SetQueryCounter(++g_QueryCounter);
 		free(m_prep);
 		return;
 	}
@@ -1671,7 +1684,15 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		m_success = true; // 查到一个算一个
 		pStr1 = strstr(pStr3, "<tr class=\"odd\" onMouseOut=\"this.className='even';\" onMouseOver=\"this.className='evenfocus';\">");
 	}
-	
+
+	if (hasChengji == false)
+	{
+		char *m_StrTmp = new char[strlen(SCORE_TEMPLATE) + 25 + 64 + 1];
+		sprintf(m_StrTmp, SCORE_TEMPLATE, "", u8"本学期还未出成绩", "", "", "", "", "", "", 0.0);
+		m_Output.append(m_StrTmp);
+		delete[]m_StrTmp;
+	}
+
 	// 假如发生了错误
 	if (!m_success) 
 	{
@@ -1679,13 +1700,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		Error(u8"<p>不好，查询时发生意外错误啦。</p>");
 		return;
 	}
-	if (hasChengji == false)
-	{
-		char *m_StrTmp = new char[strlen(SCORE_TEMPLATE) + 25 + 64 + 1];
-		sprintf(m_StrTmp, SCORE_TEMPLATE, "", u8"本学期还未出成绩", "", "", "", "","", "", 0.0);
-		m_Output.append(m_StrTmp);
-		delete[]m_StrTmp;
-	}
+
 	m_Output.append(AFTER_TEMPLATE);
 
 	// 填充返回页面
@@ -1708,12 +1723,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 
 	cout << footer.c_str();
 
-	g_fQueryCount = fopen("QueryCount.bin", "w+");
-	if (g_fQueryCount != NULL)
-	{
-		fprintf(g_fQueryCount, "%lld", ++g_QueryCount);
-		fclose(g_fQueryCount);
-	}
+	SetQueryCounter(++g_QueryCounter);
 	free(p_lpszScore);
 }
 
@@ -2044,7 +2054,7 @@ void parse_QuickQuery_Intro()
 	title += APP_NAME;
 
 	cout << strformat( header.c_str(), title.c_str());
-	cout << strformat( m_lpszQuery.c_str(), APP_NAME, g_users, g_QueryCount);
+	cout << strformat( m_lpszQuery.c_str(), APP_NAME, g_users, g_QueryCounter);
 	cout << footer.c_str();
 }
 
@@ -2464,13 +2474,8 @@ void parse_QuickQuery_Result()
 		}
 		cout << footer.c_str();
 
-		g_QueryCount = g_QueryCount + m_xhgs;
-		g_fQueryCount = fopen("QueryCount.bin", "w+");
-		if (g_fQueryCount != NULL)
-		{
-			fprintf(g_fQueryCount, "%lld", g_QueryCount);
-			fclose(g_fQueryCount);
-		}
+		g_QueryCounter += m_xhgs;
+		SetQueryCounter(g_QueryCounter);
 }
 
 // QQ帐号绑定入口与解绑逻辑 (/OAuth2Assoc.fcgi)
