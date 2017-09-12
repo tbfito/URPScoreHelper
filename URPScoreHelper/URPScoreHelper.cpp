@@ -498,11 +498,11 @@ void InitCounter()
 // 置查询计数器
 void SetQueryCounter(int current_counts)
 {
-	std::string query("UPDATE Settings SET QueryCounter='");
+	std::string query("UPDATE Settings SET QueryCounter=");
 	char counts[128] = { 0 };
 	itoa(current_counts, counts, 10);
 	query += counts;
-	query += "';";
+	query += ";";
 
 	char **db_Result = NULL;
 	sqlite3_stmt *stmt;
