@@ -42,12 +42,6 @@
     <ClInclude Include="URPRequests.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ini.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="INIReader.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Encrypt.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -75,12 +69,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="URPRequests.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ini.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="INIReader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Encrypt.cpp">

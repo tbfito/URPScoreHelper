@@ -16,15 +16,14 @@
 #include "CCurlTask.h"
 #include "OAuth2.h"
 #include "URPRequests.h"
-#include "INIReader.h"
 #include "Encrypt.h"
 #include "gbkutf8.h"
 
 // 入口函数 (FastCGI 处理循环)
 int main(int argc, const char* argv[])
 {
+	LoadConfig(); // 首次加载配置
 	/*EnableMemLeakCheck();*/
-	LoadConfig();
 	str_normalize_init();
 	FCGX_Init();
 	curl_global_init(CURL_GLOBAL_ALL);
@@ -46,6 +45,7 @@ int main(int argc, const char* argv[])
 
 	while (FCGX_Accept_r(&request) == 0)
 	{
+		LoadConfig(); // 更新配置信息
 		if (isdbReady)
 		{
 			UpdateCounter();
@@ -329,12 +329,52 @@ void LoadPageSrc()
 // 加载配置
 void LoadConfig()
 {
+	if (!isdbReady)
+	{
+		db = NULL;
+		int db_ret = sqlite3_open("Database.db", &db);
+		if (db_ret != SQLITE_OK)
+		{
+			isdbReady = false;
+			return; // unlucky..
+		}
+		else
+		{
+			isdbReady = true;
+		}
+	}
+
+	if (SERVER_URL != NULL)
+	{
+		free(SERVER_URL);
+	}
 	SERVER_URL = (char *)malloc(1024);
+	if (USER_AGENT != NULL)
+	{
+		free(USER_AGENT);
+	}
 	USER_AGENT = (char *)malloc(1024);
+	if (OAUTH2_APPID != NULL)
+	{
+		free(OAUTH2_APPID);
+	}
 	OAUTH2_APPID = (char *)malloc(1024);
+	if (OAUTH2_SECRET != NULL)
+	{
+		free(OAUTH2_SECRET);
+	}
 	OAUTH2_SECRET = (char *)malloc(1024);
+	if (CURL_PROXY_URL != NULL)
+	{
+		free(CURL_PROXY_URL);
+	}
 	CURL_PROXY_URL = (char *)malloc(1024);
+	if (APP_NAME != NULL)
+	{
+		free(APP_NAME);
+	}
 	APP_NAME = (char *)malloc(4096);
+
 	char *lpvBuffer = (char *)malloc(128);
 
 	memset(SERVER_URL, 0, 1024);
@@ -345,72 +385,38 @@ void LoadConfig()
 	memset(APP_NAME, 0, 4096);
 	memset(lpvBuffer, 0, 128);
 
-	char *Dir = (char *)malloc(MAX_PATH);
-	memset(Dir, 0, MAX_PATH);
-	char * cwd_ret = getcwd(Dir, MAX_PATH);
-	if(cwd_ret == NULL)
-	{
-		cerr << "Configuration load failed, please check it." << endl;
-		exit(EXIT_FAILURE);
-	}
-	char *pStr = strstr(Dir, "\\");
-	bool isUnixBasedPath = (pStr == NULL);
-	if (isUnixBasedPath) // Unix-like system
-	{
-		strcat(Dir, "/config.ini");
-	}
-	else // for windows
-	{
-		strcat(Dir, "\\config.ini");
-	}
+	GetSettings("SERVER_URL", SERVER_URL);
+	GetSettings("USER_AGENT", USER_AGENT);
+	GetSettings("OAUTH2_APPID", OAUTH2_APPID);
+	GetSettings("OAUTH2_SECRET", OAUTH2_SECRET);
+	GetSettings("CURL_PROXY_URL", CURL_PROXY_URL);
+	GetSettings("APP_NAME", APP_NAME);
 
-	INIReader reader(Dir);
-	if (reader.ParseError() != 0) {
-		strcpy(SERVER_URL, "http://127.0.0.1");
-		strcpy(APP_NAME, "NULL");
-		strcpy(USER_AGENT, APP_NAME);
-		strcpy(lpvBuffer, "2");
-		strcpy(OAUTH2_APPID, "NULL");
-		strcpy(OAUTH2_SECRET, "NULL");
-		strcpy(CURL_PROXY_URL, "");
-	}
-	else
-	{
-		strcpy(SERVER_URL, reader.Get("Config", "SERVER_URL", "http://127.0.0.1").c_str());
-		strcpy(APP_NAME, reader.Get("Config", "APP_NAME", "NULL").c_str());
-		strcpy(USER_AGENT, reader.Get("Config", "USER_AGENT", APP_NAME).c_str());
-		strcpy(lpvBuffer, reader.Get("Config", "CURL_TIMEOUT", "2").c_str());
-		strcpy(OAUTH2_APPID, reader.Get("Config", "OAUTH2_APPID", "NULL").c_str());
-		strcpy(OAUTH2_SECRET, reader.Get("Config", "OAUTH2_SECRET", "NULL").c_str());
-		strcpy(CURL_PROXY_URL, reader.Get("Config", "CURL_PROXY_URL", "").c_str());
-	}
-		
+	GetSettings("CURL_TIMEOUT", lpvBuffer);	
 	CURL_TIMEOUT = atoi(lpvBuffer);
 	if (CURL_TIMEOUT <= 0)
 		CURL_TIMEOUT = 2;
 	memset(lpvBuffer, 0, 128);
-	if (reader.ParseError() == 0)
-	{
-		strcpy(lpvBuffer, reader.Get("Config", "CURL_USE_PROXY", "0").c_str());
-	}
+
+	GetSettings("CURL_USE_PROXY", lpvBuffer);
 	CURL_USE_PROXY = (atoi(lpvBuffer) == 1);
 
 	free(lpvBuffer);
-	free(Dir);
 	
-	db = NULL;
-	int db_ret = sqlite3_open("Database.db", &db);
-	if (db_ret != SQLITE_OK)
-	{
-		isdbReady = false;
-	}
-	else
-	{
-		isdbReady = true;
-	}
-	std::string query("CREATE TABLE IF NOT EXISTS \"URPScoreHelper\" (\"id\" TEXT(36) NOT NULL, \"password\" TEXT(36) NOT NULL, \"openid\" TEXT(128), \"lastlogin\" TEXT(64), PRIMARY KEY (\"id\" ASC));");
-	char **db_Result = NULL;
+	std::string query("CREATE TABLE IF NOT EXISTS \"URPScoreHelper\" (\"id\" TEXT(36) NOT NULL, \"password\" TEXT(36) NOT NULL, \"name\" TEXT(36), \"openid\" TEXT(128), \"OAuth_name\" TEXT(128), \"OAuth_avatar\" TEXT(254), \"lastlogin\" TEXT(64), PRIMARY KEY (\"id\" ASC));");
 	sqlite3_stmt *stmt;
+	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+	if (db_ret != SQLITE_OK)
+	{
+		sqlite3_finalize(stmt);
+		return;
+	}
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+	{
+		break;
+	}
+	sqlite3_finalize(stmt);
+	query = "CREATE TABLE IF NOT EXISTS \"Settings\" (\"name\"  TEXT(254) NOT NULL, \"value\"  TEXT(254) NOT NULL, PRIMARY KEY (\"name\"));";
 	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
 	if (db_ret != SQLITE_OK)
 	{
@@ -422,32 +428,15 @@ void LoadConfig()
 		break;
 	}
 	sqlite3_finalize(stmt);
-	query = "CREATE TABLE IF NOT EXISTS \"Settings\" (\"name\"  TEXT(36) NOT NULL, \"value\"  TEXT(128) NOT NULL, PRIMARY KEY (\"name\"));";
-	db_Result = NULL;
-	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
-	if (db_ret != SQLITE_OK)
-	{
-		sqlite3_finalize(stmt);
-		return;
-	}
-	while (sqlite3_step(stmt) == SQLITE_ROW)
-	{
-		break;
-	}
-	sqlite3_finalize(stmt);
-	query = "INSERT OR IGNORE INTO `Settings` (\"name\", \"value\") VALUES ('QueryCounter', 0);";
-	db_Result = NULL;
-	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
-	if (db_ret != SQLITE_OK)
-	{
-		sqlite3_finalize(stmt);
-		return;
-	}
-	while (sqlite3_step(stmt) == SQLITE_ROW)
-	{
-		break;
-	}
-	sqlite3_finalize(stmt);
+	AddSettings("QueryCounter", "0");
+	AddSettings("SERVER_URL", "http://0.0.0.0");
+	AddSettings("USER_AGENT", SOFTWARE_NAME);
+	AddSettings("OAUTH2_APPID", "(null)");
+	AddSettings("OAUTH2_SECRET", "(null)");
+	AddSettings("CURL_PROXY_URL", "(null)");
+	AddSettings("APP_NAME", SOFTWARE_NAME);
+	AddSettings("CURL_TIMEOUT", "2");
+	AddSettings("CURL_USE_PROXY", "0");
 }
 
 // 更新用户数量、查询计数器
@@ -507,6 +496,64 @@ void UpdateCounter()
 		g_users = atoi((const char *)counts);
 	}
 	sqlite3_finalize(stmt);
+}
+
+// 读取数据库设置表中的内容(注意value的内存分配)
+bool GetSettings(const char *name, char *value)
+{
+	// 获取多少用户使用了我们的服务 :)
+	std::string query("SELECT value FROM Settings WHERE name='");
+	query += name;
+	query += "';";
+
+	char **db_Result = NULL;
+	sqlite3_stmt *stmt;
+	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+
+	if (db_ret != SQLITE_OK)
+	{
+		sqlite3_finalize(stmt);
+		return false;
+	}
+
+	const unsigned char *result = NULL;
+
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+	{
+		result = sqlite3_column_text(stmt, 0);
+		break;
+	}
+	if (result == NULL)
+	{
+		strcpy(value, "(null)");
+		sqlite3_finalize(stmt);
+		return false;
+	}
+	else
+	{
+		strcpy(value, (const char *)result);
+	}
+	sqlite3_finalize(stmt);
+}
+
+// 向数据库设置表中增添配置项
+bool AddSettings(const char *name, const char *value)
+{
+	std::string query("INSERT OR IGNORE INTO `Settings` (\"name\", \"value\") VALUES ('");
+	query =  query + name + "', '" + value + "');";
+	sqlite3_stmt *stmt;
+	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+	if (db_ret != SQLITE_OK)
+	{
+		sqlite3_finalize(stmt);
+		return false;
+	}
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+	{
+		break;
+	}
+	sqlite3_finalize(stmt);
+	return true;
 }
 
 // 置查询计数器
@@ -724,9 +771,14 @@ int parse_main()
 
 	char m_student_name[512] = {0};
 	char m_student_id[512] = { 0 };
-	get_student_name(m_student_name);
+	char m_avatar_url[512] = { 0 };
 	get_student_id(m_student_id);
-
+	if (!GetOAuthUserInfo(m_student_id, m_student_name, m_avatar_url))
+	{
+		memset(m_student_name, 0, 512);
+		get_student_name(m_student_name);
+	}
+	
 	cout << GLOBAL_HEADER;
 
 	std::string title(m_student_name);
@@ -965,7 +1017,18 @@ void parse_ajax_avatar()
 		return;
 	}
 	cout << "\r\n";
-	cout << m_photo.c_str();
+	char m_student_id[512] = { 0 };
+	char m_avatar_url[512] = { 0 };
+	char m_student_name[512] = { 0 };
+	get_student_id(m_student_id);
+	if (!GetOAuthUserInfo(m_student_id, m_student_name, m_avatar_url))
+	{
+		cout << m_photo.c_str();
+	}
+	else
+	{
+		cout << m_avatar_url;
+	}
 }
 
 // 处理查询页面请求 (GET /query.fcgi)
@@ -1368,7 +1431,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		// 假如发生了错误
 		if (!isSuccess)
 		{
-			Error(u8"<p>不好，查询时发生意外错误啦。</p>");
+			Error(u8"<p>现在还没有出成绩或发生了错误噢</p>");
 			return;
 		}
 		if (hasChengji == false)
@@ -1718,7 +1781,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	if (!m_success) 
 	{
 		free(p_lpszScore);
-		Error(u8"<p>不好，查询时发生意外错误啦。</p>");
+		Error(u8"<p>现在还没有出成绩或发生了错误噢</p>");
 		return;
 	}
 
@@ -1942,7 +2005,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	char *m_login_success = strstr(m_result, "\xd1\xa7\xb7\xd6\xd6\xc6\xd7\xdb\xba\xcf\xbd\xcc\xce\xf1" /*学分制综合教务*/);
 	if (m_login_success == NULL)
 	{
-		Error(u8"<p>天呐。发生了谜一般的问题！教务系统神隐了</p><p>建议你稍候再试试吧。</p>");
+		Error(u8"<p>发生了未知错误</p><p>建议你稍候再试试吧。</p>");
 		return false;
 	}
 
@@ -1985,10 +2048,14 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 
 	if (id == NULL) // 无记录，则写入数据库
 	{
-		std::string query("INSERT INTO URPScoreHelper (id, password, openid, lastlogin) VALUES ('");
+		std::string query("INSERT INTO URPScoreHelper (id, password, name, openid, lastlogin) VALUES ('");
 		query += p_xuehao;
 		query += "', '";
 		query += p_password;
+		query += "', '";
+		char m_stname[128] = { 0 };
+		get_student_name(m_stname);
+		query += m_stname;
 		query += "', NULL, '";
 		char m_time[128] = { 0 };
 		get_time(m_time);
@@ -2014,13 +2081,16 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	}
 	else // 为成功登录的学生更新记录
 	{
-		// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128) text lastlogin(64)。
 		std::string query("UPDATE URPScoreHelper SET password='");
 		char m_time[128] = { 0 };
 		get_time(m_time);
 		query += p_password;
 		query += "', lastlogin='";
 		query += m_time;
+		query += "', name='";
+		char m_stname[128] = { 0 };
+		get_student_name(m_stname);
+		query += m_stname;
 		query += "' WHERE id = '";
 		query += p_xuehao;
 		query += "';";

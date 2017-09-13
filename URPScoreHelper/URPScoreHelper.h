@@ -46,6 +46,8 @@ void parse_ajax_captcha();
 void UpdateCounter();
 void parse_ajax_avatar();
 void SetQueryCounter(int current_counts);
+bool GetSettings(const char *name, char *value);
+bool AddSettings(const char *name, const char *value);
 
 typedef struct test_info
 {

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#define SOFTWARE_NAME "iEdon URPScoreHelper"
+#define SOFTWARE_NAME "iEdon-URPScoreHelper"
 #define SOFTWARE_COPYRIGHT "Copyright © 2012-2017 iEdon Inside"
 
 

@@ -261,7 +261,6 @@ void OAuth2_CallBack()
 
 	//  成功拿到 access_token 和 openid
 
-	// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
 	std::string query("SELECT id, password FROM URPScoreHelper WHERE openid='");
 	query += openid;
 	query += "';";
@@ -298,6 +297,7 @@ void OAuth2_CallBack()
 	{
 		pStr1 = strstr(CGI_QUERY_STRING, "state=");
 		char id[128] = { 0 };
+		char orign_id[128] = { 0 };
 		if (pStr1 != NULL)
 		{
 			pStr2 = strstr(pStr1 + 6, "&");
@@ -309,9 +309,11 @@ void OAuth2_CallBack()
 			{
 				mid(id, pStr1 + 6, pStr2 - pStr1 - 6, 0);
 			}
+			strcpy(orign_id, id);
 			EnCodeStr(id, id);
 		}
 
+		WriteOAuthUserInfo(access_token, openid, orign_id);
 		cout << "Status: 302 Found\r\n";
 		if (strcmp(id, "NONE") == 0)
 		{
@@ -322,6 +324,7 @@ void OAuth2_CallBack()
 			cout << "Location: " << getAppURL().c_str() << "/OAuth2Assoc.fcgi?openid=" << openid << "&stid=" << id << "\r\n";
 		}
 		cout << GLOBAL_HEADER;
+
 		sqlite3_finalize(stmt);
 		delete[]access_token;
 		delete[]access_token_req;
@@ -336,15 +339,145 @@ void OAuth2_CallBack()
 	strcpy(encrypt_pass, (char *)password);
 	EnCodeStr(encrypt_id, encrypt_id);
 	EnCodeStr(encrypt_pass, encrypt_pass);
+	WriteOAuthUserInfo(access_token, openid, (char *)id);
 	cout << "Status: 302 Found\r\n"
 		<< "Location: " << getAppURL().c_str() << "/index.fcgi?stid=" << encrypt_id << "&pass=" << encrypt_pass << "\r\n"
 		<< GLOBAL_HEADER;
-	
 	sqlite3_finalize(stmt);
 	delete[]access_token;
 	delete[]access_token_req;
 	delete[]openid;
 	delete[]code;
+}
+
+// 向数据库中写入第三方账户的昵称与头像URL
+void WriteOAuthUserInfo(char *access_token, char *openid, char *student_id)
+{
+	CURL *curl = curl_easy_init();
+	if (curl == NULL)
+	{
+		return;
+	}
+	char get_user_info_req[512] = { 0 };
+	std::string html;
+	sprintf(get_user_info_req, OAUTH2_GET_USER_INFO, access_token, OAUTH2_APPID, openid);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
+	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, CURL_TIMEOUT);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &html);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, OAuth2_curl_receive);
+	curl_easy_setopt(curl, CURLOPT_URL, get_user_info_req);
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, USER_AGENT);
+	CURLcode ret = curl_easy_perform(curl);
+	curl_easy_cleanup(curl);
+	if (ret != CURLE_OK)
+	{
+		return;
+	}
+	char *html_str = (char *)malloc(html.length() + 1);
+	memset(html_str, 0, html.length() + 1);
+	strcpy(html_str, html.c_str());
+	replace_string(html_str, "\\/", "/");
+	
+	char *pStr1 = strstr(html_str, "\"nickname\": \"");
+	if (pStr1 == NULL)
+	{
+		Error(html_str);
+		free(html_str);
+		return;
+	}
+	char *pStr2 = strstr(pStr1 + 14, "\"");
+	if (pStr2 == NULL)
+	{
+		free(html_str);
+		return;
+	}
+	char *nickname = new char[html.length()];
+	memset(nickname, 0, html.length());
+	mid(nickname, pStr1 + 13, pStr2 - pStr1 - 13, 0);
+	
+	pStr1 = strstr(html_str, "\"figureurl_qq_1\": \"");
+	if (pStr1 == NULL)
+	{
+		delete[]nickname;
+		free(html_str);
+		return;
+	}
+	pStr2 = strstr(pStr1 + 20, "\"");
+	if (pStr2 == NULL)
+	{
+		delete[]nickname;
+		free(html_str);
+		return;
+	}
+	char *avatar = new char[html.length()];
+	memset(avatar, 0, html.length());
+	mid(avatar, pStr1 + 19, pStr2 - pStr1 - 19, 0);
+	free(html_str);
+
+	std::string query("UPDATE URPScoreHelper SET OAuth_name='");
+	query += nickname;
+	query += "', OAuth_avatar='";
+	query += avatar;
+	query += "' WHERE id='";
+	query += student_id;
+	query += "';";
+
+	sqlite3_stmt *stmt;
+	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+
+	if (db_ret != SQLITE_OK)
+	{
+		delete[]nickname;
+		delete[]avatar;
+		sqlite3_finalize(stmt);
+		return;
+	}
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+	{
+		break;
+	}
+
+	sqlite3_finalize(stmt);
+	delete[]nickname;
+	delete[]avatar;
+}
+
+// 读取第三方账户昵称与头像URL
+bool GetOAuthUserInfo(char *student_id, char *nickname, char *avatar_url)
+{
+	std::string query("SELECT OAuth_name, OAuth_avatar FROM URPScoreHelper WHERE id='");
+	query += student_id;
+	query += "';";
+
+	sqlite3_stmt *stmt;
+	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+
+	if (db_ret != SQLITE_OK)
+	{
+		sqlite3_finalize(stmt);
+		return false;
+	}
+
+	const unsigned char *name = NULL;
+	const unsigned char *avatar = NULL;
+
+	while (sqlite3_step(stmt) == SQLITE_ROW)
+	{
+		name = sqlite3_column_text(stmt, 0);
+		avatar = sqlite3_column_text(stmt, 1);
+		break;
+	}
+	if (name == NULL || avatar == NULL)
+	{
+		sqlite3_finalize(stmt);
+		return false;
+	}
+
+	strcpy(nickname, (char *)name);
+	strcpy(avatar_url, (char *)avatar);
+
+	sqlite3_finalize(stmt);
+	return true;
 }
 
 size_t OAuth2_curl_receive(char *buffer, size_t size, size_t nmemb, std::string *html)
