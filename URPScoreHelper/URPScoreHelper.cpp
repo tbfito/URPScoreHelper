@@ -567,6 +567,7 @@ bool GetSettings(const char *name, char *value)
 		strcpy(value, (const char *)result);
 	}
 	sqlite3_finalize(stmt);
+	return true;
 }
 
 // 向数据库设置表中增添配置项
