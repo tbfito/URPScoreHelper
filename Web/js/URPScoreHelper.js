@@ -74,7 +74,7 @@ function get_avatar() {
 			else
 			{
 				obj.src = data;
-				$(".swiper-container").swiper({loop:true,height:160,autoplay:5000,observer:true,observeParents:true});
+				$(".swiper-container").swiper({loop:true,height:160,autoplay:5000,observer:true,observeParents:true,lazyLoading:true});
 			}
 		},
 		error: function() {

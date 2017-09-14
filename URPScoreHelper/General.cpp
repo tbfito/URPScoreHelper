@@ -20,7 +20,7 @@ const char *OAUTH2_LOGIN_HTML = u8"<a title=\"QQ快速登录\" class=\"weui-btn 
 const char *QUICKQUERY_HTML = u8"<div class=\"quickquery\"><a class=\"weui-btn weui-btn_warn\" href=\"QuickQuery.fcgi\">免密快速查询入口 &gt;&gt;</a></div>";
 const char *ASSOC_LINK_HTML = u8"<a href=\"index.fcgi?act=requestAssoc\">绑定QQ帐号</a>";
 const char *RLS_ASSOC_LINK_HTML = u8"<span style=\"color:rgb(0,255,90)\">QQ已绑定</span> | <a href=\"javascript:void(0);\" onclick=\"releaseAssoc('%s');\">解除绑定</a>";
-const char *CARD_AD_BANNER_HTML = "<div class=\"swiper-slide\"><a href=\"%s\" target=\"_blank\"><img src=\"%s\" height=\"160\"></a></div>";
+const char *CARD_AD_BANNER_HTML = "<div class=\"swiper-slide\"><a href=\"%s\" target=\"_blank\"><img data-src=\"%s\" height=\"160\" width=\"100%%\" class=\"swiper-lazy\"></a><div class=\"swiper-lazy-preloader\"></div></div>";
 // 错误页面和配置初始化
 std::string ERROR_HTML;
 char *SERVER_URL = NULL;
