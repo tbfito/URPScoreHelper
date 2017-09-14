@@ -374,6 +374,26 @@ void LoadConfig()
 		free(APP_NAME);
 	}
 	APP_NAME = (char *)malloc(4096);
+	if (CARD_AD_BANNER_1_IMG != NULL)
+	{
+		free(CARD_AD_BANNER_1_IMG);
+	}
+	CARD_AD_BANNER_1_IMG = (char *)malloc(1024);
+	if (CARD_AD_BANNER_2_IMG != NULL)
+	{
+		free(CARD_AD_BANNER_2_IMG);
+	}
+	CARD_AD_BANNER_2_IMG = (char *)malloc(1024);
+	if (CARD_AD_BANNER_1_URL != NULL)
+	{
+		free(CARD_AD_BANNER_1_URL);
+	}
+	CARD_AD_BANNER_1_URL = (char *)malloc(1024);
+	if (CARD_AD_BANNER_2_URL != NULL)
+	{
+		free(CARD_AD_BANNER_2_URL);
+	}
+	CARD_AD_BANNER_2_URL = (char *)malloc(1024);
 
 	char *lpvBuffer = (char *)malloc(128);
 
@@ -384,6 +404,10 @@ void LoadConfig()
 	memset(CURL_PROXY_URL, 0, 1024);
 	memset(APP_NAME, 0, 4096);
 	memset(lpvBuffer, 0, 128);
+	memset(CARD_AD_BANNER_1_IMG, 0, 1024);
+	memset(CARD_AD_BANNER_2_IMG, 0 ,1024);
+	memset(CARD_AD_BANNER_1_URL, 0, 1024);
+	memset(CARD_AD_BANNER_2_URL, 0, 1024);
 
 	GetSettings("SERVER_URL", SERVER_URL);
 	GetSettings("USER_AGENT", USER_AGENT);
@@ -391,8 +415,13 @@ void LoadConfig()
 	GetSettings("OAUTH2_SECRET", OAUTH2_SECRET);
 	GetSettings("CURL_PROXY_URL", CURL_PROXY_URL);
 	GetSettings("APP_NAME", APP_NAME);
+	GetSettings("CARD_AD_BANNER_1_IMG", CARD_AD_BANNER_1_IMG);
+	GetSettings("CARD_AD_BANNER_2_IMG", CARD_AD_BANNER_2_IMG);
+	GetSettings("CARD_AD_BANNER_1_URL", CARD_AD_BANNER_1_URL);
+	GetSettings("CARD_AD_BANNER_2_URL", CARD_AD_BANNER_2_URL);
 
-	GetSettings("CURL_TIMEOUT", lpvBuffer);	
+	GetSettings("CURL_TIMEOUT", lpvBuffer);
+
 	CURL_TIMEOUT = atoi(lpvBuffer);
 	if (CURL_TIMEOUT <= 0)
 		CURL_TIMEOUT = 2;
@@ -437,6 +466,10 @@ void LoadConfig()
 	AddSettings("APP_NAME", SOFTWARE_NAME);
 	AddSettings("CURL_TIMEOUT", "2");
 	AddSettings("CURL_USE_PROXY", "0");
+	AddSettings("CARD_AD_BANNER_1_IMG", "");
+	AddSettings("CARD_AD_BANNER_2_IMG", "");
+	AddSettings("CARD_AD_BANNER_1_URL", "");
+	AddSettings("CARD_AD_BANNER_2_URL", "");
 }
 
 // 更新用户数量、查询计数器
@@ -815,15 +848,27 @@ int parse_main()
 	sqlite3_finalize(stmt);
 
 	cout << strformat(header.c_str(), title.c_str());
-
+	std::string OutputAd;
+	if (strlen(CARD_AD_BANNER_1_IMG) > 0)
+	{
+		char AdUrl[4096] = { 0 };
+		sprintf(AdUrl, CARD_AD_BANNER_HTML, CARD_AD_BANNER_1_URL, CARD_AD_BANNER_1_IMG);
+		OutputAd += AdUrl;
+	}
+	if (strlen(CARD_AD_BANNER_2_IMG) > 0)
+	{
+		char AdUrl[4096] = { 0 };
+		sprintf(AdUrl, CARD_AD_BANNER_HTML, CARD_AD_BANNER_2_URL, CARD_AD_BANNER_2_IMG);
+		OutputAd += AdUrl;
+	}
 	if (openid == NULL)
 	{
-		cout << strformat(m_lpszHomepage.c_str(), m_student_name, m_student_id, ASSOC_LINK_HTML);
+		cout << strformat(m_lpszHomepage.c_str(), m_student_name, m_student_id, ASSOC_LINK_HTML, OutputAd.c_str());
 	}
 	else
 	{
 		cout << strformat(m_lpszHomepage.c_str(), m_student_name, m_student_id,
-							strformat(RLS_ASSOC_LINK_HTML, m_student_id).c_str());
+							strformat(RLS_ASSOC_LINK_HTML, m_student_id).c_str(), OutputAd.c_str());
 	}
 
 	cout << footer.c_str();
@@ -945,7 +990,7 @@ int parse_index()
 // 处理验证码 Ajax 请求
 void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 {
-	cout << "Cache-Control: no-cache\r\nPragma: no-cache\r\nExpires: -1\r\nContent-Type: text/plain; charset=utf-8\r\n";
+	cout << "Cache-Control: no-cache\r\nPragma: no-cache\r\nExpires: Thu, 16 Oct 1997 00:00:00 GMT\r\nContent-Type: text/plain; charset=utf-8\r\n";
 	bool m_need_update_cookie = false;
 	std::string m_photo(" "); // 有数据，需要获取照片
 	process_cookie(&m_need_update_cookie, m_photo);
@@ -1003,7 +1048,7 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 // 处理头像 Ajax 请求
 void parse_ajax_avatar()
 {
-	cout << "Cache-Control: no-cache\r\nPragma: no-cache\r\nExpires: -1\r\nContent-Type: text/plain; charset=utf-8\r\n";
+	cout << "Cache-Control: no-cache\r\nPragma: no-cache\r\nExpires: Thu, 16 Oct 1997 00:00:00 GMT\r\nContent-Type: text/plain; charset=utf-8\r\n";
 	bool m_need_update_cookie = false;
 	std::string m_photo(" "); // 有数据，需要获取照片
 	process_cookie(&m_need_update_cookie, m_photo);
@@ -2611,7 +2656,7 @@ void OAuth2_Association(bool isPOST)
 		strcpy(query, "DELETE FROM URPScoreHelper WHERE id='");
 		strcat(query, student_id);
 		strcat(query, "';");*/
-		std::string query("UPDATE URPScoreHelper SET openid=NULL WHERE id='");
+		std::string query("UPDATE URPScoreHelper SET openid=NULL, OAuth_name=NULL, OAuth_avatar=NULL WHERE id='");
 		query += student_id;
 		query += "';";
 
@@ -2815,7 +2860,7 @@ void OAuth2_Association(bool isPOST)
 		{
 			char Err_Msg[1024] = u8"<b>很抱歉，QQ绑定失败。</b><p>数据库错误 (";
 			strcat(Err_Msg, sqlite3_errmsg(db));
-			strcat(Err_Msg, u8")</p><p>但是别方吖，还可以正常登录的。</p>");
+			strcat(Err_Msg, u8")</p><p>但是还可以正常登录的。</p>");
 			Error(Err_Msg);
 			sqlite3_finalize(stmt);
 			free(m_post_data);

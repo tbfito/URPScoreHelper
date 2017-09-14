@@ -7,7 +7,7 @@ const char* GLOBAL_HEADER = "X-Powered-By: iEdon-URPScoreHelper\r\n\
 Content-Type: text/html; charset=utf-8\r\n\
 Cache-Control: no-cache\r\n\
 Pragma: no-cache\r\n\
-Expires: -1\r\n\r\n";
+Expires: Thu, 16 Oct 1997 00:00:00 GMT\r\n\r\n";
 
 // HTMLS
 const char *BEFORE_TEMPLATE = u8"<div id=\"list_page\" style=\"background-color:transparent !important\"><table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"titleTop2\" style=\"background-color:transparent !important;border:none\"><tbody><tr><td class=\"pageAlign\"><table cellpadding=\"0\" width=\"100%\" class=\"displayTag\" cellspacing=\"1\" border=\"0\" id=\"user\"><thead><tr><th align=\"center\" width=\"30%\" class=\"sortable\">课名</th><th align=\"center\" width=\"10%\" class=\"sortable\">成绩</th><th align=\"center\" width=\"10%\" class=\"sortable\">均分</th><th align=\"center\" width=\"10%\" class=\"sortable\">最高</th><th align=\"center\" width=\"10%\" class=\"sortable\">最低</th><th align=\"center\" width=\"10%\" class=\"sortable\">名次</th><th align=\"center\" width=\"10%\" class=\"sortable\">学分</th><th align=\"center\" width=\"10%\" class=\"sortable\">绩点</th></tr></thead><tbody>";
@@ -20,7 +20,7 @@ const char *OAUTH2_LOGIN_HTML = u8"<a title=\"QQ快速登录\" class=\"weui-btn 
 const char *QUICKQUERY_HTML = u8"<div class=\"quickquery\"><a class=\"weui-btn weui-btn_warn\" href=\"QuickQuery.fcgi\">免密快速查询入口 &gt;&gt;</a></div>";
 const char *ASSOC_LINK_HTML = u8"<a href=\"index.fcgi?act=requestAssoc\">绑定QQ帐号</a>";
 const char *RLS_ASSOC_LINK_HTML = u8"<span style=\"color:rgb(0,255,90)\">QQ已绑定</span> | <a href=\"javascript:void(0);\" onclick=\"releaseAssoc('%s');\">解除绑定</a>";
-
+const char *CARD_AD_BANNER_HTML = "<div class=\"swiper-slide\"><a href=\"%s\" target=\"_blank\"><img src=\"%s\" height=\"160\"></a></div>";
 // 错误页面和配置初始化
 std::string ERROR_HTML;
 char *SERVER_URL = NULL;
@@ -31,6 +31,10 @@ char *OAUTH2_SECRET = NULL;
 bool CURL_USE_PROXY = false;
 char *CURL_PROXY_URL = NULL;
 char *APP_NAME = NULL;
+char *CARD_AD_BANNER_1_IMG = NULL;
+char *CARD_AD_BANNER_2_IMG = NULL;
+char *CARD_AD_BANNER_1_URL = NULL;
+char *CARD_AD_BANNER_2_URL = NULL;
 
 /*
 输出错误页面

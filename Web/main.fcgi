@@ -1,6 +1,9 @@
 <div class="i_page-title">
 	<div class="content">
-		<div class="i_header">
+		<div class="swiper-container" data-space-between='10' data-pagination='.swiper-pagination' data-autoplay='5000'>
+		  <div class="swiper-wrapper">
+			<div class="swiper-slide">
+				<div class="i_header">
 					<div class="i_user-photo-container">
 						<img class="i_user-photo" src="/img/avatar.gif" width="84" height="84" />
 					</div>
@@ -11,6 +14,11 @@
 							<a href="/changePassword.fcgi">修改密码</a> | %s
 						</div>
 					</div>
+				</div>
+			</div>
+			%s
+		  </div>
+		  <div class="swiper-pagination"></div>
 		</div>
 	</div>
 </div>

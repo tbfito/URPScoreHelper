@@ -27,6 +27,7 @@ extern const char *OAUTH2_LOGIN_HTML;
 extern const char *QUICKQUERY_HTML;
 extern const char *ASSOC_LINK_HTML;
 extern const char *RLS_ASSOC_LINK_HTML;
+extern const char *CARD_AD_BANNER_HTML;
 
 extern sqlite3 * db;
 extern int CURL_TIMEOUT;
@@ -37,6 +38,10 @@ extern char *CURL_PROXY_URL;
 extern char *APP_NAME;
 extern char *OAUTH2_APPID;
 extern char *OAUTH2_SECRET;
+extern char *CARD_AD_BANNER_1_IMG;
+extern char *CARD_AD_BANNER_2_IMG;
+extern char *CARD_AD_BANNER_1_URL;
+extern char *CARD_AD_BANNER_2_URL;
 extern std::string ERROR_HTML;
 
 extern char JSESSIONID[256];

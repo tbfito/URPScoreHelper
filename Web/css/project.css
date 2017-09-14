@@ -32,7 +32,7 @@
 .i_page-navbar{line-height:40px;color:#fff;font-size:16px;text-align:center;background-color:#03a9f4;position:relative;height:40px;overflow:hidden}
 .i_page-navbar a.return {width: 62px;padding-left: 0;text-indent: 8px;left:0}
 .i_page-navbar a {position: absolute;margin: 5px 6px;display: inline-block;padding-left: 15px;line-height: 30px;font-size: 14px;right: 0;color: #fff;width: 70px}
-.i_header{margin-left:5%}
+.i_header{margin-left:5%;height:160px}
 .i_user-photo-container{margin-top:32px;float: left}
 .i_user-info-container{float:left;margin:44px 0 0 16px;line-height:20px}
 .i_user-info-container{text-align:left;color:#fff}

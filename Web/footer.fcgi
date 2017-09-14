@@ -8,6 +8,7 @@
 	<br />
 	<script charset="utf-8" src="js/jquery.min.js"></script>
 	<script charset="utf-8" src="js/jquery-weui.min.js"></script>
+	<script charset="utf-8" src="js/swiper.js"></script>
 	<script charset="utf-8" src="js/URPScoreHelper.js?ver=17.8.10"></script>
 	<script>
 		var _hmt = _hmt || [];
