@@ -80,12 +80,20 @@
 		  月中补缓清考
 		</p>
 	  </a>
-		 <a id="logout" onclick="logout();" href="javascript:void(0);" class="weui-grid js_grid">
+	  <a id="logout" onclick="logout();" href="javascript:void(0);" class="weui-grid js_grid">
 		<div class="weui-grid__icon">
 		  <img src="img/logout.png" alt="">
 		</div>
 		<p class="weui-grid__label">
 		  退出登录
+		</p>
+	  </a>
+	   <a href="http://v.xiumi.us/board/v5/2xVry/57214495" class="weui-grid js_grid">
+		<div class="weui-grid__icon">
+		  <img src="img/focus.png" alt="">
+		</div>
+		<p class="weui-grid__label">
+		 关注我们
 		</p>
 	  </a>
 	</div>
