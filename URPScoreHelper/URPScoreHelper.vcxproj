@@ -252,6 +252,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Admin.h" />
     <ClInclude Include="CCurlTask.h" />
     <ClInclude Include="gbkutf8.h" />
     <ClInclude Include="General.h" />
@@ -264,6 +265,7 @@
     <ClInclude Include="Encrypt.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Admin.cpp" />
     <ClCompile Include="CCurlTask.cpp" />
     <ClCompile Include="gbkutf8.cpp" />
     <ClCompile Include="General.cpp" />

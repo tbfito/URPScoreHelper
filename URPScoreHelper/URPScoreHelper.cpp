@@ -163,11 +163,6 @@ int main(int argc, const char* argv[])
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/query.fcgi") == 0)
 			{
-				if (strcmp(CGI_QUERY_STRING, "act=system_registration") == 0)
-				{
-					system_registration();
-					goto END_REQUEST;
-				}
 				parse_query();
 				goto END_REQUEST;
 			}
@@ -864,11 +859,12 @@ int parse_main()
 	}
 	if (openid == NULL)
 	{
-		cout << strformat(m_lpszHomepage.c_str(), m_student_name, m_student_id, ASSOC_LINK_HTML, OutputAd.c_str());
+		cout << strformat(m_lpszHomepage.c_str(), APP_NAME, m_student_name, m_student_id, 
+							ASSOC_LINK_HTML, OutputAd.c_str());
 	}
 	else
 	{
-		cout << strformat(m_lpszHomepage.c_str(), m_student_name, m_student_id,
+		cout << strformat(m_lpszHomepage.c_str(), APP_NAME, m_student_name, m_student_id,
 							strformat(RLS_ASSOC_LINK_HTML, m_student_id).c_str(), OutputAd.c_str());
 	}
 
@@ -1116,15 +1112,19 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	strcpy(p_lpszScore, p_strlpszScore.c_str());
 
 	char *m_query_not_reg = strstr(p_lpszScore, "\xc3\xbb\xd3\xd0\xd7\xa2\xb2\xe1" /*没有注册*/);
-	if (m_query_not_reg != NULL)
+	if (m_query_not_reg != NULL) // 如果还没有电子注册
 	{
-		free(p_lpszScore);
-		std::string m_original_str (u8"<p><b>亲爱的%s，每学期首次使用需要电子注册</b></p><p>不注册的话，是查不了信息的哦！</p><p>我可以施展法术，\
+		/*std::string m_original_str (u8"<p><b>亲爱的%s，每学期首次使用需要电子注册</b></p><p>不注册的话，是查不了信息的哦！</p><p>我可以施展法术，\
 <b>一键帮你在教务系统注册哦~</b></p><p>--&gt; 点按下方按钮，自动注册，直达查分界面 :P &lt;--</p>\
 <div class=\"weui-msg__opr-area\"><p class=\"weui-btn-area\"><a style=\"color:#fff\" href=\"query.fcgi?act=system_registration\" class=\"weui-btn weui-btn_primary\">【点我】一键注册</a></p></div>");
 		m_original_str = strformat(m_original_str.c_str(), m_Student);
 		Error(m_original_str.c_str());
-		return;
+		*/
+		if (system_registration() != 0)
+		{
+			free(p_lpszScore);
+			return;
+		}
 	}
 	if (strcmp(CGI_QUERY_STRING, "order=tests") == 0)
 	{
@@ -1777,7 +1777,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		float m_chengji = atof(m_subchengji);
 		float m_kcxfjd = m_xuefen * cj2jd(m_chengji);
 		if (strstr(m_subName, "\xcc\xe5\xd3\xfd" /*体育*/) == NULL && strstr(m_subName, "\xbe\xfc\xca\xc2\xd1\xb5\xc1\xb7" /*军事训练*/) == NULL
-			&& strstr(m_subName, "\xca\xb5\xbc\xf9" /*实践*/) == NULL)
+			/* && strstr(m_subName, "\xca\xb5\xbc\xf9" [实践]) == NULL */)
 		{
 			if (m_chengji != 0 || atof(m_subzuidifen) != 0 || atof(m_subzuigaofen) != 0 || atof(m_subjunfen) != 0)
 			{
@@ -1933,7 +1933,7 @@ void get_student_id(char *p_lpszBuffer)
 	mid(p_lpszBuffer, pStr1, pStr2 - pStr1 - 9, 9);
 }
 
-// 教务系统电子注册 (GET /query.fcgi?act=system_registration)
+// 教务系统电子注册
 int system_registration()
 {
 	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
@@ -1954,21 +1954,21 @@ int system_registration()
 	char *pStr1 = strstr(m_rep_header, "selected>");
 	if (pStr1 == NULL)
 	{
-		Error(u8"<p><b>不好意思，自动注册失败。</b></p><p>本学期学费是否已交齐？或请登录教务系统查看具体原因。</p>");
+		Error(u8"<p><b>不好意思，电子注册失败。</b></p><p>本学期学费是否已交齐？或请登录教务系统查看具体原因。</p>");
 		return -1;
 	}
 	pStr1 -= 70;
 	char *pStr2 = strstr(pStr1, "<option value=\"");
 	if (pStr2 == NULL)
 	{
-		Error(u8"<p>数据错误。不好意思，自动注册失败，请登录教务系统查看具体原因。 (2)</p>");
+		Error(u8"<p>数据错误。不好意思，电子注册失败，请登录教务系统查看具体原因。 (2)</p>");
 		return -1;
 	}
 	pStr1 = pStr2;
 	pStr2 = strstr(pStr1 + 16, "\"");
 	if (pStr2 == NULL)
 	{
-		Error(u8"<p>数据错误。不好意思，自动注册失败，请登录教务系统查看具体原因。 (3)</p>");
+		Error(u8"<p>数据错误。不好意思，电子注册失败，请登录教务系统查看具体原因。 (3)</p>");
 		return -1;
 	}
 
@@ -1996,11 +1996,11 @@ int system_registration()
 	pStr1 = strstr(m_rep_header, "\xd7\xa2\xb2\xe1\xb3\xc9\xb9\xa6" /*注册成功*/);
 	if (pStr1 == NULL)
 	{
-		Error(u8"<p>不好意思，自动注册失败，请登录教务系统查看具体原因。 (4)</p>");
+		Error(u8"<p>不好意思，电子注册失败，请登录教务系统查看具体原因。 (4)</p>");
 		return -1;
 	}
 
-	cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/query.fcgi\r\n" << GLOBAL_HEADER;
+	//cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/query.fcgi\r\n" << GLOBAL_HEADER;
 	return 0;
 }
 
@@ -2383,7 +2383,7 @@ void parse_QuickQuery_Result()
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error, 
-					u8"<p><b>呃，获取失败了。请确认所输信息是正确的</b></p><p>发生错误的学号: %s</p>", 
+					u8"<p><b>出现错误。请确认所输信息是正确的</b></p><p>发生错误的学号: %s</p>", 
 					m_xh[xh_index]);
 				Error(m_friendly_error);
 				return;
@@ -3152,7 +3152,7 @@ void teaching_evaluation()
 				char *m_result = strstr(m_rep_body, "\xce\xca\xbe\xed\xc6\xc0\xb9\xc0\xd2\xb3\xc3\xe6" /*"问卷评估页面"*/);
 				if (m_result == NULL)
 				{
-					std::string err_msg = "<p>呃，出错了呢</p><p>很抱歉，在评估《";
+					std::string err_msg = "<p>出现错误</p><p>很抱歉，在评估《";
 					err_msg = err_msg + te[i].name + "》课程时出现了错误。</p><p>(进入详细页面失败)</p>";
 					Error(err_msg.c_str());
 					return;
@@ -3165,7 +3165,7 @@ void teaching_evaluation()
 					char *p1 = strstr(m_result + 26, "\"");
 					if (p1 == NULL)
 					{
-						std::string err_msg = "<p>呃，出错了呢</p><p>很抱歉，在评估《";
+						std::string err_msg = "<p>出现错误</p><p>很抱歉，在评估《";
 						err_msg = err_msg + te[i].name + "》课程时出现了错误。</p><p>(名称条目引号闭合失败)</p>";
 						Error(err_msg.c_str());
 						return;
@@ -3184,7 +3184,7 @@ void teaching_evaluation()
 					char *p2 = strstr(p1 + 1, "value=\"");
 					if (p2 == NULL)
 					{
-						std::string err_msg = "<p>呃，出错了呢</p><p>很抱歉，在评估《";
+						std::string err_msg = "<p>出现错误</p><p>很抱歉，在评估《";
 						err_msg = err_msg + te[i].name + "》课程时出现了错误。</p><p>(值条目引号开启失败)</p>";
 						Error(err_msg.c_str());
 						return;
@@ -3192,7 +3192,7 @@ void teaching_evaluation()
 					char *p3 = strstr(p2 + 7, "\"");
 					if (p2 == NULL)
 					{
-						std::string err_msg = "<p>呃，出错了呢</p><p>很抱歉，在评估《";
+						std::string err_msg = "<p>出现错误</p><p>很抱歉，在评估《";
 						err_msg = err_msg + te[i].name + "》课程时出现了错误。</p><p>(值条目引号闭合失败)</p>";
 						Error(err_msg.c_str());
 						return;
@@ -3213,7 +3213,7 @@ void teaching_evaluation()
 				CCurlTask req3;
 				if (!req3.Exec(false, POST_TEACH_EVAL, CGI_HTTP_COOKIE, true, post_data.c_str()))
 				{
-					std::string err_msg = "<p>呃，出错了呢</p><p>很抱歉，在评估《";
+					std::string err_msg = "<p>出现错误</p><p>很抱歉，在评估《";
 					err_msg = err_msg + te[i].name + "》课程时出现了错误。</p><p>curl 操作失败</p>";
 					Error(err_msg.c_str());
 				}
@@ -3222,7 +3222,7 @@ void teaching_evaluation()
 				m_result = strstr(m_rep_body, "\xb3\xc9\xb9\xa6" /*"成功"*/);
 				if (m_result == NULL)
 				{
-					std::string err_msg = "<p>呃，出错了呢</p><p>很抱歉，在评估《";
+					std::string err_msg = "<p>出现错误</p><p>很抱歉，在评估《";
 					err_msg = err_msg + te[i].name + "》课程时出现了错误。</p>";
 					Error(err_msg.c_str());
 					return;

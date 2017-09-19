@@ -70,7 +70,7 @@
 	</form>
 	<div class="weui-loadmore weui-loadmore_line">
 		<span class="weui-loadmore__tips">
-			懒人使用指南
+			使用帮助
 		</span>
 	</div>
 	<div class="weui-cells__title">

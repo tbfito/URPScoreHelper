@@ -1,3 +1,6 @@
+<div class="i_page-navbar">
+	%s
+</div>
 <div class="i_page-title">
 	<div class="content">
 		<div class="swiper-container" data-space-between='10' data-pagination='.swiper-pagination' data-autoplay='5000'>
