@@ -3,7 +3,7 @@
 			<a href="/index.fcgi" class="weui-footer__link">N加青年</a>
 		</p>
 		<p class="weui-footer__text">%s - 扬大人自己的掌上教务</p>
-		<p class="weui-footer__text">%s 项目 | <a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=3168439469&site=qq&menu=yes">合作入口</a></p>
+		<p class="weui-footer__text">%s 项目 | 合作(3168439469)</p>
 	</div>
 	<br />
 	<script charset="utf-8" src="js/jquery.min.js"></script>

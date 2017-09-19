@@ -20,7 +20,7 @@
 <meta name="description" content="唯扬小助手，提供跨平台多屏综合教务功能，包含成绩、课表、排名、GPA等查询功能，一键电子注册，一键教学评估，是你不可多得的教务小帮手。">
 <link rel="stylesheet" href="/css/weui.min.css">
 <link rel="stylesheet" href="/css/jquery-weui.min.css">
-<link rel="stylesheet" href="/css/project.css?ver=17.7.21">
+<link rel="stylesheet" href="/css/project.css?ver=17.9.14">
 <link rel="shortcut icon" href="URPScoreHelper.ico">
 </head>
 <body>
