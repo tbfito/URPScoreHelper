@@ -18,6 +18,7 @@
 #include "URPRequests.h"
 #include "Encrypt.h"
 #include "gbkutf8.h"
+#include "Admin.h"
 
 // 入口函数 (FastCGI 处理循环)
 int main(int argc, const char* argv[])
@@ -73,20 +74,8 @@ int main(int argc, const char* argv[])
 		{
 			cout << "Status: 500 Internal Server Error\r\n"
 				<< GLOBAL_HEADER
-				<< "<p><b>数据库打开失败</b></p><p>请检查 Database.db 是否存在。</p>";
+				<< u8"<p><b>数据库打开失败</b></p><p>请检查 Database.db 是否存在。</p>";
 			goto END_REQUEST;
-		}
-
-		if (!isPageSrcLoadSuccess)
-		{
-			LoadPageSrc();
-			if (!isPageSrcLoadSuccess)
-			{
-				cout << "Status: 500 Internal Server Error\r\n"
-					<< GLOBAL_HEADER
-					<< "<p>网页模板文件缺失或异常。</p>";
-				goto END_REQUEST;
-			}
 		}
 
 		if (CGI_REQUEST_METHOD == NULL || CGI_SCRIPT_NAME == NULL || CGI_QUERY_STRING == NULL ||
@@ -94,7 +83,7 @@ int main(int argc, const char* argv[])
 		{
 			cout << "Status: 500 Internal Server Error\r\n"
 				<< GLOBAL_HEADER
-				<< "<p>FastCGI 接口异常，请检查设置。</p>";
+				<< u8"<p>FastCGI 接口异常，请检查设置。</p>";
 			goto END_REQUEST;
 		}
 		if (CGI_HTTP_COOKIE == NULL)
@@ -104,6 +93,67 @@ int main(int argc, const char* argv[])
 		if (CGI_HTTP_HOST == NULL)
 		{
 			CGI_HTTP_HOST = (char *)emptystr;
+		}
+
+		// 单独为 Admin 做处理。
+		if (strstr(CGI_REQUEST_URI, "/admin") != NULL)
+		{
+			if (strcmp(CGI_SCRIPT_NAME, "/admin/login.fcgi") == 0)
+			{
+				if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+				{
+					parse_admin_login();
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
+				{
+					do_admin_login();
+					goto END_REQUEST;
+				}
+			}
+
+			if (strcmp(CGI_SCRIPT_NAME, "/admin/settings.fcgi") == 0)
+			{
+				if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+				{
+					parse_admin_settings();
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
+				{
+					save_admin_settings();
+					goto END_REQUEST;
+				}
+			}
+
+			if (strcmp(CGI_REQUEST_URI, "/admin/index.fcgi") == 0 || strcmp(CGI_REQUEST_URI, "/admin") == 0)
+			{
+				cout << "Status: 301 Moved Permanently\r\n" << "Location: " << getAppURL().c_str() << "/admin/\r\n" << GLOBAL_HEADER;
+				goto END_REQUEST;
+			}
+			
+			if (strcmp(CGI_REQUEST_URI, "/admin/") == 0)
+			{
+				parse_admin_index();
+				goto END_REQUEST;
+			}
+
+			cout << "Status: 404 Not Found\r\n";
+			admin_error(u8"页面未找到");
+			goto END_REQUEST;
+
+		}
+
+		if (!isPageSrcLoadSuccess)
+		{
+			LoadPageSrc();
+			if (!isPageSrcLoadSuccess)
+			{
+				cout << "Status: 500 Internal Server Error\r\n"
+					<< GLOBAL_HEADER
+					<< u8"<p>网页模板文件缺失或异常。</p>";
+				goto END_REQUEST;
+			}
 		}
 
 		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0) // 如果是 GET 请求
@@ -135,7 +185,7 @@ int main(int argc, const char* argv[])
 				}
 				if (strcmp(CGI_REQUEST_URI, "/index.fcgi") == 0)
 				{
-					cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
+					cout << "Status: 301 Moved Permanently\r\n" << "Location: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
 					goto END_REQUEST;
 				}
 				parse_index();
@@ -192,7 +242,7 @@ int main(int argc, const char* argv[])
 				goto END_REQUEST;
 			}
 			cout << "Status: 404 Not Found\r\n";
-			Error(u8"<p>找不到该页面。</p>");
+			Error(u8"<p>找不到该页面</p>");
 			goto END_REQUEST;
 		}
 		if (strcmp(CGI_REQUEST_METHOD, "POST") == 0) // 如果是 POST 请求
@@ -232,7 +282,7 @@ int main(int argc, const char* argv[])
 			}
 		}
 		cout << "Status: 500 Internal Server Error\r\n";
-		Error(u8"<p>发生错误，未经处理的异常。</p>");
+		Error(u8"<p>发生错误，未经处理的异常</p>");
 		goto END_REQUEST;
 
 		END_REQUEST:
@@ -244,12 +294,25 @@ int main(int argc, const char* argv[])
 		printf("%s\n%s\n\n%s\n", SOFTWARE_NAME, SOFTWARE_COPYRIGHT, "\tOptions: [-p (localhost):port_number]");
 		curl_global_cleanup();
 		sqlite3_close(db);
+		free(HEADER_TEMPLATE_LOCATION);
+		free(FOOTER_TEMPLATE_LOCATION);
 		free(SERVER_URL);
 		free(USER_AGENT);
 		free(OAUTH2_APPID);
 		free(OAUTH2_SECRET);
 		free(CURL_PROXY_URL);
 		free(APP_NAME);
+		free(CARD_AD_BANNER_1_IMG);
+		free(CARD_AD_BANNER_2_IMG);
+		free(CARD_AD_BANNER_1_URL);
+		free(CARD_AD_BANNER_2_URL);
+		free(ADMIN_USER_NAME);
+		free(ADMIN_PASSWORD);
+		free(SECONDARY_TITLE);
+		free(APP_KEYWORDS);
+		free(APP_DESCRIPTION);
+		free(FOOTER_TEXT);
+		free(ANALYSIS_CODE);
 		return 0;
 }
 
@@ -290,13 +353,15 @@ void LoadPageSrc()
 
 	strcpy(file_root, doc_root);
 	strcat(file_root, "header.fcgi");
+	strcpy(HEADER_TEMPLATE_LOCATION, file_root); // HEADER_TEMPLATE_LOCATION 内存在 LoadConfig() 中做了初始化
 
-	header = ReadTextFileToMem(file_root);
+	header = strformat(ReadTextFileToMem(file_root).c_str(), "%s", SECONDARY_TITLE, APP_KEYWORDS, APP_DESCRIPTION);
 
 	strcpy(file_root, doc_root);
 	strcat(file_root, "footer.fcgi");
-	
-	footer = strformat(ReadTextFileToMem(file_root).c_str(), APP_NAME, SOFTWARE_NAME);
+	strcpy(FOOTER_TEMPLATE_LOCATION, file_root); // FOOTER_TEMPLATE_LOCATION 内存在 LoadConfig() 中做了初始化
+
+	footer = strformat(ReadTextFileToMem(file_root).c_str(), APP_NAME, FOOTER_TEXT, SOFTWARE_NAME, ANALYSIS_CODE);
 
 	strcpy(file_root, doc_root);
 	strcat(file_root, "error.fcgi");
@@ -324,6 +389,17 @@ void LoadPageSrc()
 // 加载配置
 void LoadConfig()
 {
+	if (HEADER_TEMPLATE_LOCATION == NULL)
+	{
+		HEADER_TEMPLATE_LOCATION = (char *)malloc(1024);
+		memset(HEADER_TEMPLATE_LOCATION, 0, 1024);
+	}
+	if (FOOTER_TEMPLATE_LOCATION == NULL)
+	{
+		FOOTER_TEMPLATE_LOCATION = (char *)malloc(1024);
+		memset(FOOTER_TEMPLATE_LOCATION, 0, 1024);
+	}
+
 	if (!isdbReady)
 	{
 		db = NULL;
@@ -368,7 +444,7 @@ void LoadConfig()
 	{
 		free(APP_NAME);
 	}
-	APP_NAME = (char *)malloc(4096);
+	APP_NAME = (char *)malloc(1024);
 	if (CARD_AD_BANNER_1_IMG != NULL)
 	{
 		free(CARD_AD_BANNER_1_IMG);
@@ -389,6 +465,42 @@ void LoadConfig()
 		free(CARD_AD_BANNER_2_URL);
 	}
 	CARD_AD_BANNER_2_URL = (char *)malloc(1024);
+	if (ADMIN_USER_NAME != NULL)
+	{
+		free(ADMIN_USER_NAME);
+	}
+	ADMIN_USER_NAME = (char *)malloc(1024);
+	if (ADMIN_PASSWORD != NULL)
+	{
+		free(ADMIN_PASSWORD);
+	}
+	ADMIN_PASSWORD = (char *)malloc(1024);
+	if (SECONDARY_TITLE != NULL)
+	{
+		free(SECONDARY_TITLE);
+	}
+	SECONDARY_TITLE = (char *)malloc(1024);
+	if (APP_KEYWORDS != NULL)
+	{
+		free(APP_KEYWORDS);
+	}
+	APP_KEYWORDS = (char *)malloc(4096);
+	if (APP_DESCRIPTION != NULL)
+	{
+		free(APP_DESCRIPTION);
+	}
+	APP_DESCRIPTION = (char *)malloc(4096);
+	if (FOOTER_TEXT != NULL)
+	{
+		free(FOOTER_TEXT);
+	}
+	FOOTER_TEXT = (char *)malloc(1024);
+	if (ANALYSIS_CODE != NULL)
+	{
+		free(ANALYSIS_CODE);
+	}
+	ANALYSIS_CODE = (char *)malloc(4096);
+	
 
 	char *lpvBuffer = (char *)malloc(128);
 
@@ -397,12 +509,19 @@ void LoadConfig()
 	memset(OAUTH2_APPID, 0, 1024);
 	memset(OAUTH2_SECRET, 0, 1024);
 	memset(CURL_PROXY_URL, 0, 1024);
-	memset(APP_NAME, 0, 4096);
+	memset(APP_NAME, 0, 1024);
 	memset(lpvBuffer, 0, 128);
 	memset(CARD_AD_BANNER_1_IMG, 0, 1024);
 	memset(CARD_AD_BANNER_2_IMG, 0 ,1024);
 	memset(CARD_AD_BANNER_1_URL, 0, 1024);
 	memset(CARD_AD_BANNER_2_URL, 0, 1024);
+	memset(ADMIN_USER_NAME, 0, 1024);
+	memset(ADMIN_PASSWORD, 0, 1024);
+	memset(SECONDARY_TITLE, 0, 1024);
+	memset(APP_KEYWORDS, 0, 4096);
+	memset(APP_DESCRIPTION, 0, 4096);
+	memset(FOOTER_TEXT, 0, 1024);
+	memset(ANALYSIS_CODE, 0, 4096);
 
 	GetSettings("SERVER_URL", SERVER_URL);
 	GetSettings("USER_AGENT", USER_AGENT);
@@ -414,6 +533,13 @@ void LoadConfig()
 	GetSettings("CARD_AD_BANNER_2_IMG", CARD_AD_BANNER_2_IMG);
 	GetSettings("CARD_AD_BANNER_1_URL", CARD_AD_BANNER_1_URL);
 	GetSettings("CARD_AD_BANNER_2_URL", CARD_AD_BANNER_2_URL);
+	GetSettings("ADMIN_USER_NAME", ADMIN_USER_NAME);
+	GetSettings("ADMIN_PASSWORD", ADMIN_PASSWORD);
+	GetSettings("SECONDARY_TITLE", SECONDARY_TITLE);
+	GetSettings("APP_KEYWORDS", APP_KEYWORDS);
+	GetSettings("APP_DESCRIPTION", APP_DESCRIPTION);
+	GetSettings("FOOTER_TEXT", FOOTER_TEXT);
+	GetSettings("ANALYSIS_CODE", ANALYSIS_CODE);
 
 	GetSettings("CURL_TIMEOUT", lpvBuffer);
 
@@ -452,12 +578,14 @@ void LoadConfig()
 		break;
 	}
 	sqlite3_finalize(stmt);
+
+	// 如果数据库没有下面配置，则自动增加并写入默认值以确保首次能够正常运行。
 	AddSettings("QueryCounter", "0");
 	AddSettings("SERVER_URL", "http://0.0.0.0");
 	AddSettings("USER_AGENT", SOFTWARE_NAME);
-	AddSettings("OAUTH2_APPID", "(null)");
-	AddSettings("OAUTH2_SECRET", "(null)");
-	AddSettings("CURL_PROXY_URL", "(null)");
+	AddSettings("OAUTH2_APPID", "");
+	AddSettings("OAUTH2_SECRET", "");
+	AddSettings("CURL_PROXY_URL", "");
 	AddSettings("APP_NAME", SOFTWARE_NAME);
 	AddSettings("CURL_TIMEOUT", "2");
 	AddSettings("CURL_USE_PROXY", "0");
@@ -465,6 +593,13 @@ void LoadConfig()
 	AddSettings("CARD_AD_BANNER_2_IMG", "");
 	AddSettings("CARD_AD_BANNER_1_URL", "");
 	AddSettings("CARD_AD_BANNER_2_URL", "");
+	AddSettings("ADMIN_USER_NAME", "admin");
+	AddSettings("ADMIN_PASSWORD", "admin");
+	AddSettings("SECONDARY_TITLE", u8"综合教务小助手");
+	AddSettings("APP_KEYWORDS", "");
+	AddSettings("APP_DESCRIPTION", "");
+	AddSettings("FOOTER_TEXT", u8"综合教务小助手");
+	AddSettings("ANALYSIS_CODE", "");
 }
 
 // 更新用户数量、查询计数器

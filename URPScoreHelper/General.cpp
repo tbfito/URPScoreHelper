@@ -21,8 +21,11 @@ const char *QUICKQUERY_HTML = u8"<div class=\"quickquery\"><a class=\"weui-btn w
 const char *ASSOC_LINK_HTML = u8"<a href=\"index.fcgi?act=requestAssoc\">绑定QQ帐号</a>";
 const char *RLS_ASSOC_LINK_HTML = u8"<span style=\"color:rgb(0,255,90)\">QQ已绑定</span> | <a href=\"javascript:void(0);\" onclick=\"releaseAssoc('%s');\">解除绑定</a>";
 const char *CARD_AD_BANNER_HTML = "<div class=\"swiper-slide\"><a href=\"%s\" target=\"_blank\"><img data-src=\"%s\" height=\"160\" width=\"100%%\" class=\"swiper-lazy\"></a><div class=\"swiper-lazy-preloader\"></div></div>";
+
 // 错误页面和配置初始化
 std::string ERROR_HTML;
+char *HEADER_TEMPLATE_LOCATION = NULL;
+char *FOOTER_TEMPLATE_LOCATION = NULL;
 char *SERVER_URL = NULL;
 char *USER_AGENT = NULL;
 int CURL_TIMEOUT = 10;
@@ -35,6 +38,13 @@ char *CARD_AD_BANNER_1_IMG = NULL;
 char *CARD_AD_BANNER_2_IMG = NULL;
 char *CARD_AD_BANNER_1_URL = NULL;
 char *CARD_AD_BANNER_2_URL = NULL;
+char *ADMIN_USER_NAME = NULL;
+char *ADMIN_PASSWORD = NULL;
+char *SECONDARY_TITLE = NULL;
+char *APP_KEYWORDS = NULL;
+char *APP_DESCRIPTION = NULL;
+char *FOOTER_TEXT = NULL;
+char *ANALYSIS_CODE = NULL;
 
 /*
 输出错误页面

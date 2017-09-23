@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <ctime>
 #include <string.h>
 #include <malloc.h>
 #include <iostream>
