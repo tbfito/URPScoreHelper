@@ -106,7 +106,7 @@
       </div>
       <div class="form-group">
         <div class="label">
-          <label>OAuth 应用密钥(Secret)：</label>
+          <label>OAuth2 应用密钥(Secret)：</label>
         </div>
         <div class="field">
           <input type="text" class="input" name="OAUTH2_SECRET" value="%s" />

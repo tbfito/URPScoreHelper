@@ -26,7 +26,8 @@ void parse_admin_login()
 	}
 
 	cout << "Allow: GET, POST\r\n" << GLOBAL_HEADER
-	     << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, APP_NAME).c_str();
+	     << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(),
+			 APP_NAME, APP_NAME, SOFTWARE_NAME, SOFTWARE_COPYRIGHT).c_str();
 }
 
 // 后台管理错误提示
@@ -190,6 +191,10 @@ void parse_admin_index()
 			 << GLOBAL_HEADER;
 		return;
 	}
+	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
+	{
+		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
+	}
 
 	cout << GLOBAL_HEADER
 		 << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, APP_NAME).c_str();
@@ -205,6 +210,10 @@ void parse_admin_settings()
 			<< GLOBAL_HEADER;
 		return;
 	}
+	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
+	{
+		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
+	}
 
 	cout << GLOBAL_HEADER
 		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(),
@@ -216,6 +225,18 @@ void parse_admin_settings()
 // 保存站点信息 (POST /admin/settings.fcgi)
 void save_admin_settings()
 {
+	if (!verify_session())
+	{
+		cout << "Status: 302 Found\r\n"
+			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
+			<< GLOBAL_HEADER;
+		return;
+	}
+	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
+	{
+		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
+	}
+
 	// 获取 POST 数据。
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0)

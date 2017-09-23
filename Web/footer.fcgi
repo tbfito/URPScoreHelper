@@ -3,7 +3,7 @@
 			<a href="/index.fcgi" class="weui-footer__link">%s</a>
 		</p>
 		<p class="weui-footer__text">%s</p>
-		<p class="weui-footer__text">Powered by %s | <a href="admin/login.fcgi">管理登录</a></p>
+		<p class="weui-footer__text">Powered by %s | <a href="admin/login.fcgi">后台管理平台</a></p>
 	</div>
 	<br />
 	<script charset="utf-8" src="js/jquery.min.js"></script>
