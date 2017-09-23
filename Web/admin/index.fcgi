@@ -7,6 +7,7 @@
     <title>后台管理平台 - %s</title>  
     <link rel="stylesheet" href="css/pintuer.css">
     <link rel="stylesheet" href="css/admin.css">
+	<link rel="shortcut icon" href="../URPScoreHelper.ico">
     <script src="../js/jquery.min.js"></script>   
 </head>
 <body style="background-color:#f2f9fd;">

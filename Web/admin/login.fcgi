@@ -7,6 +7,7 @@
     <title>管理员登录 - %s</title>  
     <link rel="stylesheet" href="css/pintuer.css">
     <link rel="stylesheet" href="css/admin.css">
+	<link rel="shortcut icon" href="../URPScoreHelper.ico">
     <script src="../js/jquery.min.js"></script>
     <script src="js/pintuer.js"></script>
 </head>
