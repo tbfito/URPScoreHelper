@@ -4,6 +4,8 @@
 extern FCGX_Request request; //引用外部(URPScoreHelper.h)中定义的FCGI请求上下文。
 extern std::string header;
 extern std::string footer;
+extern int g_QueryCounter;
+extern int g_users;
 
 void parse_admin_login();
 void do_admin_login();
@@ -16,3 +18,8 @@ void save_admin_settings();
 std::string _POST(std::string & post, const char *name);
 void UpdateSettings(const char *name, const char *value);
 void decode_post_data(std::string & str);
+void parse_admin_change_password();
+void do_admin_change_password();
+void parse_admin_adv_card();
+void change_admin_adv_card();
+void parse_admin_info();

@@ -126,6 +126,40 @@ int main(int argc, const char* argv[])
 				}
 			}
 
+			if (strcmp(CGI_SCRIPT_NAME, "/admin/info.fcgi") == 0)
+			{
+					parse_admin_info();
+					goto END_REQUEST;
+			}
+
+			if (strcmp(CGI_SCRIPT_NAME, "/admin/change-pass.fcgi") == 0)
+			{
+				if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+				{
+					parse_admin_change_password();
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
+				{
+					do_admin_change_password();
+					goto END_REQUEST;
+				}
+			}
+
+			if (strcmp(CGI_SCRIPT_NAME, "/admin/adv-card.fcgi") == 0)
+			{
+				if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+				{
+					parse_admin_adv_card();
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
+				{
+					change_admin_adv_card();
+					goto END_REQUEST;
+				}
+			}
+
 			if (strcmp(CGI_REQUEST_URI, "/admin/index.fcgi") == 0 || strcmp(CGI_REQUEST_URI, "/admin") == 0)
 			{
 				cout << "Status: 301 Moved Permanently\r\n" << "Location: " << getAppURL().c_str() << "/admin/\r\n" << GLOBAL_HEADER;

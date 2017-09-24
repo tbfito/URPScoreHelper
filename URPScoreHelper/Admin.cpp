@@ -117,6 +117,7 @@ void do_admin_login()
 		 << GLOBAL_HEADER;
 }
 
+// 生成登录会话 Session
 std::string generate_session()
 {
 	unsigned long long result = std::time(nullptr);
@@ -131,6 +132,7 @@ std::string generate_session()
 	return txt;
 }
 
+// 验证登录会话 Session
 bool verify_session()
 {
 	char *session = (char *)malloc(1024);
@@ -298,7 +300,7 @@ void save_admin_settings()
 	admin_error(u8"设定已保存");
 }
 
-// 获取 POST 中的内容
+// 获取 POST 中的内容(缺陷：表单名称不能中不能有重叠)
 std::string _POST(std::string & post, const char *name)
 {
 	std::string ret;
@@ -354,4 +356,191 @@ void decode_post_data(std::string & str)
 	char temp[4096] = { 0 };
 	left(temp, (char *)str.c_str(), len);
 	str = temp;
+}
+
+// 处理修改管理员信息页面 (GET /admin/change-pass.fcgi)
+void parse_admin_change_password()
+{
+	if (!verify_session())
+	{
+		cout << "Status: 302 Found\r\n"
+			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
+			<< GLOBAL_HEADER;
+		return;
+	}
+	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
+	{
+		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
+	}
+
+	cout << GLOBAL_HEADER
+		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, ADMIN_USER_NAME).c_str();
+}
+
+// 修改管理员信息
+void do_admin_change_password()
+{
+	if (!verify_session())
+	{
+		cout << "Status: 302 Found\r\n"
+			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
+			<< GLOBAL_HEADER;
+		return;
+	}
+	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
+	{
+		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
+	}
+
+	// 获取 POST 数据。
+	int m_post_length = atoi(CGI_CONTENT_LENGTH);
+	if (m_post_length <= 0)
+	{
+		admin_error(u8"<p><b>POST错误</b></p><p>提交的数据可能存在问题</p>");
+		return;
+	}
+	char *m_post_data = (char *)malloc(m_post_length + 2);
+	FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
+	std::string post(m_post_data);
+	free(m_post_data);
+
+	std::string m_ADMIN_USER_NAME = _POST(post, "ADMIN_USER_NAME");
+	std::string m_ORIG_PASSWORD = _POST(post, "ORIG_PASSWORD");
+	std::string m_ADMIN_PASSWORD = _POST(post, "ADMIN_PASSWORD");
+	std::string m_RENEW_PASSWORD = _POST(post, "RENEW_PASSWORD");
+
+	decode_post_data(m_ADMIN_USER_NAME);
+	decode_post_data(m_ORIG_PASSWORD);
+	decode_post_data(m_ADMIN_PASSWORD);
+	decode_post_data(m_RENEW_PASSWORD);
+
+	if (m_ADMIN_USER_NAME.empty() || m_ORIG_PASSWORD.empty() || m_ADMIN_PASSWORD.empty() || m_RENEW_PASSWORD.empty())
+	{
+		admin_error(u8"输入有误，请重新输入");
+		return;
+	}
+	if (m_ORIG_PASSWORD.length() < 5 || m_ADMIN_PASSWORD.length() < 5 || m_RENEW_PASSWORD.length() < 5)
+	{
+		admin_error(u8"新密码长度不能小于5位");
+		return;
+	}
+	if (strcmp(m_ORIG_PASSWORD.c_str(), ADMIN_PASSWORD) != 0)
+	{
+		admin_error(u8"原始密码输入错误");
+		return;
+	}
+	if (m_ORIG_PASSWORD == m_ADMIN_PASSWORD)
+	{
+		admin_error(u8"新旧密码不能一样");
+		return;
+	}
+	if (m_ADMIN_PASSWORD != m_RENEW_PASSWORD)
+	{
+		admin_error(u8"确认密码与新密码不一致");
+		return;
+	}
+
+	UpdateSettings("ADMIN_USER_NAME", m_ADMIN_USER_NAME.c_str());
+	UpdateSettings("ADMIN_PASSWORD", m_ADMIN_PASSWORD.c_str());
+
+	admin_error(u8"修改成功");
+
+}
+
+// 处理广告轮播页面 (GET /admin/adv-card.fcgi)
+void parse_admin_adv_card()
+{
+	if (!verify_session())
+	{
+		cout << "Status: 302 Found\r\n"
+			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
+			<< GLOBAL_HEADER;
+		return;
+	}
+	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
+	{
+		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
+	}
+
+	cout << GLOBAL_HEADER
+		 << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
+			CARD_AD_BANNER_1_IMG, CARD_AD_BANNER_1_URL, CARD_AD_BANNER_2_IMG,
+			CARD_AD_BANNER_2_URL).c_str();
+}
+
+// 修改广告轮播信息
+void change_admin_adv_card()
+{
+	if (!verify_session())
+	{
+		cout << "Status: 302 Found\r\n"
+			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
+			<< GLOBAL_HEADER;
+		return;
+	}
+	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
+	{
+		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
+	}
+
+	// 获取 POST 数据。
+	int m_post_length = atoi(CGI_CONTENT_LENGTH);
+	if (m_post_length <= 0)
+	{
+		admin_error(u8"<p><b>POST错误</b></p><p>提交的数据可能存在问题</p>");
+		return;
+	}
+	char *m_post_data = (char *)malloc(m_post_length + 2);
+	FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
+	std::string post(m_post_data);
+	free(m_post_data);
+
+	std::string m_CARD_AD_BANNER_1_IMG = _POST(post, "CARD_AD_BANNER_1_IMG");
+	std::string m_CARD_AD_BANNER_1_URL = _POST(post, "CARD_AD_BANNER_1_URL");
+	std::string m_CARD_AD_BANNER_2_IMG = _POST(post, "CARD_AD_BANNER_2_IMG");
+	std::string m_CARD_AD_BANNER_2_URL = _POST(post, "CARD_AD_BANNER_2_URL");
+
+	decode_post_data(m_CARD_AD_BANNER_1_IMG);
+	decode_post_data(m_CARD_AD_BANNER_1_URL);
+	decode_post_data(m_CARD_AD_BANNER_2_IMG);
+	decode_post_data(m_CARD_AD_BANNER_2_URL);
+
+	UpdateSettings("CARD_AD_BANNER_1_IMG", m_CARD_AD_BANNER_1_IMG.c_str());
+	UpdateSettings("CARD_AD_BANNER_1_URL", m_CARD_AD_BANNER_1_URL.c_str());
+	UpdateSettings("CARD_AD_BANNER_2_IMG", m_CARD_AD_BANNER_2_IMG.c_str());
+	UpdateSettings("CARD_AD_BANNER_2_URL", m_CARD_AD_BANNER_2_URL.c_str());
+
+	admin_error(u8"修改成功");
+
+}
+
+// 处理系统信息页面 (GET /admin/info.fcgi)
+void parse_admin_info()
+{
+	if (!verify_session())
+	{
+		cout << "Status: 302 Found\r\n"
+			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
+			<< GLOBAL_HEADER;
+		return;
+	}
+	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
+	{
+		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
+	}
+
+	if (strcmp(CGI_QUERY_STRING, "act=reset_query_counter") == 0)
+	{
+		UpdateSettings("QueryCounter", "0");
+		admin_error(u8"操作成功");
+		return;
+	}
+
+	char *server_software = FCGX_GetParam("SERVER_SOFTWARE", request.envp);
+
+	cout << GLOBAL_HEADER
+		 << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
+			 SOFTWARE_NAME, g_users, g_QueryCounter,
+			 (server_software == NULL) ? "" : server_software,
+			__DATE__, __TIME__, SOFTWARE_COPYRIGHT).c_str();
 }

@@ -23,7 +23,7 @@
             <div class="panel loginbox">
                 <div class="text-center margin-big padding-big-top">
 					  <div class="logo margin-big-left fadein-top" style="margin-bottom:20px">
-						<h1><img src="../URPScoreHelper.ico" class="radius-circle rotate-hover" height="50" alt="" />%s</h1>
+						<h1 style="text-shadow:0 0 0 #000, 0px 0px 1px #000"><img src="../URPScoreHelper.ico" class="radius-circle rotate-hover" height="50" alt="" />%s</h1>
 				      </div>
 				</div>
                 <div class="panel-body" style="padding:30px; padding-bottom:10px; padding-top:10px;">
@@ -44,7 +44,7 @@
 					<input type="submit" class="button button-block bg-main text-big input-big" value="登录 &gt;">
 					<a style="text-align:center;margin-top:5px;background-color:#39be0e" href="../" class="button button-block bg-main text-big input-big">&lt; 前台首页</a>
 				</div>
-				<div style="text-align:center;margin:0 auto;font-weight:bold;color:#fff;text-shadow:0 8px 9px #c4b59d, 0px 0px 1px #000;">
+				<div style="text-align:center;margin:0 auto;font-weight:bold;color:#fff;text-shadow:0 0 0 #000, 0px 0px 1px #000;">
 					<p style="margin-bottom:0px">“你们佳文制造的”</p>
 					<p style="margin-bottom:0px">%s</p>
 					<p style="padding-bottom:10px">%s</p>
