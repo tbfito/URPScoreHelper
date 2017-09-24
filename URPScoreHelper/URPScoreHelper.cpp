@@ -600,7 +600,7 @@ void LoadConfig()
 		break;
 	}
 	sqlite3_finalize(stmt);
-	query = "CREATE TABLE IF NOT EXISTS \"Settings\" (\"name\"  TEXT(254) NOT NULL, \"value\"  TEXT(254) NOT NULL, PRIMARY KEY (\"name\"));";
+	query = "CREATE TABLE IF NOT EXISTS \"Settings\" (\"name\"  TEXT(254) NOT NULL, \"value\"  TEXT(4096) NOT NULL, PRIMARY KEY (\"name\"));";
 	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
 	if (db_ret != SQLITE_OK)
 	{
