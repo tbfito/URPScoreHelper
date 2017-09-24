@@ -1,11 +1,11 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "Admin.h"
 #include "General.h"
 #include "StringHelper.h"
 #include "Encrypt.h"
 #include "gbkutf8.h"
 
-// ´¦Àí¹ÜÀíÔ±µÇÂ¼Èë¿Ú (GET /admin/login.fcgi)
+// å¤„ç†ç®¡ç†å‘˜ç™»å½•å…¥å£ (GET /admin/login.fcgi)
 void parse_admin_login()
 {
 	if (strstr(CGI_QUERY_STRING, "act=logout") != NULL)
@@ -30,7 +30,7 @@ void parse_admin_login()
 			 APP_NAME, APP_NAME, SOFTWARE_NAME, SOFTWARE_COPYRIGHT).c_str();
 }
 
-// ºóÌ¨¹ÜÀí´íÎóÌáÊ¾
+// åå°ç®¡ç†é”™è¯¯æç¤º
 void admin_error(const char *err_msg)
 {
 	cout << GLOBAL_HEADER;
@@ -71,14 +71,14 @@ void admin_error(const char *err_msg)
 	delete[]file_root;
 }
 
-// ´¦Àí¹ÜÀíÔ±Â¼ (POST /admin/login.fcgi)
+// å¤„ç†ç®¡ç†å‘˜å½• (POST /admin/login.fcgi)
 void do_admin_login()
 {
-	// »ñÈ¡ POST Êı¾İ¡£
+	// è·å– POST æ•°æ®ã€‚
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0 || m_post_length > 64)
 	{
-		admin_error(u8"<p><b>POSTÇ°·½¸ßÄÜ</b></p><p>·Ç¹Ù·½ÈËÔ±ÇëÑ¸ËÙ³·Àë</p>");
+		admin_error(u8"<p><b>POSTå‰æ–¹é«˜èƒ½</b></p><p>éå®˜æ–¹äººå‘˜è¯·è¿…é€Ÿæ’¤ç¦»</p>");
 		return;
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);
@@ -90,7 +90,7 @@ void do_admin_login()
 	std::string m_password = _POST(post, "pwd");
 	if (m_user.empty() || m_password.empty())
 	{
-		admin_error(u8"<p>ÕÊºÅ»òÃÜÂëĞÅÏ¢»ñÈ¡Ê§°Ü</p>");
+		admin_error(u8"<p>å¸å·æˆ–å¯†ç ä¿¡æ¯è·å–å¤±è´¥</p>");
 		return;
 	}
 
@@ -104,10 +104,10 @@ void do_admin_login()
 	m_password = temp2;
 
 
-	// ÅĞ¶Ï¹ÜÀíÔ±µÇÂ¼
+	// åˆ¤æ–­ç®¡ç†å‘˜ç™»å½•
 	if (strcmp(m_user.c_str(), ADMIN_USER_NAME) != 0 || strcmp(m_password.c_str(), ADMIN_PASSWORD) != 0)
 	{
-		admin_error(u8"<p><b>¤¢¤Ê¤¿¤ÏÒ»ÌåÕl¤Ç¤¹¤«</b></p><p>·Ç¹Ù·½ÈËÔ±ÇëÑ¸ËÙ³·Àë</p>");
+		admin_error(u8"<p><b>ã‚ãªãŸã¯ä¸€ä½“èª°ã§ã™ã‹</b></p><p>éå®˜æ–¹äººå‘˜è¯·è¿…é€Ÿæ’¤ç¦»</p>");
 		return;
 	}
 
@@ -117,7 +117,7 @@ void do_admin_login()
 		 << GLOBAL_HEADER;
 }
 
-// Éú³ÉµÇÂ¼»á»° Session
+// ç”Ÿæˆç™»å½•ä¼šè¯ Session
 std::string generate_session()
 {
 	unsigned long long result = std::time(nullptr);
@@ -132,7 +132,7 @@ std::string generate_session()
 	return txt;
 }
 
-// ÑéÖ¤µÇÂ¼»á»° Session
+// éªŒè¯ç™»å½•ä¼šè¯ Session
 bool verify_session()
 {
 	char *session = (char *)malloc(1024);
@@ -142,7 +142,7 @@ bool verify_session()
 	if (pStr1 != NULL)
 	{
 		char *pStr2 = strstr(pStr1 + 13, ";");
-		if (pStr2 == NULL) // Èç¹ûÕâÌõ Cookie ÔÚ×îºóÒ»Ìõ
+		if (pStr2 == NULL) // å¦‚æœè¿™æ¡ Cookie åœ¨æœ€åä¸€æ¡
 		{
 			right(session, CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - (pStr1 - CGI_HTTP_COOKIE) - 13);
 		}
@@ -173,7 +173,7 @@ bool verify_session()
 	char *unused;
 	unsigned long long timestamp = strtoull(tmp1, &unused, 10);
 	unsigned long long now = std::time(nullptr);
-	if (timestamp <= now) // »á»°³¬Ê±
+	if (timestamp <= now) // ä¼šè¯è¶…æ—¶
 	{
 		free(session);
 		return false;
@@ -183,7 +183,7 @@ bool verify_session()
 	return true;
 }
 
-// ´¦Àí¹ÜÀíÄ£°åÊ×Ò³ (GET /admin/ /admin/index.fcgi)
+// å¤„ç†ç®¡ç†æ¨¡æ¿é¦–é¡µ (GET /admin/ /admin/index.fcgi)
 void parse_admin_index()
 {
 	if (!verify_session())
@@ -193,7 +193,7 @@ void parse_admin_index()
 			 << GLOBAL_HEADER;
 		return;
 	}
-	else // Èç¹ûÒÑµÇÂ¼£¬ÄÇÃ´ÕâÊÇÒ»¸öĞÂ²Ù×÷£¬¸üĞÂcookie¹ıÆÚÊ±¼ä
+	else // å¦‚æœå·²ç™»å½•ï¼Œé‚£ä¹ˆè¿™æ˜¯ä¸€ä¸ªæ–°æ“ä½œï¼Œæ›´æ–°cookieè¿‡æœŸæ—¶é—´
 	{
 		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
 	}
@@ -202,7 +202,7 @@ void parse_admin_index()
 		 << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, APP_NAME).c_str();
 }
 
-// ´¦ÀíÕ¾µãĞÅÏ¢Ò³Ãæ (GET /admin/settings.fcgi)
+// å¤„ç†ç«™ç‚¹ä¿¡æ¯é¡µé¢ (GET /admin/settings.fcgi)
 void parse_admin_settings()
 {
 	if (!verify_session())
@@ -212,7 +212,7 @@ void parse_admin_settings()
 			<< GLOBAL_HEADER;
 		return;
 	}
-	else // Èç¹ûÒÑµÇÂ¼£¬ÄÇÃ´ÕâÊÇÒ»¸öĞÂ²Ù×÷£¬¸üĞÂcookie¹ıÆÚÊ±¼ä
+	else // å¦‚æœå·²ç™»å½•ï¼Œé‚£ä¹ˆè¿™æ˜¯ä¸€ä¸ªæ–°æ“ä½œï¼Œæ›´æ–°cookieè¿‡æœŸæ—¶é—´
 	{
 		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
 	}
@@ -224,7 +224,7 @@ void parse_admin_settings()
 			OAUTH2_APPID, OAUTH2_SECRET, FOOTER_TEXT, ANALYSIS_CODE).c_str();
 }
 
-// ±£´æÕ¾µãĞÅÏ¢ (POST /admin/settings.fcgi)
+// ä¿å­˜ç«™ç‚¹ä¿¡æ¯ (POST /admin/settings.fcgi)
 void save_admin_settings()
 {
 	if (!verify_session())
@@ -234,16 +234,16 @@ void save_admin_settings()
 			<< GLOBAL_HEADER;
 		return;
 	}
-	else // Èç¹ûÒÑµÇÂ¼£¬ÄÇÃ´ÕâÊÇÒ»¸öĞÂ²Ù×÷£¬¸üĞÂcookie¹ıÆÚÊ±¼ä
+	else // å¦‚æœå·²ç™»å½•ï¼Œé‚£ä¹ˆè¿™æ˜¯ä¸€ä¸ªæ–°æ“ä½œï¼Œæ›´æ–°cookieè¿‡æœŸæ—¶é—´
 	{
 		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
 	}
 
-	// »ñÈ¡ POST Êı¾İ¡£
+	// è·å– POST æ•°æ®ã€‚
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0)
 	{
-		admin_error(u8"<p><b>POST´íÎó</b></p><p>Ìá½»µÄÊı¾İ¿ÉÄÜ´æÔÚÎÊÌâ</p>");
+		admin_error(u8"<p><b>POSTé”™è¯¯</b></p><p>æäº¤çš„æ•°æ®å¯èƒ½å­˜åœ¨é—®é¢˜</p>");
 		return;
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);
@@ -293,14 +293,14 @@ void save_admin_settings()
 	UpdateSettings("FOOTER_TEXT", m_FOOTER_TEXT.c_str());
 	UpdateSettings("ANALYSIS_CODE", m_ANALYSIS_CODE.c_str());
 
-	// ÒòÎªheader(²¿·Ö)¡¢footer(È«²¿)ÄÚÈİÒ»Ö±»º´æÔÚÄÚ´æÖĞ£¬ËùÒÔĞèÒªµ¥¶À¶ÔÆä½øĞĞ¸üĞÂ¡£
+	// å› ä¸ºheader(éƒ¨åˆ†)ã€footer(å…¨éƒ¨)å†…å®¹ä¸€ç›´ç¼“å­˜åœ¨å†…å­˜ä¸­ï¼Œæ‰€ä»¥éœ€è¦å•ç‹¬å¯¹å…¶è¿›è¡Œæ›´æ–°ã€‚
 	header = strformat(ReadTextFileToMem(HEADER_TEMPLATE_LOCATION).c_str(), "%s", m_SECONDARY_TITLE.c_str(), m_APP_KEYWORDS.c_str(), m_APP_DESCRIPTION.c_str());
 	footer = strformat(ReadTextFileToMem(FOOTER_TEMPLATE_LOCATION).c_str(), m_APP_NAME.c_str(), m_FOOTER_TEXT.c_str(), SOFTWARE_NAME, m_ANALYSIS_CODE.c_str());
 
-	admin_error(u8"Éè¶¨ÒÑ±£´æ");
+	admin_error(u8"è®¾å®šå·²ä¿å­˜");
 }
 
-// »ñÈ¡ POST ÖĞµÄÄÚÈİ(È±Ïİ£º±íµ¥Ãû³Æ²»ÄÜÖĞ²»ÄÜÓĞÖØµş)
+// è·å– POST ä¸­çš„å†…å®¹(ç¼ºé™·ï¼šè¡¨å•åç§°ä¸èƒ½ä¸­ä¸èƒ½æœ‰é‡å )
 std::string _POST(std::string & post, const char *name)
 {
 	std::string ret;
@@ -322,7 +322,7 @@ std::string _POST(std::string & post, const char *name)
 	return ret;
 }
 
-// ¸üĞÂÉèÖÃ±í
+// æ›´æ–°è®¾ç½®è¡¨
 void UpdateSettings(const char *name, const char *value)
 {
 	std::string query("UPDATE Settings SET value='");
@@ -349,7 +349,7 @@ void UpdateSettings(const char *name, const char *value)
 	sqlite3_finalize(stmt);
 }
 
-// ½âÂëURL±àÂë
+// è§£ç URLç¼–ç 
 void decode_post_data(std::string & str)
 {
 	int len = url_decode((char *)str.c_str(), str.length());
@@ -358,7 +358,7 @@ void decode_post_data(std::string & str)
 	str = temp;
 }
 
-// ´¦ÀíĞŞ¸Ä¹ÜÀíÔ±ĞÅÏ¢Ò³Ãæ (GET /admin/change-pass.fcgi)
+// å¤„ç†ä¿®æ”¹ç®¡ç†å‘˜ä¿¡æ¯é¡µé¢ (GET /admin/change-pass.fcgi)
 void parse_admin_change_password()
 {
 	if (!verify_session())
@@ -368,7 +368,7 @@ void parse_admin_change_password()
 			<< GLOBAL_HEADER;
 		return;
 	}
-	else // Èç¹ûÒÑµÇÂ¼£¬ÄÇÃ´ÕâÊÇÒ»¸öĞÂ²Ù×÷£¬¸üĞÂcookie¹ıÆÚÊ±¼ä
+	else // å¦‚æœå·²ç™»å½•ï¼Œé‚£ä¹ˆè¿™æ˜¯ä¸€ä¸ªæ–°æ“ä½œï¼Œæ›´æ–°cookieè¿‡æœŸæ—¶é—´
 	{
 		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
 	}
@@ -377,7 +377,7 @@ void parse_admin_change_password()
 		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, ADMIN_USER_NAME).c_str();
 }
 
-// ĞŞ¸Ä¹ÜÀíÔ±ĞÅÏ¢
+// ä¿®æ”¹ç®¡ç†å‘˜ä¿¡æ¯
 void do_admin_change_password()
 {
 	if (!verify_session())
@@ -387,16 +387,16 @@ void do_admin_change_password()
 			<< GLOBAL_HEADER;
 		return;
 	}
-	else // Èç¹ûÒÑµÇÂ¼£¬ÄÇÃ´ÕâÊÇÒ»¸öĞÂ²Ù×÷£¬¸üĞÂcookie¹ıÆÚÊ±¼ä
+	else // å¦‚æœå·²ç™»å½•ï¼Œé‚£ä¹ˆè¿™æ˜¯ä¸€ä¸ªæ–°æ“ä½œï¼Œæ›´æ–°cookieè¿‡æœŸæ—¶é—´
 	{
 		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
 	}
 
-	// »ñÈ¡ POST Êı¾İ¡£
+	// è·å– POST æ•°æ®ã€‚
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0)
 	{
-		admin_error(u8"<p><b>POST´íÎó</b></p><p>Ìá½»µÄÊı¾İ¿ÉÄÜ´æÔÚÎÊÌâ</p>");
+		admin_error(u8"<p><b>POSTé”™è¯¯</b></p><p>æäº¤çš„æ•°æ®å¯èƒ½å­˜åœ¨é—®é¢˜</p>");
 		return;
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);
@@ -416,38 +416,38 @@ void do_admin_change_password()
 
 	if (m_ADMIN_USER_NAME.empty() || m_ORIG_PASSWORD.empty() || m_ADMIN_PASSWORD.empty() || m_RENEW_PASSWORD.empty())
 	{
-		admin_error(u8"ÊäÈëÓĞÎó£¬ÇëÖØĞÂÊäÈë");
+		admin_error(u8"è¾“å…¥æœ‰è¯¯ï¼Œè¯·é‡æ–°è¾“å…¥");
 		return;
 	}
 	if (m_ORIG_PASSWORD.length() < 5 || m_ADMIN_PASSWORD.length() < 5 || m_RENEW_PASSWORD.length() < 5)
 	{
-		admin_error(u8"ĞÂÃÜÂë³¤¶È²»ÄÜĞ¡ÓÚ5Î»");
+		admin_error(u8"æ–°å¯†ç é•¿åº¦ä¸èƒ½å°äº5ä½");
 		return;
 	}
 	if (strcmp(m_ORIG_PASSWORD.c_str(), ADMIN_PASSWORD) != 0)
 	{
-		admin_error(u8"Ô­Ê¼ÃÜÂëÊäÈë´íÎó");
+		admin_error(u8"åŸå§‹å¯†ç è¾“å…¥é”™è¯¯");
 		return;
 	}
 	if (m_ORIG_PASSWORD == m_ADMIN_PASSWORD)
 	{
-		admin_error(u8"ĞÂ¾ÉÃÜÂë²»ÄÜÒ»Ñù");
+		admin_error(u8"æ–°æ—§å¯†ç ä¸èƒ½ä¸€æ ·");
 		return;
 	}
 	if (m_ADMIN_PASSWORD != m_RENEW_PASSWORD)
 	{
-		admin_error(u8"È·ÈÏÃÜÂëÓëĞÂÃÜÂë²»Ò»ÖÂ");
+		admin_error(u8"ç¡®è®¤å¯†ç ä¸æ–°å¯†ç ä¸ä¸€è‡´");
 		return;
 	}
 
 	UpdateSettings("ADMIN_USER_NAME", m_ADMIN_USER_NAME.c_str());
 	UpdateSettings("ADMIN_PASSWORD", m_ADMIN_PASSWORD.c_str());
 
-	admin_error(u8"ĞŞ¸Ä³É¹¦");
+	admin_error(u8"ä¿®æ”¹æˆåŠŸ");
 
 }
 
-// ´¦Àí¹ã¸æÂÖ²¥Ò³Ãæ (GET /admin/adv-card.fcgi)
+// å¤„ç†å¹¿å‘Šè½®æ’­é¡µé¢ (GET /admin/adv-card.fcgi)
 void parse_admin_adv_card()
 {
 	if (!verify_session())
@@ -457,7 +457,7 @@ void parse_admin_adv_card()
 			<< GLOBAL_HEADER;
 		return;
 	}
-	else // Èç¹ûÒÑµÇÂ¼£¬ÄÇÃ´ÕâÊÇÒ»¸öĞÂ²Ù×÷£¬¸üĞÂcookie¹ıÆÚÊ±¼ä
+	else // å¦‚æœå·²ç™»å½•ï¼Œé‚£ä¹ˆè¿™æ˜¯ä¸€ä¸ªæ–°æ“ä½œï¼Œæ›´æ–°cookieè¿‡æœŸæ—¶é—´
 	{
 		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
 	}
@@ -468,7 +468,7 @@ void parse_admin_adv_card()
 			CARD_AD_BANNER_2_URL).c_str();
 }
 
-// ĞŞ¸Ä¹ã¸æÂÖ²¥ĞÅÏ¢
+// ä¿®æ”¹å¹¿å‘Šè½®æ’­ä¿¡æ¯
 void change_admin_adv_card()
 {
 	if (!verify_session())
@@ -478,16 +478,16 @@ void change_admin_adv_card()
 			<< GLOBAL_HEADER;
 		return;
 	}
-	else // Èç¹ûÒÑµÇÂ¼£¬ÄÇÃ´ÕâÊÇÒ»¸öĞÂ²Ù×÷£¬¸üĞÂcookie¹ıÆÚÊ±¼ä
+	else // å¦‚æœå·²ç™»å½•ï¼Œé‚£ä¹ˆè¿™æ˜¯ä¸€ä¸ªæ–°æ“ä½œï¼Œæ›´æ–°cookieè¿‡æœŸæ—¶é—´
 	{
 		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
 	}
 
-	// »ñÈ¡ POST Êı¾İ¡£
+	// è·å– POST æ•°æ®ã€‚
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0)
 	{
-		admin_error(u8"<p><b>POST´íÎó</b></p><p>Ìá½»µÄÊı¾İ¿ÉÄÜ´æÔÚÎÊÌâ</p>");
+		admin_error(u8"<p><b>POSTé”™è¯¯</b></p><p>æäº¤çš„æ•°æ®å¯èƒ½å­˜åœ¨é—®é¢˜</p>");
 		return;
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);
@@ -510,11 +510,11 @@ void change_admin_adv_card()
 	UpdateSettings("CARD_AD_BANNER_2_IMG", m_CARD_AD_BANNER_2_IMG.c_str());
 	UpdateSettings("CARD_AD_BANNER_2_URL", m_CARD_AD_BANNER_2_URL.c_str());
 
-	admin_error(u8"ĞŞ¸Ä³É¹¦");
+	admin_error(u8"ä¿®æ”¹æˆåŠŸ");
 
 }
 
-// ´¦ÀíÏµÍ³ĞÅÏ¢Ò³Ãæ (GET /admin/info.fcgi)
+// å¤„ç†ç³»ç»Ÿä¿¡æ¯é¡µé¢ (GET /admin/info.fcgi)
 void parse_admin_info()
 {
 	if (!verify_session())
@@ -524,7 +524,7 @@ void parse_admin_info()
 			<< GLOBAL_HEADER;
 		return;
 	}
-	else // Èç¹ûÒÑµÇÂ¼£¬ÄÇÃ´ÕâÊÇÒ»¸öĞÂ²Ù×÷£¬¸üĞÂcookie¹ıÆÚÊ±¼ä
+	else // å¦‚æœå·²ç™»å½•ï¼Œé‚£ä¹ˆè¿™æ˜¯ä¸€ä¸ªæ–°æ“ä½œï¼Œæ›´æ–°cookieè¿‡æœŸæ—¶é—´
 	{
 		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
 	}
@@ -532,7 +532,7 @@ void parse_admin_info()
 	if (strcmp(CGI_QUERY_STRING, "act=reset_query_counter") == 0)
 	{
 		UpdateSettings("QueryCounter", "0");
-		admin_error(u8"²Ù×÷³É¹¦");
+		admin_error(u8"æ“ä½œæˆåŠŸ");
 		return;
 	}
 

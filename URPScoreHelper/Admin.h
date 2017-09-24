@@ -1,7 +1,7 @@
-#pragma once
+ï»¿#pragma once
 
-/*  ÓÉÓÚÊÇµ¥Ïß³ÌÖ´ĞĞ£¬ËùÒÔÊ²Ã´¶¼²»ÓÃ¿¼ÂÇ£¬Ë¬ÍáÍá¡£ */
-extern FCGX_Request request; //ÒıÓÃÍâ²¿(URPScoreHelper.h)ÖĞ¶¨ÒåµÄFCGIÇëÇóÉÏÏÂÎÄ¡£
+/*  ç”±äºæ˜¯å•çº¿ç¨‹æ‰§è¡Œï¼Œæ‰€ä»¥ä»€ä¹ˆéƒ½ä¸ç”¨è€ƒè™‘ï¼Œçˆ½æ­ªæ­ªã€‚ */
+extern FCGX_Request request; //å¼•ç”¨å¤–éƒ¨(URPScoreHelper.h)ä¸­å®šä¹‰çš„FCGIè¯·æ±‚ä¸Šä¸‹æ–‡ã€‚
 extern std::string header;
 extern std::string footer;
 extern int g_QueryCounter;
