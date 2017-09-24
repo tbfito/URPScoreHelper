@@ -759,7 +759,7 @@ void SetQueryCounter(int current_counts)
 {
 	std::string query("UPDATE Settings SET value='");
 	char counts[128] = { 0 };
-	itoa(current_counts, counts, 10);
+	sprintf(counts, "%d", current_counts);
 	query += counts;
 	query += "' WHERE name='QueryCounter';";
 
