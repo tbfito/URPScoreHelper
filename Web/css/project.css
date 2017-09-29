@@ -1,4 +1,4 @@
-.demos-title:before{content:"";margin-left:45%;position:absolute;width:180px;height:20px;background-color:rgba(255,255,255,.5);will-change:transform;transform:rotate(-90deg);animation:logoLights 1s ease-in 1s infinite}
+.demos-title:before{content:"";margin-left:45%;position:absolute;width:100px;height:20px;background-color:rgba(255,255,255,.5);will-change:transform;transform:rotate(-90deg);animation:logoLights 1s ease-in 1s infinite}
 @keyframes logoLights {0%{left:-100px}to{left:120px}}
 @keyframes fade-in{0%{opacity:0;top:30px}100%{opacity:1;top:0px;will-change:auto}}	 
 .content{position:relative;margin:0 auto;width:30%;animation:fade-in;animation-duration:0.5s;will-change:transform;transform:translate3d(0,0,0)}
