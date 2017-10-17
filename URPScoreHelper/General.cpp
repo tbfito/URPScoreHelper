@@ -48,8 +48,6 @@ char *ANALYSIS_CODE = NULL;
 
 /*
 输出错误页面
-@Params: char* error message
-@Return: none
 */
 void Error(const char *p_ErrMsg)
 {
@@ -59,8 +57,6 @@ void Error(const char *p_ErrMsg)
 
 /*
 BASE64 编码
-@Params: source bin, in buffer, in length
-@Return char* base64 code
 */
 const char * base64char = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 char * base64_encode(const unsigned char * bindata, char * base64, int binlength)
@@ -105,8 +101,6 @@ char * base64_encode(const unsigned char * bindata, char * base64, int binlength
 
 /*
 将文本文件读入内存
-@Params: const char* file path
-@Return: std::string filedata
 */
 std::string ReadTextFileToMem(const char *lpszLocalPath)
 {
@@ -134,8 +128,6 @@ std::string ReadTextFileToMem(const char *lpszLocalPath)
 
 /*
 将成绩转化为绩点
-@Params: float cj
-@Return: float jidian point
 */
 float cj2jd(float cj)
 {
@@ -146,8 +138,6 @@ float cj2jd(float cj)
 
 /*
 实现 std::string 的格式化功能
-@Params: const char *format
-@Return: std::string
 */
 std::string strformat(const char *format, ...)
 {

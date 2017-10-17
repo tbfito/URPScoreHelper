@@ -9,8 +9,10 @@ std::string error;
 int g_QueryCounter;
 int g_users;
 sqlite3 *db;
-
 FCGX_Request request; //全局可以使用的请求
+static const char *emptystr = "";
+
+
 char *CGI_SCRIPT_NAME; // 脚本名字
 char *CGI_REQUEST_URI; // 请求URI
 char *CGI_REQUEST_METHOD; // 请求方法

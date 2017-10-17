@@ -1,8 +1,7 @@
 ﻿/*
 ******************************************
 ********** iEdon URPScoreHelper **********
-**********       唯扬小助手      *********
-********** C++ MVC - Controller **********
+**********  C MVC - Controller  **********
 **********   Copyright © iEdon  **********
 ******************************************
 ****  Project encoding must be UTF-8  ****
@@ -20,31 +19,11 @@
 #include "gbkutf8.h"
 #include "Admin.h"
 
-// 入口函数 (FastCGI 处理循环)
-int main(int argc, const char* argv[])
+// 请求映射入口 (FastCGI 处理循环)
+int app_intro()
 {
-	LoadConfig(); // 首次加载配置
-	/*EnableMemLeakCheck();*/
-	str_normalize_init();
-	FCGX_Init();
-	curl_global_init(CURL_GLOBAL_ALL);
-	static const char *emptystr = "";
-	isPageSrcLoadSuccess = false;
-
-	int FCGX_SocketId = 0;
-	if (argc == 3)
-	{
-		if (strcmp(argv[1], "-p") == 0)
-		{
-			FCGX_SocketId = FCGX_OpenSocket(argv[2], 5);
-			if (FCGX_SocketId == -1)
-				FCGX_SocketId = 0;
-		}
-	}
-
-	FCGX_InitRequest(&request, FCGX_SocketId, 0);
-
-	while (FCGX_Accept_r(&request) == 0)
+	int ret = FCGX_Accept_r(&request);
+	while (ret == 0)
 	{
 		LoadConfig(); // 更新配置信息
 		if (isdbReady)
@@ -320,34 +299,13 @@ int main(int argc, const char* argv[])
 		goto END_REQUEST;
 
 		END_REQUEST:
+			ret = FCGX_Accept_r(&request);
 			ZeroMemory(JSESSIONID, 256);
 			//FCGX_Finish_r(&request); 注： FCGI 库里面每次执行 Accept，已经帮做好了 Finish 动作。
 			//_CrtDumpMemoryLeaks();
 			continue;
 	}
-		printf("%s\n%s\n\n%s\n", SOFTWARE_NAME, SOFTWARE_COPYRIGHT, "\tOptions: [-p (localhost):port_number]");
-		curl_global_cleanup();
-		sqlite3_close(db);
-		free(HEADER_TEMPLATE_LOCATION);
-		free(FOOTER_TEMPLATE_LOCATION);
-		free(SERVER_URL);
-		free(USER_AGENT);
-		free(OAUTH2_APPID);
-		free(OAUTH2_SECRET);
-		free(CURL_PROXY_URL);
-		free(APP_NAME);
-		free(CARD_AD_BANNER_1_IMG);
-		free(CARD_AD_BANNER_2_IMG);
-		free(CARD_AD_BANNER_1_URL);
-		free(CARD_AD_BANNER_2_URL);
-		free(ADMIN_USER_NAME);
-		free(ADMIN_PASSWORD);
-		free(SECONDARY_TITLE);
-		free(APP_KEYWORDS);
-		free(APP_DESCRIPTION);
-		free(FOOTER_TEXT);
-		free(ANALYSIS_CODE);
-		return 0;
+	return ret;
 }
 
 // 预加载头部和尾部页面(header.fcgi, footer.fcgi, error.fcgi)
@@ -2003,13 +1961,24 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	m_Output.append(AFTER_TEMPLATE);
 
 	// 填充返回页面
+	//if (m_Total_pointsxxuefen != 0 || m_Total_xuefen != 0)
+	//{
+	float jiaquan, gpa;
 	if (m_Total_pointsxxuefen != 0 || m_Total_xuefen != 0)
 	{
+		jiaquan = m_Total_pointsxxuefen / m_Total_xuefen;
+		gpa = m_Total_jidian / m_Total_xuefen;
+	}
+	else
+	{
+		jiaquan = 0.0;
+		gpa = 0.0;
+	}
 		char m_jiaquanfen[1024] = { 0 };
 		sprintf(m_jiaquanfen, u8"<div id=\"i_total\"><p>加权平均分 / GPA(平均绩点)：</p><center>%.1f&nbsp;&nbsp;&nbsp;&nbsp;%.2f</center></div>",
-				m_Total_pointsxxuefen / m_Total_xuefen, m_Total_jidian / m_Total_xuefen);
+				jiaquan, gpa);
 		m_Output.insert(0, m_jiaquanfen);
-	}
+	//}
 
 	cout << GLOBAL_HEADER;
 
