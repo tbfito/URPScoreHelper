@@ -1,7 +1,7 @@
 ﻿/*
 ******************************************
 ********** iEdon URPScoreHelper **********
-**********  C MVC - Controller  **********
+**********  Model + Controller  **********
 **********   Copyright © iEdon  **********
 ******************************************
 ****  Project encoding must be UTF-8  ****
@@ -773,7 +773,7 @@ void SetQueryCounter(int current_counts)
 int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 {
 	char *pStr = strstr(CGI_HTTP_COOKIE, "JSESSIONID=");
-	if (pStr == NULL) // 如果客户端已经拿到 JSESSIONID，看看原 Cookie 是否过期、有效（即服务器是否设置了新 Cookie）
+	if (pStr != NULL) // 如果客户端已经拿到 JSESSIONID，看看原 Cookie 是否过期、有效（即服务器是否设置了新 Cookie）
 	{
 		CCurlTask req;
 		if (!req.Exec(true, REQUEST_HOME_PAGE, CGI_HTTP_COOKIE))
