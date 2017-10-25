@@ -32,20 +32,9 @@ int main(int argc, const char *argv[])
 		}
 	}
 
-	int ret = 0;
-	bool isFirst = true;
-	while (FCGX_InitRequest(&request, FCGX_SocketId, 0) == 0)
-	{
-		ret = app_intro();
-		if (isFirst && ret != 0)
-		{
-			break;
-		}
-		isFirst = false;
-		FCGX_Finish_r(&request);
-		memset(&request, 0, sizeof(FCGX_Request));
-	}
 
+	FCGX_InitRequest(&request, FCGX_SocketId, 0);
+	app_intro();
 	printf("%s\n%s\n\n%s\n", SOFTWARE_NAME, SOFTWARE_COPYRIGHT, "\tOptions: [-p (localhost):port_number]");
 	
 	free(HEADER_TEMPLATE_LOCATION);

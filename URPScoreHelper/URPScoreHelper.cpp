@@ -178,7 +178,10 @@ int app_intro()
 				char _3rd_party[4096] = {0};
 				right(_3rd_party, CGI_QUERY_STRING, strlen(CGI_QUERY_STRING) - 10);
 				std::cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n";
-				std::cout << "Set-Cookie: 3rd_party=" << _3rd_party << "; max-age=3600; path=/\r\n" << GLOBAL_HEADER;
+				if (strlen(_3rd_party) != 0)
+				{
+					std::cout << "Set-Cookie: 3rd_party=" << _3rd_party << "; max-age=3600; path=/\r\n" << GLOBAL_HEADER;
+				}
 				goto END_REQUEST;
 			}
 		}
