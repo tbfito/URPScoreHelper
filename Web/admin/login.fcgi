@@ -45,7 +45,6 @@
 					<a style="text-align:center;margin-top:5px;background-color:#39be0e" href="../" class="button button-block bg-main text-big input-big">&lt; 前台首页</a>
 				</div>
 				<div style="text-align:center;margin:0 auto;font-weight:bold;color:#fff;text-shadow:0 0 0 #000, 0px 0px 1px #000;">
-					<p style="margin-bottom:0px">“你们佳文制造的”</p>
 					<p style="margin-bottom:0px">%s</p>
 					<p style="padding-bottom:10px">%s</p>
 				</div>

@@ -799,14 +799,14 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 		}
 		else // 如果 Cookie 还能用，就获取它。
 		{
-			char *pStr2 = strstr(pStr1 + 11, ";");
+			char *pStr2 = strstr(pStr + 11, ";");
 			if (pStr2 == NULL) // 如果这条 Cookie 在最后一条
 			{
-				right(JSESSIONID, CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - (pStr1 - CGI_HTTP_COOKIE) - 11);
+				right(JSESSIONID, CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - (pStr - CGI_HTTP_COOKIE) - 11);
 			}
 			else
 			{
-				mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11);
+				mid(JSESSIONID, pStr, pStr2 - pStr - 11, 11);
 			}
 		}
 	}
