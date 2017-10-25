@@ -13,18 +13,19 @@ FCGX_Request request; //全局可以使用的请求
 static const char *emptystr = "";
 
 
-char *CGI_SCRIPT_NAME; // 脚本名字
-char *CGI_REQUEST_URI; // 请求URI
-char *CGI_REQUEST_METHOD; // 请求方法
-char *CGI_CONTENT_LENGTH; // 数据长度
-char *CGI_QUERY_STRING; // 查询参数
-char *CGI_SCRIPT_FILENAME; // 脚本位置
-char *CGI_HTTP_COOKIE; // Cookie
+char *CGI_SCRIPT_NAME;
+char *CGI_REQUEST_URI;
+char *CGI_REQUEST_METHOD;
+char *CGI_CONTENT_LENGTH;
+char *CGI_QUERY_STRING;
+char *CGI_SCRIPT_FILENAME;
+char *CGI_HTTP_COOKIE;
 char *CGI_HTTP_HOST;
 char *CGI_HTTPS;
 bool isPageSrcLoadSuccess;
 bool isdbReady;
 
+void app_intro();
 int parse_main();
 int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri);
 int parse_index();

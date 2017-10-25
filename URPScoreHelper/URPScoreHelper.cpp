@@ -20,10 +20,9 @@
 #include "Admin.h"
 
 // 请求映射入口 (FastCGI 处理循环)
-int app_intro()
+void app_intro()
 {
-	int ret = FCGX_Accept_r(&request);
-	while (ret == 0)
+	while (FCGX_Accept_r(&request) >= 0)
 	{
 		LoadConfig(); // 更新配置信息
 		if (isdbReady)
@@ -46,8 +45,8 @@ int app_intro()
 		CGI_QUERY_STRING = FCGX_GetParam("QUERY_STRING", request.envp); // 查询参数
 		CGI_SCRIPT_FILENAME = FCGX_GetParam("SCRIPT_FILENAME", request.envp); // 脚本位置
 		CGI_HTTP_COOKIE = FCGX_GetParam("HTTP_COOKIE", request.envp); // Cookie
-		CGI_HTTPS = FCGX_GetParam("HTTPS", request.envp);
-		CGI_HTTP_HOST = FCGX_GetParam("HTTP_HOST", request.envp);
+		CGI_HTTPS = FCGX_GetParam("HTTPS", request.envp); // 是否使用 HTTPS
+		CGI_HTTP_HOST = FCGX_GetParam("HTTP_HOST", request.envp); // 请求主机
 
 		if (!isdbReady)
 		{
@@ -179,7 +178,7 @@ int app_intro()
 				if (strcmp(CGI_QUERY_STRING, "3rd_party=") != 0)
 				{
 					right(_3rd_party, CGI_QUERY_STRING, strlen(CGI_QUERY_STRING) - 10);
-					std::cout << "Set-Cookie: 3rd_party=" << _3rd_party << "; max-age=3600; path=/\r\n";
+					std::cout << "Set-Cookie: 3rd_party=" << _3rd_party << "; max-age=1800; path=/\r\n";
 				}
 				std::cout << GLOBAL_HEADER;
 				goto END_REQUEST;
@@ -334,13 +333,11 @@ int app_intro()
 		goto END_REQUEST;
 
 		END_REQUEST:
-			ret = FCGX_Accept_r(&request);
 			ZeroMemory(JSESSIONID, 256);
-			//FCGX_Finish_r(&request); 注： FCGI 库里面每次执行 Accept，已经帮做好了 Finish 动作。
+			FCGX_Finish_r(&request);
 			//_CrtDumpMemoryLeaks();
 			continue;
 	}
-	return ret;
 }
 
 // 预加载头部和尾部页面(header.fcgi, footer.fcgi, error.fcgi)
