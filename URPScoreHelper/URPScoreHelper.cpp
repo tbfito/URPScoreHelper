@@ -107,8 +107,8 @@ int app_intro()
 
 			if (strcmp(CGI_SCRIPT_NAME, "/admin/info.fcgi") == 0)
 			{
-					parse_admin_info();
-					goto END_REQUEST;
+				parse_admin_info();
+				goto END_REQUEST;
 			}
 
 			if (strcmp(CGI_SCRIPT_NAME, "/admin/change-pass.fcgi") == 0)
@@ -144,7 +144,7 @@ int app_intro()
 				cout << "Status: 301 Moved Permanently\r\n" << "Location: " << getAppURL().c_str() << "/admin/\r\n" << GLOBAL_HEADER;
 				goto END_REQUEST;
 			}
-			
+
 			if (strcmp(CGI_REQUEST_URI, "/admin/") == 0)
 			{
 				parse_admin_index();
@@ -169,6 +169,38 @@ int app_intro()
 			}
 		}
 
+		// 为第三方接入做名称转换
+		if (CGI_QUERY_STRING != NULL && strstr(CGI_QUERY_STRING, "3rd_party=") != NULL)
+		{
+			char * pStr = strstr(CGI_QUERY_STRING, "&");
+			if (pStr == NULL)
+			{
+				char _3rd_party[4096] = {0};
+				right(_3rd_party, CGI_QUERY_STRING, strlen(CGI_QUERY_STRING) - 10);
+				std::cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n";
+				std::cout << "Set-Cookie: 3rd_party=" << _3rd_party << "; max-age=3600; path=/\r\n" << GLOBAL_HEADER;
+				goto END_REQUEST;
+			}
+		}
+		char * pStr_3rd_party = strstr(CGI_HTTP_COOKIE, "3rd_party=");
+		if (CGI_HTTP_COOKIE != NULL && pStr_3rd_party != NULL)
+		{
+			char *pStr2 = strstr(pStr_3rd_party + 10, ";");
+			char _3rd_party[4096] = { 0 };
+			if (pStr2 == NULL) // 如果这条 Cookie 在最后一条
+			{
+				right(_3rd_party, CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - (pStr_3rd_party - CGI_HTTP_COOKIE) - 10);
+			}
+			else
+			{
+				mid(_3rd_party, pStr_3rd_party, pStr2 - pStr_3rd_party - 10, 10);
+			}
+			_3rd_party[1023] = '\0';
+			url_decode(_3rd_party, 1024);
+			strncpy(APP_NAME, _3rd_party, 1024);
+		}
+
+		// 普通请求处理
 		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0) // 如果是 GET 请求
 		{
 			if (strcmp(CGI_SCRIPT_NAME, "/") == 0 || strcmp(CGI_SCRIPT_NAME, "/index.fcgi") == 0)
@@ -740,7 +772,8 @@ void SetQueryCounter(int current_counts)
 // 处理 Cookie、照片(p_photo_uri 为空代表不要照片, 随便设置内容不为空则会向里面写入照片数据)
 int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 {
-	if (strcmp(CGI_HTTP_COOKIE, "") != 0) // 如果客户端已经拿到 JSESSIONID，看看原 Cookie 是否过期、有效（即服务器是否设置了新 Cookie）
+	char *pStr = strstr(CGI_HTTP_COOKIE, "JSESSIONID=");
+	if (pStr == NULL) // 如果客户端已经拿到 JSESSIONID，看看原 Cookie 是否过期、有效（即服务器是否设置了新 Cookie）
 	{
 		CCurlTask req;
 		if (!req.Exec(true, REQUEST_HOME_PAGE, CGI_HTTP_COOKIE))
@@ -766,18 +799,14 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 		}
 		else // 如果 Cookie 还能用，就获取它。
 		{
-			char *pStr1 = strstr(CGI_HTTP_COOKIE, "JSESSIONID=");
-			if (pStr1 != NULL)
+			char *pStr2 = strstr(pStr1 + 11, ";");
+			if (pStr2 == NULL) // 如果这条 Cookie 在最后一条
 			{
-				char *pStr2 = strstr(pStr1 + 11, ";");
-				if (pStr2 == NULL) // 如果这条 Cookie 在最后一条
-				{
-					right(JSESSIONID, CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - (pStr1 - CGI_HTTP_COOKIE) - 11);
-				}
-				else
-				{
-					mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11);
-				}
+				right(JSESSIONID, CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - (pStr1 - CGI_HTTP_COOKIE) - 11);
+			}
+			else
+			{
+				mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11);
 			}
 		}
 	}
