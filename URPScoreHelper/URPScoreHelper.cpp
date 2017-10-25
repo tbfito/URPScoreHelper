@@ -172,16 +172,16 @@ int app_intro()
 		// 为第三方接入做名称转换
 		if (CGI_QUERY_STRING != NULL && strstr(CGI_QUERY_STRING, "3rd_party=") != NULL)
 		{
-			char * pStr = strstr(CGI_QUERY_STRING, "&");
-			if (pStr == NULL)
+			if (strstr(CGI_QUERY_STRING, "&") == NULL)
 			{
 				char _3rd_party[4096] = {0};
-				right(_3rd_party, CGI_QUERY_STRING, strlen(CGI_QUERY_STRING) - 10);
 				std::cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n";
-				if (strlen(_3rd_party) != 0)
+				if (strcmp(CGI_QUERY_STRING, "3rd_party=") != 0)
 				{
-					std::cout << "Set-Cookie: 3rd_party=" << _3rd_party << "; max-age=3600; path=/\r\n" << GLOBAL_HEADER;
+					right(_3rd_party, CGI_QUERY_STRING, strlen(CGI_QUERY_STRING) - 10);
+					std::cout << "Set-Cookie: 3rd_party=" << _3rd_party << "; max-age=3600; path=/\r\n";
 				}
+				std::cout << GLOBAL_HEADER;
 				goto END_REQUEST;
 			}
 		}
