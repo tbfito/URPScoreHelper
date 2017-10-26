@@ -157,7 +157,7 @@ function adjust_form() {
 		document.getElementsByClassName("weui-cell weui-cell_vcode")[1].style.display = "none";
 	}
 }
-$(document).ready(function(){
+function init(){
 	adjust_form();
 	get_captcha();
 	get_avatar();
@@ -204,19 +204,40 @@ $(document).ready(function(){
 			$.toast("没写主观评价啊","cancel");
 			return false;
 		}
-		$.toptip("正在加载中...", 5000, 'success');
-		return true;
-	});
-	$(".weui-grid.js_grid").not("#logout").on("click", function(e) {
-		$.toptip("正在加载中...", 5000, 'success');
-		return true;
-	});
-	$(".return").on("click", function(e) {
-		$.toptip("正在加载中...", 5000, 'success');
+		$.toptip("正在提交，请稍后...", 5000, 'success');
 		return true;
 	});
 	$(".loading").hide();
-});
-$("a").on("click", function(e) {
+	$("a").not("#logout").not("#no_ajax").on("click", function(e) {
+		var href = $(this).attr("href");
+		e.preventDefault();
+		ajax_page(href);
+	});
+}
+function ajax_page(href) {
 	$(".loading").show();
-});
+	if (href != undefined) {
+		$.ajax({
+			url: href,
+			type: "GET",
+			dataType: "html",
+			error: function(request) {
+				window.location.href = href;
+			},
+			success: function(data) {
+				var res = $(data).filter("#container").get(0);
+				if (res != undefined) {
+					console.log(data);
+					$("#container").html(res.innerHTML);
+					$(".loading").hide();
+					init();
+				}
+				else
+				{
+					window.location.href = href;
+				}
+			}
+		});
+	}
+}
+$(document).ready(init());

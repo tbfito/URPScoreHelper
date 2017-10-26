@@ -7,7 +7,7 @@
 @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
 .demos-title:before{content:"";margin-left:45%;position:absolute;width:100px;height:20px;background-color:rgba(255,255,255,.5);will-change:transform;transform:rotate(-90deg);animation:logoLights 1s ease-in 1s infinite}
 @keyframes logoLights {0%{left:-150px}to{left:150px}}
-@keyframes fade-in{0%{opacity:0;top:30px}100%{opacity:1;top:0px;will-change:auto}}	 
+@keyframes fade-in{0%{opacity:0;top:30px}100%{opacity:1;top:0px;will-change:auto}}
 .content{position:relative;margin:0 auto;width:30%;animation:fade-in;animation-duration:0.5s;will-change:transform;transform:translate3d(0,0,0)}
 .demos-header{padding-top:35px}
 .demos-title{text-align: center;font-size: 34px;color: #3cc51f;font-weight:400;margin: 0 15%}

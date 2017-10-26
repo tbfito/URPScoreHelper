@@ -1772,13 +1772,13 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		cout << GLOBAL_HEADER;
 		char m_before[512] = { 0 };
 		sprintf(m_before, "<a name=\"qb_731\"></a><table width=\"100%%\" border=\"0\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td class=\"Linetop\"></td></tr></tbody></table><table width=\"100%%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\"><tbody><tr><td width=\"100%%\"><table border=\"0\" align=\"left\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td>&nbsp;</td><td valign=\"middle\">&nbsp;<b>%s</b> &nbsp;</td></tr></tbody></table></td></tr></tbody></table>", u8"我的课程表 / 选课结果");
-		*(m_end_body + 8) = '<';
-		*(m_end_body + 9) = '/';
-		*(m_end_body + 10) = 'd';
-		*(m_end_body + 11) = 'i';
-		*(m_end_body + 12) = 'v';
-		*(m_end_body + 13) = '>';
-		*(m_end_body + 14) = '\0';
+		*(m_end_body + 26) = '<';
+		*(m_end_body + 27) = '/';
+		*(m_end_body + 28) = 'd';
+		*(m_end_body + 29) = 'i';
+		*(m_end_body + 30) = 'v';
+		*(m_end_body + 31) = '>';
+		*(m_end_body + 32) = '\0';
 
 		strcat(m_prep, m_before);
 		strcat(m_prep, m_result);
