@@ -215,4 +215,8 @@ $(document).ready(function(){
 		$.toptip("正在加载中...", 5000, 'success');
 		return true;
 	});
+	$(".loading").hide();
+});
+$("a").on("click", function(e) {
+	$(".loading").show();
 });
