@@ -150,7 +150,7 @@ function adjust_form(href) {
 			return;
 		}
 	}
-	else
+	else if(window.location.pathname == "/")
 	{
 		return;
 	}
