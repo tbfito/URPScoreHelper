@@ -39,7 +39,7 @@ function get_captcha() {
 			if(data == "LOGGED-IN")
 			{
 				$.toast("已登录过, 正在跳转", "text");
-				window.location.href = "/main.fcgi";
+				ajax_page("/main.fcgi");
 			}
 			else if(data == "REQUEST-FAILED")
 			{
@@ -65,11 +65,12 @@ function get_avatar() {
 		type: "GET",
 		url: "/avatar.fcgi",
 		dataType: "text",
+		cache: true,
 		success: function(data) {
 			if(data == "LOGGED-OUT")
 			{
 				$.toast("尚未登录，请登录！", "text");
-				window.location.href = "/index.fcgi";
+				ajax_page("/index.fcgi");
 			}
 			else
 			{
@@ -110,15 +111,15 @@ function getcharnum() {
 }
 function logout() {
 	$.confirm("确认要退出系统吗？", function() {
-		$.toptip("正在登出...", 5000, 'success');
-		window.location.href = "/index.fcgi?act=logout";
+		$.toptip("正在登出...", 2000, 'success');
+		ajax_page("/index.fcgi?act=logout");
 	}, function() {
 	});
 }
 function releaseAssoc(id) {
 	$.confirm("确定要解除学号与QQ号的关联吗？", function() {
-		$.toptip("正在解绑...", 5000, 'success');
-		window.location.href = "/OAuth2Assoc.fcgi?release=" + id;
+		$.toptip("正在解绑...", 2000, 'success');
+		ajax_page("/OAuth2Assoc.fcgi?release=" + id);
 	}, function() {
 	});
 }
@@ -139,11 +140,16 @@ function check_password() {
 		return false;
 	}
 	$.toptip("正在修改...", 5000, 'success');
+	$(".loading").show();
 	return true;
 }
-function adjust_form() {
-	if(window.location.pathname == "/") {
-		return;
+function adjust_form(href) {
+	if(href != null) {
+		var path = href.split("?")[0];
+		if(path != undefined && (path == "/" || path == "/index.fcgi"))
+		{
+			return;
+		}
 	}
 	r1 = document.getElementById("i_xh");
 	r2 = document.getElementById("i_mm");
@@ -157,8 +163,8 @@ function adjust_form() {
 		document.getElementsByClassName("weui-cell weui-cell_vcode")[1].style.display = "none";
 	}
 }
-function init(){
-	adjust_form();
+function init(href){
+	adjust_form(href);
 	get_captcha();
 	get_avatar();
 	var r1 = document.getElementById("i_xh");
@@ -205,6 +211,7 @@ function init(){
 			return false;
 		}
 		$.toptip("正在提交，请稍后...", 5000, 'success');
+		$(".loading").show();
 		return true;
 	});
 	$(".loading").hide();
@@ -227,10 +234,9 @@ function ajax_page(href) {
 			success: function(data) {
 				var res = $(data).filter("#container").get(0);
 				if (res != undefined) {
-					console.log(data);
 					$("#container").html(res.innerHTML);
 					$(".loading").hide();
-					init();
+					init(href);
 				}
 				else
 				{
@@ -240,4 +246,4 @@ function ajax_page(href) {
 		});
 	}
 }
-$(document).ready(init());
+$(document).ready(init(null));
