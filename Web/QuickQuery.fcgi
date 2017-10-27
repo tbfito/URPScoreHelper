@@ -9,7 +9,7 @@
 <div class="content">
 	<form action="query.fcgi?act=QuickQuery" method="post" class="weui-cells weui-cells_form">
 		<div class="weui-cells__title">
-			输入学号来查询成绩，仅支持广陵学院 :)
+			输入学号来查询成绩，仅支持部分院校 :)
 		</div>
 		<div class="signbox">
 			<div class="weui-cells weui-cells_form bigbox">

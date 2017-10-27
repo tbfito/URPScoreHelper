@@ -230,21 +230,17 @@ function ajax_page(href) {
 		$.ajax({
 			url: href,
 			type: "GET",
-			dataType: "html",
+			dataType: "text",
+			beforeSend: function(request) {
+				request.setRequestHeader("X-Ajax-Request", "1");
+			},
 			error: function(request) {
 				window.location.href = href;
 			},
 			success: function(data) {
-				var res = $(data).filter("#container").get(0);
-				if (res != undefined) {
-					$("#container").html(res.innerHTML);
-					$(".loading").hide();
-					init(href);
-				}
-				else
-				{
-					window.location.href = href;
-				}
+				$("#container").html(data);
+				init(href);
+				$(".loading").hide();
 			}
 		});
 	}

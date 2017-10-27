@@ -220,7 +220,7 @@ void parse_admin_settings()
 	cout << GLOBAL_HEADER
 		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(),
 			APP_NAME, APP_NAME, SECONDARY_TITLE, APP_DESCRIPTION, APP_KEYWORDS, SERVER_URL,
-			USER_AGENT, CURL_TIMEOUT, CURL_USE_PROXY ? 1 : 0, CURL_PROXY_URL, 
+			USER_AGENT, CURL_TIMEOUT, CURL_USE_PROXY ? 1 : 0, CURL_PROXY_URL, ENABLE_QUICK_QUERY ? 1 : 0,
 			OAUTH2_APPID, OAUTH2_SECRET, FOOTER_TEXT, ANALYSIS_CODE).c_str();
 }
 
@@ -260,6 +260,7 @@ void save_admin_settings()
 	std::string m_CURL_TIMEOUT = _POST(post, "CURL_TIMEOUT");
 	std::string m_CURL_USE_PROXY = _POST(post, "CURL_USE_PROXY");
 	std::string m_CURL_PROXY_URL = _POST(post, "CURL_PROXY_URL");
+	std::string m_ENABLE_QUICK_QUERY = _POST(post, "ENABLE_QUICK_QUERY");
 	std::string m_OAUTH2_APPID = _POST(post, "OAUTH2_APPID");
 	std::string m_OAUTH2_SECRET = _POST(post, "OAUTH2_SECRET");
 	std::string m_FOOTER_TEXT = _POST(post, "FOOTER_TEXT");
@@ -274,6 +275,7 @@ void save_admin_settings()
 	decode_post_data(m_CURL_TIMEOUT);
 	decode_post_data(m_CURL_USE_PROXY);
 	decode_post_data(m_CURL_PROXY_URL);
+	decode_post_data(m_ENABLE_QUICK_QUERY);
 	decode_post_data(m_OAUTH2_APPID);
 	decode_post_data(m_OAUTH2_SECRET);
 	decode_post_data(m_FOOTER_TEXT);
@@ -288,6 +290,7 @@ void save_admin_settings()
 	UpdateSettings("CURL_TIMEOUT", m_CURL_TIMEOUT.c_str());
 	UpdateSettings("CURL_USE_PROXY", m_CURL_USE_PROXY.c_str());
 	UpdateSettings("CURL_PROXY_URL", m_CURL_PROXY_URL.c_str());
+	UpdateSettings("ENABLE_QUICK_QUERY", m_ENABLE_QUICK_QUERY.c_str());
 	UpdateSettings("OAUTH2_APPID", m_OAUTH2_APPID.c_str());
 	UpdateSettings("OAUTH2_SECRET", m_OAUTH2_SECRET.c_str());
 	UpdateSettings("FOOTER_TEXT", m_FOOTER_TEXT.c_str());

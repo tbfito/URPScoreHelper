@@ -22,11 +22,12 @@ char *CGI_SCRIPT_FILENAME;
 char *CGI_HTTP_COOKIE;
 char *CGI_HTTP_HOST;
 char *CGI_HTTPS;
+bool isAjaxRequest;
 bool isPageSrcLoadSuccess;
 bool isdbReady;
 
 void app_intro();
-int parse_main();
+void parse_main();
 int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri);
 int parse_index();
 int parse_query();

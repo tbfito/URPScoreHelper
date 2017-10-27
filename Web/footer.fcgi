@@ -4,7 +4,7 @@
 				<a href="/index.fcgi" class="weui-footer__link">%s</a>
 			</p>
 			<p class="weui-footer__text">%s</p>
-			<p class="weui-footer__text">Powered by %s | <a href="admin/login.fcgi">后台管理平台</a></p>
+			<p class="weui-footer__text">Powered by %s | <a id="no_ajax" href="admin/login.fcgi">后台管理平台</a></p>
 		</div>
 		<div class="loading">
 			<div class="loading_animation">

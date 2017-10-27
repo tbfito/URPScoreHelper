@@ -47,6 +47,7 @@ void app_intro()
 		CGI_HTTP_COOKIE = FCGX_GetParam("HTTP_COOKIE", request.envp); // Cookie
 		CGI_HTTPS = FCGX_GetParam("HTTPS", request.envp); // 是否使用 HTTPS
 		CGI_HTTP_HOST = FCGX_GetParam("HTTP_HOST", request.envp); // 请求主机
+		isAjaxRequest = (FCGX_GetParam("HTTP_X_AJAX_REQUEST", request.envp) != NULL); // 是否是 AJAX 请求
 
 		if (!isdbReady)
 		{
@@ -566,7 +567,6 @@ void LoadConfig()
 	GetSettings("ANALYSIS_CODE", ANALYSIS_CODE);
 
 	GetSettings("CURL_TIMEOUT", lpvBuffer);
-
 	CURL_TIMEOUT = atoi(lpvBuffer);
 	if (CURL_TIMEOUT <= 0)
 		CURL_TIMEOUT = 2;
@@ -574,6 +574,10 @@ void LoadConfig()
 
 	GetSettings("CURL_USE_PROXY", lpvBuffer);
 	CURL_USE_PROXY = (atoi(lpvBuffer) == 1);
+
+	memset(lpvBuffer, 0, 128);
+	GetSettings("ENABLE_QUICK_QUERY", lpvBuffer);
+	ENABLE_QUICK_QUERY = (atoi(lpvBuffer) == 1);
 
 	free(lpvBuffer);
 	
@@ -624,6 +628,7 @@ void LoadConfig()
 	AddSettings("APP_DESCRIPTION", "");
 	AddSettings("FOOTER_TEXT", u8"综合教务小助手");
 	AddSettings("ANALYSIS_CODE", "");
+	AddSettings("ENABLE_QUICK_QUERY", "1");
 }
 
 // 更新用户数量、查询计数器
@@ -875,8 +880,8 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 	return 1;
 }
 
-// 处理 GET /main.fcgi
-int parse_main()
+// 处理 /main.fcgi
+void parse_main()
 {
 	if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
 	{
@@ -885,7 +890,7 @@ int parse_main()
 		if (m_post_length <= 0 || m_post_length > 127)
 		{
 			Error(u8"<p><b>发生错误，POST 数据长度异常</b></p><p>帐号或密码输入有问题哦，请重试</p>");
-			return -1;
+			return;
 		}
 		char *m_post_data = (char *)malloc(m_post_length + 2);
 		FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
@@ -896,7 +901,7 @@ int parse_main()
 		{
 			free(m_post_data);
 			Error(u8"<p>无法获取学号信息。</p>");
-			return -1;
+			return;
 		}
 		char *pStr2 = strstr(pStr1 + 3, "&");
 		char m_xuehao[128] = { 0 };
@@ -910,7 +915,7 @@ int parse_main()
 		{
 			free(m_post_data);
 			Error(u8"<p>无法获取密码信息。</p>");
-			return -1;
+			return;
 		}
 		pStr2 = strstr(pStr1 + 3, "&");
 		char m_password[128] = { 0 };
@@ -924,7 +929,7 @@ int parse_main()
 		{
 			free(m_post_data);
 			Error(u8"<p>无法获取验证码信息。</p>");
-			return -1;
+			return;
 		}
 		char m_captcha[128] = { 0 };
 		right(m_captcha, pStr1 + 4, 4);
@@ -933,7 +938,7 @@ int parse_main()
 		{
 			// 其余资源清理已在学生登录里面做过了。
 			free(m_post_data);
-			return -1;
+			return;
 		}
 		free(m_post_data);
 		char m_xuehaoe[1024] = { 0 };
@@ -963,12 +968,6 @@ int parse_main()
 		memset(m_student_name, 0, 512);
 		get_student_name(m_student_name);
 	}
-	
-	cout << GLOBAL_HEADER;
-
-	std::string title(m_student_name);
-	title += u8" - ";
-	title += APP_NAME;
 
 	// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
 	std::string query("SELECT openid FROM URPScoreHelper WHERE id='");
@@ -986,7 +985,7 @@ int parse_main()
 		Err_Msg.append(")</p>");
 		Error(Err_Msg.c_str());
 		sqlite3_finalize(stmt);
-		return -1;
+		return;
 	}
 
 	const unsigned char *openid = NULL;
@@ -999,7 +998,15 @@ int parse_main()
 
 	sqlite3_finalize(stmt);
 
-	cout << strformat(header.c_str(), title.c_str());
+	cout << GLOBAL_HEADER;
+
+	if (!isAjaxRequest)
+	{
+		std::string title(m_student_name);
+		title += u8" - ";
+		title += APP_NAME;
+		cout << strformat(header.c_str(), title.c_str());
+	}
 	std::string OutputAd;
 	if (strlen(CARD_AD_BANNER_1_IMG) > 0)
 	{
@@ -1023,9 +1030,10 @@ int parse_main()
 		cout << strformat(m_lpszHomepage.c_str(), APP_NAME, m_student_name, m_student_id,
 							strformat(RLS_ASSOC_LINK_HTML, m_student_id).c_str(), OutputAd.c_str());
 	}
-
-	cout << footer.c_str();
-	return 0;
+	if (!isAjaxRequest)
+	{
+		cout << footer.c_str();
+	}
 }
 
 // 处理主页面请求 (GET / /index.fcgi)
@@ -1105,7 +1113,10 @@ int parse_index()
 	std::string m_lpszHomepage = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
 	cout << GLOBAL_HEADER;
-	cout << strformat( header.c_str(), APP_NAME);
+	if (!isAjaxRequest)
+	{
+		cout << strformat(header.c_str(), APP_NAME);
+	}
 
 	if (m_xh == NULL || m_mm == NULL)
 	{
@@ -1113,13 +1124,13 @@ int parse_index()
 		{
 			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter,
 				u8"输入你的教务系统帐号来登录吧 :)", token_xh, token_mm, u8"登录", " col-50",
-				OAUTH2_LOGIN_HTML, QUICKQUERY_HTML);
+				OAUTH2_LOGIN_HTML, ENABLE_QUICK_QUERY ? QUICKQUERY_HTML : "");
 		}
 		else
 		{
 			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter,
 				u8"输入你的教务系统帐号来登录吧 :)", "", "", u8"登录", " col-50",
-				OAUTH2_LOGIN_HTML, QUICKQUERY_HTML);
+				OAUTH2_LOGIN_HTML, ENABLE_QUICK_QUERY ? QUICKQUERY_HTML : "");
 		}
 	}
 	else 
@@ -1127,8 +1138,10 @@ int parse_index()
 		cout << strformat( m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter,
 						u8"QQ登录成功，输入验证码继续吧 :)", m_xh, m_mm, u8"继续", "", "", "");
 	}
-
-	cout << footer.c_str();
+	if (!isAjaxRequest)
+	{
+		cout << footer.c_str();
+	}
 	if (m_xh != NULL)
 		delete[]m_xh;
 	if (m_mm != NULL)
@@ -1201,7 +1214,7 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 // 处理头像 Ajax 请求
 void parse_ajax_avatar()
 {
-	cout << "Cache-Control: no-cache\r\nPragma: no-cache\r\nExpires: Thu, 16 Oct 1997 00:00:00 GMT\r\nContent-Type: text/plain; charset=utf-8\r\n";
+	cout << "Content-Type: text/plain; charset=utf-8\r\n";
 	bool m_need_update_cookie = false;
 	std::string m_photo(" "); // 有数据，需要获取照片
 	process_cookie(&m_need_update_cookie, m_photo);
@@ -1334,13 +1347,18 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		strcat(m_prep, m_before);
 		strcat(m_prep, m_result);
 
-		std::string title(m_Student);
-		title += u8"的考试成绩 - ";
-		title += APP_NAME;
-
-		cout << strformat( header.c_str(), title.c_str());
+		if (!isAjaxRequest)
+		{
+			std::string title(m_Student);
+			title += u8"的考试成绩 - ";
+			title += APP_NAME;
+			cout << strformat(header.c_str(), title.c_str());
+		}
 		cout << strformat( m_lpszQuery.c_str(), m_Student, m_prep);
-		cout << footer.c_str();
+		if (!isAjaxRequest)
+		{
+			cout << footer.c_str();
+		}
 
 		SetQueryCounter(++g_QueryCounter);
 
@@ -1393,13 +1411,18 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		*(m_end_body + 6) = '\0';
 		strcat(m_prep, m_result);
 
-		std::string title(m_Student);
-		title += u8"的通过科目 - ";
-		title += APP_NAME;
-
-		cout << strformat( header.c_str(), title.c_str());
+		if (!isAjaxRequest)
+		{
+			std::string title(m_Student);
+			title += u8"的通过科目 - ";
+			title += APP_NAME;
+			cout << strformat(header.c_str(), title.c_str());
+		}
 		cout << strformat( m_lpszQuery.c_str(), m_Student, m_prep);
-		cout << footer.c_str();
+		if (!isAjaxRequest)
+		{
+			cout << footer.c_str();
+		}
 
 		SetQueryCounter(++g_QueryCounter);
 
@@ -1645,14 +1668,21 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		}
 
 		m_Output.append(AFTER_TEMPLATE);
-		std::string title(m_Student);
-		title += u8"的专业方案 - ";
-		title += APP_NAME;
 
 		cout << GLOBAL_HEADER;
-		cout << strformat(header.c_str(), title.c_str());
+
+		if (!isAjaxRequest)
+		{
+			std::string title(m_Student);
+			title += u8"的专业方案 - ";
+			title += APP_NAME;
+			cout << strformat(header.c_str(), title.c_str());
+		}
 		cout << strformat(m_lpszQuery.c_str(), m_Student, m_Output.c_str());
-		cout << footer.c_str();
+		if (!isAjaxRequest)
+		{
+			cout << footer.c_str();
+		}
 		SetQueryCounter(++g_QueryCounter);
 		return;
 	}
@@ -1707,13 +1737,18 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		*(m_end_body + 6) = '\0';
 		strcat(m_prep, m_result);
 
-		std::string title(m_Student);
-		title += u8"的未通过科目 - ";
-		title += APP_NAME;
-
-		cout << strformat( header.c_str(), title.c_str());
+		if (!isAjaxRequest)
+		{
+			std::string title(m_Student);
+			title += u8"的未通过科目 - ";
+			title += APP_NAME;
+			cout << strformat(header.c_str(), title.c_str());
+		}
 		cout << strformat( m_lpszQuery.c_str(), m_Student, m_prep);
-		cout << footer.c_str();
+		if (!isAjaxRequest)
+		{
+			cout << footer.c_str();
+		}
 
 		SetQueryCounter(++g_QueryCounter);
 
@@ -1783,12 +1818,17 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		strcat(m_prep, m_before);
 		strcat(m_prep, m_result);
 
-		std::string title(u8"本学期课程表 - ");
-		title += APP_NAME;
-
-		cout << strformat(header.c_str(), title.c_str());
+		if (!isAjaxRequest)
+		{
+			std::string title(u8"本学期课程表 - ");
+			title += APP_NAME;
+			cout << strformat(header.c_str(), title.c_str());
+		}
 		cout << strformat(m_lpszQuery.c_str(), m_Student, m_prep);
-		cout << footer.c_str();
+		if (!isAjaxRequest)
+		{
+			cout << footer.c_str();
+		}
 
 		SetQueryCounter(++g_QueryCounter);
 		free(m_prep);
@@ -2011,14 +2051,18 @@ void parse_friendly_score(std::string & p_strlpszScore)
 
 	cout << GLOBAL_HEADER;
 
-	std::string title(m_Student);
-	title += u8"的本学期成绩 - ";
-	title += APP_NAME;
-
-	cout << strformat( header.c_str(), title.c_str());
+	if (!isAjaxRequest)
+	{
+		std::string title(m_Student);
+		title += u8"的本学期成绩 - ";
+		title += APP_NAME;
+		cout << strformat(header.c_str(), title.c_str());
+	}
 	cout << strformat( m_lpszQuery.c_str(), m_Student, m_Output.c_str());
-
-	cout << footer.c_str();
+	if (!isAjaxRequest)
+	{
+		cout << footer.c_str();
+	}
 
 	SetQueryCounter(++g_QueryCounter);
 	free(p_lpszScore);
@@ -2352,14 +2396,20 @@ void parse_QuickQuery_Intro()
 
 	if (m_need_update_cookie)
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+
 	cout << GLOBAL_HEADER;
 
-	std::string title(u8"免密成绩查询 - ");
-	title += APP_NAME;
-
-	cout << strformat( header.c_str(), title.c_str());
+	if (!isAjaxRequest)
+	{
+		std::string title(u8"免密成绩查询 - ");
+		title += APP_NAME;
+		cout << strformat(header.c_str(), title.c_str());
+	}
 	cout << strformat( m_lpszQuery.c_str(), APP_NAME, g_users, g_QueryCounter);
-	cout << footer.c_str();
+	if (!isAjaxRequest)
+	{
+		cout << footer.c_str();
+	}
 }
 
 // 免密查询结果 (/query.fcgi?act=QuickQuery)
@@ -2755,10 +2805,12 @@ void parse_QuickQuery_Result()
 
 		if (m_xhgs > 1)
 		{
-			std::string title(u8"多人查询 - 免密成绩查询 - ");
-			title += APP_NAME;
-
-			cout << strformat( header.c_str(), title.c_str());
+			if (!isAjaxRequest)
+			{
+				std::string title(u8"多人查询 - 免密成绩查询 - ");
+				title += APP_NAME;
+				cout << strformat(header.c_str(), title.c_str());
+			}
 			cout << strformat( m_lpszQuery.c_str(), u8"多人查询", m_list.c_str());
 		}
 		else
@@ -2766,17 +2818,21 @@ void parse_QuickQuery_Result()
 			char *m_xxmz_u8 = (char *)malloc(512);
 			unsigned int u8len = 0;
 			gbk_to_utf8(m_xxmz, (unsigned int)strlen(m_xxmz), &m_xxmz_u8, &u8len);
-			std::string title(m_xxmz_u8);
 
-			title += u8" - 免密成绩查询 - ";
-			title += APP_NAME;
-
-			cout << strformat( header.c_str(), title.c_str());
+			if (!isAjaxRequest)
+			{
+				std::string title(m_xxmz_u8);
+				title += u8" - 免密成绩查询 - ";
+				title += APP_NAME;
+				cout << strformat(header.c_str(), title.c_str());
+			}
 			cout << strformat( m_lpszQuery.c_str(), m_xxmz_u8, m_list.c_str());
-
 			free(m_xxmz_u8);
 		}
-		cout << footer.c_str();
+		if (!isAjaxRequest)
+		{
+			cout << footer.c_str();
+		}
 
 		g_QueryCounter += m_xhgs;
 		SetQueryCounter(g_QueryCounter);
@@ -3153,9 +3209,13 @@ void parse_teaching_evaluation()
 
 	cout << GLOBAL_HEADER;
 
-	std::string title = u8"一键评教 - ";
-	title += APP_NAME;
-	cout << strformat(header.c_str(), title.c_str());
+	if (!isAjaxRequest)
+	{
+		std::string title = u8"一键评教 - ";
+		title += APP_NAME;
+		cout << strformat(header.c_str(), title.c_str());
+	}
+
 	bool need_eval = true;
 	if (to_eval && counts)
 	{
@@ -3177,7 +3237,10 @@ void parse_teaching_evaluation()
 		need_eval ? u8"老师很辛苦，给个赞呗。默认全好评，你懂的 :)" : "",
 		need_eval ? "block" : "none"
 		, outer.c_str());
-	cout << footer.c_str();
+	if (!isAjaxRequest)
+	{
+		cout << footer.c_str();
+	}
 }
 
 // 教学评估流程 (POST /TeachEval.fcgi?act=Evaluate)
@@ -3420,13 +3483,18 @@ void parse_change_password()
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 	cout << GLOBAL_HEADER;
 
-	std::string title(u8"修改密码 - ");
-	title += APP_NAME;
-
-	cout << strformat( header.c_str(), title.c_str());
+	if (!isAjaxRequest)
+	{
+		std::string title(u8"修改密码 - ");
+		title += APP_NAME;
+		cout << strformat(header.c_str(), title.c_str());
+	}
 	cout << strformat( m_lpszQuery.c_str());
 
-	cout << footer.c_str();
+	if (!isAjaxRequest)
+	{
+		cout << footer.c_str();
+	}
 }
 
 // 修改密码 (POST /changePassword.fcgi)

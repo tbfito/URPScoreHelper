@@ -19,7 +19,7 @@ extern char *CGI_HTTPS; // is secure HTTP
 extern char *HEADER_TEMPLATE_LOCATION;
 extern char *FOOTER_TEMPLATE_LOCATION;
 
-extern const char *GLOBAL_HEADER;
+extern char GLOBAL_HEADER[256];
 extern const char *SCORE_TEMPLATE;
 extern const char *BEFORE_TEMPLATE;
 extern const char *AFTER_TEMPLATE;
@@ -45,6 +45,7 @@ extern char *CARD_AD_BANNER_1_IMG;
 extern char *CARD_AD_BANNER_2_IMG;
 extern char *CARD_AD_BANNER_1_URL;
 extern char *CARD_AD_BANNER_2_URL;
+extern bool ENABLE_QUICK_QUERY;
 extern char *ADMIN_USER_NAME;
 extern char *ADMIN_PASSWORD;
 extern char *SECONDARY_TITLE;
@@ -54,6 +55,8 @@ extern char *FOOTER_TEXT;
 extern char *ANALYSIS_CODE;
 
 extern std::string ERROR_HTML;
+extern std::string error;
+extern bool isAjaxRequest;
 
 extern char JSESSIONID[256];
 

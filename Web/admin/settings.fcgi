@@ -98,6 +98,15 @@
 		  </div>
 		  <div class="form-group">
 			<div class="label">
+			  <label><b>是否启用免密快速查询：</b>(0-禁用,1-启用 部分院校教务系统可能要求更高权限而无法使用此功能)</label>
+			</div>
+			<div class="field">
+			  <input type="text" class="input" name="ENABLE_QUICK_QUERY" value="%d" />
+			  <div class="tips"></div>
+			</div>
+		  </div>
+		  <div class="form-group">
+			<div class="label">
 			  <label><b>OAuth2 应用ID(AppID)：</b></label>
 			</div>
 			<div class="field">

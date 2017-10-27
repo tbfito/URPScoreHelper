@@ -15,6 +15,10 @@
 
 int main(int argc, const char *argv[])
 {
+	strcat(GLOBAL_HEADER, "Content-Type: text/html; charset=utf-8\r\nX-Powered-By: ");
+	strcat(GLOBAL_HEADER, SOFTWARE_NAME);
+	strcat(GLOBAL_HEADER, "\r\n\r\n");
+
 	LoadConfig();
 	str_normalize_init();
 	FCGX_Init();

@@ -3,11 +3,7 @@
 
 char JSESSIONID[256] = {0};
 
-const char* GLOBAL_HEADER = "X-Powered-By: iEdon-URPScoreHelper\r\n\
-Content-Type: text/html; charset=utf-8\r\n\
-Cache-Control: no-cache\r\n\
-Pragma: no-cache\r\n\
-Expires: Thu, 16 Oct 1997 00:00:00 GMT\r\n\r\n";
+char GLOBAL_HEADER[256] = {0};
 
 // HTMLS
 const char *BEFORE_TEMPLATE = u8"<div id=\"list_page\" style=\"background-color:transparent !important\"><table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"titleTop2\" style=\"background-color:transparent !important;border:none\"><tbody><tr><td class=\"pageAlign\"><table cellpadding=\"0\" width=\"100%\" class=\"displayTag\" cellspacing=\"1\" border=\"0\" id=\"user\"><thead><tr><th align=\"center\" width=\"30%\" class=\"sortable\">课名</th><th align=\"center\" width=\"10%\" class=\"sortable\">成绩</th><th align=\"center\" width=\"10%\" class=\"sortable\">均分</th><th align=\"center\" width=\"10%\" class=\"sortable\">最高</th><th align=\"center\" width=\"10%\" class=\"sortable\">最低</th><th align=\"center\" width=\"10%\" class=\"sortable\">名次</th><th align=\"center\" width=\"10%\" class=\"sortable\">学分</th><th align=\"center\" width=\"10%\" class=\"sortable\">绩点</th></tr></thead><tbody>";
@@ -45,14 +41,22 @@ char *APP_KEYWORDS = NULL;
 char *APP_DESCRIPTION = NULL;
 char *FOOTER_TEXT = NULL;
 char *ANALYSIS_CODE = NULL;
+bool ENABLE_QUICK_QUERY = false;
 
 /*
 输出错误页面
 */
 void Error(const char *p_ErrMsg)
 {
-	std::string output = strformat(ERROR_HTML.c_str(), p_ErrMsg);
-	std::cout << GLOBAL_HEADER << output.c_str();
+	std::cout << GLOBAL_HEADER;
+	if (isAjaxRequest)
+	{
+		std::cout << strformat(error.c_str(), p_ErrMsg).c_str();
+	}
+	else
+	{
+		std::cout << strformat(ERROR_HTML.c_str(), p_ErrMsg).c_str();
+	}
 }
 
 /*
