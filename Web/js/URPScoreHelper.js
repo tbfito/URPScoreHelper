@@ -70,7 +70,7 @@ function get_avatar() {
 			if(data == "LOGGED-OUT")
 			{
 				$.toast("尚未登录，请登录！", "text");
-				ajax_page("/index.fcgi");
+				ajax_page("/index.fcgi?act=logout");
 			}
 			else
 			{
@@ -145,8 +145,7 @@ function check_password() {
 }
 function adjust_form(href) {
 	if(href != null) {
-		var path = href.split("?")[0];
-		if(path != undefined && (path == "/" || path == "/index.fcgi"))
+		if(href == "/" || href == "/index.fcgi?act=logout")
 		{
 			return;
 		}
