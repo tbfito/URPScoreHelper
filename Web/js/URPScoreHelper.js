@@ -151,6 +151,10 @@ function adjust_form(href) {
 			return;
 		}
 	}
+	else
+	{
+		return;
+	}
 	r1 = document.getElementById("i_xh");
 	r2 = document.getElementById("i_mm");
 	if(r1 == undefined || r2 == undefined) {
