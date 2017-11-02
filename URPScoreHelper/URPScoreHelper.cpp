@@ -53,7 +53,7 @@ void app_intro()
 		{
 			cout << "Status: 500 Internal Server Error\r\n"
 				<< GLOBAL_HEADER
-				<< u8"<p><b>数据库打开失败</b></p><p>请检查 Database.db 是否存在。</p>";
+				<< u8"<p><b>数据库连接失败</b></p><p>" << mysql_error(&db) << "</p>";
 			goto END_REQUEST;
 		}
 
@@ -416,22 +416,21 @@ void LoadConfig()
 {
 	if (HEADER_TEMPLATE_LOCATION == NULL)
 	{
-		HEADER_TEMPLATE_LOCATION = (char *)malloc(1024);
-		memset(HEADER_TEMPLATE_LOCATION, 0, 1024);
+		HEADER_TEMPLATE_LOCATION = (char *)malloc(10240);
+		memset(HEADER_TEMPLATE_LOCATION, 0, 10240);
 	}
 	if (FOOTER_TEMPLATE_LOCATION == NULL)
 	{
-		FOOTER_TEMPLATE_LOCATION = (char *)malloc(1024);
-		memset(FOOTER_TEMPLATE_LOCATION, 0, 1024);
+		FOOTER_TEMPLATE_LOCATION = (char *)malloc(10240);
+		memset(FOOTER_TEMPLATE_LOCATION, 0, 10240);
 	}
 
 	if (!isdbReady)
 	{
-		db = NULL;
-		int db_ret = sqlite3_open("Database.db", &db);
-		if (db_ret != SQLITE_OK)
+		if (!mysql_real_connect(&db, MYSQL_HOST, MYSQL_USERNAME, MYSQL_PASSWORD, MYSQL_DBNAME, atoi(MYSQL_PORT_NUMBER), NULL, 0))
 		{
 			isdbReady = false;
+			fprintf(stderr, "Failed to connect to database: Error: %s\n", mysql_error(&db));
 			return; // unlucky..
 		}
 		else
@@ -444,109 +443,109 @@ void LoadConfig()
 	{
 		free(SERVER_URL);
 	}
-	SERVER_URL = (char *)malloc(1024);
+	SERVER_URL = (char *)malloc(10240);
 	if (USER_AGENT != NULL)
 	{
 		free(USER_AGENT);
 	}
-	USER_AGENT = (char *)malloc(1024);
+	USER_AGENT = (char *)malloc(10240);
 	if (OAUTH2_APPID != NULL)
 	{
 		free(OAUTH2_APPID);
 	}
-	OAUTH2_APPID = (char *)malloc(1024);
+	OAUTH2_APPID = (char *)malloc(10240);
 	if (OAUTH2_SECRET != NULL)
 	{
 		free(OAUTH2_SECRET);
 	}
-	OAUTH2_SECRET = (char *)malloc(1024);
+	OAUTH2_SECRET = (char *)malloc(10240);
 	if (CURL_PROXY_URL != NULL)
 	{
 		free(CURL_PROXY_URL);
 	}
-	CURL_PROXY_URL = (char *)malloc(1024);
+	CURL_PROXY_URL = (char *)malloc(10240);
 	if (APP_NAME != NULL)
 	{
 		free(APP_NAME);
 	}
-	APP_NAME = (char *)malloc(1024);
+	APP_NAME = (char *)malloc(10240);
 	if (CARD_AD_BANNER_1_IMG != NULL)
 	{
 		free(CARD_AD_BANNER_1_IMG);
 	}
-	CARD_AD_BANNER_1_IMG = (char *)malloc(1024);
+	CARD_AD_BANNER_1_IMG = (char *)malloc(10240);
 	if (CARD_AD_BANNER_2_IMG != NULL)
 	{
 		free(CARD_AD_BANNER_2_IMG);
 	}
-	CARD_AD_BANNER_2_IMG = (char *)malloc(1024);
+	CARD_AD_BANNER_2_IMG = (char *)malloc(10240);
 	if (CARD_AD_BANNER_1_URL != NULL)
 	{
 		free(CARD_AD_BANNER_1_URL);
 	}
-	CARD_AD_BANNER_1_URL = (char *)malloc(1024);
+	CARD_AD_BANNER_1_URL = (char *)malloc(10240);
 	if (CARD_AD_BANNER_2_URL != NULL)
 	{
 		free(CARD_AD_BANNER_2_URL);
 	}
-	CARD_AD_BANNER_2_URL = (char *)malloc(1024);
+	CARD_AD_BANNER_2_URL = (char *)malloc(10240);
 	if (ADMIN_USER_NAME != NULL)
 	{
 		free(ADMIN_USER_NAME);
 	}
-	ADMIN_USER_NAME = (char *)malloc(1024);
+	ADMIN_USER_NAME = (char *)malloc(10240);
 	if (ADMIN_PASSWORD != NULL)
 	{
 		free(ADMIN_PASSWORD);
 	}
-	ADMIN_PASSWORD = (char *)malloc(1024);
+	ADMIN_PASSWORD = (char *)malloc(10240);
 	if (SECONDARY_TITLE != NULL)
 	{
 		free(SECONDARY_TITLE);
 	}
-	SECONDARY_TITLE = (char *)malloc(1024);
+	SECONDARY_TITLE = (char *)malloc(10240);
 	if (APP_KEYWORDS != NULL)
 	{
 		free(APP_KEYWORDS);
 	}
-	APP_KEYWORDS = (char *)malloc(4096);
+	APP_KEYWORDS = (char *)malloc(10240);
 	if (APP_DESCRIPTION != NULL)
 	{
 		free(APP_DESCRIPTION);
 	}
-	APP_DESCRIPTION = (char *)malloc(4096);
+	APP_DESCRIPTION = (char *)malloc(10240);
 	if (FOOTER_TEXT != NULL)
 	{
 		free(FOOTER_TEXT);
 	}
-	FOOTER_TEXT = (char *)malloc(1024);
+	FOOTER_TEXT = (char *)malloc(10240);
 	if (ANALYSIS_CODE != NULL)
 	{
 		free(ANALYSIS_CODE);
 	}
-	ANALYSIS_CODE = (char *)malloc(4096);
+	ANALYSIS_CODE = (char *)malloc(10240);
 	
 
-	char *lpvBuffer = (char *)malloc(128);
+	char *lpvBuffer = (char *)malloc(10240);
 
-	memset(SERVER_URL, 0, 1024);
-	memset(USER_AGENT, 0, 1024);
-	memset(OAUTH2_APPID, 0, 1024);
-	memset(OAUTH2_SECRET, 0, 1024);
-	memset(CURL_PROXY_URL, 0, 1024);
-	memset(APP_NAME, 0, 1024);
-	memset(lpvBuffer, 0, 128);
-	memset(CARD_AD_BANNER_1_IMG, 0, 1024);
-	memset(CARD_AD_BANNER_2_IMG, 0 ,1024);
-	memset(CARD_AD_BANNER_1_URL, 0, 1024);
-	memset(CARD_AD_BANNER_2_URL, 0, 1024);
-	memset(ADMIN_USER_NAME, 0, 1024);
-	memset(ADMIN_PASSWORD, 0, 1024);
-	memset(SECONDARY_TITLE, 0, 1024);
-	memset(APP_KEYWORDS, 0, 4096);
-	memset(APP_DESCRIPTION, 0, 4096);
-	memset(FOOTER_TEXT, 0, 1024);
-	memset(ANALYSIS_CODE, 0, 4096);
+	memset(SERVER_URL, 0, 10240);
+	memset(USER_AGENT, 0, 10240);
+	memset(OAUTH2_APPID, 0, 10240);
+	memset(OAUTH2_SECRET, 0, 10240);
+	memset(CURL_PROXY_URL, 0, 10240);
+	memset(APP_NAME, 0, 10240);
+	memset(lpvBuffer, 0, 10240);
+	memset(CARD_AD_BANNER_1_IMG, 0, 10240);
+	memset(CARD_AD_BANNER_2_IMG, 0 ,10240);
+	memset(CARD_AD_BANNER_1_URL, 0, 10240);
+	memset(CARD_AD_BANNER_2_URL, 0, 10240);
+	memset(ADMIN_USER_NAME, 0, 10240);
+	memset(ADMIN_PASSWORD, 0, 10240);
+	memset(SECONDARY_TITLE, 0, 10240);
+	memset(APP_KEYWORDS, 0, 10240);
+	memset(APP_DESCRIPTION, 0, 10240);
+	memset(FOOTER_TEXT, 0, 10240);
+	memset(ANALYSIS_CODE, 0, 10240);
 
 	GetSettings("SERVER_URL", SERVER_URL);
 	GetSettings("USER_AGENT", USER_AGENT);
@@ -570,42 +569,28 @@ void LoadConfig()
 	CURL_TIMEOUT = atoi(lpvBuffer);
 	if (CURL_TIMEOUT <= 0)
 		CURL_TIMEOUT = 2;
-	memset(lpvBuffer, 0, 128);
+	memset(lpvBuffer, 0, 10240);
 
 	GetSettings("CURL_USE_PROXY", lpvBuffer);
 	CURL_USE_PROXY = (atoi(lpvBuffer) == 1);
 
-	memset(lpvBuffer, 0, 128);
+	memset(lpvBuffer, 0, 10240);
 	GetSettings("ENABLE_QUICK_QUERY", lpvBuffer);
 	ENABLE_QUICK_QUERY = (atoi(lpvBuffer) == 1);
 
 	free(lpvBuffer);
 	
-	std::string query("CREATE TABLE IF NOT EXISTS \"URPScoreHelper\" (\"id\" TEXT(36) NOT NULL, \"password\" TEXT(36) NOT NULL, \"name\" TEXT(36), \"openid\" TEXT(128), \"OAuth_name\" TEXT(128), \"OAuth_avatar\" TEXT(254), \"lastlogin\" TEXT(64), PRIMARY KEY (\"id\" ASC));");
-	sqlite3_stmt *stmt;
-	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
-	if (db_ret != SQLITE_OK)
+	std::string query("CREATE TABLE IF NOT EXISTS `UserInfo` (`id` char(36) NOT NULL,`password` char(36) NOT NULL,`name` varchar(36) DEFAULT NULL,`openid` varchar(1024) DEFAULT NULL,`OAuth_name` varchar(1024) DEFAULT NULL,`OAuth_avatar` varchar(4096) DEFAULT NULL,`lastlogin` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+	if (mysql_query(&db, query.c_str()) != 0)
 	{
-		sqlite3_finalize(stmt);
 		return;
 	}
-	while (sqlite3_step(stmt) == SQLITE_ROW)
+
+	query = "CREATE TABLE IF NOT EXISTS `Settings` (`name` varchar(254) NOT NULL,`value` varchar(10240) NOT NULL,PRIMARY KEY (`name`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+	if (mysql_query(&db, query.c_str()) != 0)
 	{
-		break;
-	}
-	sqlite3_finalize(stmt);
-	query = "CREATE TABLE IF NOT EXISTS \"Settings\" (\"name\"  TEXT(254) NOT NULL, \"value\"  TEXT(4096) NOT NULL, PRIMARY KEY (\"name\"));";
-	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
-	if (db_ret != SQLITE_OK)
-	{
-		sqlite3_finalize(stmt);
 		return;
 	}
-	while (sqlite3_step(stmt) == SQLITE_ROW)
-	{
-		break;
-	}
-	sqlite3_finalize(stmt);
 
 	// 如果数据库没有下面配置，则自动增加并写入默认值以确保首次能够正常运行。
 	AddSettings("QueryCounter", "0");
@@ -623,10 +608,10 @@ void LoadConfig()
 	AddSettings("CARD_AD_BANNER_2_URL", "");
 	AddSettings("ADMIN_USER_NAME", "admin");
 	AddSettings("ADMIN_PASSWORD", "admin");
-	AddSettings("SECONDARY_TITLE", u8"综合教务小助手");
+	AddSettings("SECONDARY_TITLE", SOFTWARE_NAME);
 	AddSettings("APP_KEYWORDS", "");
 	AddSettings("APP_DESCRIPTION", "");
-	AddSettings("FOOTER_TEXT", u8"综合教务小助手");
+	AddSettings("FOOTER_TEXT", SOFTWARE_NAME);
 	AddSettings("ANALYSIS_CODE", "");
 	AddSettings("ENABLE_QUICK_QUERY", "1");
 }
@@ -634,144 +619,116 @@ void LoadConfig()
 // 更新用户数量、查询计数器
 void UpdateCounter()
 {
-	// 获取多少用户使用了我们的服务 :)
-	std::string query("SELECT value FROM Settings WHERE name='QueryCounter';");
-
-	char **db_Result = NULL;
-	sqlite3_stmt *stmt;
-	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
-
-	if (db_ret != SQLITE_OK)
-	{
-		g_QueryCounter = 0;
-		sqlite3_finalize(stmt);
-		return;
-	}
-
-	const unsigned char *query_counts = NULL;
-
-	while (sqlite3_step(stmt) == SQLITE_ROW)
-	{
-		query_counts = sqlite3_column_text(stmt, 0);
-		break;
-	}
-	if (query_counts == NULL)
-	{
-		g_QueryCounter = 0;
-	}
-	else
-	{
-		g_QueryCounter = atoi((const char *)query_counts);
-	}
-
-	sqlite3_finalize(stmt);
-
-	query = "SELECT COUNT(*) FROM URPScoreHelper;";
-	db_Result = NULL;
-	db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
-
-	if (db_ret != SQLITE_OK)
-	{
-		sqlite3_finalize(stmt);
-		return;
-	}
-	
-	const unsigned char *counts = NULL;
+	g_QueryCounter = 0;
 	g_users = 0;
-	while (sqlite3_step(stmt) == SQLITE_ROW)
+
+	// 获取多少用户使用了我们的服务 :)
+	std::string query("SELECT `value` FROM `Settings` WHERE name='QueryCounter';");
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	if (mysql_query(&db, query.c_str()) != 0)
 	{
-		counts = sqlite3_column_text(stmt, 0);
-		break;
+		return;
 	}
-	if (counts != NULL)
+	result = mysql_store_result(&db);
+	if (mysql_num_rows(result))
 	{
-		g_users = atoi((const char *)counts);
+		while ((row = mysql_fetch_row(result)))
+		{
+			if (row[0])
+			{
+				char query_counts[64] = { 0 };
+				sprintf(query_counts, "%s", row[0]);
+				g_QueryCounter = atoi(query_counts);
+			}
+			break;
+		}
 	}
-	sqlite3_finalize(stmt);
+	mysql_free_result(result);
+	memset(&row, 0, sizeof(MYSQL_ROW));
+
+	query = "SELECT COUNT(*) FROM `UserInfo`;";
+	if (mysql_query(&db, query.c_str()) != 0)
+	{
+		return;
+	}
+	result = mysql_store_result(&db);
+	if (mysql_num_rows(result))
+	{
+		while ((row = mysql_fetch_row(result)))
+		{
+			if (row[0])
+			{
+				char query_counts[64] = { 0 };
+				sprintf(query_counts, "%s", row[0]);
+				g_users = atoi(query_counts);
+			}
+			break;
+		}
+	}
+	mysql_free_result(result);
 }
 
 // 读取数据库设置表中的内容(注意value的内存分配)
 bool GetSettings(const char *name, char *value)
 {
 	// 获取多少用户使用了我们的服务 :)
-	std::string query("SELECT value FROM Settings WHERE name='");
+	std::string query("SELECT `value` FROM `Settings` WHERE name='");
 	query += name;
 	query += "';";
 
-	char **db_Result = NULL;
-	sqlite3_stmt *stmt;
-	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
-
-	if (db_ret != SQLITE_OK)
-	{
-		sqlite3_finalize(stmt);
-		return false;
-	}
-
-	const unsigned char *result = NULL;
-
-	while (sqlite3_step(stmt) == SQLITE_ROW)
-	{
-		result = sqlite3_column_text(stmt, 0);
-		break;
-	}
-	if (result == NULL)
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	if (mysql_query(&db, query.c_str()) != 0)
 	{
 		strcpy(value, "(null)");
-		sqlite3_finalize(stmt);
 		return false;
+	}
+	result = mysql_store_result(&db);
+	if (mysql_num_rows(result))
+	{
+		while ((row = mysql_fetch_row(result)))
+		{
+			if (row[0])
+			{
+				sprintf(value, "%s", row[0]);
+			}
+			break;
+		}
 	}
 	else
 	{
-		strcpy(value, (const char *)result);
+		strcpy(value, "(null)");
 	}
-	sqlite3_finalize(stmt);
+	mysql_free_result(result);
 	return true;
 }
 
 // 向数据库设置表中增添配置项
 bool AddSettings(const char *name, const char *value)
 {
-	std::string query("INSERT OR IGNORE INTO `Settings` (\"name\", \"value\") VALUES ('");
+	std::string query("INSERT IGNORE INTO `Settings` (`name`, `value`) VALUES ('");
 	query =  query + name + "', '" + value + "');";
-	sqlite3_stmt *stmt;
-	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
-	if (db_ret != SQLITE_OK)
+	if (mysql_query(&db, query.c_str()) != 0)
 	{
-		sqlite3_finalize(stmt);
 		return false;
 	}
-	while (sqlite3_step(stmt) == SQLITE_ROW)
-	{
-		break;
-	}
-	sqlite3_finalize(stmt);
 	return true;
 }
 
 // 置查询计数器
 void SetQueryCounter(int current_counts)
 {
-	std::string query("UPDATE Settings SET value='");
+	std::string query("UPDATE `Settings` SET value='");
 	char counts[128] = { 0 };
 	sprintf(counts, "%d", current_counts);
 	query += counts;
 	query += "' WHERE name='QueryCounter';";
 
-	char **db_Result = NULL;
-	sqlite3_stmt *stmt;
-	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
-
-	if (db_ret != SQLITE_OK)
+	if (mysql_query(&db, query.c_str()) != 0)
 	{
-		sqlite3_finalize(stmt);
 		return;
 	}
-	while (sqlite3_step(stmt) == SQLITE_ROW)
-	{
-		break;
-	}
-	sqlite3_finalize(stmt);
 }
 
 // 处理 Cookie、照片(p_photo_uri 为空代表不要照片, 随便设置内容不为空则会向里面写入照片数据)
@@ -970,33 +927,31 @@ void parse_main()
 	}
 
 	// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
-	std::string query("SELECT openid FROM URPScoreHelper WHERE id='");
+	std::string query("SELECT `openid` FROM `UserInfo` WHERE id='");
 	query.append(m_student_id);
 	query.append("';");
 
-	char **db_Result = NULL;
-	sqlite3_stmt *stmt;
-	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	char openid[512] = { 0 };
 
-	if (db_ret != SQLITE_OK)
+	if (mysql_query(&db, query.c_str()) != 0)
 	{
-		std::string Err_Msg(u8"<b>数据库准备失败！请确认数据库合法性。</b><p>(");
-		Err_Msg.append(sqlite3_errmsg(db));
-		Err_Msg.append(")</p>");
-		Error(Err_Msg.c_str());
-		sqlite3_finalize(stmt);
 		return;
 	}
-
-	const unsigned char *openid = NULL;
-
-	while (sqlite3_step(stmt) == SQLITE_ROW)
+	result = mysql_store_result(&db);
+	if (mysql_num_rows(result))
 	{
-		openid = sqlite3_column_text(stmt, 0);
-		break;
+		while ((row = mysql_fetch_row(result)))
+		{
+			if (row[0])
+			{
+				sprintf(openid, "%s", row[0]);
+			}
+			break;
+		}
 	}
-
-	sqlite3_finalize(stmt);
+	mysql_free_result(result);
 
 	cout << GLOBAL_HEADER;
 
@@ -1020,7 +975,7 @@ void parse_main()
 		sprintf(AdUrl, CARD_AD_BANNER_HTML, CARD_AD_BANNER_2_URL, CARD_AD_BANNER_2_IMG);
 		OutputAd += AdUrl;
 	}
-	if (openid == NULL)
+	if (strlen(openid) == 0)
 	{
 		cout << strformat(m_lpszHomepage.c_str(), APP_NAME, m_student_name, m_student_id, 
 							ASSOC_LINK_HTML, OutputAd.c_str());
@@ -1474,7 +1429,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 						char info[1024] = { 0 };
 						mid(info, p1, p2 - p1 + 9, 0);
 						replace_string(info, " style=\"font-weight: bold\"", "");
-						replace_string(info, "tblView", "plan_tag");
+						replace_string(info, "tblView", "byplan");
 						char *u8strtmp = (char *)malloc(strlen(info) * 3 + 1);
 						unsigned int u8len = 0;
 						gbk_to_utf8(info, (unsigned int)strlen(info), &u8strtmp, &u8len);
@@ -1531,35 +1486,35 @@ void parse_friendly_score(std::string & p_strlpszScore)
 				case kechenghao:
 				{
 					mid(m_kechenghao, p1 + 20, p2 - p1 - 20, 0);
-					Trim(m_kechenghao);
+					////Trim(m_kechenghao);
 					flags++;
 					break;
 				}
 				case kexuhao:
 				{
 					mid(m_kexuhao, p1 + 20, p2 - p1 - 20, 0);
-					Trim(m_kexuhao);
+					//Trim(m_kexuhao);
 					flags++;
 					break;
 				}
 				case kechengming:
 				{
 					mid(m_kechengming, p1 + 20, p2 - p1 - 20, 0);
-					Trim(m_kechengming);
+					//Trim(m_kechengming);
 					flags++;
 					break;
 				}
 				case yingwenkechengming:
 				{
 					mid(m_yingwenkechengming, p1 + 20, p2 - p1 - 20, 0);
-					Trim(m_yingwenkechengming);
+					//Trim(m_yingwenkechengming);
 					flags++;
 					break;
 				}
 				case xuefen:
 				{
 					mid(m_xuefen, p1 + 20, p2 - p1 - 20, 0);
-					Trim(m_xuefen);
+					//Trim(m_xuefen);
 					f_xuefen = atof(m_xuefen);
 					flags++;
 					break;
@@ -1567,7 +1522,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 				case shuxing:
 				{
 					mid(m_shuxing, p1 + 20, p2 - p1 - 20, 0);
-					Trim(m_shuxing);
+					//Trim(m_shuxing);
 					flags++;
 					break;
 				}
@@ -1579,7 +1534,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 					{
 						mid(m_chengji, p3 + 18, strlen(m_chengji), 0);
 					}
-					Trim(m_chengji);
+					//Trim(m_chengji);
 					f_chengji = atof(m_chengji);
 					if (strstr(m_chengji, "\xd3\xc5\xd0\xe3" /*优秀*/) != NULL)
 					{
@@ -1615,7 +1570,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 				case weiguoyuanyin:
 				{
 					mid(m_weiguoyuanyin, p1 + 18, p2 - p1 - 19, 0);
-					Trim(m_weiguoyuanyin);
+					//Trim(m_weiguoyuanyin);
 					char *m_StrTmp = new char[8192];
 					sprintf(m_StrTmp, SCORE_TEMPLATE_BY_PLAN,
 						(f_chengji < 60 && f_xuefen != 0) ? "background-color:rgba(255,0,0,0.5);color:#fff" : "",
@@ -1868,7 +1823,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_subName[512] = { 0 };
 		mid(m_subName, pStr2, pStr3 - pStr2 - 19, 19);
-		Trim(m_subName);
+		//Trim(m_subName);
 
 		pStr2 = pStr3;
 		pStr2 = strstr(pStr2 + 19, "<td align=\"center\">");
@@ -1877,7 +1832,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_subXuefen[128] = { 0 };
 		mid(m_subXuefen, pStr2, pStr3 - pStr2 - 19, 19);
-		Trim(m_subXuefen);
+		//Trim(m_subXuefen);
 		//if (atof(m_subXuefen) == 0) sprintf(m_subXuefen, "暂无数据");
 
 		pStr2 = pStr3;
@@ -1887,7 +1842,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_subzuigaofen[128] = { 0 };
 		mid(m_subzuigaofen, pStr2, pStr3 - pStr2 - 19, 19);
-		Trim(m_subzuigaofen);
+		//Trim(m_subzuigaofen);
 		//if (atof(m_subzuigaofen) == 0) sprintf(m_subzuigaofen, "暂无数据");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
@@ -1896,7 +1851,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_subzuidifen[128] = { 0 };
 		mid(m_subzuidifen, pStr2, pStr3 - pStr2 - 19, 19);
-		Trim(m_subzuidifen);
+		//Trim(m_subzuidifen);
 		//if (atof(m_subzuidifen) == 0) sprintf(m_subzuidifen, "暂无数据");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
@@ -1905,7 +1860,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_subjunfen[128] = { 0 };
 		mid(m_subjunfen, pStr2, pStr3 - pStr2 - 19, 19);
-		Trim(m_subjunfen);
+		//Trim(m_subjunfen);
 		//if (atof(m_subjunfen) == 0) sprintf(m_subjunfen, "暂无数据");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
@@ -1914,7 +1869,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_subchengji[256] = { 0 };
 		mid(m_subchengji, pStr2, pStr3 - pStr2 - 19, 19);
-		Trim(m_subchengji);
+		//Trim(m_subchengji);
 		if (strstr(m_subchengji, "\xd3\xc5\xd0\xe3" /*优秀*/) != NULL)
 		{
 			strcpy(m_subchengji,"95");
@@ -1965,7 +1920,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (pStr3 == NULL) break;
 		char m_submingci[128] = { 0 };
 		mid(m_submingci, pStr2, pStr3 - pStr2 - 19, 19);
-		Trim(m_submingci);
+		//Trim(m_submingci);
 		//if (atof(m_submingci) == 0) sprintf(m_submingci, "暂无数据");
 
 		// （分数x学分）全都加起来/总学分 = 加权分，排除体育和课程设计
@@ -2266,36 +2221,38 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		return false;
 	}
 
-	// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
-	std::string query("SELECT id FROM URPScoreHelper WHERE id='");
+	// <del>SQLite3</del> 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
+	std::string query("SELECT `id` FROM `UserInfo` WHERE id='");
 	query += p_xuehao;
 	query += "';";
 
-	char **db_Result = NULL;
-	sqlite3_stmt *stmt;
-	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	char id[64] = { 0 };
 
-	if (db_ret != SQLITE_OK)
+	if (mysql_query(&db, query.c_str()) != 0)
 	{
 		student_logout();
-		std::string Err_Msg = u8"<b>数据库准备失败！请确认数据库合法性。</b><p>(";
-		Err_Msg += sqlite3_errmsg(db);
+		std::string Err_Msg(u8"<b>很抱歉，登录失败。</b><p>数据库错误 (");
+		Err_Msg += mysql_error(&db);
 		Err_Msg += ")</p>";
 		Error(Err_Msg.c_str());
-		sqlite3_finalize(stmt);
 		return false;
 	}
-
-	const unsigned char *id = NULL;
-
-	while (sqlite3_step(stmt) == SQLITE_ROW)
+	result = mysql_store_result(&db);
+	if (mysql_num_rows(result))
 	{
-		id = sqlite3_column_text(stmt, 0);
-		break;
+		while ((row = mysql_fetch_row(result)))
+		{
+			if (row[0])
+			{
+				sprintf(id, "%s", row[0]);
+			}
+			break;
+		}
 	}
 
-	sqlite3_step(stmt);
-	sqlite3_finalize(stmt);
+	mysql_free_result(result);
 
 	// 对密码做URL解码
 	int len = url_decode(p_password, strlen(p_password));
@@ -2303,9 +2260,9 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	left(temp, p_password, len);
 	strcpy(p_password, temp);
 
-	if (id == NULL) // 无记录，则写入数据库
+	if (strlen(id) == 0) // 无记录，则写入数据库
 	{
-		std::string query("INSERT INTO URPScoreHelper (id, password, name, openid, lastlogin) VALUES ('");
+		std::string query("INSERT INTO `UserInfo` (`id`, `password`, `name`, `openid`, `lastlogin`) VALUES ('");
 		query += p_xuehao;
 		query += "', '";
 		query += p_password;
@@ -2319,26 +2276,19 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		query += m_time;
 		query += "');";
 
-		char **db_Result = NULL;
-		sqlite3_stmt *stmt;
-		db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
-
-		if (db_ret != SQLITE_OK)
+		if (mysql_query(&db, query.c_str()) != 0)
 		{
 			student_logout();
 			std::string Err_Msg(u8"<b>很抱歉，登录失败。</b><p>数据库错误 (");
-			Err_Msg += sqlite3_errmsg(db);
+			Err_Msg += mysql_error(&db);
 			Err_Msg += ")</p>";
 			Error(Err_Msg.c_str());
-			sqlite3_finalize(stmt);
 			return false;
 		}
-		sqlite3_step(stmt);
-		sqlite3_finalize(stmt);
 	}
 	else // 为成功登录的学生更新记录
 	{
-		std::string query("UPDATE URPScoreHelper SET password='");
+		std::string query("UPDATE `UserInfo` SET password='");
 		char m_time[128] = { 0 };
 		get_time(m_time);
 		query += p_password;
@@ -2352,25 +2302,15 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		query += p_xuehao;
 		query += "';";
 
-		char **db_Result = NULL;
-		sqlite3_stmt *stmt;
-		db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
-
-		if (db_ret != SQLITE_OK)
+		if (mysql_query(&db, query.c_str()) != 0)
 		{
 			student_logout();
-			std::string Err_Msg(u8"<b>登录数据库记录失败，请稍后再试。</b><p>(");
-			Err_Msg += sqlite3_errmsg(db);
+			std::string Err_Msg(u8"<b>很抱歉，登录失败。</b><p>数据库错误 (");
+			Err_Msg += mysql_error(&db);
 			Err_Msg += ")</p>";
 			Error(Err_Msg.c_str());
-			sqlite3_finalize(stmt);
 			return false;
 		}
-		while (sqlite3_step(stmt) == SQLITE_ROW)
-		{
-			break;
-		}
-		sqlite3_finalize(stmt);
 	}
 	// 至此，学生登录成功
 	return true;
@@ -2446,7 +2386,8 @@ void parse_QuickQuery_Result()
 	char *pStr2 = strstr(pStr1 + 3, "&");
 	char m_xuehao[1024] = { 0 };
 	right(m_xuehao, pStr1, strlen(pStr1) - 3);
-	replace_string(m_xuehao, "%0D%0A", "|");
+	if(strstr(m_xuehao, "%0D%0A") != NULL)
+		replace_string(m_xuehao, "%0D%0A", "|");
 	char *p = strtok(m_xuehao, "|");
 	char *m_xh[512] = { NULL };
 	int m_xhgs = 0;
@@ -2874,36 +2815,19 @@ void OAuth2_Association(bool isPOST)
 			return;
 		}
 
-		// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
-		/*char *query = new char[strlen("DELETE FROM URPScoreHelper WHERE id='") + 36 + 1];
-		memset(query, 0, strlen("DELETE FROM URPScoreHelper WHERE id='") + 36 + 1);
-		strcpy(query, "DELETE FROM URPScoreHelper WHERE id='");
-		strcat(query, student_id);
-		strcat(query, "';");*/
-		std::string query("UPDATE URPScoreHelper SET openid=NULL, OAuth_name=NULL, OAuth_avatar=NULL WHERE id='");
+		std::string query("UPDATE `UserInfo` SET `openid`=NULL, `OAuth_name`=NULL, `OAuth_avatar`=NULL WHERE id='");
 		query += student_id;
 		query += "';";
 
-		char **db_Result = NULL;
-		sqlite3_stmt *stmt;
-		int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
-
-		if (db_ret != SQLITE_OK)
+		if (mysql_query(&db, query.c_str()) != 0)
 		{
 			std::string Err_Msg(u8"<b>解除绑定失败，请稍后再试。</b><p>(");
-			Err_Msg += sqlite3_errmsg(db);
+			Err_Msg += mysql_error(&db);
 			Err_Msg += ")</p>";
 			Error(Err_Msg.c_str());
-			sqlite3_finalize(stmt);
 			return;
 		}
 
-		while (sqlite3_step(stmt) == SQLITE_ROW)
-		{
-			break;
-		}
-
-		sqlite3_finalize(stmt);
 		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/main.fcgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
@@ -2947,38 +2871,34 @@ void OAuth2_Association(bool isPOST)
 		if (strlen(stid) != 0 && strcmp(stid, "NONE") != 0)
 		{
 			// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
-			std::string query("SELECT password FROM URPScoreHelper WHERE id='");
+			std::string query("SELECT `password` FROM `UserInfo` WHERE id='");
 			query += stid;
 			query += "';";
 
-			char **db_Result = NULL;
-			sqlite3_stmt *stmt;
-			int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
-
-			if (db_ret != SQLITE_OK)
+			MYSQL_RES *result;
+			MYSQL_ROW row;
+			if (mysql_query(&db, query.c_str()) != 0)
 			{
 				char Err_Msg[1024] = u8"<b>数据库准备失败！请确认数据库合法性。</b><p>(";
-				strcat(Err_Msg, sqlite3_errmsg(db));
+				strcat(Err_Msg, mysql_error(&db));
 				strcat(Err_Msg, ")</p>");
 				Error(Err_Msg);
-				sqlite3_finalize(stmt);
 				delete[]openid;
 				return;
 			}
-
-			const unsigned char *password = NULL;
-
-			while (sqlite3_step(stmt) == SQLITE_ROW)
+			result = mysql_store_result(&db);
+			if (mysql_num_rows(result))
 			{
-				password = sqlite3_column_text(stmt, 0);
-				break;
+				while ((row = mysql_fetch_row(result)))
+				{
+					if (row[0])
+					{
+						sprintf(pass, "%s", row[0]);
+					}
+					break;
+				}
 			}
-			if (password != NULL)
-			{
-				strcpy(pass, (const char *)password);
-			}
-			sqlite3_step(stmt);
-			sqlite3_finalize(stmt);
+			mysql_free_result(result);
 		}
 
 		std::string m_lpszHomepage = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
@@ -3069,31 +2989,22 @@ void OAuth2_Association(bool isPOST)
 		}
 
 		// 这里表示登录成功，应该写入数据库了。
-		// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
-		std::string query("UPDATE URPScoreHelper SET openid='");
+		std::string query("UPDATE `UserInfo` SET openid='");
 		query += openid;
 		query += "' WHERE id='";
 		query += m_xuehao;
 		query += "';";
 
-		char **db_Result = NULL;
-		sqlite3_stmt *stmt;
-		int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
-
-		if (db_ret != SQLITE_OK)
+		if (mysql_query(&db, query.c_str()) != 0)
 		{
 			char Err_Msg[1024] = u8"<b>很抱歉，QQ绑定失败。</b><p>数据库错误 (";
-			strcat(Err_Msg, sqlite3_errmsg(db));
+			strcat(Err_Msg, mysql_error(&db));
 			strcat(Err_Msg, u8")</p><p>但是还可以正常登录的。</p>");
 			Error(Err_Msg);
-			sqlite3_finalize(stmt);
 			free(m_post_data);
 			delete[]openid;
 			return;
 		}
-
-		sqlite3_step(stmt);
-		sqlite3_finalize(stmt);
 
 		cout << "Status: 302 Found\r\n";
 		cout << "Location: " << getAppURL().c_str() << "/main.fcgi\r\n";
@@ -3564,7 +3475,7 @@ void do_change_password() //(POST /changePassword.fcgi)
 	}
 
 	// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128) text lastlogin(64)。
-	std::string query("UPDATE URPScoreHelper SET password='");
+	std::string query("UPDATE `UserInfo` SET password='");
 	char m_time[128] = { 0 };
 	get_time(m_time);
 	query += pwd;
@@ -3576,26 +3487,14 @@ void do_change_password() //(POST /changePassword.fcgi)
 	query += id;
 	query += "';";
 
-	char **db_Result = NULL;
-	sqlite3_stmt *stmt;
-	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
-
-	if (db_ret != SQLITE_OK)
+	if (mysql_query(&db, query.c_str()) != 0)
 	{
 		std::string Err_Msg(u8"<b>密码修改成功，但登录数据库记录失败，请稍后再试。(请使用新密码登录)</b><p>(");
-		Err_Msg += sqlite3_errmsg(db);
+		Err_Msg += mysql_error(&db);
 		Err_Msg += ")</p>";
 		Error(Err_Msg.c_str());
-		sqlite3_finalize(stmt);
 		return;
 	}
-
-	while (sqlite3_step(stmt) == SQLITE_ROW)
-	{
-		break;
-	}
-
-	sqlite3_finalize(stmt);
 
 	student_logout();
 	cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;

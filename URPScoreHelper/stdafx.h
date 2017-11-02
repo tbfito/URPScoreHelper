@@ -15,7 +15,7 @@
 #include <iostream>
 #include <string>
 #include "libfcgi/fcgio.h"
-#include "sqlite/sqlite3.h"
+#include "libmysql/mysql.h"
 #include "curl/curl.h"
 
 using namespace std;
@@ -25,13 +25,13 @@ extern "C"
 #ifdef _WIN64
 	#include "resource.h"
 	#pragma comment(lib, "libfcgi/libfcgi_win64.lib")
-	#pragma comment(lib, "sqlite/sqlite3_win64.lib")
+	#pragma comment(lib, "libmysql/libmysql_win64.lib")
 	#pragma comment(lib, "curl/libcurl_win64.lib")
 #else
 	#ifdef _WIN32
 		#include "resource.h"
 		#pragma comment(lib, "libfcgi/libfcgi_win32.lib")
-		#pragma comment(lib, "sqlite/sqlite3_win32.lib")
+		#pragma comment(lib, "sqlite/libmysql_win32.lib")
 		#pragma comment(lib, "curl/libcurl_win32.lib")
 	#else
 		#include <unistd.h>

@@ -8,7 +8,9 @@ std::string error;
 
 int g_QueryCounter;
 int g_users;
-sqlite3 *db;
+
+MYSQL db;
+
 FCGX_Request request; //全局可以使用的请求
 static const char *emptystr = "";
 

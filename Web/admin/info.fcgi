@@ -48,6 +48,17 @@
 				</div>
 			</div>
 		  </div>
+		   <div class="form-group">
+			<div class="label">
+			  <label><b>MySQL 信息：</b></label>
+			</div>
+			<div class="field">
+				<div class="label">
+				  <label>LibMySQL 库版本：%s</label>
+				  <label>服务器版本：%s</label>
+				</div>
+			</div>
+		  </div>
 		  <div class="form-group">
 			<div class="label">
 			  <label><b>程序版本：</b></label>

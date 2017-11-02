@@ -328,28 +328,16 @@ std::string _POST(std::string & post, const char *name)
 // 更新设置表
 void UpdateSettings(const char *name, const char *value)
 {
-	std::string query("UPDATE Settings SET value='");
+	std::string query("UPDATE `Settings` SET value='");
 	query += value;
 	query += "' WHERE name='";
 	query += name;
 	query += "';";
 
-	char **db_Result = NULL;
-	sqlite3_stmt *stmt;
-	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
-
-	if (db_ret != SQLITE_OK)
+	if (mysql_query(&db, query.c_str()) != 0)
 	{
-		sqlite3_finalize(stmt);
 		return;
 	}
-
-	while (sqlite3_step(stmt) == SQLITE_ROW)
-	{
-		sqlite3_column_text(stmt, 0);
-		break;
-	}
-	sqlite3_finalize(stmt);
 }
 
 // 解码URL编码
@@ -544,6 +532,6 @@ void parse_admin_info()
 	cout << GLOBAL_HEADER
 		 << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
 			 SOFTWARE_NAME, g_users, g_QueryCounter,
-			 (server_software == NULL) ? "" : server_software,
+			 (server_software == NULL) ? "" : server_software, mysql_get_client_info(), mysql_get_server_info(&db),
 			__DATE__, __TIME__, SOFTWARE_COPYRIGHT).c_str();
 }

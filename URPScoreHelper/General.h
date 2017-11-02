@@ -32,7 +32,13 @@ extern const char *ASSOC_LINK_HTML;
 extern const char *RLS_ASSOC_LINK_HTML;
 extern const char *CARD_AD_BANNER_HTML;
 
-extern sqlite3 * db;
+extern MYSQL db;
+extern char MYSQL_HOST[64];
+extern char MYSQL_PORT_NUMBER[64];
+extern char MYSQL_USERNAME[64];
+extern char MYSQL_PASSWORD[64];
+extern char MYSQL_DBNAME[128];
+
 extern int CURL_TIMEOUT;
 extern bool CURL_USE_PROXY;
 extern char *SERVER_URL;

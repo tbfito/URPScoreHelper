@@ -48,34 +48,26 @@ char * right(char *dst, char *src, int n)
 	return(dst);
 }
 
-// 将字符串中指定子字符串用指定字符串代替，targ_str 是被替换的，val是替换的字符串
-void replace_string(char * source_str, const char * targ_str, const char *val)
+// 只允许将长串替换为短串
+void replace_string(char * source_str, const char * search, const char *replace_with)
 {
-	char * temp_sstr = new char[strlen(source_str) + 1];
-	char * result = new char[strlen(source_str) + 1];
-	char * p, *q;
-	int len; len = 0; q = p = NULL;
-	memset(result, 0, sizeof(result));
-	memset(temp_sstr, 0, sizeof(temp_sstr));
-	strcpy(temp_sstr, source_str);
-	p = q = temp_sstr;
-	len = strlen(targ_str);
-	while (q != NULL)
+	size_t dst_size = strlen(source_str);
+	char * replace_buf = (char *)malloc(dst_size);
+	if (replace_buf)
 	{
-		if ((q = strstr(p, targ_str)) != NULL)
+		replace_buf[0] = 0;
+		char * p = (char *)source_str;
+		char * pos = NULL;
+		while ((pos = strstr(p, search)) != NULL)
 		{
-			strncat(result, p, q - p);
-			strcat(result, val);
-			strcat(result, "\0");
-			q += len;
-			p = q;
+			size_t n = (size_t)(pos - p);
+			strncat(replace_buf, p, n > dst_size ? dst_size : n);
+			strncat(replace_buf, replace_with, dst_size - strlen(replace_buf) - 1);
+			p = pos + strlen(search);
 		}
-		else
-			strcat(result, p);
+		snprintf(source_str, dst_size, "%s%s", replace_buf, p);
+		free(replace_buf);
 	}
-	strcpy(source_str, result);
-	delete[]temp_sstr;
-	delete[]result;
 }
 
 static unsigned char hexchars[] = "0123456789ABCDEF";
@@ -227,21 +219,4 @@ int Ascii2Hex(char* ascii, char* hex)
 	hex[len * 2] = '\0';
 
 	return len * 2;
-}
-
-void Trim(char *str)
-{
-	char *ptr = str;
-	while (isspace(*ptr) || *ptr == '\t' || *ptr == '\r' || *ptr == '\n') ++ptr;
-
-	char *end = ptr;
-	while (*end) ++end;
-
-	if (end > ptr)
-	{
-		for (--end; end >= ptr && (isspace(*end) || *end == '\t' || *end == '\r' || *end == '\n'); --end);
-	}
-	
-	memmove(str, ptr, end - ptr + 1);
-	str[end - ptr + 1] = 0;
 }

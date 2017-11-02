@@ -5,6 +5,12 @@ char JSESSIONID[256] = {0};
 
 char GLOBAL_HEADER[256] = {0};
 
+char MYSQL_HOST[64] = { 0 };
+char MYSQL_PORT_NUMBER[64] = { 0 };
+char MYSQL_USERNAME[64] = { 0 };
+char MYSQL_PASSWORD[64] = { 0 };
+char MYSQL_DBNAME[128] = { 0 };
+
 // HTMLS
 const char *BEFORE_TEMPLATE = u8"<div id=\"list_page\" style=\"background-color:transparent !important\"><table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"titleTop2\" style=\"background-color:transparent !important;border:none\"><tbody><tr><td class=\"pageAlign\"><table cellpadding=\"0\" width=\"100%\" class=\"displayTag\" cellspacing=\"1\" border=\"0\" id=\"user\"><thead><tr><th align=\"center\" width=\"30%\" class=\"sortable\">课名</th><th align=\"center\" width=\"10%\" class=\"sortable\">成绩</th><th align=\"center\" width=\"10%\" class=\"sortable\">均分</th><th align=\"center\" width=\"10%\" class=\"sortable\">最高</th><th align=\"center\" width=\"10%\" class=\"sortable\">最低</th><th align=\"center\" width=\"10%\" class=\"sortable\">名次</th><th align=\"center\" width=\"10%\" class=\"sortable\">学分</th><th align=\"center\" width=\"10%\" class=\"sortable\">绩点</th></tr></thead><tbody>";
 const char *AFTER_TEMPLATE = u8"</tbody></table></td></tr></tbody></table></div>";

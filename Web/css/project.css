@@ -70,7 +70,7 @@
 #list_page table .infoBg2{float:left}
 #list_page table .infoBg4,#list_page table .infoBg5{display:none}
 #tblView tr td{width:50% !important}
-#plan_tag{padding:10px 0 10px 30px}
-#plan_tag tr td{font-size:12px;width:60% !important}
+#byplan{padding:10px 0 10px 30px}
+#byplan tr td{font-size:12px;width:60% !important}
 #list_page table.titleTop3{background-color:#ffffff;border-top:5px solid #ffffff;border-bottom:5px solid #ffffff}
 .item-inner span{margin-right:10px}

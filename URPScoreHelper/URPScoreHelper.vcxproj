@@ -252,9 +252,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Admin.h" />
+    <ClInclude Include="AES.h" />
     <ClInclude Include="CCurlTask.h" />
     <ClInclude Include="gbkutf8.h" />
     <ClInclude Include="General.h" />
+    <ClInclude Include="INI_Reader.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="OAuth2.h" />
     <ClInclude Include="URPRequests.h" />
@@ -266,9 +268,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Admin.cpp" />
+    <ClCompile Include="AES.cpp" />
     <ClCompile Include="CCurlTask.cpp" />
     <ClCompile Include="gbkutf8.cpp" />
     <ClCompile Include="General.cpp" />
+    <ClCompile Include="INI_Reader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OAuth2.cpp" />
     <ClCompile Include="URPRequests.cpp" />

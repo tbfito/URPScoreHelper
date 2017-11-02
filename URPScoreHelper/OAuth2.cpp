@@ -261,39 +261,44 @@ void OAuth2_CallBack()
 
 	//  成功拿到 access_token 和 openid
 
-	std::string query("SELECT id, password FROM URPScoreHelper WHERE openid='");
+	std::string query("SELECT `id`, `password` FROM `UserInfo` WHERE openid='");
 	query += openid;
 	query += "';";
 
-	char **db_Result = NULL;
-	sqlite3_stmt *stmt;
-	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	char id[64] = { 0 };
+	char password[64] = { 0 };
 
-	if (db_ret != SQLITE_OK)
+	if (mysql_query(&db, query.c_str()) != 0)
 	{
 		char Err_Msg[1024] = u8"<b>数据库准备失败！请确认数据库合法性。</b><p>(";
-		strcat(Err_Msg, sqlite3_errmsg(db));
+		strcat(Err_Msg, mysql_error(&db));
 		strcat(Err_Msg, ")</p>");
 		Error(Err_Msg);
-		sqlite3_finalize(stmt);
 		delete[]access_token;
 		delete[]access_token_req;
 		delete[]openid;
 		delete[]code;
 		return;
 	}
-
-	const unsigned char *id = NULL;
-	const unsigned char *password = NULL;
-
-	while (sqlite3_step(stmt) == SQLITE_ROW)
+	result = mysql_store_result(&db);
+	if (mysql_num_rows(result))
 	{
-		id = sqlite3_column_text(stmt, 0);
-		password = sqlite3_column_text(stmt, 1);
-		break;
+		while ((row = mysql_fetch_row(result)))
+		{
+			if (row[0])
+			{
+				sprintf(id, "%s", row[0]);
+				sprintf(password, "%s", row[1]);
+			}
+			break;
+		}
 	}
 
-	if (id == NULL || password == NULL) // 无记录，跳转至 OAuth2Assoc.fcgi
+	mysql_free_result(result);
+
+	if (strlen(id) == 0 || strlen(password) == 0) // 无记录，跳转至 OAuth2Assoc.fcgi
 	{
 		pStr1 = strstr(CGI_QUERY_STRING, "state=");
 		char id[128] = { 0 };
@@ -325,7 +330,6 @@ void OAuth2_CallBack()
 		}
 		cout << GLOBAL_HEADER;
 
-		sqlite3_finalize(stmt);
 		delete[]access_token;
 		delete[]access_token_req;
 		delete[]openid;
@@ -343,7 +347,6 @@ void OAuth2_CallBack()
 	cout << "Status: 302 Found\r\n"
 		<< "Location: " << getAppURL().c_str() << "/index.fcgi?stid=" << encrypt_id << "&pass=" << encrypt_pass << "\r\n"
 		<< GLOBAL_HEADER;
-	sqlite3_finalize(stmt);
 	delete[]access_token;
 	delete[]access_token_req;
 	delete[]openid;
@@ -414,7 +417,7 @@ void WriteOAuthUserInfo(char *access_token, char *openid, char *student_id)
 	mid(avatar, pStr1 + 19, pStr2 - pStr1 - 19, 0);
 	free(html_str);
 
-	std::string query("UPDATE URPScoreHelper SET OAuth_name='");
+	std::string query("UPDATE `UserInfo` SET OAuth_name='");
 	query += nickname;
 	query += "', OAuth_avatar='";
 	query += avatar;
@@ -422,22 +425,13 @@ void WriteOAuthUserInfo(char *access_token, char *openid, char *student_id)
 	query += student_id;
 	query += "';";
 
-	sqlite3_stmt *stmt;
-	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
-
-	if (db_ret != SQLITE_OK)
+	if (mysql_query(&db, query.c_str()) != 0)
 	{
 		delete[]nickname;
 		delete[]avatar;
-		sqlite3_finalize(stmt);
 		return;
 	}
-	while (sqlite3_step(stmt) == SQLITE_ROW)
-	{
-		break;
-	}
 
-	sqlite3_finalize(stmt);
 	delete[]nickname;
 	delete[]avatar;
 }
@@ -445,38 +439,42 @@ void WriteOAuthUserInfo(char *access_token, char *openid, char *student_id)
 // 读取第三方账户昵称与头像URL
 bool GetOAuthUserInfo(char *student_id, char *nickname, char *avatar_url)
 {
-	std::string query("SELECT OAuth_name, OAuth_avatar FROM URPScoreHelper WHERE id='");
+	std::string query("SELECT `OAuth_name`, `OAuth_avatar` FROM `UserInfo` WHERE id='");
 	query += student_id;
 	query += "';";
 
-	sqlite3_stmt *stmt;
-	int db_ret = sqlite3_prepare(db, query.c_str(), query.length(), &stmt, 0);
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	char name[128] = { 0 };
+	char avatar[2048] = { 0 };
 
-	if (db_ret != SQLITE_OK)
+	if (mysql_query(&db, query.c_str()) != 0)
 	{
-		sqlite3_finalize(stmt);
 		return false;
 	}
-
-	const unsigned char *name = NULL;
-	const unsigned char *avatar = NULL;
-
-	while (sqlite3_step(stmt) == SQLITE_ROW)
+	result = mysql_store_result(&db);
+	if (mysql_num_rows(result))
 	{
-		name = sqlite3_column_text(stmt, 0);
-		avatar = sqlite3_column_text(stmt, 1);
-		break;
+		while ((row = mysql_fetch_row(result)))
+		{
+			if (row[0])
+			{
+				sprintf(name, "%s", row[0]);
+				sprintf(avatar, "%s", row[1]);
+			}
+			break;
+		}
 	}
-	if (name == NULL || avatar == NULL)
+	mysql_free_result(result);
+
+	if (strlen(name) == 0 || strlen(avatar) == 0)
 	{
-		sqlite3_finalize(stmt);
 		return false;
 	}
 
 	strcpy(nickname, (char *)name);
 	strcpy(avatar_url, (char *)avatar);
 
-	sqlite3_finalize(stmt);
 	return true;
 }
 

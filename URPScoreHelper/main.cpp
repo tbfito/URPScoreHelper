@@ -12,6 +12,7 @@
 #include "main.h"
 #include "General.h"
 #include "gbkutf8.h"
+#include "INI_Reader.h"
 
 int main(int argc, const char *argv[])
 {
@@ -19,10 +20,18 @@ int main(int argc, const char *argv[])
 	strcat(GLOBAL_HEADER, SOFTWARE_NAME);
 	strcat(GLOBAL_HEADER, "\r\n\r\n");
 
-	LoadConfig();
 	str_normalize_init();
 	FCGX_Init();
 	curl_global_init(CURL_GLOBAL_ALL);
+	mysql_init(&db);
+
+	get_profile_string("MySQL", "MYSQL_HOST", "127.0.0.1", MYSQL_HOST, 64, "Database.ini");
+	get_profile_string("MySQL", "MYSQL_PORT_NUMBER", "127.0.0.1", MYSQL_PORT_NUMBER, 64, "Database.ini");
+	get_profile_string("MySQL", "MYSQL_USERNAME", "root", MYSQL_USERNAME, 64, "Database.ini");
+	get_profile_string("MySQL", "MYSQL_PASSWORD", "root", MYSQL_PASSWORD, 64, "Database.ini");
+	get_profile_string("MySQL", "MYSQL_DBNAME", "database", MYSQL_DBNAME, 128, "Database.ini");
+
+	LoadConfig();
 	isPageSrcLoadSuccess = false;
 
 	int FCGX_SocketId = 0;
@@ -40,7 +49,8 @@ int main(int argc, const char *argv[])
 	FCGX_InitRequest(&request, FCGX_SocketId, 0);
 	app_intro();
 	printf("%s\n%s\n\n%s\n", SOFTWARE_NAME, SOFTWARE_COPYRIGHT, "\tOptions: [-p (localhost):port_number]");
-	
+
+	// cleanup operations
 	free(HEADER_TEMPLATE_LOCATION);
 	free(FOOTER_TEMPLATE_LOCATION);
 	free(SERVER_URL);
@@ -60,7 +70,8 @@ int main(int argc, const char *argv[])
 	free(APP_DESCRIPTION);
 	free(FOOTER_TEXT);
 	free(ANALYSIS_CODE);
-	sqlite3_close(db);
+
+	mysql_close(&db);
 	curl_global_cleanup();
 	return 0;
 }
