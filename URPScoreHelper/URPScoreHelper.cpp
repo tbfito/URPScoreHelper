@@ -431,11 +431,7 @@ void LoadConfig()
 		{
 			isdbReady = false;
 			fprintf(stderr, "Failed to connect to database: Error: %s\n", mysql_error(&db));
-			return; // unlucky..
-		}
-		else
-		{
-			isdbReady = true;
+			return;
 		}
 	}
 
@@ -579,19 +575,24 @@ void LoadConfig()
 	ENABLE_QUICK_QUERY = (atoi(lpvBuffer) == 1);
 
 	free(lpvBuffer);
+	if (!isdbReady)
+	{
+		std::string query("CREATE TABLE IF NOT EXISTS `UserInfo` (`id` char(36) NOT NULL,`password` char(36) NOT NULL,`name` varchar(36) DEFAULT NULL,`openid` varchar(1024) DEFAULT NULL,`OAuth_name` varchar(1024) DEFAULT NULL,`OAuth_avatar` varchar(4096) DEFAULT NULL,`lastlogin` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+		if (mysql_query(&db, query.c_str()) != 0)
+		{
+			return;
+		}
+
+		query = "CREATE TABLE IF NOT EXISTS `Settings` (`name` varchar(254) NOT NULL,`value` varchar(10240) NOT NULL,PRIMARY KEY (`name`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+		if (mysql_query(&db, query.c_str()) != 0)
+		{
+			return;
+		}
+
+		query = "SET NAMES UTF8;";
+		mysql_query(&db, query.c_str());
+	}
 	
-	std::string query("CREATE TABLE IF NOT EXISTS `UserInfo` (`id` char(36) NOT NULL,`password` char(36) NOT NULL,`name` varchar(36) DEFAULT NULL,`openid` varchar(1024) DEFAULT NULL,`OAuth_name` varchar(1024) DEFAULT NULL,`OAuth_avatar` varchar(4096) DEFAULT NULL,`lastlogin` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-	if (mysql_query(&db, query.c_str()) != 0)
-	{
-		return;
-	}
-
-	query = "CREATE TABLE IF NOT EXISTS `Settings` (`name` varchar(254) NOT NULL,`value` varchar(10240) NOT NULL,PRIMARY KEY (`name`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
-	if (mysql_query(&db, query.c_str()) != 0)
-	{
-		return;
-	}
-
 	// 如果数据库没有下面配置，则自动增加并写入默认值以确保首次能够正常运行。
 	AddSettings("QueryCounter", "0");
 	AddSettings("SERVER_URL", "http://0.0.0.0");
@@ -614,6 +615,11 @@ void LoadConfig()
 	AddSettings("FOOTER_TEXT", SOFTWARE_NAME);
 	AddSettings("ANALYSIS_CODE", "");
 	AddSettings("ENABLE_QUICK_QUERY", "1");
+
+	if (!isdbReady)
+	{
+		isdbReady = true;
+	}
 }
 
 // 更新用户数量、查询计数器
