@@ -905,11 +905,9 @@ void parse_main()
 		}
 		free(m_post_data);
 		char m_xuehaoe[1024] = { 0 };
-		strcpy(m_xuehaoe, m_xuehao);
 		char m_passworde[1024] = { 0 };
-		strcpy(m_passworde, m_password);
-		EnCodeStr(m_xuehaoe, m_xuehaoe);
-		EnCodeStr(m_passworde, m_passworde);
+		EnCodeStr(m_xuehao, m_xuehaoe);
+		EnCodeStr(m_password, m_passworde);
 		std::string token(m_xuehaoe);
 		token += "X";
 		token += m_passworde;
@@ -1056,7 +1054,7 @@ int parse_index()
 		DeCodeStr(token);
 		token_xh = (char *)malloc(1024);
 		token_mm = (char *)malloc(1024);
-		if (sscanf(token, "%[^X]%s", token_xh, token_mm) != 2)
+		if (sscanf(token, "%[^X]X%s", token_xh, token_mm) != 2)
 		{
 			free(token_xh);
 			free(token_mm);
