@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title>后台管理平台 - %s</title>  
     <link rel="stylesheet" href="css/pintuer.css">
     <link rel="stylesheet" href="css/admin.css">
@@ -24,6 +23,7 @@
 		<li><a href="settings.fcgi" target="right"><span class="icon-caret-right"></span>站点设置</a></li>
 		<li><a href="adv-card.fcgi" target="right"><span class="icon-caret-right"></span>广告轮播</a></li>
 		<li><a href="change-pass.fcgi" target="right"><span class="icon-caret-right"></span>修改密码</a></li>
+		<li><a href="find-user.fcgi" target="right"><span class="icon-caret-right"></span>查询用户</a></li>
 		<li><a href="info.fcgi" target="right"><span class="icon-caret-right"></span>系统信息</a></li>
 	  </ul>   
 	</div>

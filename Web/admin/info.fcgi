@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 <title>系统信息 - %s</title>
 <link rel="stylesheet" href="css/pintuer.css">
 <link rel="stylesheet" href="css/admin.css">
@@ -34,7 +33,8 @@
 			</div>
 			<div class="field">
 				<div class="label">
-				  <label>%d&nbsp;&nbsp;<a href="info.fcgi?act=reset_query_counter">重置</a></label>
+				  <label>%d</label>
+				  <label><a href="info.fcgi?act=reset_query_counter">重置</a></label>
 				</div>
 			</div>
 		  </div>
@@ -54,7 +54,7 @@
 			</div>
 			<div class="field">
 				<div class="label">
-				  <label>LibMySQL 库版本：%s</label>
+				  <label>libMySQL 库版本：%s</label>
 				  <label>服务器版本：%s</label>
 				</div>
 			</div>

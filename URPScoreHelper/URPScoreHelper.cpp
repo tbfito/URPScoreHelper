@@ -125,6 +125,20 @@ void app_intro()
 				}
 			}
 
+			if (strcmp(CGI_SCRIPT_NAME, "/admin/find-user.fcgi") == 0)
+			{
+				if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+				{
+					parse_find_user();
+					goto END_REQUEST;
+				}
+				if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
+				{
+					do_find_user();
+					goto END_REQUEST;
+				}
+			}
+
 			if (strcmp(CGI_SCRIPT_NAME, "/admin/adv-card.fcgi") == 0)
 			{
 				if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)

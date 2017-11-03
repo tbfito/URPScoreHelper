@@ -532,6 +532,104 @@ void parse_admin_info()
 	cout << GLOBAL_HEADER
 		 << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
 			 SOFTWARE_NAME, g_users, g_QueryCounter,
-			 (server_software == NULL) ? "" : server_software, mysql_get_client_info(), mysql_get_server_info(&db),
+			 (server_software == NULL) ? "Unknown" : server_software, mysql_get_client_info(), mysql_get_server_info(&db),
 			__DATE__, __TIME__, SOFTWARE_COPYRIGHT).c_str();
+}
+
+// 处理查找用户 (GET /admin/find-user.fcgi)
+void parse_find_user()
+{
+	if (!verify_session())
+	{
+		cout << "Status: 302 Found\r\n"
+			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
+			<< GLOBAL_HEADER;
+		return;
+	}
+	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
+	{
+		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
+	}
+
+	cout << GLOBAL_HEADER
+		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
+			"", "", "", "", "", "", "").c_str();
+}
+
+// 处理查找用户
+void do_find_user()
+{
+	if (!verify_session())
+	{
+		cout << "Status: 302 Found\r\n"
+			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
+			<< GLOBAL_HEADER;
+		return;
+	}
+	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
+	{
+		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
+	}
+
+	// 获取 POST 数据。
+	int m_post_length = atoi(CGI_CONTENT_LENGTH);
+	if (m_post_length <= 0)
+	{
+		admin_error(u8"<p><b>POST错误</b></p><p>提交的数据可能存在问题</p>");
+		return;
+	}
+	char *m_post_data = (char *)malloc(m_post_length + 2);
+	FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
+	std::string post(m_post_data);
+	free(m_post_data);
+
+	std::string m_STUDENT_ID = _POST(post, "STUDENT_ID");
+
+	decode_post_data(m_STUDENT_ID);
+
+	// 获取多少用户使用了我们的服务 :)
+	std::string query("SELECT * FROM `UserInfo` WHERE id='");
+	query += m_STUDENT_ID;
+	query += "';";
+
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+
+	char tmp1[4096] = u8"未找到";
+	char tmp2[4096] = { 0 };
+	char tmp3[4096] = { 0 };
+	char tmp4[4096] = { 0 };
+	char tmp5[4096] = { 0 };
+	char tmp6[4096] = { 0 };
+
+	if (mysql_query(&db, query.c_str()) != 0)
+	{
+		goto END;
+	}
+	result = mysql_store_result(&db);
+	if (mysql_num_rows(result))
+	{
+		while ((row = mysql_fetch_row(result)))
+		{
+			sprintf(tmp1, "%s", row[0]);
+			sprintf(tmp2, "%s", row[1]);
+			sprintf(tmp3, "%s", row[2]);
+			sprintf(tmp4, "%s", row[3]);
+			sprintf(tmp5, "%s", row[4]);
+			sprintf(tmp6, "%s", row[6]);
+			break;
+		}
+	}
+	else
+	{
+		mysql_free_result(result);
+		goto END;
+	}
+	mysql_free_result(result);
+
+	goto END;
+	END: 
+	cout << GLOBAL_HEADER
+		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
+			m_STUDENT_ID.c_str(), tmp1, tmp2, tmp3, tmp4, tmp5, tmp6).c_str();
 }

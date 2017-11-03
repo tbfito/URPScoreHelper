@@ -23,3 +23,5 @@ void do_admin_change_password();
 void parse_admin_adv_card();
 void change_admin_adv_card();
 void parse_admin_info();
+void parse_find_user();
+void do_find_user();
