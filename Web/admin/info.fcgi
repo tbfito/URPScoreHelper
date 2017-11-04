@@ -54,7 +54,7 @@
 			</div>
 			<div class="field">
 				<div class="label">
-				  <label>libMySQL 库版本：%s</label>
+				  <label>MySQL Connector 库版本：%s</label>
 				  <label>服务器版本：%s</label>
 				</div>
 			</div>

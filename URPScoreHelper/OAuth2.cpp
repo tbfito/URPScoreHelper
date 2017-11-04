@@ -260,19 +260,47 @@ void OAuth2_CallBack()
 	mid(openid, pStr1 + 10, pStr2 - pStr1 - 10, 0);
 
 	//  成功拿到 access_token 和 openid
+	MYSQL_STMT *stmt = mysql_stmt_init(&db);
+	MYSQL_BIND bind[1];
+	MYSQL_BIND query_ret[2];
+	memset(bind, 0, sizeof(bind));
+	memset(query_ret, 0, sizeof(query_ret));
+	std::string query("SELECT `id`, `password` FROM `UserInfo` WHERE `openid`=?");
 
-	std::string query("SELECT `id`, `password` FROM `UserInfo` WHERE openid='");
-	query += openid;
-	query += "';";
-
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	char id[64] = { 0 };
-	char password[64] = { 0 };
-
-	if (mysql_query(&db, query.c_str()) != 0)
+	if (stmt == NULL)
 	{
-		char Err_Msg[1024] = u8"<b>数据库准备失败！请确认数据库合法性。</b><p>(";
+		char Err_Msg[1024] = u8"<b>数据库操作失败</b><p>(statement 初始化失败)</p>";
+		Error(Err_Msg);
+		delete[]access_token;
+		delete[]access_token_req;
+		delete[]openid;
+		delete[]code;
+		return;
+	}
+
+	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[0].buffer = (void *)openid;
+	bind[0].buffer_length = strlen(openid);
+
+	char id[36] = { 0 };
+	query_ret[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	query_ret[0].buffer = (void *)id;
+	query_ret[0].buffer_length = sizeof(id);
+
+	char password[36] = { 0 };
+	query_ret[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+	query_ret[1].buffer = (void *)password;
+	query_ret[1].buffer_length = sizeof(password);
+
+	if (mysql_stmt_prepare(stmt, query.c_str(), query.length()) != 0 || 
+		mysql_stmt_bind_param(stmt, bind) != 0 || 
+		mysql_stmt_bind_result(stmt, query_ret) != 0 || 
+		mysql_stmt_execute(stmt) != 0 || 
+		mysql_stmt_store_result(stmt) != 0
+		)
+	{
+		mysql_stmt_close(stmt);
+		char Err_Msg[1024] = u8"<b>数据库操作失败</b><p>(";
 		strcat(Err_Msg, mysql_error(&db));
 		strcat(Err_Msg, ")</p>");
 		Error(Err_Msg);
@@ -282,51 +310,51 @@ void OAuth2_CallBack()
 		delete[]code;
 		return;
 	}
-	result = mysql_store_result(&db);
-	if (mysql_num_rows(result))
-	{
-		while ((row = mysql_fetch_row(result)))
-		{
-			if (row[0])
-			{
-				sprintf(id, "%s", row[0]);
-				sprintf(password, "%s", row[1]);
-			}
-			break;
-		}
-	}
 
-	mysql_free_result(result);
+	while (mysql_stmt_fetch(stmt) == 0);
+
+	mysql_stmt_close(stmt);
 
 	if (strlen(id) == 0 || strlen(password) == 0) // 无记录，跳转至 OAuth2Assoc.fcgi
 	{
 		pStr1 = strstr(CGI_QUERY_STRING, "state=");
-		char id[128] = { 0 };
-		char orign_id[128] = { 0 };
+		char id_encrypt[128] = { 0 };
+		char id_state[128] = { 0 };
+		char orign_id_state[128] = { 0 };
 		if (pStr1 != NULL)
 		{
 			pStr2 = strstr(pStr1 + 6, "&");
 			if (pStr2 == NULL)
 			{
-				right(id, pStr1 + 6, strlen(CGI_QUERY_STRING) - 6);
+				right(id_state, pStr1 + 6, strlen(CGI_QUERY_STRING) - 6);
 			}
 			else
 			{
-				mid(id, pStr1 + 6, pStr2 - pStr1 - 6, 0);
+				mid(id_state, pStr1 + 6, pStr2 - pStr1 - 6, 0);
 			}
-			strcpy(orign_id, id);
-			EnCodeStr(id, id);
+			strcpy(orign_id_state, id_state);
+			EnCodeStr(id_state, id_state);
 		}
 
-		WriteOAuthUserInfo(access_token, openid, orign_id);
+		char encrypt_access_token[1024] = { 0 };
+		EnCodeStr(access_token, encrypt_access_token);
+
 		cout << "Status: 302 Found\r\n";
-		if (strcmp(id, "NONE") == 0)
+		if (strcmp(orign_id_state, "NONE") == 0) //如果 OAuth State 传过来的学号不存在 (为 NONE)
 		{
-			cout << "Location: " << getAppURL().c_str() << "/OAuth2Assoc.fcgi?openid=" << openid << "\r\n";
+			if (strlen(id) != 0) // 但通过 openid 却能查到数据库中对应的学号
+			{
+				EnCodeStr(id, id_encrypt);
+				cout << "Location: " << getAppURL().c_str() << "/OAuth2Assoc.fcgi?openid=" << openid << "&stid=" << id_encrypt << "&proc=" << encrypt_access_token << "\r\n";
+			}
+			else // 完全不存在学号，则为新绑定用户
+			{
+				cout << "Location: " << getAppURL().c_str() << "/OAuth2Assoc.fcgi?openid=" << openid << "&proc=" << encrypt_access_token << "\r\n";
+			}
 		}
-		else
+		else // OAuth State 传来有效的需要绑定的学号
 		{
-			cout << "Location: " << getAppURL().c_str() << "/OAuth2Assoc.fcgi?openid=" << openid << "&stid=" << id << "\r\n";
+			cout << "Location: " << getAppURL().c_str() << "/OAuth2Assoc.fcgi?openid=" << openid << "&stid=" << id_state << "&proc=" << encrypt_access_token << "\r\n";
 		}
 		cout << GLOBAL_HEADER;
 
@@ -384,7 +412,6 @@ void WriteOAuthUserInfo(char *access_token, char *openid, char *student_id)
 	char *pStr1 = strstr(html_str, "\"nickname\": \"");
 	if (pStr1 == NULL)
 	{
-		Error(html_str);
 		free(html_str);
 		return;
 	}
@@ -417,21 +444,41 @@ void WriteOAuthUserInfo(char *access_token, char *openid, char *student_id)
 	mid(avatar, pStr1 + 19, pStr2 - pStr1 - 19, 0);
 	free(html_str);
 
-	std::string query("UPDATE `UserInfo` SET OAuth_name='");
-	query += nickname;
-	query += "', OAuth_avatar='";
-	query += avatar;
-	query += "' WHERE id='";
-	query += student_id;
-	query += "';";
+	MYSQL_STMT *stmt = mysql_stmt_init(&db);
+	MYSQL_BIND bind[3];
+	memset(bind, 0, sizeof(bind));
+	std::string query("UPDATE `UserInfo` SET `OAuth_name`=?, `OAuth_avatar`=? WHERE `id`=?");
 
-	if (mysql_query(&db, query.c_str()) != 0)
+	if (stmt == NULL)
 	{
 		delete[]nickname;
 		delete[]avatar;
 		return;
 	}
 
+	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[0].buffer = (void *)nickname;
+	bind[0].buffer_length = strlen(nickname);
+
+	bind[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[1].buffer = (void *)avatar;
+	bind[1].buffer_length = strlen(avatar);
+
+	bind[2].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[2].buffer = (void *)student_id;
+	bind[2].buffer_length = strlen(student_id);
+
+	if (mysql_stmt_prepare(stmt, query.c_str(), query.length()) != 0 || 
+		mysql_stmt_bind_param(stmt, bind) != 0 || 
+		mysql_stmt_execute(stmt) != 0)
+	{
+		mysql_stmt_close(stmt);
+		delete[]nickname;
+		delete[]avatar;
+		return;
+	}
+
+	mysql_stmt_close(stmt);
 	delete[]nickname;
 	delete[]avatar;
 }
@@ -439,41 +486,53 @@ void WriteOAuthUserInfo(char *access_token, char *openid, char *student_id)
 // 读取第三方账户昵称与头像URL
 bool GetOAuthUserInfo(char *student_id, char *nickname, char *avatar_url)
 {
-	std::string query("SELECT `OAuth_name`, `OAuth_avatar` FROM `UserInfo` WHERE id='");
-	query += student_id;
-	query += "';";
+	MYSQL_STMT *stmt = mysql_stmt_init(&db);
+	MYSQL_BIND bind[1];
+	MYSQL_BIND query_ret[2];
+	memset(bind, 0, sizeof(bind));
+	memset(query_ret, 0, sizeof(query_ret));
+	std::string query("SELECT `OAuth_name`, `OAuth_avatar` FROM `UserInfo` WHERE `id`=?");
 
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	char name[128] = { 0 };
-	char avatar[2048] = { 0 };
-
-	if (mysql_query(&db, query.c_str()) != 0)
-	{
-		return false;
-	}
-	result = mysql_store_result(&db);
-	if (mysql_num_rows(result))
-	{
-		while ((row = mysql_fetch_row(result)))
-		{
-			if (row[0])
-			{
-				sprintf(name, "%s", row[0]);
-				sprintf(avatar, "%s", row[1]);
-			}
-			break;
-		}
-	}
-	mysql_free_result(result);
-
-	if (strlen(name) == 0 || strlen(avatar) == 0)
+	if (stmt == NULL)
 	{
 		return false;
 	}
 
-	strcpy(nickname, (char *)name);
-	strcpy(avatar_url, (char *)avatar);
+	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[0].buffer = (void *)student_id;
+	bind[0].buffer_length = strlen(student_id);
+
+	char OAuth_name[1024] = { 0 };
+	query_ret[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	query_ret[0].buffer = (void *)OAuth_name;
+	query_ret[0].buffer_length = sizeof(OAuth_name);
+
+	char OAuth_avatar[4096] = { 0 };
+	query_ret[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+	query_ret[1].buffer = (void *)OAuth_avatar;
+	query_ret[1].buffer_length = sizeof(OAuth_avatar);
+
+	if (mysql_stmt_prepare(stmt, query.c_str(), query.length()) != 0 || 
+		mysql_stmt_bind_param(stmt, bind) != 0 || 
+		mysql_stmt_bind_result(stmt, query_ret) != 0 || 
+		mysql_stmt_execute(stmt) != 0 || 
+		mysql_stmt_store_result(stmt) != 0)
+	{
+		mysql_stmt_close(stmt);
+		return false;
+	}
+
+	while (mysql_stmt_fetch(stmt) == 0);
+
+	mysql_stmt_close(stmt);
+
+	if (strlen(OAuth_name) == 0 || strlen(OAuth_avatar) == 0)
+	{
+		return false;
+	}
+
+	strcpy(nickname, OAuth_name);
+	strcpy(avatar_url, OAuth_avatar);
 
 	return true;
 }

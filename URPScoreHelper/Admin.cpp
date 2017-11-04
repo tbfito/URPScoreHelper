@@ -587,48 +587,59 @@ void do_find_user()
 
 	decode_post_data(m_STUDENT_ID);
 
-	// 获取多少用户使用了我们的服务 :)
-	std::string query("SELECT * FROM `UserInfo` WHERE id='");
-	query += m_STUDENT_ID;
-	query += "';";
+	MYSQL_STMT *stmt = mysql_stmt_init(&db);
+	MYSQL_BIND bind[1];
+	MYSQL_BIND query_ret[6];
+	memset(bind, 0, sizeof(bind));
+	memset(query_ret, 0, sizeof(query_ret));
+	std::string query("SELECT `id`, `password`, `name`, `openid`, `OAuth_name`, `lastlogin` FROM `UserInfo` WHERE `id`=?");
 
-	MYSQL_RES *result;
-	MYSQL_ROW row;
+	char tmp1[36] = { 0 };
+	char tmp2[36] = { 0 };
+	char tmp3[36] = { 0 };
+	char tmp4[1024] = { 0 };
+	char tmp5[1024] = { 0 };
+	char tmp6[1024] = { 0 };
+	
+	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[0].buffer = (void *)m_STUDENT_ID.c_str();
+	bind[0].buffer_length = m_STUDENT_ID.length();
 
-	char tmp1[4096] = u8"未找到";
-	char tmp2[4096] = { 0 };
-	char tmp3[4096] = { 0 };
-	char tmp4[4096] = { 0 };
-	char tmp5[4096] = { 0 };
-	char tmp6[4096] = { 0 };
+	query_ret[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	query_ret[0].buffer = (void *)tmp1;
+	query_ret[0].buffer_length = sizeof(tmp1);
+	query_ret[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+	query_ret[1].buffer = (void *)tmp2;
+	query_ret[1].buffer_length = sizeof(tmp2);
+	query_ret[2].buffer_type = MYSQL_TYPE_VAR_STRING;
+	query_ret[2].buffer = (void *)tmp3;
+	query_ret[2].buffer_length = sizeof(tmp3);
+	query_ret[3].buffer_type = MYSQL_TYPE_VAR_STRING;
+	query_ret[3].buffer = (void *)tmp4;
+	query_ret[3].buffer_length = sizeof(tmp4);
+	query_ret[4].buffer_type = MYSQL_TYPE_VAR_STRING;
+	query_ret[4].buffer = (void *)tmp5;
+	query_ret[4].buffer_length = sizeof(tmp5);
+	query_ret[5].buffer_type = MYSQL_TYPE_VAR_STRING;
+	query_ret[5].buffer = (void *)tmp6;
+	query_ret[5].buffer_length = sizeof(tmp6);
 
-	if (mysql_query(&db, query.c_str()) != 0)
+	if (stmt != NULL)
 	{
-		goto END;
+		mysql_stmt_prepare(stmt, query.c_str(), query.length());
+		mysql_stmt_bind_param(stmt, bind);
+		mysql_stmt_bind_result(stmt, query_ret);
+		mysql_stmt_execute(stmt);
+		mysql_stmt_store_result(stmt);
+		while (mysql_stmt_fetch(stmt) == 0);
+		mysql_stmt_close(stmt);
 	}
-	result = mysql_store_result(&db);
-	if (mysql_num_rows(result))
-	{
-		while ((row = mysql_fetch_row(result)))
-		{
-			sprintf(tmp1, "%s", row[0]);
-			sprintf(tmp2, "%s", row[1]);
-			sprintf(tmp3, "%s", row[2]);
-			sprintf(tmp4, "%s", row[3]);
-			sprintf(tmp5, "%s", row[4]);
-			sprintf(tmp6, "%s", row[6]);
-			break;
-		}
-	}
-	else
-	{
-		mysql_free_result(result);
-		goto END;
-	}
-	mysql_free_result(result);
 
-	goto END;
-	END: 
+	if (strlen(tmp1) == 0)
+	{
+		strcpy(tmp1, u8"未找到");
+	}
+
 	cout << GLOBAL_HEADER
 		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
 			m_STUDENT_ID.c_str(), tmp1, tmp2, tmp3, tmp4, tmp5, tmp6).c_str();

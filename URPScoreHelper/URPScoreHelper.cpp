@@ -591,7 +591,7 @@ void LoadConfig()
 	free(lpvBuffer);
 	if (!isdbReady)
 	{
-		std::string query("CREATE TABLE IF NOT EXISTS `UserInfo` (`id` char(36) NOT NULL,`password` char(36) NOT NULL,`name` varchar(36) DEFAULT NULL,`openid` varchar(1024) DEFAULT NULL,`OAuth_name` varchar(1024) DEFAULT NULL,`OAuth_avatar` varchar(4096) DEFAULT NULL,`lastlogin` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+		std::string query("CREATE TABLE IF NOT EXISTS `UserInfo` (`id` varchar(36) NOT NULL,`password` varchar(36) NOT NULL,`name` varchar(36) DEFAULT NULL,`openid` varchar(1024) DEFAULT NULL,`OAuth_name` varchar(1024) DEFAULT NULL,`OAuth_avatar` varchar(4096) DEFAULT NULL,`lastlogin` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 		if (mysql_query(&db, query.c_str()) != 0)
 		{
 			return;
@@ -643,112 +643,207 @@ void UpdateCounter()
 	g_users = 0;
 
 	// 获取多少用户使用了我们的服务 :)
-	std::string query("SELECT `value` FROM `Settings` WHERE name='QueryCounter';");
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (mysql_query(&db, query.c_str()) != 0)
-	{
-		return;
-	}
-	result = mysql_store_result(&db);
-	if (mysql_num_rows(result))
-	{
-		while ((row = mysql_fetch_row(result)))
-		{
-			if (row[0])
-			{
-				char query_counts[64] = { 0 };
-				sprintf(query_counts, "%s", row[0]);
-				g_QueryCounter = atoi(query_counts);
-			}
-			break;
-		}
-	}
-	mysql_free_result(result);
-	memset(&row, 0, sizeof(MYSQL_ROW));
+	MYSQL_STMT *stmt = mysql_stmt_init(&db);
+	MYSQL_BIND bind[1];
+	memset(bind, 0, sizeof(bind));
+	std::string query("SELECT `value` FROM `Settings` WHERE `name`='QueryCounter';");
 
-	query = "SELECT COUNT(*) FROM `UserInfo`;";
-	if (mysql_query(&db, query.c_str()) != 0)
+	if (stmt == NULL)
 	{
 		return;
 	}
-	result = mysql_store_result(&db);
-	if (mysql_num_rows(result))
+	if (mysql_stmt_prepare(stmt, query.c_str(), query.length()))
 	{
-		while ((row = mysql_fetch_row(result)))
-		{
-			if (row[0])
-			{
-				char query_counts[64] = { 0 };
-				sprintf(query_counts, "%s", row[0]);
-				g_users = atoi(query_counts);
-			}
-			break;
-		}
+		mysql_stmt_close(stmt);
+		return;
 	}
-	mysql_free_result(result);
+
+	char query_counts[64] = { 0 };
+	
+	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[0].buffer = (void *)query_counts;
+	bind[0].buffer_length = sizeof(query_counts);
+
+	if (mysql_stmt_bind_result(stmt, bind))
+	{
+		mysql_stmt_close(stmt);
+		return;
+	}
+	if (mysql_stmt_execute(stmt))
+	{
+		mysql_stmt_close(stmt);
+		return;
+	}
+	if (mysql_stmt_store_result(stmt))
+	{
+		mysql_stmt_close(stmt);
+		return;
+	}
+
+	while (mysql_stmt_fetch(stmt) == 0)
+		g_QueryCounter = atoi(query_counts);
+
+	mysql_stmt_close(stmt);
+	
+	stmt = mysql_stmt_init(&db);
+	MYSQL_BIND bind2[1];
+	memset(bind2, 0, sizeof(bind2));
+	query = "SELECT COUNT(*) FROM `UserInfo`;";
+
+	if (stmt == NULL)
+	{
+		return;
+	}
+	if (mysql_stmt_prepare(stmt, query.c_str(), query.length()))
+	{
+		mysql_stmt_close(stmt);
+		return;
+	}
+
+	bind2[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind2[0].buffer = (void *)query_counts;
+	bind2[0].buffer_length = sizeof(query_counts);
+
+	if (mysql_stmt_bind_result(stmt, bind))
+	{
+		mysql_stmt_close(stmt);
+		return;
+	}
+	if (mysql_stmt_execute(stmt))
+	{
+		mysql_stmt_close(stmt);
+		return;
+	}
+	if (mysql_stmt_store_result(stmt))
+	{
+		mysql_stmt_close(stmt);
+		return;
+	}
+
+	while (mysql_stmt_fetch(stmt) == 0)
+		g_users = atoi(query_counts);
+
+	mysql_stmt_close(stmt);
 }
 
 // 读取数据库设置表中的内容(注意value的内存分配)
 bool GetSettings(const char *name, char *value)
 {
 	// 获取多少用户使用了我们的服务 :)
-	std::string query("SELECT `value` FROM `Settings` WHERE name='");
-	query += name;
-	query += "';";
+	MYSQL_STMT *stmt = mysql_stmt_init(&db);
+	MYSQL_BIND bind[1];
+	MYSQL_BIND ret[1];
+	memset(bind, 0, sizeof(bind));
+	memset(ret, 0, sizeof(ret));
+	std::string query("SELECT `value` FROM `Settings` WHERE `name`=?");
 
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	if (mysql_query(&db, query.c_str()) != 0)
+	if (stmt == NULL)
 	{
-		strcpy(value, "(null)");
 		return false;
 	}
-	result = mysql_store_result(&db);
-	if (mysql_num_rows(result))
+
+	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[0].buffer = (void *)name;
+	bind[0].buffer_length = strlen(name);
+
+	char query_ret[10240] = { 0 };
+	ret[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	ret[0].buffer = (void *)query_ret;
+	ret[0].buffer_length = sizeof(query_ret);
+
+	if (mysql_stmt_prepare(stmt, query.c_str(), query.length()) != 0 || 
+		mysql_stmt_bind_param(stmt, bind) != 0 || 
+		mysql_stmt_bind_result(stmt, ret) != 0 || 
+		mysql_stmt_execute(stmt) != 0 || 
+		mysql_stmt_store_result(stmt) != 0)
 	{
-		while ((row = mysql_fetch_row(result)))
-		{
-			if (row[0])
-			{
-				sprintf(value, "%s", row[0]);
-			}
-			break;
-		}
+		mysql_stmt_close(stmt);
+		strcpy(value, "");
+		return false;
 	}
-	else
+
+	while (mysql_stmt_fetch(stmt) == 0);
+
+	if (strlen(query_ret) == 0)
 	{
-		strcpy(value, "(null)");
+		mysql_stmt_close(stmt);
+		strcpy(value, "");
+		return false;
 	}
-	mysql_free_result(result);
+
+	mysql_stmt_close(stmt);
+	strcpy(value, query_ret);
 	return true;
 }
 
 // 向数据库设置表中增添配置项
 bool AddSettings(const char *name, const char *value)
 {
-	std::string query("INSERT IGNORE INTO `Settings` (`name`, `value`) VALUES ('");
-	query =  query + name + "', '" + value + "');";
-	if (mysql_query(&db, query.c_str()) != 0)
+	MYSQL_STMT *stmt = mysql_stmt_init(&db);
+	MYSQL_BIND bind[2];
+	memset(bind, 0, sizeof(bind));
+	std::string query("INSERT IGNORE INTO `Settings` (`name`, `value`) VALUES (?, ?)");
+
+	if (stmt == NULL)
 	{
 		return false;
 	}
+	if (mysql_stmt_prepare(stmt, query.c_str(), query.length()))
+	{
+		mysql_stmt_close(stmt);
+		return false;
+	}
+
+	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[0].buffer = (void *)name;
+	bind[0].buffer_length = strlen(name);
+
+	bind[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[1].buffer = (void *)value;
+	bind[1].buffer_length = strlen(value);
+
+	if (mysql_stmt_bind_param(stmt, bind))
+	{
+		mysql_stmt_close(stmt);
+		return false;
+	}
+
+	if (mysql_stmt_execute(stmt))
+	{
+		mysql_stmt_close(stmt);
+		return false;
+	}
+	mysql_stmt_close(stmt);
 	return true;
 }
 
 // 置查询计数器
 void SetQueryCounter(int current_counts)
 {
-	std::string query("UPDATE `Settings` SET value='");
-	char counts[128] = { 0 };
-	sprintf(counts, "%d", current_counts);
-	query += counts;
-	query += "' WHERE name='QueryCounter';";
+	MYSQL_STMT *stmt = mysql_stmt_init(&db);
+	MYSQL_BIND bind[1];
+	memset(bind, 0, sizeof(bind));
+	std::string query("UPDATE `Settings` SET `value`=? WHERE `name`='QueryCounter'");
 
-	if (mysql_query(&db, query.c_str()) != 0)
+	if (stmt == NULL)
 	{
 		return;
 	}
+	if (mysql_stmt_prepare(stmt, query.c_str(), query.length()))
+	{
+		mysql_stmt_close(stmt);
+		return;
+	}
+
+	char counts[128] = { 0 };
+	sprintf(counts, "%d", current_counts);
+	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[0].buffer = (void *)counts;
+	bind[0].buffer_length = strlen(counts);
+
+	mysql_stmt_bind_param(stmt, bind);
+	mysql_stmt_execute(stmt);
+	mysql_stmt_close(stmt);
 }
 
 // 处理 Cookie、照片(p_photo_uri 为空代表不要照片, 随便设置内容不为空则会向里面写入照片数据)
@@ -866,7 +961,7 @@ void parse_main()
 		int m_post_length = atoi(CGI_CONTENT_LENGTH);
 		if (m_post_length <= 0 || m_post_length > 127)
 		{
-			Error(u8"<p><b>发生错误，POST 数据长度异常</b></p><p>帐号或密码输入有问题哦，请重试</p>");
+			Error(u8"<p>帐号或密码输入有问题哦，请重试</p>");
 			return;
 		}
 		char *m_post_data = (char *)malloc(m_post_length + 2);
@@ -934,42 +1029,42 @@ void parse_main()
 	// 读入主页面文件
 	std::string m_lpszHomepage = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
-	char m_student_name[512] = {0};
+	char m_student_name[1024] = {0};
 	char m_student_id[512] = { 0 };
-	char m_avatar_url[512] = { 0 };
+	char m_avatar_url[4096] = { 0 };
 	get_student_id(m_student_id);
 	if (!GetOAuthUserInfo(m_student_id, m_student_name, m_avatar_url))
 	{
-		memset(m_student_name, 0, 512);
+		memset(m_student_name, 0, 1024);
 		get_student_name(m_student_name);
 	}
 
-	// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
-	std::string query("SELECT `openid` FROM `UserInfo` WHERE id='");
-	query.append(m_student_id);
-	query.append("';");
+	MYSQL_STMT *stmt = mysql_stmt_init(&db);
+	MYSQL_BIND bind[1];
+	MYSQL_BIND ret[1];
+	memset(bind, 0, sizeof(bind));
+	memset(ret, 0, sizeof(ret));
+	std::string query("SELECT `openid` FROM `UserInfo` WHERE `id`=?");
 
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	char openid[512] = { 0 };
+	char openid[1024] = { 0 };
+	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[0].buffer = (void *)m_student_id;
+	bind[0].buffer_length = strlen(m_student_id);
 
-	if (mysql_query(&db, query.c_str()) != 0)
+	ret[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	ret[0].buffer = (void *)openid;
+	ret[0].buffer_length = sizeof(openid);
+
+	if (stmt != NULL)
 	{
-		return;
+		mysql_stmt_prepare(stmt, query.c_str(), query.length());
+		mysql_stmt_bind_param(stmt, bind);
+		mysql_stmt_bind_result(stmt, ret);
+		mysql_stmt_execute(stmt);
+		mysql_stmt_store_result(stmt);
+		while (mysql_stmt_fetch(stmt) == 0);
+		mysql_stmt_close(stmt);
 	}
-	result = mysql_store_result(&db);
-	if (mysql_num_rows(result))
-	{
-		while ((row = mysql_fetch_row(result)))
-		{
-			if (row[0])
-			{
-				sprintf(openid, "%s", row[0]);
-			}
-			break;
-		}
-	}
-	mysql_free_result(result);
 
 	cout << GLOBAL_HEADER;
 
@@ -1202,8 +1297,8 @@ void parse_ajax_avatar()
 	}
 	cout << "\r\n";
 	char m_student_id[512] = { 0 };
-	char m_avatar_url[512] = { 0 };
-	char m_student_name[512] = { 0 };
+	char m_avatar_url[4096] = { 0 };
+	char m_student_name[1024] = { 0 };
 	get_student_id(m_student_id);
 	if (!GetOAuthUserInfo(m_student_id, m_student_name, m_avatar_url))
 	{
@@ -2239,38 +2334,32 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		return false;
 	}
 
-	// <del>SQLite3</del> 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
-	std::string query("SELECT `id` FROM `UserInfo` WHERE id='");
-	query += p_xuehao;
-	query += "';";
+	MYSQL_STMT *stmt = mysql_stmt_init(&db);
+	MYSQL_BIND bind[1];
+	MYSQL_BIND ret[1];
+	memset(bind, 0, sizeof(bind));
+	memset(ret, 0, sizeof(ret));
+	std::string query("SELECT `id` FROM `UserInfo` WHERE `id`=?");
 
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	char id[64] = { 0 };
+	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[0].buffer = (void *)p_xuehao;
+	bind[0].buffer_length = strlen(p_xuehao);
 
-	if (mysql_query(&db, query.c_str()) != 0)
+	char id[36] = { 0 };
+	ret[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	ret[0].buffer = (void *)id;
+	ret[0].buffer_length = sizeof(id);
+
+	if (stmt != NULL)
 	{
-		student_logout();
-		std::string Err_Msg(u8"<b>很抱歉，登录失败。</b><p>数据库错误 (");
-		Err_Msg += mysql_error(&db);
-		Err_Msg += ")</p>";
-		Error(Err_Msg.c_str());
-		return false;
+		mysql_stmt_prepare(stmt, query.c_str(), query.length());
+		mysql_stmt_bind_param(stmt, bind);
+		mysql_stmt_bind_result(stmt, ret);
+		mysql_stmt_execute(stmt);
+		mysql_stmt_store_result(stmt);
+		while (mysql_stmt_fetch(stmt) == 0);
+		mysql_stmt_close(stmt);
 	}
-	result = mysql_store_result(&db);
-	if (mysql_num_rows(result))
-	{
-		while ((row = mysql_fetch_row(result)))
-		{
-			if (row[0])
-			{
-				sprintf(id, "%s", row[0]);
-			}
-			break;
-		}
-	}
-
-	mysql_free_result(result);
 
 	// 对密码做URL解码
 	int len = url_decode(p_password, strlen(p_password));
@@ -2278,57 +2367,104 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	left(temp, p_password, len);
 	strcpy(p_password, temp);
 
-	if (strlen(id) == 0) // 无记录，则写入数据库
+	if (strcmp(id, p_xuehao) != 0) // 无记录，则写入数据库
 	{
-		std::string query("INSERT INTO `UserInfo` (`id`, `password`, `name`, `openid`, `lastlogin`) VALUES ('");
-		query += p_xuehao;
-		query += "', '";
-		query += p_password;
-		query += "', '";
-		char m_stname[128] = { 0 };
-		get_student_name(m_stname);
-		query += m_stname;
-		query += "', NULL, '";
-		char m_time[128] = { 0 };
-		get_time(m_time);
-		query += m_time;
-		query += "');";
+		MYSQL_STMT *stmt = mysql_stmt_init(&db);
+		MYSQL_BIND bind[4];
+		memset(bind, 0, sizeof(bind));
+		std::string query("INSERT INTO `UserInfo` (`id`, `password`, `name`, `lastlogin`) VALUES (?, ?, ?, ?)");
 
-		if (mysql_query(&db, query.c_str()) != 0)
+		if (stmt == NULL)
 		{
 			student_logout();
-			std::string Err_Msg(u8"<b>很抱歉，登录失败。</b><p>数据库错误 (");
-			Err_Msg += mysql_error(&db);
-			Err_Msg += ")</p>";
+			std::string Err_Msg(u8"<b>很抱歉，登录失败。</b><p>数据库错误 (statement 初始化失败)</p>");
 			Error(Err_Msg.c_str());
 			return false;
 		}
+
+		bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+		bind[0].buffer = (void *)p_xuehao;
+		bind[0].buffer_length = strlen(p_xuehao);
+
+		bind[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+		bind[1].buffer = (void *)p_password;
+		bind[1].buffer_length = strlen(p_password);
+
+		char m_stname[128] = { 0 };
+		get_student_name(m_stname);
+		bind[2].buffer_type = MYSQL_TYPE_VAR_STRING;
+		bind[2].buffer = (void *)m_stname;
+		bind[2].buffer_length = strlen(m_stname);
+
+		char m_time[128] = { 0 };
+		get_time(m_time);
+		bind[3].buffer_type = MYSQL_TYPE_VAR_STRING;
+		bind[3].buffer = (void *)m_time;
+		bind[3].buffer_length = strlen(m_time);
+
+		if (mysql_stmt_prepare(stmt, query.c_str(), query.length()) != 0 || 
+			mysql_stmt_bind_param(stmt, bind) != 0 || 
+			mysql_stmt_execute(stmt) != 0
+			)
+		{
+			student_logout();
+			std::string Err_Msg(u8"<b>很抱歉，登录失败。</b><p>数据库错误 (");
+			Err_Msg += mysql_stmt_error(stmt);
+			Err_Msg += ")</p>";
+			Error(Err_Msg.c_str());
+			mysql_stmt_close(stmt);
+			return false;
+		}
+		mysql_stmt_close(stmt);
 	}
 	else // 为成功登录的学生更新记录
 	{
-		std::string query("UPDATE `UserInfo` SET password='");
-		char m_time[128] = { 0 };
-		get_time(m_time);
-		query += p_password;
-		query += "', lastlogin='";
-		query += m_time;
-		query += "', name='";
-		char m_stname[128] = { 0 };
-		get_student_name(m_stname);
-		query += m_stname;
-		query += "' WHERE id = '";
-		query += p_xuehao;
-		query += "';";
+		MYSQL_STMT *stmt = mysql_stmt_init(&db);
+		MYSQL_BIND bind[4];
+		memset(bind, 0, sizeof(bind));
+		std::string query("UPDATE `UserInfo` SET `password`=?, `lastlogin`=?, `name`=? WHERE `id`=?");
 
-		if (mysql_query(&db, query.c_str()) != 0)
+		if (stmt == NULL)
 		{
 			student_logout();
-			std::string Err_Msg(u8"<b>很抱歉，登录失败。</b><p>数据库错误 (");
-			Err_Msg += mysql_error(&db);
-			Err_Msg += ")</p>";
+			std::string Err_Msg(u8"<b>很抱歉，登录失败。</b><p>数据库错误 (statement 初始化失败)</p>");
 			Error(Err_Msg.c_str());
 			return false;
 		}
+
+		bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+		bind[0].buffer = (void *)p_password;
+		bind[0].buffer_length = strlen(p_password);
+
+		char m_time[128] = { 0 };
+		get_time(m_time);
+		bind[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+		bind[1].buffer = (void *)m_time;
+		bind[1].buffer_length = strlen(m_time);
+
+		char m_stname[128] = { 0 };
+		get_student_name(m_stname);
+		bind[2].buffer_type = MYSQL_TYPE_VAR_STRING;
+		bind[2].buffer = (void *)m_stname;
+		bind[2].buffer_length = strlen(m_stname);
+
+		bind[3].buffer_type = MYSQL_TYPE_VAR_STRING;
+		bind[3].buffer = (void *)p_xuehao;
+		bind[3].buffer_length = strlen(p_xuehao);
+
+		if (mysql_stmt_prepare(stmt, query.c_str(), query.length()) != 0 || 
+			mysql_stmt_bind_param(stmt, bind) != 0 || 
+			mysql_stmt_execute(stmt) != 0)
+		{
+			student_logout();
+			std::string Err_Msg(u8"<b>很抱歉，登录失败。</b><p>数据库错误 (");
+			Err_Msg += mysql_stmt_error(stmt);
+			Err_Msg += ")</p>";
+			Error(Err_Msg.c_str());
+			mysql_stmt_close(stmt);
+			return false;
+		}
+		mysql_stmt_close(stmt);
 	}
 	// 至此，学生登录成功
 	return true;
@@ -2833,19 +2969,35 @@ void OAuth2_Association(bool isPOST)
 			return;
 		}
 
-		std::string query("UPDATE `UserInfo` SET `openid`=NULL, `OAuth_name`=NULL, `OAuth_avatar`=NULL WHERE id='");
-		query += student_id;
-		query += "';";
+		MYSQL_STMT *stmt = mysql_stmt_init(&db);
+		MYSQL_BIND bind[1];
+		memset(bind, 0, sizeof(bind));
+		std::string query("UPDATE `UserInfo` SET `openid`=NULL, `OAuth_name`=NULL, `OAuth_avatar`=NULL WHERE `id`=?");
 
-		if (mysql_query(&db, query.c_str()) != 0)
+		if (stmt == NULL)
 		{
-			std::string Err_Msg(u8"<b>解除绑定失败，请稍后再试。</b><p>(");
-			Err_Msg += mysql_error(&db);
-			Err_Msg += ")</p>";
+			std::string Err_Msg(u8"<b>解除绑定失败</b><p>数据库错误 (statement 初始化失败)</p>");
 			Error(Err_Msg.c_str());
 			return;
 		}
 
+		bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+		bind[0].buffer = (void *)student_id;
+		bind[0].buffer_length = strlen(student_id);
+
+		if (mysql_stmt_prepare(stmt, query.c_str(), query.length()) != 0 || 
+			mysql_stmt_bind_param(stmt, bind) != 0 || 
+			mysql_stmt_execute(stmt) != 0)
+		{
+			std::string Err_Msg(u8"<b>解除绑定失败</b><p>数据库错误 (");
+			Err_Msg += mysql_stmt_error(stmt);
+			Err_Msg += ")</p>";
+			Error(Err_Msg.c_str());
+			mysql_stmt_close(stmt);
+			return;
+		}
+
+		mysql_stmt_close(stmt);
 		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/main.fcgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
@@ -2866,6 +3018,25 @@ void OAuth2_Association(bool isPOST)
 	{
 		mid(openid, pStr1 + 7, pStr2 - pStr1 - 7, 0);
 	}
+
+	char access_token[1024] = { 0 };
+	pStr1 = strstr(CGI_QUERY_STRING, "proc=");
+	if (pStr1 == NULL)
+	{
+		Error(u8"没有过程状态信息 (Null proc)");
+		delete[]openid;
+		return;
+	}
+	pStr2 = strstr(pStr1 + 5, "&");
+	if (pStr2 == NULL)
+	{
+		right(access_token, pStr1 + 5, strlen(CGI_QUERY_STRING) - 5);
+	}
+	else
+	{
+		mid(access_token, pStr1 + 5, pStr2 - pStr1 - 5, 0);
+	}
+
 	if (!isPOST)
 	{
 		// 如果传进 sid，则自动填写学号、并且从数据库中拿密码。
@@ -2885,38 +3056,34 @@ void OAuth2_Association(bool isPOST)
 			DeCodeStr(stid);
 		}
 
-		char pass[512] = {0};
+		char pass[36] = {0};
 		if (strlen(stid) != 0 && strcmp(stid, "NONE") != 0)
 		{
-			// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128)。
-			std::string query("SELECT `password` FROM `UserInfo` WHERE id='");
-			query += stid;
-			query += "';";
+			MYSQL_STMT *stmt = mysql_stmt_init(&db);
+			MYSQL_BIND bind[1];
+			MYSQL_BIND ret[1];
+			memset(bind, 0, sizeof(bind));
+			memset(ret, 0, sizeof(ret));
+			std::string query("SELECT `password` FROM `UserInfo` WHERE `id`=?");
 
-			MYSQL_RES *result;
-			MYSQL_ROW row;
-			if (mysql_query(&db, query.c_str()) != 0)
+			bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+			bind[0].buffer = (void *)stid;
+			bind[0].buffer_length = strlen(stid);
+
+			ret[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+			ret[0].buffer = (void *)pass;
+			ret[0].buffer_length = sizeof(pass);
+
+			if (stmt != NULL)
 			{
-				char Err_Msg[1024] = u8"<b>数据库准备失败！请确认数据库合法性。</b><p>(";
-				strcat(Err_Msg, mysql_error(&db));
-				strcat(Err_Msg, ")</p>");
-				Error(Err_Msg);
-				delete[]openid;
-				return;
+				mysql_stmt_prepare(stmt, query.c_str(), query.length());
+				mysql_stmt_bind_param(stmt, bind);
+				mysql_stmt_bind_result(stmt, ret);
+				mysql_stmt_execute(stmt);
+				mysql_stmt_store_result(stmt);
+				while (mysql_stmt_fetch(stmt) == 0);
+				mysql_stmt_close(stmt);
 			}
-			result = mysql_store_result(&db);
-			if (mysql_num_rows(result))
-			{
-				while ((row = mysql_fetch_row(result)))
-				{
-					if (row[0])
-					{
-						sprintf(pass, "%s", row[0]);
-					}
-					break;
-				}
-			}
-			mysql_free_result(result);
 		}
 
 		std::string m_lpszHomepage = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
@@ -2929,17 +3096,17 @@ void OAuth2_Association(bool isPOST)
 
 		if (strlen(stid) == 0 || strcmp(stid, "NONE") == 0)
 		{
-			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, u8"感谢使用QQ登录，请先绑定自己的学号吧 :)",
+			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"感谢使用QQ登录，请先绑定自己的学号吧 :)",
 				 "", pass);
 		}
 		else if(strlen(pass) == 0)
 		{
-			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, u8"感谢使用QQ登录，请输入密码来继续操作 :)",
+			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"感谢使用QQ登录，请输入密码来继续操作 :)",
 				stid, "");
 		}
 		else
 		{
-			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, u8"感谢使用QQ登录，请输入验证码来继续操作 :)",
+			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"感谢使用QQ登录，请输入验证码来继续操作 :)",
 				stid, pass);
 		}
 		cout << footer.c_str();
@@ -2948,7 +3115,7 @@ void OAuth2_Association(bool isPOST)
 	{
 		// 获取 POST 数据。
 		int m_post_length = atoi(CGI_CONTENT_LENGTH);
-		if (m_post_length <= 0)
+		if (m_post_length <= 0 || m_post_length > 127)
 		{
 			Error(u8"<p>发生错误，POST 数据长度异常</p>");
 			delete[]openid;
@@ -3007,30 +3174,53 @@ void OAuth2_Association(bool isPOST)
 		}
 
 		// 这里表示登录成功，应该写入数据库了。
-		std::string query("UPDATE `UserInfo` SET openid='");
-		query += openid;
-		query += "' WHERE id='";
-		query += m_xuehao;
-		query += "';";
+		MYSQL_STMT *stmt = mysql_stmt_init(&db);
+		MYSQL_BIND bind[2];
+		memset(bind, 0, sizeof(bind));
+		std::string query("UPDATE `UserInfo` SET `openid`=? WHERE `id`=?");
 
-		if (mysql_query(&db, query.c_str()) != 0)
+		if (stmt == NULL)
 		{
-			char Err_Msg[1024] = u8"<b>很抱歉，QQ绑定失败。</b><p>数据库错误 (";
-			strcat(Err_Msg, mysql_error(&db));
-			strcat(Err_Msg, u8")</p><p>但是还可以正常登录的。</p>");
+			char Err_Msg[1024] = u8"<b>很抱歉，QQ绑定失败。</b><p>数据库错误 (statement 初始化失败)</p><p>但还是可以正常登录的。</p>";
 			Error(Err_Msg);
 			free(m_post_data);
 			delete[]openid;
 			return;
 		}
 
+		bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+		bind[0].buffer = (void *)openid;
+		bind[0].buffer_length = strlen(openid);
+
+		bind[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+		bind[1].buffer = (void *)m_xuehao;
+		bind[1].buffer_length = strlen(m_xuehao);
+
+		if (mysql_stmt_prepare(stmt, query.c_str(), query.length()) != 0 || 
+			mysql_stmt_bind_param(stmt, bind) != 0 || 
+			mysql_stmt_execute(stmt) != 0
+			)
+		{
+			char Err_Msg[1024] = u8"<b>很抱歉，QQ绑定失败。</b><p>数据库错误 (";
+			strcat(Err_Msg, mysql_stmt_error(stmt));
+			strcat(Err_Msg, u8")</p><p>但还是可以正常登录的。</p>");
+			Error(Err_Msg);
+			free(m_post_data);
+			delete[]openid;
+			mysql_stmt_close(stmt);
+			return;
+		}
+		mysql_stmt_close(stmt);
+
+		DeCodeStr(access_token);
+		WriteOAuthUserInfo(access_token, openid, m_xuehao);
+
 		cout << "Status: 302 Found\r\n";
 		cout << "Location: " << getAppURL().c_str() << "/main.fcgi\r\n";
 		cout << GLOBAL_HEADER;
-		
 		free(m_post_data);
 	}
-
+	
 	delete[]openid;
 	return;
 }
@@ -3492,20 +3682,12 @@ void do_change_password() //(POST /changePassword.fcgi)
 		return;
 	}
 
-	// SQLite3 数据库，库名 main，表 URLScoreHelper，字段 text id(36), text password(36), text openid(128) text lastlogin(64)。
-	std::string query("UPDATE `UserInfo` SET password='");
-	char m_time[128] = { 0 };
-	get_time(m_time);
-	query += pwd;
-	query += "', lastlogin='";
-	query += m_time;
-	query += "' WHERE id = '";
-	char id[128] = { 0 };
-	get_student_id(id);
-	query += id;
-	query += "';";
+	MYSQL_STMT *stmt = mysql_stmt_init(&db);
+	MYSQL_BIND bind[3];
+	memset(bind, 0, sizeof(bind));
+	std::string query("UPDATE `UserInfo` SET `password`=?, `lastlogin`=? WHERE `id`=?");
 
-	if (mysql_query(&db, query.c_str()) != 0)
+	if (stmt == NULL)
 	{
 		std::string Err_Msg(u8"<b>密码修改成功，但登录数据库记录失败，请稍后再试。(请使用新密码登录)</b><p>(");
 		Err_Msg += mysql_error(&db);
@@ -3514,6 +3696,35 @@ void do_change_password() //(POST /changePassword.fcgi)
 		return;
 	}
 
+	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[0].buffer = (void *)pwd;
+	bind[0].buffer_length = strlen(pwd);
+
+	char m_time[128] = { 0 };
+	get_time(m_time);
+	bind[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[1].buffer = (void *)m_time;
+	bind[1].buffer_length = strlen(m_time);
+
+	char id[128] = { 0 };
+	get_student_id(id);
+	bind[2].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[2].buffer = (void *)id;
+	bind[2].buffer_length = strlen(id);
+
+	if (mysql_stmt_prepare(stmt, query.c_str(), query.length()) != 0 || 
+		mysql_stmt_bind_param(stmt, bind) != 0 || 
+		mysql_stmt_execute(stmt) != 0)
+	{
+		std::string Err_Msg(u8"<b>密码修改成功，但登录数据库记录失败，请稍后再试。(请使用新密码登录)</b><p>(");
+		Err_Msg += mysql_stmt_error(stmt);
+		Err_Msg += ")</p>";
+		Error(Err_Msg.c_str());
+		mysql_stmt_close(stmt);
+		return;
+	}
+
+	mysql_stmt_close(stmt);
 	student_logout();
 	cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
 }
