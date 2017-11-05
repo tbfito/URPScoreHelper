@@ -54,10 +54,13 @@
     <ClInclude Include="main.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="INI_Reader.h">
+    <ClInclude Include="AES.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="AES.h">
+    <ClInclude Include="ini.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="INIReader.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -95,10 +98,13 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="INI_Reader.cpp">
+    <ClCompile Include="AES.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="AES.cpp">
+    <ClCompile Include="ini.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="INIReader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

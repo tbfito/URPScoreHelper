@@ -12,7 +12,7 @@
 #include "main.h"
 #include "General.h"
 #include "gbkutf8.h"
-#include "INI_Reader.h"
+#include "INIReader.h"
 
 int main(int argc, const char *argv[])
 {
@@ -25,11 +25,37 @@ int main(int argc, const char *argv[])
 	curl_global_init(CURL_GLOBAL_ALL);
 	mysql_init(&db);
 
-	get_profile_string("MySQL", "MYSQL_HOST", "127.0.0.1", MYSQL_HOST, 64, "Database.ini");
-	get_profile_string("MySQL", "MYSQL_PORT_NUMBER", "127.0.0.1", MYSQL_PORT_NUMBER, 64, "Database.ini");
-	get_profile_string("MySQL", "MYSQL_USERNAME", "root", MYSQL_USERNAME, 64, "Database.ini");
-	get_profile_string("MySQL", "MYSQL_PASSWORD", "root", MYSQL_PASSWORD, 64, "Database.ini");
-	get_profile_string("MySQL", "MYSQL_DBNAME", "database", MYSQL_DBNAME, 128, "Database.ini");
+	char *root = (char *)malloc(MAX_PATH);
+	memset(root, 0, MAX_PATH);
+	getcwd(root, MAX_PATH);
+	char *pStr = strstr(root, "\\");
+	bool isUnixBasedPath = (pStr == NULL);
+	if (isUnixBasedPath)
+	{
+		strcat(root, "/Database.ini");
+	}
+	else
+	{
+		strcat(root, "\\Database.ini");
+	}
+
+	INIReader reader(root);
+	if (reader.ParseError() != 0) {
+		strcpy(MYSQL_HOST, "127.0.0.1");
+		strcpy(MYSQL_PORT_NUMBER, "3306");
+		strcpy(MYSQL_USERNAME, "root");
+		strcpy(MYSQL_PASSWORD, "root");
+		strcpy(MYSQL_DBNAME, "database");
+	}
+	else
+	{
+		strcpy(MYSQL_HOST, reader.Get("MySQL", "MYSQL_HOST", "127.0.0.1").c_str());
+		strcpy(MYSQL_PORT_NUMBER, reader.Get("MySQL", "MYSQL_PORT_NUMBER", "3306").c_str());
+		strcpy(MYSQL_USERNAME, reader.Get("MySQL", "MYSQL_USERNAME", "root").c_str());
+		strcpy(MYSQL_PASSWORD, reader.Get("MySQL", "MYSQL_PASSWORD", "root").c_str());
+		strcpy(MYSQL_DBNAME, reader.Get("MySQL", "MYSQL_DBNAME", "database").c_str());
+	}
+	free(root);
 
 	LoadConfig();
 	isPageSrcLoadSuccess = false;

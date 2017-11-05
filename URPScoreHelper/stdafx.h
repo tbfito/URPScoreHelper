@@ -23,12 +23,16 @@ using namespace std;
 extern "C"
 {
 #ifdef _WIN64
+	#include <direct.h>
+	#define getcwd _getcwd
 	#include "resource.h"
 	#pragma comment(lib, "libfcgi/libfcgi_win64.lib")
 	#pragma comment(lib, "libmysql/libmysql_win64.lib")
 	#pragma comment(lib, "curl/libcurl_win64.lib")
 #else
 	#ifdef _WIN32
+		#include <direct.h>
+		#define getcwd _getcwd
 		#include "resource.h"
 		#pragma comment(lib, "libfcgi/libfcgi_win32.lib")
 		#pragma comment(lib, "sqlite/libmysql_win32.lib")
@@ -47,7 +51,7 @@ extern "C"
 #ifdef MAX_PATH
 	#undef MAX_PATH
 #endif
-#define MAX_PATH 260
+#define MAX_PATH 4096
 
 /*
 #define _CRTDBG_MAP_ALLOC
