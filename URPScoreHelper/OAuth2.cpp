@@ -154,7 +154,7 @@ void OAuth2_CallBack()
 	pStr1 = strstr((char *)html.c_str(), "access_token=");
 	if (pStr1 == NULL)
 	{
-		std::string err("<p><b>无法读取 access_token</b></p><p>");
+		std::string err(u8"<p><b>无法读取 access_token</b></p><p>");
 		err.append(html);
 		err.append("</p>");
 		Error(err.c_str());
@@ -237,7 +237,7 @@ void OAuth2_CallBack()
 	pStr1 = strstr((char *)html.c_str(), "\"openid\":\"");
 	if (pStr1 == NULL)
 	{
-		std::string err("<p><b>无法读取 openid</b></p><p>");
+		std::string err(u8"<p><b>无法读取 openid</b></p><p>");
 		err.append(html);
 		err.append("</p>");
 		Error(err.c_str());
@@ -516,7 +516,8 @@ bool GetOAuthUserInfo(char *student_id, char *nickname, char *avatar_url)
 		mysql_stmt_bind_param(stmt, bind) != 0 || 
 		mysql_stmt_bind_result(stmt, query_ret) != 0 || 
 		mysql_stmt_execute(stmt) != 0 || 
-		mysql_stmt_store_result(stmt) != 0)
+		mysql_stmt_store_result(stmt) != 0
+		)
 	{
 		mysql_stmt_close(stmt);
 		return false;
