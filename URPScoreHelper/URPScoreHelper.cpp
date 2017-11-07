@@ -53,17 +53,29 @@ void app_intro()
 		{
 			cout << "Status: 500 Internal Server Error\r\n"
 				<< GLOBAL_HEADER
-				<< u8"<p><b>数据库连接失败</b></p><p>" << mysql_error(&db) << "</p>";
+				<< u8"<h1>数据库连接失败</h1><p>" << mysql_error(&db) << "</p>";
 			goto END_REQUEST;
 		}
 
-		if (CGI_REQUEST_METHOD == NULL || CGI_SCRIPT_NAME == NULL || CGI_QUERY_STRING == NULL ||
-			CGI_SCRIPT_FILENAME == NULL || CGI_CONTENT_LENGTH == NULL)
+		if (CGI_REQUEST_METHOD == NULL)
 		{
-			cout << "Status: 500 Internal Server Error\r\n"
-				<< GLOBAL_HEADER
-				<< u8"<p>FastCGI 接口异常，请检查设置。</p>";
-			goto END_REQUEST;
+			CGI_REQUEST_METHOD = (char *)emptystr;
+		}
+		if (CGI_SCRIPT_NAME == NULL)
+		{
+			CGI_SCRIPT_NAME = (char *)emptystr;
+		}
+		if (CGI_QUERY_STRING == NULL)
+		{
+			CGI_QUERY_STRING = (char *)emptystr;
+		}
+		if (CGI_SCRIPT_FILENAME == NULL)
+		{
+			CGI_SCRIPT_FILENAME = (char *)emptystr;
+		}
+		if (CGI_CONTENT_LENGTH == NULL)
+		{
+			CGI_CONTENT_LENGTH = (char *)emptystr;
 		}
 		if (CGI_HTTP_COOKIE == NULL)
 		{
@@ -344,7 +356,7 @@ void app_intro()
 			}
 		}
 		cout << "Status: 500 Internal Server Error\r\n";
-		Error(u8"<p>发生错误，未经处理的异常</p>");
+		Error(u8"<p>发生错误，FastCGI 接口可能存在问题</p>");
 		goto END_REQUEST;
 
 		END_REQUEST:
