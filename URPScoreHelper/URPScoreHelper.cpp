@@ -2570,6 +2570,16 @@ void parse_QuickQuery_Result()
 	char m_xxmz[512] = { 0 };
 	free(m_post_data);
 
+	std::string COOKIE("JSESSIONID=");
+	if (m_need_update_cookie)
+	{
+		COOKIE.append(JSESSIONID);
+	}
+	else
+	{
+		COOKIE = CGI_HTTP_COOKIE;
+	}
+
 	for (int xh_index = 0; xh_index < m_xhgs; xh_index++)
 		{
 			if (strlen(m_xh[xh_index]) > 36)
@@ -2585,7 +2595,7 @@ void parse_QuickQuery_Result()
 			strcat(m_query_param, "&resultPage=%3F"); // this is ok.
 
 			CCurlTask req;
-			if (!req.Exec(true, REQUEST_SET_REPORT_PARAMS, CGI_HTTP_COOKIE, true, m_query_param))
+			if (!req.Exec(true, REQUEST_SET_REPORT_PARAMS, COOKIE.c_str(), true, m_query_param))
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
@@ -2622,7 +2632,7 @@ void parse_QuickQuery_Result()
 			referer.insert(0, SERVER_URL);
 			req2.SetReferer(referer);
 
-			if (!req2.Exec(false, m_query_report, CGI_HTTP_COOKIE))
+			if (!req2.Exec(false, m_query_report, COOKIE.c_str()))
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
@@ -2668,7 +2678,7 @@ void parse_QuickQuery_Result()
 			referer.insert(0, SERVER_URL);
 			req3.SetReferer(referer);
 
-			if (!req3.Exec(false, m_query_score, CGI_HTTP_COOKIE))
+			if (!req3.Exec(false, m_query_score, COOKIE.c_str()))
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
