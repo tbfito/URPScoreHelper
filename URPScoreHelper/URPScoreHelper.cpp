@@ -2494,14 +2494,7 @@ void student_logout()
 // 免密查询入口 (/QuickQuery.fcgi)
 void parse_QuickQuery_Intro()
 {
-	bool m_need_update_cookie = false;
-	std::string nullphoto;
-	process_cookie(&m_need_update_cookie, nullphoto);
-
 	std::string m_lpszQuery = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
-
-	if (m_need_update_cookie)
-		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 
 	cout << GLOBAL_HEADER;
 
