@@ -23,6 +23,7 @@
 .weui-cells.weui-cells_form.bigbox{margin-left:15px;border:1px solid rgba(81, 203, 238, 1);border-radius:3px}
 #login_captcha{margin:10px;border-radius:2px}
 .info_tag{padding-top:5px}
+.fa{margin-right:5px}
 @media screen and (max-width:1300px){.content{width:35%}}
 @media screen and (max-width:1200px){.content{width:40%}}
 @media screen and (max-width:1100px){.content{width:42%}}

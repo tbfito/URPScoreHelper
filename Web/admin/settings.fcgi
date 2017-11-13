@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title>站点设置 - %s</title>  
     <link rel="stylesheet" href="css/pintuer.css">
+	<link rel="stylesheet" href="../css/font-awesome.min.css">
     <link rel="stylesheet" href="css/admin.css">
 	<link rel="shortcut icon" href="../URPScoreHelper.ico">
     <script src="../js/jquery.min.js"></script>
@@ -12,7 +13,7 @@
 </head>
 <body>
 	<div class="panel admin-panel">
-	  <div class="panel-head"><strong><span class="icon-pencil-square-o"></span> 站点设置</strong></div>
+	  <div class="panel-head"><strong><i class="fa fa-pencil-square-o"></i> 站点设置</strong></div>
 	  <div class="body-content">
 		<form method="post" class="form-x" action="settings.fcgi">
 		  <div class="form-group">
@@ -145,7 +146,7 @@
 			  <label></label>
 			</div>
 			<div class="field">
-			  <button class="button bg-main icon-check-square-o" type="submit"> 保存设定</button>
+			  <button class="button bg-main fa fa-check-square-o" type="submit"> 保存设定</button>
 			</div>
 		  </div>
 		</form>

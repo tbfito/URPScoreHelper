@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-<title>广告轮播 - %s</title>
-<link rel="stylesheet" href="css/pintuer.css">
-<link rel="stylesheet" href="css/admin.css">
-<script src="../js/jquery.min.js"></script>
-<script src="js/pintuer.js"></script>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title>广告轮播 - %s</title>
+	<link rel="stylesheet" href="css/pintuer.css">
+	<link rel="stylesheet" href="../css/font-awesome.min.css">
+	<link rel="stylesheet" href="css/admin.css">
+	<script src="../js/jquery.min.js"></script>
+	<script src="js/pintuer.js"></script>
 </head>
 <body>
 	<div class="panel admin-panel" id="add">
-	  <div class="panel-head"><strong><span class="icon-pencil-square-o"></span> 广告轮播 (留空则不显示广告)</strong></div>
+	  <div class="panel-head"><strong><i class="fa fa-pencil-square-o"></i> 广告轮播 (留空则不显示广告)</strong></div>
 	  <div class="body-content">
 		<form method="post" class="form-x" action="">    
 		  <div class="form-group">
@@ -55,7 +56,7 @@
 			  <label></label>
 			</div>
 			<div class="field">
-			  <button class="button bg-main icon-check-square-o" type="submit"> 提交</button>
+			  <button class="button bg-main fa fa-check-square-o" type="submit"> 提交</button>
 			</div>
 		  </div>
 		</form>

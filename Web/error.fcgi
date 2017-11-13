@@ -6,7 +6,7 @@
 		<div class="weui-msg__desc">%s</div>
 		<div class="weui-msg__opr-area">
 			<p class="weui-btn-area">
-			  <a href="/main.fcgi" class="weui-btn weui-btn_default">返回主页</a>
+			  <a href="/main.fcgi" class="weui-btn weui-btn_default"><i class="fa fa-arrow-left"></i>返回主页</a>
 			</p>
 	    </div>
 	  </div>

@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-<title>管理员帐号修改 - %s</title>
-<link rel="stylesheet" href="css/pintuer.css">
-<link rel="stylesheet" href="css/admin.css">
-<script src="../js/jquery.min.js"></script>
-<script src="js/pintuer.js"></script>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title>管理员帐号修改 - %s</title>
+	<link rel="stylesheet" href="css/pintuer.css">
+	<link rel="stylesheet" href="../css/font-awesome.min.css">
+	<link rel="stylesheet" href="css/admin.css">
+	<script src="../js/jquery.min.js"></script>
+	<script src="js/pintuer.js"></script>
 </head>
 <body>
 	<div class="panel admin-panel">
-	  <div class="panel-head"><strong><span class="icon-key"></span> 管理员帐号修改</strong></div>
+	  <div class="panel-head"><strong><i class="fa fa-key"></i> 管理员帐号修改</strong></div>
 	  <div class="body-content">
 		<form method="post" class="form-x" action="change-pass.fcgi">
 		  <div class="form-group">
@@ -51,7 +52,7 @@
 			  <label></label>
 			</div>
 			<div class="field">
-			  <button class="button bg-main icon-check-square-o" type="submit"> 修改</button>   
+			  <button class="button bg-main fa fa-check-square-o" type="submit"> 修改</button>   
 			</div>
 		  </div>      
 		</form>

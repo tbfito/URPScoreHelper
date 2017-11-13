@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title>后台管理平台 - %s</title>  
     <link rel="stylesheet" href="css/pintuer.css">
+	<link rel="stylesheet" href="../css/font-awesome.min.css">
     <link rel="stylesheet" href="css/admin.css">
 	<link rel="shortcut icon" href="../URPScoreHelper.ico">
     <script src="../js/jquery.min.js"></script>   
@@ -14,17 +15,17 @@
 	  <div class="logo margin-big-left fadein-top">
 		<h1><img src="../URPScoreHelper.ico" class="radius-circle rotate-hover" height="50" alt="" />%s</h1>
 	  </div>
-	  <div class="head-l"><a class="button button-little bg-green" href="../" target="_blank"><span class="icon-home"></span> 前台首页</a>&nbsp;&nbsp;<a class="button button-little bg-red" href="login.fcgi?act=logout"><span class="icon-power-off"></span> 退出登录</a></div>
+	  <div class="head-l"><a class="button button-little bg-green" href="../" target="_blank"><i class="fa fa-home"></i> 前台首页</a>&nbsp;&nbsp;<a class="button button-little bg-red" href="login.fcgi?act=logout"><i class="fa fa-power-off"></i> 退出登录</a></div>
 	</div>
 	<div class="leftnav">
-	  <div class="leftnav-title"><strong><span class="icon-list"></span>菜单列表</strong></div>
-	  <h2><span class="icon-user"></span>基本设置</h2>
+	  <div class="leftnav-title"><strong><i class="fa fa-list"></i>菜单列表</strong></div>
+	  <h2><i class="fa fa-user"></i>基本设置</h2>
 	  <ul style="display:block">
-		<li><a href="settings.fcgi" target="right"><span class="icon-caret-right"></span>站点设置</a></li>
-		<li><a href="adv-card.fcgi" target="right"><span class="icon-caret-right"></span>广告轮播</a></li>
-		<li><a href="change-pass.fcgi" target="right"><span class="icon-caret-right"></span>修改密码</a></li>
-		<li><a href="find-user.fcgi" target="right"><span class="icon-caret-right"></span>查询用户</a></li>
-		<li><a href="info.fcgi" target="right"><span class="icon-caret-right"></span>系统信息</a></li>
+		<li><a href="settings.fcgi" target="right"><i class="fa fa-caret-right"></i>站点设置</a></li>
+		<li><a href="adv-card.fcgi" target="right"><i class="fa fa-caret-right"></i>广告轮播</a></li>
+		<li><a href="change-pass.fcgi" target="right"><i class="fa fa-caret-right"></i>修改密码</a></li>
+		<li><a href="find-user.fcgi" target="right"><i class="fa fa-caret-right"></i>查询用户</a></li>
+		<li><a href="info.fcgi" target="right"><i class="fa fa-caret-right"></i>系统信息</a></li>
 	  </ul>   
 	</div>
 	<script type="text/javascript">

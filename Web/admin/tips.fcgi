@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	<title>提示 - %s</title>
 	<link rel="stylesheet" href="css/pintuer.css">
+	<link rel="stylesheet" href="../css/font-awesome.min.css">
 	<style type="text/css">
 	*{ margin:0px; padding:0px;}
 	.error-container{ background:#fff; border:1px solid #0ae;  text-align:center; width:300px; margin:50px auto; font-family:Microsoft Yahei; padding-bottom:30px; border-top-left-radius:5px; border-top-right-radius:5px;  }
@@ -21,7 +22,7 @@
 <div class="error-container"> 
     <h1>%s 后台管理平台</h1>   
     <div class="errorcon">     
-        <i class="icon-smile-o"></i>%s
+        <i class="fa fa-smile-o"></i>%s
    </div>
     <h4 class="smaller"><a id="href" href="javascript:self.location=document.referrer;">点击这里返回上一页</a></h4> 
    

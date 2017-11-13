@@ -15,7 +15,7 @@
 			<div class="weui-cell weui-cell_vcode">
 				<div class="weui-cell__hd">
 					<label class="weui-label">
-						学号
+						<i class="fa fa-user"></i>学号
 					</label>
 				</div>
 				<div class="weui-cell__bd">
@@ -30,7 +30,7 @@
 			<div class="weui-cell weui-cell_vcode">
 				<div class="weui-cell__hd">
 					<label class="weui-label">
-						密码
+						<i class="fa fa-key"></i>密码
 					</label>
 				</div>
 				<div class="weui-cell__bd">
@@ -45,7 +45,7 @@
 			<div class="weui-cell weui-cell_vcode">
 				<div class="weui-cell__hd">
 					<label class="weui-label">
-						验证码
+						<i class="fa fa-image"></i>验证码
 					</label>
 				</div>
 				<div class="weui-cell__bd">
@@ -63,7 +63,9 @@
 			</span>
 		</label>
 		<div class="weui-btn-area">
-			<input id="i_submit" type="submit" value="%s" class="weui-btn weui-btn_primary%s"/>
+			<button id="i_submit" type="submit" class="weui-btn weui-btn_primary%s">
+				<i class="fa fa-check-square-o"></i>%s
+			</button>
 			%s
 		</div>
 		%s

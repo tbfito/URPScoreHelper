@@ -1,6 +1,6 @@
 <div class="i_page-navbar">
-	<a href="/main.fcgi" class="return">&lt; 返 回</a>
-	一键教学评估
+	<a href="/main.fcgi" class="return"><i class="fa fa-arrow-left"></i>返回</a>
+	<i class="fa fa-hand-o-right"></i>一键教学评估
 </div>
 <div class="content">
 	<div id="i_total"><p>%s</p></div>
@@ -14,7 +14,7 @@
 			</div>
 		</div>	
 		<div class="weui-btn-area">
-			<input id="i_submit" type="submit" value="一键评教" class="weui-btn weui-btn_primary" />
+			<button id="i_submit" type="submit" class="weui-btn weui-btn_primary"><i class="fa fa-check-square-o"></i>一键评教</button>
 		</div>
 	</form>
 	<br />

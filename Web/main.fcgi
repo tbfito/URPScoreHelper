@@ -14,7 +14,7 @@
 						<h1>%s</h1>
 						<p><small>%s</small></p>
 						<div class="info_tag">
-							<a href="/changePassword.fcgi">修改密码</a> | %s
+							<a href="/changePassword.fcgi"><i class="fa fa-lock"></i>修改密码</a> · %s
 						</div>
 					</div>
 				</div>

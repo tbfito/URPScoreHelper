@@ -1,6 +1,6 @@
 <div class="i_page-navbar">
-	<a href="/main.fcgi" class="return">&lt; 返 回</a>
-	教务密码修改
+	<a href="/main.fcgi" class="return"><i class="fa fa-arrow-left"></i>返回</a>
+	<i class="fa fa-lock"></i>教务密码修改
 </div>
 <div class="content">
 	<div id="i_total"><p>修改密码要<b>慎重</b>呐，丢了可<b>找不回来</b>，除非找教务处 :)</p></div>
@@ -20,8 +20,8 @@
 					</div>
 				</div>
 		<div class="weui-btn-area">
-			<input onclick="return check_password();" type="submit" value="确认修改" class="weui-btn weui-btn_primary" />
-			<a href="/main.fcgi" class="weui-btn weui-btn_default">&lt;&lt; 不整了，回去</a>
+			<button onclick="return check_password();" type="submit" class="weui-btn weui-btn_primary"><i class="fa fa-check-square-o"></i>确认修改</button>
+			<a href="/main.fcgi" class="weui-btn weui-btn_default"><i class="fa fa-arrow-left"></i> 取消并返回</a>
 		</div>
 	</form>
 	<br />

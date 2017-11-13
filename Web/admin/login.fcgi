@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>管理员登录 - %s</title>  
     <link rel="stylesheet" href="css/pintuer.css">
+	<link rel="stylesheet" href="../css/font-awesome.min.css">
     <link rel="stylesheet" href="css/admin.css">
 	<link rel="shortcut icon" href="../URPScoreHelper.ico">
     <script src="../js/jquery.min.js"></script>
@@ -30,19 +31,17 @@
                     <div class="form-group">
                         <div class="field field-icon-right">
                             <input autofocus type="text" class="input input-big" name="usr" placeholder="请输入管理员帐号" data-validate="required:请填写帐号" />
-                            <span class="icon icon-user margin-small"></span>
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="field field-icon-right">
                             <input type="password" class="input input-big" name="pwd" placeholder="请输入登录密码" data-validate="required:请填写密码" />
-                            <span class="icon icon-key margin-small"></span>
                         </div>
                     </div>
                 </div>
                 <div style="padding:0px 30px 10px 30px">
-					<input type="submit" class="button button-block bg-main text-big input-big" value="登录 &gt;">
-					<a style="text-align:center;margin-top:5px;background-color:#39be0e" href="../" class="button button-block bg-main text-big input-big">&lt; 前台首页</a>
+					<button type="submit" class="button button-block bg-main text-big input-big"><i class="fa fa-unlock-alt"></i>登录</button>
+					<a style="text-align:center;margin-top:5px;background-color:#39be0e" href="../" class="button button-block bg-main text-big input-big"><i class="fa fa-arrow-left"></i>前台首页</a>
 				</div>
 				<div style="text-align:center;margin:0 auto;font-weight:bold;color:#fff;text-shadow:0 0 0 #000, 0px 0px 1px #000;">
 					<p style="margin-bottom:0px">%s</p>

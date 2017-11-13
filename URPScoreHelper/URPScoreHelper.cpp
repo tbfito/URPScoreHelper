@@ -1203,20 +1203,20 @@ int parse_index()
 		if (token_xh != NULL && token_mm != NULL)
 		{
 			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter,
-				u8"输入你的教务系统帐号来登录吧 :)", token_xh, token_mm, u8"登录", " col-50",
+				u8"输入你的教务系统帐号来登录吧 :)", token_xh, token_mm, " col-50", u8"登录",
 				OAUTH2_LOGIN_HTML, ENABLE_QUICK_QUERY ? QUICKQUERY_HTML : "");
 		}
 		else
 		{
 			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter,
-				u8"输入你的教务系统帐号来登录吧 :)", "", "", u8"登录", " col-50",
+				u8"输入你的教务系统帐号来登录吧 :)", "", "", " col-50", u8"登录",
 				OAUTH2_LOGIN_HTML, ENABLE_QUICK_QUERY ? QUICKQUERY_HTML : "");
 		}
 	}
 	else 
 	{
 		cout << strformat( m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter,
-						u8"QQ登录成功，输入验证码继续吧 :)", m_xh, m_mm, u8"继续", "", "", "");
+						u8"QQ登录成功，输入验证码继续吧 :)", m_xh, m_mm, "", u8"继续", "", "");
 	}
 	if (!isAjaxRequest)
 	{
