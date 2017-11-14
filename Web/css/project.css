@@ -23,7 +23,7 @@
 .weui-cells.weui-cells_form.bigbox{margin-left:15px;border:1px solid rgba(81, 203, 238, 1);border-radius:3px}
 #login_captcha{margin:10px;border-radius:2px}
 .info_tag{padding-top:5px;font-size:12px}
-.info_tag a{font-size:12px}
+.info_tag a{font-size:12px !important}
 .fa{margin-right:5px}
 @media screen and (max-width:1300px){.content{width:35%}}
 @media screen and (max-width:1200px){.content{width:40%}}
@@ -39,9 +39,9 @@
 @media screen and (max-width:440px){.content{width:100%}.demos-title:before{margin-left:30%}}
 .i_page-title{font-size:16px;text-align:center;background-color:#01a9da;position:relative;height:160px;overflow:hidden}
 .i_page-navbar{line-height:40px;color:#fff;font-size:16px;text-align:center;background-color:#03a9f4;position:relative;height:40px;overflow:hidden}
-.i_page-navbar a.return {width: 62px;padding-left: 0;text-indent: 8px;left:0}
+.i_page-navbar a.return {width:62px;padding-left: 0;text-indent: 8px;left:0}
 .i_page-navbar a {position: absolute;margin: 5px 6px;display: inline-block;padding-left: 15px;line-height: 30px;font-size: 14px;right: 0;color: #fff;width: 70px}
-.i_header{margin-left:2%;height:160px}
+.i_header{margin-left:5%;height:160px}
 .i_user-photo-container{margin-top:32px;float: left}
 .i_user-info-container{float:left;margin:44px 0 0 10px;line-height:20px}
 .i_user-info-container{text-align:left;color:#fff}
