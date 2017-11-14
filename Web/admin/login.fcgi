@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -41,7 +41,7 @@
                 </div>
                 <div style="padding:0px 30px 10px 30px">
 					<button type="submit" class="button button-block bg-main text-big input-big"><i class="fa fa-unlock-alt"></i>登录</button>
-					<a style="text-align:center;margin-top:5px;background-color:#39be0e" href="../" class="button button-block bg-main text-big input-big"><i class="fa fa-arrow-left"></i>前台首页</a>
+					<a style="text-align:center;margin-top:5px;background-color:#39be0e;border-color:#39be0e" href="../" class="button button-block bg-main text-big input-big"><i class="fa fa-arrow-left"></i>前台首页</a>
 				</div>
 				<div style="text-align:center;margin:0 auto;font-weight:bold;color:#fff;text-shadow:0 0 0 #000, 0px 0px 1px #000;">
 					<p style="margin-bottom:0px">%s</p>
