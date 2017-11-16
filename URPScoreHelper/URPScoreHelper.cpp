@@ -1468,6 +1468,11 @@ void parse_friendly_score(std::string & p_strlpszScore)
 			Error(u8"<p><b>接收数据失败</b></p><p>curl 操作失败</p>");
 			return;
 		}
+		if (req.GetLength() <= 256) // 经过测试，当新生没有已过科目的时候，服务器返回空body的内容，大小211b.
+		{
+			Error(u8"<p>现在还没有已过科目的数据</p>");
+			return;
+		}
 
 		unsigned int rep_len = req.GetLength() * 3 + 1;
 		char *m_rep_body = (char *)malloc(rep_len);
@@ -1484,18 +1489,20 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		}
 		m_result += 92;
 		char *m_prep = (char *)malloc(req.GetLength());
-		replace_string(m_result, "&nbsp;", "");
-		replace_string(m_result, "\t", "");
-		replace_string(m_result, "\r", "");
-		replace_string(m_result, "\n", "");
 		strcpy(m_prep, "<div id=\"list_page\">");
 		char *m_end_body = strstr(m_result, "</body>");
-		if (m_result == NULL)
+		if (m_end_body == NULL)
 		{
 			free(m_prep);
 			Error(u8"<p>从服务器拉取分数失败 (EndOfBodyNotFound)</p>");
 			return;
 		}
+
+		replace_string(m_result, "&nbsp;", "");
+		replace_string(m_result, "\t", "");
+		replace_string(m_result, "\r", "");
+		replace_string(m_result, "\n", "");
+
 		cout << GLOBAL_HEADER;
 		*(m_end_body + 2) = 'd';
 		*(m_end_body + 3) = 'i';
