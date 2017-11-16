@@ -328,16 +328,41 @@ std::string _POST(std::string & post, const char *name)
 // 更新设置表
 void UpdateSettings(const char *name, const char *value)
 {
-	std::string query("UPDATE `Settings` SET value='");
-	query += value;
-	query += "' WHERE name='";
-	query += name;
-	query += "';";
+	MYSQL_STMT *stmt = mysql_stmt_init(&db);
+	MYSQL_BIND bind[2];
+	memset(bind, 0, sizeof(bind));
+	std::string query("UPDATE `Settings` SET `value`=? WHERE `name`=?");
 
-	if (mysql_query(&db, query.c_str()) != 0)
+	if (stmt == NULL)
 	{
 		return;
 	}
+	if (mysql_stmt_prepare(stmt, query.c_str(), query.length()))
+	{
+		mysql_stmt_close(stmt);
+		return;
+	}
+
+	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[0].buffer = (void *)name;
+	bind[0].buffer_length = strlen(name);
+
+	bind[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[1].buffer = (void *)value;
+	bind[1].buffer_length = strlen(value);
+
+	if (mysql_stmt_bind_param(stmt, bind))
+	{
+		mysql_stmt_close(stmt);
+		return;
+	}
+
+	if (mysql_stmt_execute(stmt))
+	{
+		mysql_stmt_close(stmt);
+		return;
+	}
+	mysql_stmt_close(stmt);
 }
 
 // 解码URL编码

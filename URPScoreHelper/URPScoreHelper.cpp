@@ -473,13 +473,13 @@ void LoadConfig()
 			fprintf(stderr, "Database Error: %s\n", mysql_error(&db));
 			return;
 		}
+
+		// 设置允许数据库断开重连
 		char value = 1;
 		mysql_options(&db, MYSQL_OPT_RECONNECT, &value);
-		isdbReady = true;
-	}
 
-	if (isdbReady)
-	{
+		isdbReady = true;
+
 		std::string query("CREATE TABLE IF NOT EXISTS `UserInfo` (`id` varchar(36) NOT NULL,`password` varchar(36) NOT NULL,`name` varchar(36) DEFAULT NULL,`openid` varchar(1024) DEFAULT NULL,`OAuth_name` varchar(1024) DEFAULT NULL,`OAuth_avatar` varchar(4096) DEFAULT NULL,`lastlogin` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 		if (mysql_query(&db, query.c_str()) != 0)
 		{
