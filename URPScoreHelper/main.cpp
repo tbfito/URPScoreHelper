@@ -73,7 +73,7 @@ int main(int argc, const char *argv[])
 
 
 	FCGX_InitRequest(&request, FCGX_SocketId, 0);
-	app_intro();
+	fastcgi_app_intro();
 	printf("%s\n%s\n\n%s\n", SOFTWARE_NAME, SOFTWARE_COPYRIGHT, "\tOptions: [-p (localhost):port_number]");
 
 	// cleanup operations

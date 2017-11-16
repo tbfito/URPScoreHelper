@@ -20,11 +20,12 @@
 #include "Admin.h"
 
 // 请求映射入口 (FastCGI 处理循环)
-void app_intro()
+void fastcgi_app_intro()
 {
+	isdbReady = false; // 初始化数据库状态
 	while (FCGX_Accept_r(&request) >= 0)
 	{
-		LoadConfig(); // 更新配置信息
+		LoadConfig(); // 再次更新配置信息
 		if (isdbReady)
 		{
 			UpdateCounter();
@@ -451,7 +452,21 @@ void LoadConfig()
 		memset(FOOTER_TEMPLATE_LOCATION, 0, 10240);
 	}
 
+	bool need_db_connection = false;
 	if (!isdbReady)
+	{
+		need_db_connection = true;
+	}
+	else
+	{
+		if (mysql_ping(&db) != 0)
+		{
+			isdbReady = false;
+			mysql_close(&db);
+			need_db_connection = true;
+		}
+	}
+	if (need_db_connection)
 	{
 		if (!mysql_real_connect(&db, MYSQL_HOST, MYSQL_USERNAME, MYSQL_PASSWORD, MYSQL_DBNAME, atoi(MYSQL_PORT_NUMBER), NULL, 0))
 		{
@@ -459,6 +474,9 @@ void LoadConfig()
 			fprintf(stderr, "Failed to connect to database: Error: %s\n", mysql_error(&db));
 			return;
 		}
+		char value = 1;
+		mysql_options(&db, MYSQL_OPT_RECONNECT, &value);
+		isdbReady = true;
 	}
 
 	if (SERVER_URL != NULL)
@@ -601,7 +619,8 @@ void LoadConfig()
 	ENABLE_QUICK_QUERY = (atoi(lpvBuffer) == 1);
 
 	free(lpvBuffer);
-	if (!isdbReady)
+
+	if (isdbReady)
 	{
 		std::string query("CREATE TABLE IF NOT EXISTS `UserInfo` (`id` varchar(36) NOT NULL,`password` varchar(36) NOT NULL,`name` varchar(36) DEFAULT NULL,`openid` varchar(1024) DEFAULT NULL,`OAuth_name` varchar(1024) DEFAULT NULL,`OAuth_avatar` varchar(4096) DEFAULT NULL,`lastlogin` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 		if (mysql_query(&db, query.c_str()) != 0)
@@ -641,11 +660,6 @@ void LoadConfig()
 	AddSettings("FOOTER_TEXT", SOFTWARE_NAME);
 	AddSettings("ANALYSIS_CODE", "");
 	AddSettings("ENABLE_QUICK_QUERY", "1");
-
-	if (!isdbReady)
-	{
-		isdbReady = true;
-	}
 }
 
 // 更新用户数量、查询计数器

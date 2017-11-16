@@ -28,7 +28,7 @@ bool isAjaxRequest;
 bool isPageSrcLoadSuccess;
 bool isdbReady;
 
-void app_intro();
+void fastcgi_app_intro();
 void parse_main();
 int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri);
 int parse_index();
