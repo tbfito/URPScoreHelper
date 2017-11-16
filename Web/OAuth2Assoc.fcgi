@@ -66,5 +66,4 @@
 			<button id="i_submit" type="button" class="weui-btn weui-btn_primary"><i class="fa fa-link"></i>绑定</button>
 		</div>
 	</form>
-	<br />
 </div>

@@ -4,5 +4,4 @@
 </div>
 <div class="content">
 	%s
-	<br />
 </div>

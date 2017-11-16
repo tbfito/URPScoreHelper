@@ -21,7 +21,7 @@
 .weui-cells:before{border-top:0}
 .weui-cells:after{border-bottom:0}
 .weui-cells.weui-cells_form.bigbox{margin-left:15px;border:1px solid rgba(81, 203, 238, 1);border-radius:3px}
-.weui-footer{margin-top:30px}
+.weui-footer{margin-top:60px}
 #login_captcha{margin:10px;border-radius:2px}
 .info_tag{padding-top:5px;font-size:12px}
 .info_tag a{font-size:12px !important}

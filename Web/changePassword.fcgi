@@ -24,5 +24,4 @@
 			<a href="/main.fcgi" class="weui-btn weui-btn_default"><i class="fa fa-arrow-left"></i> 取消并返回</a>
 		</div>
 	</form>
-	<br />
 </div>
