@@ -25,7 +25,7 @@ void parse_admin_login()
 		return;
 	}
 
-	cout << "Allow: GET, POST\r\n" << GLOBAL_HEADER
+	cout << GLOBAL_HEADER
 	     << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(),
 			 APP_NAME, APP_NAME, SOFTWARE_NAME, SOFTWARE_COPYRIGHT).c_str();
 }
@@ -329,35 +329,27 @@ std::string _POST(std::string & post, const char *name)
 void UpdateSettings(const char *name, const char *value)
 {
 	MYSQL_STMT *stmt = mysql_stmt_init(&db);
-	MYSQL_BIND bind[2];
-	memset(bind, 0, sizeof(bind));
-	std::string query("UPDATE `Settings` SET `value`=? WHERE `name`=?");
-
 	if (stmt == NULL)
 	{
 		return;
 	}
-	if (mysql_stmt_prepare(stmt, query.c_str(), query.length()))
-	{
-		mysql_stmt_close(stmt);
-		return;
-	}
+
+	MYSQL_BIND bind[2];
+	memset(bind, 0, sizeof(bind));
+	std::string query("UPDATE `Settings` SET `value`=? WHERE `name`=?");
 
 	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
-	bind[0].buffer = (void *)name;
-	bind[0].buffer_length = strlen(name);
+	bind[0].buffer = (void *)value;
+	bind[0].buffer_length = strlen(value);
 
 	bind[1].buffer_type = MYSQL_TYPE_VAR_STRING;
-	bind[1].buffer = (void *)value;
-	bind[1].buffer_length = strlen(value);
+	bind[1].buffer = (void *)name;
+	bind[1].buffer_length = strlen(name);
 
-	if (mysql_stmt_bind_param(stmt, bind))
-	{
-		mysql_stmt_close(stmt);
-		return;
-	}
-
-	if (mysql_stmt_execute(stmt))
+	if (mysql_stmt_prepare(stmt, query.c_str(), query.length()) != 0 || 
+		mysql_stmt_bind_param(stmt, bind) != 0 || 
+		mysql_stmt_execute(stmt) != 0
+		)
 	{
 		mysql_stmt_close(stmt);
 		return;
