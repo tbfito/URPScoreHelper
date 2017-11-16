@@ -145,7 +145,7 @@ function change_password() {
 }
 function adjust_form(href) {
 	if(href != null) {
-		if(href == "/" || href == "/index.fcgi" || href == "/index.fcgi?act=logout")
+		if(href == "/" || href == "/index.fcgi" || href == "/index.fcgi?act=logout" || href == "/changePassword.fcgi")
 		{
 			return;
 		}
