@@ -26,7 +26,7 @@ char *CGI_HTTP_HOST;
 char *CGI_HTTPS;
 bool isAjaxRequest;
 bool isPageSrcLoadSuccess;
-bool isdbReady;
+bool isdbReady = false;
 
 void fastcgi_app_intro();
 void parse_main();
