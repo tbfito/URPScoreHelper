@@ -1,7 +1,7 @@
 		</div>
 		<div class="weui-footer">
 			<p class="weui-footer__links">
-				<a href="/index.fcgi" class="weui-footer__link">%s</a>
+				<a href="/" class="weui-footer__link">%s</a>
 			</p>
 			<p class="weui-footer__text">%s</p>
 			<p class="weui-footer__text">Powered by %s · <a id="no_ajax" href="admin/login.fcgi">后台管理平台</a></p>

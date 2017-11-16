@@ -190,7 +190,7 @@ void fastcgi_app_intro()
 			{
 				cout << "Status: 500 Internal Server Error\r\n"
 					<< GLOBAL_HEADER
-					<< u8"<p>网页模板文件缺失或异常。</p>";
+					<< u8"<p>网页模板文件缺失或异常</p>";
 				goto END_REQUEST;
 			}
 		}
@@ -247,7 +247,7 @@ void fastcgi_app_intro()
 					process_cookie(&m_need_update_cookie, photo);
 					if (photo.empty())
 					{
-						cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
+						cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
 						goto END_REQUEST;
 					}
 					char student_id[512] = { 0 };
@@ -1344,7 +1344,7 @@ int parse_query()
 
 	if (m_photo.empty()) // 还没登陆就丢去登陆。
 	{
-		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
 		return 0;
 	}
 
@@ -2242,7 +2242,7 @@ int system_registration()
 {
 	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
 	{
-		cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
 		return -1;
 	}
 
@@ -3262,7 +3262,7 @@ void parse_teaching_evaluation()
 
 	if (m_photo.empty()) // 还没登陆就丢去登陆。
 	{
-		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
@@ -3399,7 +3399,7 @@ void teaching_evaluation()
 
 	if (m_photo.empty()) // 还没登陆就丢去登陆。
 	{
-		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
@@ -3620,7 +3620,7 @@ void parse_change_password()
 
 	if (m_photo.empty()) // 还没登陆就丢去登陆。
 	{
-		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
@@ -3654,7 +3654,7 @@ void do_change_password() //(POST /changePassword.fcgi)
 
 	if (m_photo.empty()) // 还没登陆就丢去登陆。
 	{
-		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
@@ -3754,5 +3754,5 @@ void do_change_password() //(POST /changePassword.fcgi)
 
 	mysql_stmt_close(stmt);
 	student_logout();
-	cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/index.fcgi\r\n" << GLOBAL_HEADER;
+	cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
 }
