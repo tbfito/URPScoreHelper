@@ -1395,7 +1395,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		char *m_result = strstr(m_rep_body, "<table cellpadding=\"0\" width=\"100%\" class=\"displayTag\" cellspacing=\"1\" border=\"0\" id=\"user\">");
 		if (m_result == NULL)
 		{
-			Error(u8"<p><b>从服务器拉取分数失败。(BeginOfTable)</b></p><p>教务君可能月线繁忙，请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
+			Error(u8"<p><b>从服务器拉取分数失败 (BeginOfTable)</b></p><p>系统可能正忙，请稍后再试</p>");
 			return;
 		}
 		m_result += 93;
@@ -1409,13 +1409,13 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (m_result == NULL)
 		{
 			free(m_prep);
-			Error(u8"<p>从服务器拉取分数失败。(EndOfBodyNotFound)</p>");
+			Error(u8"<p>从服务器拉取分数失败 (EndOfBodyNotFound)</p>");
 			return;
 		}
 		m_result -= 93;
 		cout << GLOBAL_HEADER;
 		char m_before[512] = { 0 };
-		sprintf(m_before, "<a name=\"qb_731\"></a><table width=\"100%%\" border=\"0\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td class=\"Linetop\"></td></tr></tbody></table><table width=\"100%%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\"><tbody><tr><td width=\"100%%\"><table border=\"0\" align=\"left\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td>&nbsp;</td><td valign=\"middle\">&nbsp;<b>%s</b> &nbsp;</td></tr></tbody></table></td></tr></tbody></table>", u8"成绩清单（月考/期中/补考/缓考/清考）");
+		sprintf(m_before, "<a name=\"qb_731\"></a><table width=\"100%%\" border=\"0\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td class=\"Linetop\"></td></tr></tbody></table><table width=\"100%%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\"><tbody><tr><td width=\"100%%\"><table border=\"0\" align=\"left\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td>&nbsp;</td><td valign=\"middle\">&nbsp;<b>%s</b> &nbsp;</td></tr></tbody></table></td></tr></tbody></table>", u8"成绩清单（期中/月考/其他类型考试）");
 		*(m_end_body + 8) = '<';
 		*(m_end_body + 9) = '/';
 		*(m_end_body + 10) = 'd';
@@ -1466,7 +1466,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		char *m_result = strstr(m_rep_body, "<body leftmargin=\"0\" topmargin=\"0\" marginwidth=\"0\" marginheight=\"0\" style=\"overflow:auto;\">");
 		if (m_result == NULL)
 		{
-			Error(u8"<p><b>从服务器拉取分数失败。(BeginOfRet)</b></p><p>教务君可能月线繁忙，请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
+			Error(u8"<p><b>从服务器拉取分数失败 (BeginOfRet)</b></p><p>系统可能正忙，请稍后再试</p>");
 			return;
 		}
 		m_result += 92;
@@ -1480,7 +1480,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (m_result == NULL)
 		{
 			free(m_prep);
-			Error(u8"<p>从服务器拉取分数失败。(EndOfBodyNotFound)</p>");
+			Error(u8"<p>从服务器拉取分数失败 (EndOfBodyNotFound)</p>");
 			return;
 		}
 		cout << GLOBAL_HEADER;
@@ -1525,7 +1525,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		char *m_result = strstr(m_rep_body, "<body leftmargin=\"0\" topmargin=\"0\" marginwidth=\"0\" marginheight=\"0\" style=\"overflow:auto;\">");
 		if (m_result == NULL)
 		{
-			Error(u8"<p><b>从服务器拉取分数失败。(BeginOfRet)</b></p><p>教务君可能月线繁忙，请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
+			Error(u8"<p><b>从服务器拉取分数失败 (BeginOfRet)</b></p><p>系统可能正忙，请稍后再试</p>");
 			return;
 		}
 
@@ -1787,13 +1787,13 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		char *m_result = strstr(m_rep_body, "<table width=\"100%\"  border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\">");
 		if (m_result == NULL)
 		{
-			Error(u8"<p><b>从服务器拉取分数失败。(BeginOfRet)</b></p><p>教务君可能月线繁忙，请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
+			Error(u8"<p><b>从服务器拉取分数失败 (BeginOfRet)</b></p><p>系统可能正忙，请稍后再试</p>");
 			return;
 		}
 		m_result = strstr(m_result + 92, "<table width=\"100%\"  border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\">");
 		if (m_result == NULL)
 		{
-			Error(u8"<p><b>从服务器拉取分数失败。(MidOfRet-Table)</b></p><p>教务君可能月线繁忙，请稍候再试。</p><p>如果月线正忙，或存在数据显示遗漏，多刷新几次即可。</p>");
+			Error(u8"<p><b>从服务器拉取分数失败 (MidOfRet-Table)</b></p><p>系统可能正忙，请稍后再试</p>");
 			return;
 		}
 		char *m_prep = (char *)malloc(req.GetLength());
@@ -1806,7 +1806,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		if (m_result == NULL)
 		{
 			free(m_prep);
-			Error(u8"<p>从服务器拉取分数失败。(EndOfBodyNotFound)</p>");
+			Error(u8"<p>从服务器拉取分数失败 (EndOfBodyNotFound)</p>");
 			return;
 		}
 		cout << GLOBAL_HEADER;

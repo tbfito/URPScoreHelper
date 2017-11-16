@@ -123,7 +123,7 @@ function releaseAssoc(id) {
 	}, function() {
 	});
 }
-function check_password() {
+function change_password() {
 	var r1 = document.getElementById("i_xhs").value;
 	if(r1=="")
 	{
@@ -139,8 +139,8 @@ function check_password() {
 		$.toast("滑动右边开关来确认输入无误 :-)", "text");
 		return false;
 	}
-	$.toptip("正在修改...", 5000, 'success');
-	$(".loading").show();
+	$.toptip("正在修改...", 2000, 'success');
+	ajax_submit();
 	return true;
 }
 function adjust_form(href) {
@@ -213,8 +213,8 @@ function init(href){
 			$.toast("没写主观评价啊","cancel");
 			return false;
 		}
-		$.toptip("正在提交，请稍后...", 5000, 'success');
-		$(".loading").show();
+		$.toptip("正在提交，请稍后...", 2000, 'success');
+		ajax_submit();
 		return true;
 	});
 	$(".loading").hide();
@@ -236,6 +236,32 @@ function ajax_page(href) {
 			},
 			error: function(request) {
 				window.location.href = href;
+			},
+			success: function(data) {
+				$("#container").html(data);
+				init(href);
+				$(".loading").hide();
+			}
+		});
+	}
+}
+function ajax_submit() {
+	$(".loading").show();
+	var href = $("#ajax_submit").attr("data-ajax-submit");
+	if (href != undefined) {
+		$.ajax({
+			url: href,
+			type: "POST",
+			contentType: "application/x-www-form-urlencoded",
+			dataType: "text",
+			data: $('#ajax_submit').serialize(),
+			beforeSend: function(request) {
+				request.setRequestHeader("X-Ajax-Request", "1");
+			},
+			error: function(request) {
+				$(".loading").hide();
+				$.toast("请求失败，请稍后再试。","cancel");
+				ajax_page("/");
 			},
 			success: function(data) {
 				$("#container").html(data);

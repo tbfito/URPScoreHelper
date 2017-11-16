@@ -7,7 +7,7 @@
 	</div>
 </header>
 <div class="content">
-	<form action="/main.fcgi" method="post" class="weui-cells weui-cells_form">
+	<form id="ajax_submit" data-ajax-submit="/main.fcgi" class="weui-cells weui-cells_form">
 		<div class="weui-cells__title">
 			%s
 		</div>
@@ -63,7 +63,7 @@
 			</span>
 		</label>
 		<div class="weui-btn-area">
-			<button id="i_submit" type="submit" class="weui-btn weui-btn_primary%s">
+			<button id="i_submit" type="button" class="weui-btn weui-btn_primary%s">
 				<i class="fa fa-check-square-o"></i>%s
 			</button>
 			%s

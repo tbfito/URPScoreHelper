@@ -48,7 +48,7 @@
 		  <img src="img/schedule.png" alt="">
 		</div>
 		<p class="weui-grid__label">
-		  我的课程表
+		  课程表
 		</p>
 	  </a>
 		<a href="/query.fcgi?order=passed" class="weui-grid js_grid">
@@ -80,7 +80,7 @@
 		  <img src="img/tests.png" alt="">
 		</div>
 		<p class="weui-grid__label">
-		  月中补缓清考
+		  期中月考
 		</p>
 	  </a>
 	  <a id="logout" onclick="logout();" href="javascript:void(0);" class="weui-grid js_grid">
@@ -89,14 +89,6 @@
 		</div>
 		<p class="weui-grid__label">
 		  退出登录
-		</p>
-	  </a>
-	   <a href="http://v.xiumi.us/board/v5/2xVry/57214495" class="weui-grid js_grid">
-		<div class="weui-grid__icon">
-		  <img src="img/focus.png" alt="">
-		</div>
-		<p class="weui-grid__label">
-		 关注我们
 		</p>
 	  </a>
 	</div>
