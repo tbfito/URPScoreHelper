@@ -494,6 +494,29 @@ void LoadConfig()
 
 		query = "SET NAMES UTF8;";
 		mysql_query(&db, query.c_str());
+
+		// 如果数据库没有下面配置，则自动增加并写入默认值以确保首次能够正常运行。
+		AddSettings("QueryCounter", "0");
+		AddSettings("SERVER_URL", "http://0.0.0.0");
+		AddSettings("USER_AGENT", SOFTWARE_NAME);
+		AddSettings("OAUTH2_APPID", "");
+		AddSettings("OAUTH2_SECRET", "");
+		AddSettings("CURL_PROXY_URL", "");
+		AddSettings("APP_NAME", SOFTWARE_NAME);
+		AddSettings("CURL_TIMEOUT", "2");
+		AddSettings("CURL_USE_PROXY", "0");
+		AddSettings("CARD_AD_BANNER_1_IMG", "");
+		AddSettings("CARD_AD_BANNER_2_IMG", "");
+		AddSettings("CARD_AD_BANNER_1_URL", "");
+		AddSettings("CARD_AD_BANNER_2_URL", "");
+		AddSettings("ADMIN_USER_NAME", "admin");
+		AddSettings("ADMIN_PASSWORD", "admin");
+		AddSettings("SECONDARY_TITLE", SOFTWARE_NAME);
+		AddSettings("APP_KEYWORDS", "");
+		AddSettings("APP_DESCRIPTION", "");
+		AddSettings("FOOTER_TEXT", SOFTWARE_NAME);
+		AddSettings("ANALYSIS_CODE", "");
+		AddSettings("ENABLE_QUICK_QUERY", "1");
 	}
 
 	if (SERVER_URL != NULL)
@@ -636,29 +659,6 @@ void LoadConfig()
 	ENABLE_QUICK_QUERY = (atoi(lpvBuffer) == 1);
 
 	free(lpvBuffer);
-	
-	// 如果数据库没有下面配置，则自动增加并写入默认值以确保首次能够正常运行。
-	AddSettings("QueryCounter", "0");
-	AddSettings("SERVER_URL", "http://0.0.0.0");
-	AddSettings("USER_AGENT", SOFTWARE_NAME);
-	AddSettings("OAUTH2_APPID", "");
-	AddSettings("OAUTH2_SECRET", "");
-	AddSettings("CURL_PROXY_URL", "");
-	AddSettings("APP_NAME", SOFTWARE_NAME);
-	AddSettings("CURL_TIMEOUT", "2");
-	AddSettings("CURL_USE_PROXY", "0");
-	AddSettings("CARD_AD_BANNER_1_IMG", "");
-	AddSettings("CARD_AD_BANNER_2_IMG", "");
-	AddSettings("CARD_AD_BANNER_1_URL", "");
-	AddSettings("CARD_AD_BANNER_2_URL", "");
-	AddSettings("ADMIN_USER_NAME", "admin");
-	AddSettings("ADMIN_PASSWORD", "admin");
-	AddSettings("SECONDARY_TITLE", SOFTWARE_NAME);
-	AddSettings("APP_KEYWORDS", "");
-	AddSettings("APP_DESCRIPTION", "");
-	AddSettings("FOOTER_TEXT", SOFTWARE_NAME);
-	AddSettings("ANALYSIS_CODE", "");
-	AddSettings("ENABLE_QUICK_QUERY", "1");
 }
 
 // 更新用户数量、查询计数器
