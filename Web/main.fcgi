@@ -80,7 +80,7 @@
 		  <img src="img/tests.png" alt="">
 		</div>
 		<p class="weui-grid__label">
-		  期中月考
+		  月中补缓清考
 		</p>
 	  </a>
 	  <a id="logout" onclick="logout();" href="javascript:void(0);" class="weui-grid js_grid">

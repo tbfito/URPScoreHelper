@@ -53,7 +53,7 @@ void fastcgi_app_intro()
 		{
 			cout << "Status: 500 Internal Server Error\r\n"
 				<< GLOBAL_HEADER
-				<< u8"<h1>数据库连接失败</h1><p>" << mysql_error(&db) << "</p>";
+				<< u8"<h1>数据库连接失败</h1><p>" << dbConnError << "</p>";
 			goto END_REQUEST;
 		}
 
@@ -333,6 +333,11 @@ void fastcgi_app_intro()
 					parse_QuickQuery_Result();
 					goto END_REQUEST;
 				}
+				if (strcmp(CGI_QUERY_STRING, "order=tests") == 0)
+				{
+					parse_query_tests();
+					goto END_REQUEST;
+				}
 				parse_query();
 				goto END_REQUEST;
 			}
@@ -462,6 +467,8 @@ void LoadConfig()
 		{
 			isdbReady = false;
 			mysql_close(&db);
+			memset(&db, 0, sizeof(MYSQL));
+			mysql_init(&db);
 			need_db_connection = true;
 		}
 	}
@@ -471,7 +478,22 @@ void LoadConfig()
 		{
 			isdbReady = false;
 			fprintf(stderr, "Database Error: %s\n", mysql_error(&db));
+			if (dbConnError != NULL)
+			{
+				free(dbConnError);
+				dbConnError = NULL;
+			}
+			dbConnError = (char *)malloc(strlen(mysql_error(&db)) + 1);
+			strcpy(dbConnError, mysql_error(&db));
+			mysql_close(&db);
+			memset(&db, 0, sizeof(MYSQL));
+			mysql_init(&db);
 			return;
+		}
+		if (dbConnError != NULL)
+		{
+			free(dbConnError);
+			dbConnError = NULL;
 		}
 
 		// 设置允许数据库断开重连
@@ -1392,54 +1414,72 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	{
 		free(p_lpszScore);
 		CCurlTask req;
-		if (!req.Exec(false, GET_SMALL_TEST_SCORE, CGI_HTTP_COOKIE))
+		if (!req.Exec(false, GET_TEST_LIST, CGI_HTTP_COOKIE))
 		{
 			Error(u8"<p><b>接收数据失败</b></p><p>curl 操作失败</p>");
 			return;
 		}
 
-		unsigned int rep_len = req.GetLength() * 3 + 1;
-		char *m_rep_body = (char *)malloc(rep_len);
-		gbk_to_utf8(req.GetResult(), (unsigned int)req.GetLength(), &m_rep_body, &rep_len);
-		req.GetResultString() = m_rep_body;
-		free(m_rep_body);
-		m_rep_body = req.GetResult();
+		char *p1 = strstr(req.GetResult(), "] = new Array(\"");
+		if (p1 == NULL)
+		{
+			Error(u8"<p><b>从服务器拉取分数失败 (BeginOfList)</b></p><p>可能现在还没出成绩</p>");
+			return;
+		}
+		std::string script(u8"<script type=\"text/javascript\">$(\"#tests\").select({title:\"选择考试\",items:[");
+		bool isFirst = true;
+		while (p1 != NULL)
+		{
+			char *p2 = strstr(p1+16, "\");");
+			if (p2 == NULL)
+			{
+				Error(u8"<p><b>从服务器拉取分数失败 (EndOfLine)</b></p><p>请稍后再试</p>");
+				return;
+			}
+			char Line[4096] = { 0 };
+			mid(Line, p1, p2 - p1 + 3, 0);
+			char testName[4096] = { 0 };
+			char testID[4096] = { 0 };
+			char termID[4096] = { 0 };
+			
+			int matches = sscanf(Line, "%*[^\"]\"%[^\"]\",\"%[^\"]\",\"%[^\"]\");", testName, testID, termID);
+			if (matches != 3)
+			{
+				Error(u8"<p><b>从服务器拉取分数失败 (MatchLineError)</b></p><p>请稍后再试</p>");
+				return;
+			}
 
-		char *m_result = strstr(m_rep_body, "<table cellpadding=\"0\" width=\"100%\" class=\"displayTag\" cellspacing=\"1\" border=\"0\" id=\"user\">");
-		if (m_result == NULL)
-		{
-			Error(u8"<p><b>从服务器拉取分数失败 (BeginOfTable)</b></p><p>系统可能正忙，请稍后再试</p>");
-			return;
+			int lowYear = 0, highYear = 0, season = 0, season_part = 0;
+			int termMaches = sscanf(termID, "%d-%d-%d-%d", &lowYear, &highYear, &season, &season_part);
+			if (matches != 3)
+			{
+				Error(u8"<p><b>从服务器拉取分数失败 (MatchTermError)</b></p><p>请稍后再试</p>");
+				return;
+			}
+
+			char term[1024] = { 0 };
+			sprintf(term, "[%d-%d%s] ", lowYear, highYear, season == 1 ? u8"秋" : u8"春");
+
+			unsigned int u8len = strlen(testName) * 3 + 1;
+			char *u8testName = (char *)malloc(u8len);
+			gbk_to_utf8(testName, (unsigned int)strlen(testName), &u8testName, &u8len);
+			strcat(term, u8testName);
+
+			if (!isFirst)
+			{
+				script += ",";
+			}
+			else
+			{
+				isFirst = false;
+			}
+			script = script + "{title:\"" + term + "\",value:\"" + termID + "|" + testID + "\"}";
+			free(u8testName);
+
+			p1 = strstr(p2 + 3, "] = new Array(\"");
 		}
-		m_result += 93;
-		char *m_prep = (char *)malloc(req.GetLength());
-		replace_string(m_result, "&nbsp;", "");
-		replace_string(m_result, "\t", "");
-		replace_string(m_result, "\r", "");
-		replace_string(m_result, "\n", "");
-		strcpy(m_prep, "<div id=\"list_page\">");
-		char *m_end_body = strstr(m_result, "</table>");
-		if (m_result == NULL)
-		{
-			free(m_prep);
-			Error(u8"<p>从服务器拉取分数失败 (EndOfBodyNotFound)</p>");
-			return;
-		}
-		m_result -= 93;
+		script = script + "]});</script>" + TEST_LIST_HTML;
 		cout << GLOBAL_HEADER;
-		char m_before[512] = { 0 };
-		sprintf(m_before, "<a name=\"qb_731\"></a><table width=\"100%%\" border=\"0\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td class=\"Linetop\"></td></tr></tbody></table><table width=\"100%%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\"><tbody><tr><td width=\"100%%\"><table border=\"0\" align=\"left\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td>&nbsp;</td><td valign=\"middle\">&nbsp;<b>%s</b> &nbsp;</td></tr></tbody></table></td></tr></tbody></table>", u8"成绩清单（期中/月考/其他类型考试）");
-		*(m_end_body + 8) = '<';
-		*(m_end_body + 9) = '/';
-		*(m_end_body + 10) = 'd';
-		*(m_end_body + 11) = 'i';
-		*(m_end_body + 12) = 'v';
-		*(m_end_body + 13) = '>';
-		*(m_end_body + 14) = '\0';
-
-		strcat(m_prep, m_before);
-		strcat(m_prep, m_result);
-
 		if (!isAjaxRequest)
 		{
 			std::string title(m_Student);
@@ -1447,15 +1487,11 @@ void parse_friendly_score(std::string & p_strlpszScore)
 			title += APP_NAME;
 			cout << strformat(header.c_str(), title.c_str());
 		}
-		cout << strformat( m_lpszQuery.c_str(), m_Student, m_prep);
+		cout << strformat(m_lpszQuery.c_str(), m_Student, script.c_str());
 		if (!isAjaxRequest)
 		{
 			cout << footer.c_str();
 		}
-
-		SetQueryCounter(++g_QueryCounter);
-
-		free(m_prep);
 		return;
 	}
 
@@ -2166,6 +2202,133 @@ void parse_friendly_score(std::string & p_strlpszScore)
 
 	SetQueryCounter(++g_QueryCounter);
 	free(p_lpszScore);
+}
+
+// 处理 期中/月考/补考/缓考/清考等各种疑难杂考
+void parse_query_tests()
+{
+	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
+	{
+		cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
+		return;
+	}
+
+	std::string m_lpszQuery = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
+
+	char m_Student[128] = { 0 };
+	get_student_name(m_Student);
+
+	// 获取 POST 数据。
+	int m_post_length = atoi(CGI_CONTENT_LENGTH);
+	if (m_post_length <= 0 || m_post_length > 4096)
+	{
+		Error(u8"<p>发生错误，POST 数据长度异常</p>");
+		return;
+	}
+	char *m_post_data = (char *)malloc(m_post_length + 2);
+	FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
+
+	char *pStr1 = strstr(m_post_data, "tests=");
+	if (pStr1 == NULL)
+	{
+		free(m_post_data);
+		Error(u8"<p>发生错误，无法获取 POST 数据。</p>");
+		return;
+	}
+	char tests[4096] = { 0 };
+	left(tests, pStr1 + 6, m_post_length - 6);
+	int len = url_decode(tests, strlen(tests));
+	char temp[4096] = { 0 };
+	left(temp, tests, len);
+	strcpy(tests, temp);
+	free(m_post_data);
+
+	if (len > 2048 || len <= 0)
+	{
+		Error(u8"<p>提交数据存在异常</p>");
+		return;
+	}
+
+	char testName[4096] = { 0 };
+	char termID[4096] = { 0 };
+	char testID[4096] = { 0 };
+	int matches = sscanf(tests, "%[^|]%*c%[^|]%*c%s", testName, termID, testID);
+	if (matches != 3)
+	{
+		Error(u8"<p>提交数据存在异常</p>");
+		return;
+	}
+
+	const char *postdata = "jxzxjh=%s&ksbh=%s&pageSize=300&page=1&currentPage=1&pageNo=";
+	char request[256] = { 0 };
+	sprintf(request, postdata, termID, testID);
+
+	CCurlTask req;
+	if (!req.Exec(false, GET_TEST_DETAIL, CGI_HTTP_COOKIE, true, request))
+	{
+		Error(u8"<p><b>接收数据失败</b></p><p>curl 操作失败</p>");
+		return;
+	}
+
+	unsigned int rep_len = req.GetLength() * 3 + 1;
+	char *m_rep_body = (char *)malloc(rep_len);
+	gbk_to_utf8(req.GetResult(), (unsigned int)req.GetLength(), &m_rep_body, &rep_len);
+	req.GetResultString() = m_rep_body;
+	free(m_rep_body);
+	m_rep_body = req.GetResult();
+
+	char *m_result = strstr(m_rep_body, "<table cellpadding=\"0\" width=\"100%\" class=\"displayTag\" cellspacing=\"1\" border=\"0\" id=\"user\">");
+	if (m_result == NULL)
+	{
+		Error(u8"<p><b>从服务器拉取分数失败 (BeginOfTable)</b></p><p>系统可能正忙，请稍后再试</p>");
+		return;
+	}
+	m_result += 93;
+	char *m_prep = (char *)malloc(req.GetLength());
+	replace_string(m_result, "&nbsp;", "");
+	replace_string(m_result, "\t", "");
+	replace_string(m_result, "\r", "");
+	replace_string(m_result, "\n", "");
+	strcpy(m_prep, "<div id=\"list_page\">");
+	char *m_end_body = strstr(m_result, "</table>");
+	if (m_result == NULL)
+	{
+		free(m_prep);
+		Error(u8"<p>从服务器拉取分数失败 (EndOfBodyNotFound)</p>");
+		return;
+	}
+	m_result -= 93;
+	cout << GLOBAL_HEADER;
+	char m_before[512] = { 0 };
+	sprintf(m_before, "<a name=\"qb_731\"></a><table width=\"100%%\" border=\"0\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td class=\"Linetop\"></td></tr></tbody></table><table width=\"100%%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\"><tbody><tr><td width=\"100%%\"><table border=\"0\" align=\"left\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td>&nbsp;</td><td valign=\"middle\">&nbsp;<b>%s</b> &nbsp;</td></tr></tbody></table></td></tr></tbody></table>", testName);
+	*(m_end_body + 8) = '<';
+	*(m_end_body + 9) = '/';
+	*(m_end_body + 10) = 'd';
+	*(m_end_body + 11) = 'i';
+	*(m_end_body + 12) = 'v';
+	*(m_end_body + 13) = '>';
+	*(m_end_body + 14) = '\0';
+
+	strcat(m_prep, m_before);
+	strcat(m_prep, m_result);
+
+	if (!isAjaxRequest)
+	{
+		std::string title(m_Student);
+		title += " - ";
+		title += APP_NAME;
+		cout << strformat(header.c_str(), title.c_str());
+	}
+	cout << strformat(m_lpszQuery.c_str(), m_Student, m_prep);
+	if (!isAjaxRequest)
+	{
+		cout << footer.c_str();
+	}
+
+	SetQueryCounter(++g_QueryCounter);
+
+	free(m_prep);
+	return;
 }
 
 // 获取学生姓名
@@ -3680,7 +3843,7 @@ void do_change_password() //(POST /changePassword.fcgi)
 	if (pStr1 == NULL)
 	{
 		free(m_post_data);
-		Error(u8"<p>发生了错误，无法获取 POST 数据。</p>");
+		Error(u8"<p>发生错误，无法获取 POST 数据。</p>");
 		return;
 	}
 

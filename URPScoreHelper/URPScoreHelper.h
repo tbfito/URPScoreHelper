@@ -14,7 +14,7 @@ MYSQL db;
 FCGX_Request request; //全局可以使用的请求
 static const char *emptystr = "";
 
-
+char *dbConnError = NULL;
 char *CGI_SCRIPT_NAME;
 char *CGI_REQUEST_URI;
 char *CGI_REQUEST_METHOD;
@@ -54,6 +54,7 @@ void parse_ajax_avatar();
 void SetQueryCounter(int current_counts);
 bool GetSettings(const char *name, char *value);
 bool AddSettings(const char *name, const char *value);
+void parse_query_tests();
 
 typedef struct test_info
 {

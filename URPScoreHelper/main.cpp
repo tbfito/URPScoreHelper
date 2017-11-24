@@ -96,6 +96,11 @@ int main(int argc, const char *argv[])
 	free(APP_DESCRIPTION);
 	free(FOOTER_TEXT);
 	free(ANALYSIS_CODE);
+	if (dbConnError != NULL)
+	{
+		free(dbConnError);
+		dbConnError = NULL;
+	}
 
 	mysql_close(&db);
 	curl_global_cleanup();
