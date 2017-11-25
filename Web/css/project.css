@@ -38,6 +38,8 @@
 @media screen and (max-width:550px){.content{width:80%}.demos-title:before{margin-left:35%}}
 @media screen and (max-width:525px){.content{width:85%}.demos-title:before{margin-left:35%}}
 @media screen and (max-width:440px){.content{width:100%}.demos-title:before{margin-left:30%}}
+#i_notice{color:#8A6D3B;background-color:#FCF8E3;border: 1px solid #FAEBCC;overflow:hidden;margin:10px auto -20px auto;padding:15px;border-radius:4px;font-size:12px;width:80%}
+#i_notice p{margin:0px}
 .i_page-title{font-size:16px;text-align:center;background-color:#01a9da;position:relative;height:160px;overflow:hidden}
 .i_page-navbar{line-height:40px;color:#fff;font-size:16px;text-align:center;background-color:#03a9f4;position:relative;height:40px;overflow:hidden}
 .i_page-navbar a.return {width:62px;padding-left: 0;text-indent: 8px;left:0}

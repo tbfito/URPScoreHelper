@@ -18,7 +18,7 @@
 		<script charset="utf-8" src="js/jquery.min.js"></script>
 		<script charset="utf-8" src="js/jquery-weui.min.js"></script>
 		<script charset="utf-8" src="js/swiper.min.js"></script>
-		<script charset="utf-8" src="js/URPScoreHelper.js?ver=17.11.16"></script>
+		<script charset="utf-8" src="js/URPScoreHelper.js?ver=17.11.25"></script>
 		%s
 	</body>
 </html>

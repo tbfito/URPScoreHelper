@@ -5,6 +5,107 @@
 #include "Encrypt.h"
 #include "gbkutf8.h"
 
+// admin 控制器入口
+void admin_intro()
+{
+	if (strcmp(CGI_SCRIPT_NAME, "/admin/login.fcgi") == 0)
+	{
+		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+		{
+			parse_admin_login();
+			return;
+		}
+		if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
+		{
+			do_admin_login();
+			return;
+		}
+	}
+
+	if (strcmp(CGI_SCRIPT_NAME, "/admin/settings.fcgi") == 0)
+	{
+		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+		{
+			parse_admin_settings();
+			return;
+		}
+		if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
+		{
+			save_admin_settings();
+			return;
+		}
+	}
+
+	if (strcmp(CGI_SCRIPT_NAME, "/admin/info.fcgi") == 0)
+	{
+		parse_admin_info();
+		return;
+	}
+
+	if (strcmp(CGI_SCRIPT_NAME, "/admin/change-pass.fcgi") == 0)
+	{
+		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+		{
+			parse_admin_change_password();
+			return;
+		}
+		if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
+		{
+			do_admin_change_password();
+			return;
+		}
+	}
+
+	if (strcmp(CGI_SCRIPT_NAME, "/admin/homepage-notice.fcgi") == 0)
+	{
+		homepage_notice();
+		return;
+	}
+
+	if (strcmp(CGI_SCRIPT_NAME, "/admin/find-user.fcgi") == 0)
+	{
+		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+		{
+			parse_find_user();
+			return;
+		}
+		if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
+		{
+			do_find_user();
+			return;
+		}
+	}
+
+	if (strcmp(CGI_SCRIPT_NAME, "/admin/adv-card.fcgi") == 0)
+	{
+		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+		{
+			parse_admin_adv_card();
+			return;
+		}
+		if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
+		{
+			change_admin_adv_card();
+			return;
+		}
+	}
+
+	if (strcmp(CGI_REQUEST_URI, "/admin/index.fcgi") == 0 || strcmp(CGI_REQUEST_URI, "/admin") == 0)
+	{
+		cout << "Status: 301 Moved Permanently\r\n" << "Location: " << getAppURL().c_str() << "/admin/\r\n" << GLOBAL_HEADER;
+		return;
+	}
+
+	if (strcmp(CGI_REQUEST_URI, "/admin/") == 0)
+	{
+		parse_admin_index();
+		return;
+	}
+
+	cout << "Status: 404 Not Found\r\n";
+	admin_error(u8"页面未找到");
+}
+
 // 处理管理员登录入口 (GET /admin/login.fcgi)
 void parse_admin_login()
 {
@@ -660,4 +761,49 @@ void do_find_user()
 	cout << GLOBAL_HEADER
 		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
 			m_STUDENT_ID.c_str(), tmp1, tmp2, tmp3, tmp4, tmp5, tmp6).c_str();
+}
+
+// 处理首页公告 (GET/POST /admin/homepage-notice.fcgi)
+void homepage_notice()
+{
+	if (!verify_session())
+	{
+		cout << "Status: 302 Found\r\n"
+			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
+			<< GLOBAL_HEADER;
+		return;
+	}
+	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
+	{
+		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
+	}
+
+	if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+	{
+		cout << GLOBAL_HEADER;
+		cout << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, HOMEPAGE_NOTICE).c_str();
+		return;
+	}
+	else if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
+	{
+		// 获取 POST 数据。
+		int m_post_length = atoi(CGI_CONTENT_LENGTH);
+		if (m_post_length <= 0 || m_post_length > 10240)
+		{
+			admin_error(u8"<p><b>POST错误</b></p><p>提交的数据可能存在问题</p>");
+			return;
+		}
+		char *m_post_data = (char *)malloc(m_post_length + 2);
+		FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
+		std::string post(m_post_data);
+		free(m_post_data);
+
+		std::string m_HOMEPAGE_NOTICE = _POST(post, "HOMEPAGE_NOTICE");
+		decode_post_data(m_HOMEPAGE_NOTICE);
+		UpdateSettings("HOMEPAGE_NOTICE", m_HOMEPAGE_NOTICE.c_str());
+
+		admin_error(u8"修改成功");
+		return;
+	}
+	admin_error(u8"发生未知错误");
 }

@@ -2,7 +2,6 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title>后台管理平台 - %s</title>  
     <link rel="stylesheet" href="css/pintuer.css">
 	<link rel="stylesheet" href="../css/font-awesome.min.css">
@@ -22,6 +21,7 @@
 	  <h2><i class="fa fa-user"></i>基本设置</h2>
 	  <ul style="display:block">
 		<li><a href="settings.fcgi" target="right"><i class="fa fa-caret-right"></i>站点设置</a></li>
+		<li><a href="homepage-notice.fcgi" target="right"><i class="fa fa-caret-right"></i>首页公告</a></li>
 		<li><a href="adv-card.fcgi" target="right"><i class="fa fa-caret-right"></i>广告轮播</a></li>
 		<li><a href="change-pass.fcgi" target="right"><i class="fa fa-caret-right"></i>修改密码</a></li>
 		<li><a href="find-user.fcgi" target="right"><i class="fa fa-caret-right"></i>查询用户</a></li>

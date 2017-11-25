@@ -25,3 +25,5 @@ void change_admin_adv_card();
 void parse_admin_info();
 void parse_find_user();
 void do_find_user();
+void admin_intro();
+void homepage_notice();

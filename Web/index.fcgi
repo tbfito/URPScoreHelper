@@ -7,6 +7,7 @@
 	</div>
 </header>
 <div class="content">
+	%s
 	<form id="ajax_submit" data-ajax-submit="/main.fcgi" class="weui-cells weui-cells_form">
 		<div class="weui-cells__title">
 			%s

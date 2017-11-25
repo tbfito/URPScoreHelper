@@ -2,7 +2,6 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<title>管理员帐号修改 - %s</title>
 	<link rel="stylesheet" href="css/pintuer.css">
 	<link rel="stylesheet" href="../css/font-awesome.min.css">

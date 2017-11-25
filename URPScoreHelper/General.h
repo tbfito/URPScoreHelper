@@ -60,6 +60,7 @@ extern char *APP_KEYWORDS;
 extern char *APP_DESCRIPTION;
 extern char *FOOTER_TEXT;
 extern char *ANALYSIS_CODE;
+extern char *HOMEPAGE_NOTICE;
 
 extern std::string ERROR_HTML;
 extern std::string error;

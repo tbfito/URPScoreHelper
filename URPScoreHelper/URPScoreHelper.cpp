@@ -19,7 +19,7 @@
 #include "gbkutf8.h"
 #include "Admin.h"
 
-// 请求映射入口 (FastCGI 处理循环)
+// 请求映射入口 (主控制器：FastCGI 处理循环)
 void fastcgi_app_intro()
 {
 	while (FCGX_Accept_r(&request) >= 0)
@@ -86,101 +86,11 @@ void fastcgi_app_intro()
 			CGI_HTTP_HOST = (char *)emptystr;
 		}
 
-		// 单独为 Admin 做处理。
+		// 单独为 Admin 做处理，将其请求转发到 admin.cpp 控制器。
 		if (strstr(CGI_REQUEST_URI, "/admin") != NULL)
 		{
-			if (strcmp(CGI_SCRIPT_NAME, "/admin/login.fcgi") == 0)
-			{
-				if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
-				{
-					parse_admin_login();
-					goto END_REQUEST;
-				}
-				if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
-				{
-					do_admin_login();
-					goto END_REQUEST;
-				}
-			}
-
-			if (strcmp(CGI_SCRIPT_NAME, "/admin/settings.fcgi") == 0)
-			{
-				if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
-				{
-					parse_admin_settings();
-					goto END_REQUEST;
-				}
-				if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
-				{
-					save_admin_settings();
-					goto END_REQUEST;
-				}
-			}
-
-			if (strcmp(CGI_SCRIPT_NAME, "/admin/info.fcgi") == 0)
-			{
-				parse_admin_info();
-				goto END_REQUEST;
-			}
-
-			if (strcmp(CGI_SCRIPT_NAME, "/admin/change-pass.fcgi") == 0)
-			{
-				if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
-				{
-					parse_admin_change_password();
-					goto END_REQUEST;
-				}
-				if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
-				{
-					do_admin_change_password();
-					goto END_REQUEST;
-				}
-			}
-
-			if (strcmp(CGI_SCRIPT_NAME, "/admin/find-user.fcgi") == 0)
-			{
-				if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
-				{
-					parse_find_user();
-					goto END_REQUEST;
-				}
-				if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
-				{
-					do_find_user();
-					goto END_REQUEST;
-				}
-			}
-
-			if (strcmp(CGI_SCRIPT_NAME, "/admin/adv-card.fcgi") == 0)
-			{
-				if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
-				{
-					parse_admin_adv_card();
-					goto END_REQUEST;
-				}
-				if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
-				{
-					change_admin_adv_card();
-					goto END_REQUEST;
-				}
-			}
-
-			if (strcmp(CGI_REQUEST_URI, "/admin/index.fcgi") == 0 || strcmp(CGI_REQUEST_URI, "/admin") == 0)
-			{
-				cout << "Status: 301 Moved Permanently\r\n" << "Location: " << getAppURL().c_str() << "/admin/\r\n" << GLOBAL_HEADER;
-				goto END_REQUEST;
-			}
-
-			if (strcmp(CGI_REQUEST_URI, "/admin/") == 0)
-			{
-				parse_admin_index();
-				goto END_REQUEST;
-			}
-
-			cout << "Status: 404 Not Found\r\n";
-			admin_error(u8"页面未找到");
+			admin_intro();
 			goto END_REQUEST;
-
 		}
 
 		if (!isPageSrcLoadSuccess)
@@ -539,6 +449,7 @@ void LoadConfig()
 		AddSettings("FOOTER_TEXT", SOFTWARE_NAME);
 		AddSettings("ANALYSIS_CODE", "");
 		AddSettings("ENABLE_QUICK_QUERY", "1");
+		AddSettings("HOMEPAGE_NOTICE", "");
 	}
 
 	if (SERVER_URL != NULL)
@@ -626,7 +537,11 @@ void LoadConfig()
 		free(ANALYSIS_CODE);
 	}
 	ANALYSIS_CODE = (char *)malloc(10240);
-	
+	if (HOMEPAGE_NOTICE != NULL)
+	{
+		free(HOMEPAGE_NOTICE);
+	}
+	HOMEPAGE_NOTICE = (char *)malloc(10240);
 
 	char *lpvBuffer = (char *)malloc(10240);
 
@@ -648,6 +563,7 @@ void LoadConfig()
 	memset(APP_DESCRIPTION, 0, 10240);
 	memset(FOOTER_TEXT, 0, 10240);
 	memset(ANALYSIS_CODE, 0, 10240);
+	memset(HOMEPAGE_NOTICE, 0, 10240);
 
 	GetSettings("SERVER_URL", SERVER_URL);
 	GetSettings("USER_AGENT", USER_AGENT);
@@ -666,6 +582,7 @@ void LoadConfig()
 	GetSettings("APP_DESCRIPTION", APP_DESCRIPTION);
 	GetSettings("FOOTER_TEXT", FOOTER_TEXT);
 	GetSettings("ANALYSIS_CODE", ANALYSIS_CODE);
+	GetSettings("HOMEPAGE_NOTICE", HOMEPAGE_NOTICE);
 
 	GetSettings("CURL_TIMEOUT", lpvBuffer);
 	CURL_TIMEOUT = atoi(lpvBuffer);
@@ -1233,24 +1150,32 @@ int parse_index()
 		cout << strformat(header.c_str(), APP_NAME);
 	}
 
+	bool hasNotice = (strlen(HOMEPAGE_NOTICE) != 0);
+	std::string notice("<div id=\"i_notice\">");
+	if (hasNotice)
+	{
+		notice = notice + HOMEPAGE_NOTICE;
+	}
+	notice = notice + "</div>";
+
 	if (m_xh == NULL || m_mm == NULL)
 	{
 		if (token_xh != NULL && token_mm != NULL)
 		{
-			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter,
+			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter, hasNotice ? notice.c_str() : "",
 				u8"输入你的教务系统帐号来登录吧 :)", token_xh, token_mm, " col-50", u8"登录",
 				OAUTH2_LOGIN_HTML, ENABLE_QUICK_QUERY ? QUICKQUERY_HTML : "");
 		}
 		else
 		{
-			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter,
+			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter, hasNotice ? notice.c_str() : "",
 				u8"输入你的教务系统帐号来登录吧 :)", "", "", " col-50", u8"登录",
 				OAUTH2_LOGIN_HTML, ENABLE_QUICK_QUERY ? QUICKQUERY_HTML : "");
 		}
 	}
 	else 
 	{
-		cout << strformat( m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter,
+		cout << strformat( m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter, hasNotice ? notice.c_str() : "",
 						u8"QQ登录成功，输入验证码继续吧 :)", m_xh, m_mm, "", u8"继续", "", "");
 	}
 	if (!isAjaxRequest)
@@ -1451,7 +1376,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 
 			int lowYear = 0, highYear = 0, season = 0, season_part = 0;
 			int termMaches = sscanf(termID, "%d-%d-%d-%d", &lowYear, &highYear, &season, &season_part);
-			if (matches != 3)
+			if (termMaches != 4)
 			{
 				Error(u8"<p><b>从服务器拉取分数失败 (MatchTermError)</b></p><p>请稍后再试</p>");
 				return;
@@ -2501,13 +2426,13 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	char *m_login_not_auth = strstr(m_result, "\xd6\xa4\xbc\xfe\xba\xc5" /*"证件号"*/); // for some urp systems
 	if (m_login_not_auth != NULL)
 	{
-		Error(u8"<p><b>学号或密码不对啊</b></p><p>如果你曾修改过教务系统的帐号密码，请使用新密码再试一试。</p>");
+		Error(u8"<p><b>学号或密码不对</b></p><p>如果你曾修改过帐号密码，请用新密码试一试</p>");
 		return false;
 	}
 	m_login_not_auth = strstr(m_result, "\xc3\xdc\xc2\xeb\xb2\xbb\xd5\xfd\xc8\xb7" /*密码不正确*/);
 	if (m_login_not_auth != NULL)
 	{
-		Error(u8"<p><b>学号或密码不对啊</b></p><p>如果你曾修改过教务系统的帐号密码，请使用新密码再试一试。</p>");
+		Error(u8"<p><b>学号或密码不对</b></p><p>如果你曾修改过帐号密码，请用新密码试一试</p>");
 		return false;
 	}
 	m_login_not_auth = strstr(m_result, "\xd1\xe9\xd6\xa4\xc2\xeb\xb4\xed\xce\xf3" /*验证码错误*/);
@@ -2519,13 +2444,13 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	m_login_not_auth = strstr(m_result, "\xca\xfd\xbe\xdd\xbf\xe2" /*数据库*/);
 	if (m_login_not_auth != NULL)
 	{
-		Error(u8"<p>学院系统君说数据库繁忙</p><p>请先等等再来吧~</p>");
+		Error(u8"<p>教务系统数据库繁忙</p><p>请先等等再来吧</p>");
 		return false;
 	}
 	char *m_login_success = strstr(m_result, "\xd1\xa7\xb7\xd6\xd6\xc6\xd7\xdb\xba\xcf\xbd\xcc\xce\xf1" /*学分制综合教务*/);
 	if (m_login_success == NULL)
 	{
-		Error(u8"<p>发生了未知错误</p><p>建议你稍候再试试吧。</p>");
+		Error(u8"<p>发生了未知错误</p><p>请稍后再试</p>");
 		return false;
 	}
 

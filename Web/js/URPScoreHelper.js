@@ -273,7 +273,7 @@ function ajax_submit(mydata) {
 }
 function query_tests() {
 	var r1 = document.getElementById("tests").value;
-	if(r1 == undefined || r1 == "" || r1 == "请选择...")
+	if(r1 == undefined || r1 == "" || r1 == "点击这里选择...")
 	{
 		$.toast("请选择一场考试！","text");
 		return false;
