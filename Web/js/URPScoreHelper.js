@@ -217,6 +217,11 @@ function init(href){
 		ajax_submit(null);
 		return true;
 	});
+	try {
+		if (typeof(eval(init_test_list)) == "function") {
+			init_test_list();
+		}
+	} catch(e) {}
 	$(".loading").hide();
 	$("a").not("#logout").not("#no_ajax").on("click", function(e) {
 		var href = $(this).attr("href");

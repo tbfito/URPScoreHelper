@@ -1351,7 +1351,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 			Error(u8"<p><b>从服务器拉取分数失败 (BeginOfList)</b></p><p>可能现在还没出成绩</p>");
 			return;
 		}
-		std::string script(u8"<script type=\"text/javascript\">$(\"#tests\").select({title:\"选择考试\",items:[");
+		std::string script(u8"<script type=\"text/javascript\">function init_test_list() {$(\"#tests\").select({title:\"选择考试\",items:[");
 		bool isFirst = true;
 		while (p1 != NULL)
 		{
@@ -1375,8 +1375,8 @@ void parse_friendly_score(std::string & p_strlpszScore)
 			}
 
 			int lowYear = 0, highYear = 0, season = 0, season_part = 0;
-			int termMaches = sscanf(termID, "%d-%d-%d-%d", &lowYear, &highYear, &season, &season_part);
-			if (termMaches != 4)
+			int termMatches = sscanf(termID, "%d-%d-%d-%d", &lowYear, &highYear, &season, &season_part);
+			if (termMatches != 4)
 			{
 				Error(u8"<p><b>从服务器拉取分数失败 (MatchTermError)</b></p><p>请稍后再试</p>");
 				return;
@@ -1403,7 +1403,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 
 			p1 = strstr(p2 + 3, "] = new Array(\"");
 		}
-		script = script + "]});</script>" + TEST_LIST_HTML;
+		script = script + "]});}</script>" + TEST_LIST_HTML;
 		cout << GLOBAL_HEADER;
 		if (!isAjaxRequest)
 		{
