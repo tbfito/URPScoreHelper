@@ -1274,7 +1274,14 @@ void parse_ajax_avatar()
 	get_student_id(m_student_id);
 	if (!GetOAuthUserInfo(m_student_id, m_student_name, m_avatar_url))
 	{
-		cout << m_photo.c_str();
+		if (m_photo != "data:image/jpg;base64,") // 判断教务系统中有无头像，即 datauri 有没有值
+		{
+			cout << m_photo.c_str();
+		}
+		else
+		{
+			cout << "/img/default_avatar.jpg";
+		}
 	}
 	else
 	{
@@ -2261,14 +2268,14 @@ void get_student_name(char *p_lpszBuffer)
 {
 	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
 	{
-		strcpy(p_lpszBuffer, "\0");
+		strcpy(p_lpszBuffer, u8"(无名氏)");
 		return;
 	}
 
 	CCurlTask req;
 	if (!req.Exec(false, REQUEST_GET_REGISTER_INTERFACE, CGI_HTTP_COOKIE))
 	{
-		strcpy(p_lpszBuffer, "\0");
+		strcpy(p_lpszBuffer, u8"(无名氏)");
 		return;
 	}
 	char *m_rep_header = req.GetResult();
@@ -2276,22 +2283,27 @@ void get_student_name(char *p_lpszBuffer)
 	char *pStr1 = strstr(m_rep_header, "\x3c\x74\x64\x20\x63\x6c\x61\x73\x73\x3d\x22\x66\x69\x65\x6c\x64\x4e\x61\x6d\x65\x22\x3e\xd0\xd5\xc3\xfb\x3a\x26\x6e\x62\x73\x70\x3b\x3c\x2f\x74\x64\x3e" /*"<td class=\"fieldName\">姓名:&nbsp;</td>"*/);
 	if (pStr1 == NULL)
 	{
-		strcpy(p_lpszBuffer, "\0");
+		strcpy(p_lpszBuffer, u8"(无名氏)");
 		return;
 	}
 	pStr1 = strstr(pStr1 + 39, "<td>");
 	if (pStr1 == NULL)
 	{
-		strcpy(p_lpszBuffer, "\0");
+		strcpy(p_lpszBuffer, u8"(无名氏)");
 		return;
 	}
 	char *pStr2 = strstr(pStr1 + 5,"</td>");
 	if (pStr2 == NULL)
 	{
-		strcpy(p_lpszBuffer, "\0");
+		strcpy(p_lpszBuffer, u8"(无名氏)");
 		return;
 	}
 	mid(p_lpszBuffer, pStr1, pStr2 - pStr1 - 4, 4);
+	if (strstr(p_lpszBuffer, "<td") != NULL || strstr(p_lpszBuffer, "td>") != NULL) //如果教务系统中没有姓名可以获取，则会获取到html乱码
+	{
+		strcpy(p_lpszBuffer, u8"(无名氏)");
+		return;
+	}
 	char *temp = (char *)malloc(512);
 	unsigned int u8len = 0;
 	gbk_to_utf8(p_lpszBuffer, (unsigned int)strlen(p_lpszBuffer), &temp, &u8len);
