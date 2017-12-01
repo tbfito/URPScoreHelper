@@ -4,6 +4,7 @@
 char JSESSIONID[256] = {0};
 
 char GLOBAL_HEADER[256] = {0};
+char GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT[512] = { 0 };
 
 char MYSQL_HOST[64] = { 0 };
 char MYSQL_PORT_NUMBER[64] = { 0 };

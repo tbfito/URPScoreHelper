@@ -65,7 +65,7 @@ function get_avatar() {
 		type: "GET",
 		url: "/avatar.fcgi",
 		dataType: "text",
-		cache: true,
+		cache: false,
 		success: function(data) {
 			if(data == "LOGGED-OUT")
 			{

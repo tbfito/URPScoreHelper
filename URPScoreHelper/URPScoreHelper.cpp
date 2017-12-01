@@ -1196,17 +1196,20 @@ int parse_index()
 // 处理验证码 Ajax 请求
 void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 {
-	cout << "Cache-Control: no-cache\r\nPragma: no-cache\r\nExpires: Thu, 16 Oct 1997 00:00:00 GMT\r\nContent-Type: text/plain; charset=utf-8\r\n";
 	bool m_need_update_cookie = false;
 	std::string m_photo(" "); // 有数据，需要获取照片
 	process_cookie(&m_need_update_cookie, m_photo);
 
 	if (m_need_update_cookie)
+	{
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+		cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
+	}
 
 	if (!m_photo.empty() && !m_need_update_cookie) // 登录了就通报已经登录
 	{
-		cout << "\r\nLOGGED-IN";
+		cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
+		cout << "LOGGED-IN";
 		return;
 	}
 
@@ -1230,7 +1233,8 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 	}
 	if (!req.Exec(false, Captcha, cookie))
 	{
-		cout << "\r\nREQUEST-FAILED";
+		cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
+		cout << "REQUEST-FAILED";
 		return;
 	}
 	char *m_rep_body = req.GetResult();
@@ -1244,7 +1248,7 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 	strcpy(m_DataURL, "data:image/jpg;base64,");
 	strcat(m_DataURL, m_base64);
 
-	cout << "\r\n";
+	cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
 	cout << m_DataURL;
 
 	delete[]m_base64;
@@ -1254,20 +1258,23 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 // 处理头像 Ajax 请求
 void parse_ajax_avatar()
 {
-	cout << "Content-Type: text/plain; charset=utf-8\r\n";
 	bool m_need_update_cookie = false;
 	std::string m_photo(" "); // 有数据，需要获取照片
 	process_cookie(&m_need_update_cookie, m_photo);
 
 	if (m_need_update_cookie)
+	{
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+		cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
+	}
 
 	if (m_photo.empty() || m_need_update_cookie)
 	{
-		cout << "\r\nLOGGED-OUT";
+		cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
+		cout << "LOGGED-OUT";
 		return;
 	}
-	cout << "\r\n";
+	cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
 	char m_student_id[512] = { 0 };
 	char m_avatar_url[4096] = { 0 };
 	char m_student_name[1024] = { 0 };

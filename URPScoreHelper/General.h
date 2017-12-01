@@ -20,6 +20,7 @@ extern char *HEADER_TEMPLATE_LOCATION;
 extern char *FOOTER_TEMPLATE_LOCATION;
 
 extern char GLOBAL_HEADER[256];
+extern char GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT[512];
 extern const char *SCORE_TEMPLATE;
 extern const char *BEFORE_TEMPLATE;
 extern const char *AFTER_TEMPLATE;
