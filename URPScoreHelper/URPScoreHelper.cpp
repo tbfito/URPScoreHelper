@@ -1203,7 +1203,6 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 	if (m_need_update_cookie)
 	{
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-		cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
 	}
 
 	if (!m_photo.empty() && !m_need_update_cookie) // 登录了就通报已经登录
@@ -1265,7 +1264,6 @@ void parse_ajax_avatar()
 	if (m_need_update_cookie)
 	{
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-		cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
 	}
 
 	if (m_photo.empty() || m_need_update_cookie)
