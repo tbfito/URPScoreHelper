@@ -20,9 +20,9 @@ int main(int argc, const char *argv[])
 	strcat(GLOBAL_HEADER, SOFTWARE_NAME);
 	strcat(GLOBAL_HEADER, "\r\n\r\n");
 
-	strcat(GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT, "Cache-Control: no-cache\r\nPragma: no-cache\r\nExpires: Thu, 16 Oct 1997 00:00:00 GMT\r\nContent-Type: text/plain; charset=utf-8\r\n");
-	strcat(GLOBAL_HEADER, SOFTWARE_NAME);
-	strcat(GLOBAL_HEADER, "\r\n\r\n");
+	strcat(GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT, "Content-Type: text/plain; charset=utf-8\r\nCache-Control: no-cache\r\nPragma: no-cache\r\nExpires: Thu, 16 Oct 1997 00:00:00 GMT\r\n");
+	strcat(GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT, SOFTWARE_NAME);
+	strcat(GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT, "\r\n\r\n");
 
 	str_normalize_init();
 	FCGX_Init();
