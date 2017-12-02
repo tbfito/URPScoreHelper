@@ -1,5 +1,4 @@
-#include "stdafx.h"
-#include "aes.h"
+#include "headers.h"
 
 /*
 
@@ -40,7 +39,7 @@ For AES192/256 the block size is proportionally larger.
 /*****************************************************************************/
 #include <stdint.h>
 #include <string.h> // CBC mode, for memset
-#include "aes.h"
+#include "AES.h"
 
 /*****************************************************************************/
 /* Defines:                                                                  */

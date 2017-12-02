@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+﻿#include "headers.h"
 #include "gbkutf8.h"
 #include <stdlib.h>
 

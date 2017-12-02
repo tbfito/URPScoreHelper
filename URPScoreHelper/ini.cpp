@@ -6,7 +6,7 @@ home page for more info:
 https://github.com/benhoyt/inih
 
 */
-#include "stdafx.h"
+#include "headers.h"
 #include "ini.h"
 
 #if !INI_USE_STACK

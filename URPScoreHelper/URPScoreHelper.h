@@ -29,6 +29,7 @@ bool isPageSrcLoadSuccess;
 bool isdbReady = false;
 
 void fastcgi_app_intro();
+void END_REQUEST();
 void parse_main();
 int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri);
 int parse_index();

@@ -5,7 +5,7 @@
 //
 // https://github.com/benhoyt/inih
 
-#include "stdafx.h"
+#include "headers.h"
 #include <algorithm>
 #include "ini.h"
 #include "INIReader.h"

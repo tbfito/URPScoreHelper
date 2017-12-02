@@ -8,7 +8,7 @@
 ******************************************
 */
 
-#include "stdafx.h"
+#include "headers.h"
 #include "URPScoreHelper.h"
 #include "General.h"
 #include "StringHelper.h"
@@ -54,7 +54,7 @@ void fastcgi_app_intro()
 			cout << "Status: 500 Internal Server Error\r\n"
 				<< GLOBAL_HEADER
 				<< u8"<h1>数据库连接失败</h1><p>" << dbConnError << "</p>";
-			goto END_REQUEST;
+			END_REQUEST(); continue;
 		}
 
 		if (CGI_REQUEST_METHOD == NULL)
@@ -90,7 +90,7 @@ void fastcgi_app_intro()
 		if (strstr(CGI_REQUEST_URI, "/admin") != NULL)
 		{
 			admin_intro();
-			goto END_REQUEST;
+			END_REQUEST(); continue;
 		}
 
 		if (!isPageSrcLoadSuccess)
@@ -101,7 +101,7 @@ void fastcgi_app_intro()
 				cout << "Status: 500 Internal Server Error\r\n"
 					<< GLOBAL_HEADER
 					<< u8"<p>网页模板文件缺失或异常</p>";
-				goto END_REQUEST;
+				END_REQUEST(); continue;
 			}
 		}
 
@@ -118,7 +118,7 @@ void fastcgi_app_intro()
 					std::cout << "Set-Cookie: 3rd_party=" << _3rd_party << "; max-age=1800; path=/\r\n";
 				}
 				std::cout << GLOBAL_HEADER;
-				goto END_REQUEST;
+				END_REQUEST(); continue;
 			}
 		}
 		char * pStr_3rd_party = strstr(CGI_HTTP_COOKIE, "3rd_party=");
@@ -148,7 +148,7 @@ void fastcgi_app_intro()
 				{
 					student_logout();
 					cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
-					goto END_REQUEST;
+					END_REQUEST(); continue;
 				}
 				if (strcmp(CGI_QUERY_STRING, "act=requestAssoc") == 0)
 				{
@@ -158,128 +158,131 @@ void fastcgi_app_intro()
 					if (photo.empty())
 					{
 						cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
-						goto END_REQUEST;
+						END_REQUEST(); continue;
 					}
 					char student_id[512] = { 0 };
 					get_student_id(student_id);
 					student_logout();
 					EnCodeStr(student_id, student_id);
 					cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/OAuth2.fcgi?stid=" << student_id << "\r\n" << GLOBAL_HEADER;
-					goto END_REQUEST;
+					END_REQUEST(); continue;
 				}
 				if (strcmp(CGI_REQUEST_URI, "/index.fcgi") == 0)
 				{
 					cout << "Status: 301 Moved Permanently\r\n" << "Location: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
-					goto END_REQUEST;
+					END_REQUEST(); continue;
 				}
 				parse_index();
-				goto END_REQUEST;
+				END_REQUEST(); continue;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/main.fcgi") == 0)
 			{
 				parse_main();
-				goto END_REQUEST;
+				END_REQUEST(); continue;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2.fcgi") == 0)
 			{
 				OAuth2_process();
-				goto END_REQUEST;
+				END_REQUEST(); continue;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2CallBack.fcgi") == 0)
 			{
 				OAuth2_CallBack();
-				goto END_REQUEST;
+				END_REQUEST(); continue;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.fcgi") == 0)
 			{
 				OAuth2_Association(false);
-				goto END_REQUEST;
+				END_REQUEST(); continue;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/query.fcgi") == 0)
 			{
 				parse_query();
-				goto END_REQUEST;
+				END_REQUEST(); continue;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/QuickQuery.fcgi") == 0)
 			{
 				parse_QuickQuery_Intro();
-				goto END_REQUEST;
+				END_REQUEST(); continue;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/TeachEval.fcgi") == 0)
 			{
 				parse_teaching_evaluation();
-				goto END_REQUEST;
+				END_REQUEST(); continue;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/changePassword.fcgi") == 0)
 			{
 				parse_change_password();
-				goto END_REQUEST;
+				END_REQUEST(); continue;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/captcha.fcgi") == 0)
 			{
 				parse_ajax_captcha();
-				goto END_REQUEST;
+				END_REQUEST(); continue;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/avatar.fcgi") == 0)
 			{
 				parse_ajax_avatar();
-				goto END_REQUEST;
+				END_REQUEST(); continue;
 			}
 			cout << "Status: 404 Not Found\r\n";
 			Error(u8"<p>找不到该页面</p>");
-			goto END_REQUEST;
+			END_REQUEST(); continue;
 		}
 		if (strcmp(CGI_REQUEST_METHOD, "POST") == 0) // 如果是 POST 请求
 		{
 			if (strcmp(CGI_SCRIPT_NAME, "/changePassword.fcgi") == 0)
 			{
 				do_change_password();
-				goto END_REQUEST;
+				END_REQUEST(); continue;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/query.fcgi") == 0)
 			{
 				if (strcmp(CGI_QUERY_STRING, "act=QuickQuery") == 0)
 				{
 					parse_QuickQuery_Result();
-					goto END_REQUEST;
+					END_REQUEST(); continue;
 				}
 				if (strcmp(CGI_QUERY_STRING, "order=tests") == 0)
 				{
 					parse_query_tests();
-					goto END_REQUEST;
+					END_REQUEST(); continue;
 				}
 				parse_query();
-				goto END_REQUEST;
+				END_REQUEST(); continue;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/main.fcgi") == 0)
 			{
 				parse_main();
-				goto END_REQUEST;
+				END_REQUEST(); continue;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.fcgi") == 0)
 			{
 				OAuth2_Association(true);
-				goto END_REQUEST;
+				END_REQUEST(); continue;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/TeachEval.fcgi") == 0)
 			{
 				if (strcmp(CGI_QUERY_STRING, "act=Evaluate") == 0)
 				{
 					teaching_evaluation();
-					goto END_REQUEST;
+					END_REQUEST(); continue;
 				}
 			}
 		}
 		cout << "Status: 500 Internal Server Error\r\n";
 		Error(u8"<p>发生错误，FastCGI 接口可能存在问题</p>");
-		goto END_REQUEST;
-
-		END_REQUEST:
-			ZeroMemory(JSESSIONID, 256);
-			FCGX_Finish_r(&request);
-			//_CrtDumpMemoryLeaks();
-			continue;
+		END_REQUEST(); continue;
 	}
+}
+
+// 结束请求
+void END_REQUEST()
+{
+	ZeroMemory(JSESSIONID, 256);
+	FCGX_Finish_r(&request);
+	//_CrtDumpMemoryLeaks();
+	// continue;
 }
 
 // 预加载头部和尾部页面(header.fcgi, footer.fcgi, error.fcgi)

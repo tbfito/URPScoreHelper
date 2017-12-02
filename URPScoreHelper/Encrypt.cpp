@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+﻿#include "headers.h"
 #include "Encrypt.h"
 #include "General.h"
 #include "StringHelper.h"

@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+﻿#include "headers.h"
 #include "StringHelper.h"
 
 // 取文本左边

@@ -18,9 +18,6 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="General.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -63,11 +60,11 @@
     <ClInclude Include="INIReader.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="headers.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="General.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -105,6 +102,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="INIReader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="headers.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

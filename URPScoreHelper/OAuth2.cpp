@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+﻿#include "headers.h"
 #include "OAuth2.h"
 #include "StringHelper.h"
 #include "General.h"

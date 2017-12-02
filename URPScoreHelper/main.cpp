@@ -8,7 +8,7 @@
 ******************************************
 */
 
-#include "stdafx.h"
+#include "headers.h"
 #include "main.h"
 #include "General.h"
 #include "gbkutf8.h"
@@ -29,21 +29,7 @@ int main(int argc, const char *argv[])
 	curl_global_init(CURL_GLOBAL_ALL);
 	mysql_init(&db);
 
-	char *root = (char *)malloc(MAX_PATH);
-	memset(root, 0, MAX_PATH);
-	getcwd(root, MAX_PATH);
-	char *pStr = strstr(root, "\\");
-	bool isUnixBasedPath = (pStr == NULL);
-	if (isUnixBasedPath)
-	{
-		strcat(root, "/Database.ini");
-	}
-	else
-	{
-		strcat(root, "\\Database.ini");
-	}
-
-	INIReader reader(root);
+	INIReader reader("Database.ini");
 	if (reader.ParseError() != 0) {
 		strcpy(MYSQL_HOST, "127.0.0.1");
 		strcpy(MYSQL_PORT_NUMBER, "3306");
@@ -59,7 +45,6 @@ int main(int argc, const char *argv[])
 		strcpy(MYSQL_PASSWORD, reader.Get("MySQL", "MYSQL_PASSWORD", "root").c_str());
 		strcpy(MYSQL_DBNAME, reader.Get("MySQL", "MYSQL_DBNAME", "database").c_str());
 	}
-	free(root);
 
 	LoadConfig();
 	isPageSrcLoadSuccess = false;
@@ -74,7 +59,6 @@ int main(int argc, const char *argv[])
 				FCGX_SocketId = 0;
 		}
 	}
-
 
 	FCGX_InitRequest(&request, FCGX_SocketId, 0);
 	fastcgi_app_intro();

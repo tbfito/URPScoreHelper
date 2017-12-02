@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+﻿#include "headers.h"
 #include "General.h"
 
 char JSESSIONID[256] = {0};
