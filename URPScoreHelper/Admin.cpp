@@ -397,7 +397,7 @@ void save_admin_settings()
 	UpdateSettings("FOOTER_TEXT", m_FOOTER_TEXT.c_str());
 	UpdateSettings("ANALYSIS_CODE", m_ANALYSIS_CODE.c_str());
 
-	// 因为header(部分)、footer(全部)内容一直缓存在内存中，所以需要单独对其进行更新。
+	// 因为header(部分)内容一直缓存在内存中，所以需要单独对其进行更新。(footer 内容每请求都会在 LoadConfig() 当中更新)
 	header = strformat(ReadTextFileToMem(HEADER_TEMPLATE_LOCATION).c_str(), "%s", m_SECONDARY_TITLE.c_str(), m_APP_KEYWORDS.c_str(), m_APP_DESCRIPTION.c_str());
 	footer = strformat(ReadTextFileToMem(FOOTER_TEMPLATE_LOCATION).c_str(), m_APP_NAME.c_str(), m_FOOTER_TEXT.c_str(), SOFTWARE_NAME, m_ANALYSIS_CODE.c_str());
 

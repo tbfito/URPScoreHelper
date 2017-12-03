@@ -281,8 +281,6 @@ void END_REQUEST()
 {
 	ZeroMemory(JSESSIONID, 256);
 	FCGX_Finish_r(&request);
-	//_CrtDumpMemoryLeaks();
-	// continue;
 }
 
 // 预加载头部和尾部页面(header.fcgi, footer.fcgi, error.fcgi)
@@ -360,13 +358,17 @@ void LoadConfig()
 {
 	if (HEADER_TEMPLATE_LOCATION == NULL)
 	{
-		HEADER_TEMPLATE_LOCATION = (char *)malloc(10240);
-		memset(HEADER_TEMPLATE_LOCATION, 0, 10240);
+		HEADER_TEMPLATE_LOCATION = (char *)malloc(MAX_PATH);
+		memset(HEADER_TEMPLATE_LOCATION, 0, MAX_PATH);
 	}
 	if (FOOTER_TEMPLATE_LOCATION == NULL)
 	{
-		FOOTER_TEMPLATE_LOCATION = (char *)malloc(10240);
-		memset(FOOTER_TEMPLATE_LOCATION, 0, 10240);
+		FOOTER_TEMPLATE_LOCATION = (char *)malloc(MAX_PATH);
+		memset(FOOTER_TEMPLATE_LOCATION, 0, MAX_PATH);
+	}
+	else
+	{
+		footer = strformat(ReadTextFileToMem(FOOTER_TEMPLATE_LOCATION).c_str(), APP_NAME, FOOTER_TEXT, SOFTWARE_NAME, ANALYSIS_CODE);
 	}
 
 	bool need_db_connection = false;
