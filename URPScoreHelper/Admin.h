@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-/*  由于是单线程执行，所以什么都不用考虑，爽歪歪。 */
+/*  由于是单线程执行，所以什么都不用考虑。 */
 extern FCGX_Request request; //引用外部(URPScoreHelper.h)中定义的FCGI请求上下文。
 extern std::string header;
 extern std::string footer;
@@ -27,3 +27,5 @@ void parse_find_user();
 void do_find_user();
 void admin_intro();
 void homepage_notice();
+void set_discussion();
+bool session();

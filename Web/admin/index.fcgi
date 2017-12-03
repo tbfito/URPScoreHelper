@@ -22,6 +22,7 @@
 	  <ul style="display:block">
 		<li><a href="settings.fcgi" target="right"><i class="fa fa-caret-right"></i>站点设置</a></li>
 		<li><a href="homepage-notice.fcgi" target="right"><i class="fa fa-caret-right"></i>首页公告</a></li>
+		<li><a href="set-discussion.fcgi" target="right"><i class="fa fa-caret-right"></i>交流讨论</a></li>
 		<li><a href="adv-card.fcgi" target="right"><i class="fa fa-caret-right"></i>广告轮播</a></li>
 		<li><a href="change-pass.fcgi" target="right"><i class="fa fa-caret-right"></i>修改密码</a></li>
 		<li><a href="find-user.fcgi" target="right"><i class="fa fa-caret-right"></i>查询用户</a></li>

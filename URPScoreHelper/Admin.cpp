@@ -62,6 +62,12 @@ void admin_intro()
 		return;
 	}
 
+	if (strcmp(CGI_SCRIPT_NAME, "/admin/set-discussion.fcgi") == 0)
+	{
+		set_discussion();
+		return;
+	}
+
 	if (strcmp(CGI_SCRIPT_NAME, "/admin/find-user.fcgi") == 0)
 	{
 		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
@@ -103,7 +109,7 @@ void admin_intro()
 	}
 
 	cout << "Status: 404 Not Found\r\n";
-	admin_error(u8"页面未找到");
+	admin_error(u8"页面未找到或发生未知错误");
 }
 
 // 处理管理员登录入口 (GET /admin/login.fcgi)
@@ -218,7 +224,7 @@ void do_admin_login()
 		 << GLOBAL_HEADER;
 }
 
-// 生成登录会话 Session
+// 生成登录会话 Session，由 sessino() 调用
 std::string generate_session()
 {
 	unsigned long long result = std::time(nullptr);
@@ -233,7 +239,7 @@ std::string generate_session()
 	return txt;
 }
 
-// 验证登录会话 Session
+// 验证登录会话 Session，由 sessino() 调用
 bool verify_session()
 {
 	char *session = (char *)malloc(1024);
@@ -284,20 +290,28 @@ bool verify_session()
 	return true;
 }
 
-// 处理管理模板首页 (GET /admin/ /admin/index.fcgi)
-void parse_admin_index()
+// Session 处理，返回 true 代表可以继续向下操作，返回 false 代表需要立即返回。
+bool session()
 {
 	if (!verify_session())
 	{
 		cout << "Status: 302 Found\r\n"
-			 << "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
-			 << GLOBAL_HEADER;
-		return;
+			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
+			<< GLOBAL_HEADER;
+		return false;
 	}
 	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
 	{
 		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
+		return true;
 	}
+}
+
+// 处理管理模板首页 (GET /admin/ /admin/index.fcgi)
+void parse_admin_index()
+{
+	if (!session())
+		return;
 
 	cout << GLOBAL_HEADER
 		 << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, APP_NAME).c_str();
@@ -306,17 +320,8 @@ void parse_admin_index()
 // 处理站点信息页面 (GET /admin/settings.fcgi)
 void parse_admin_settings()
 {
-	if (!verify_session())
-	{
-		cout << "Status: 302 Found\r\n"
-			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
-			<< GLOBAL_HEADER;
+	if (!session())
 		return;
-	}
-	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
-	{
-		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
-	}
 
 	cout << GLOBAL_HEADER
 		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(),
@@ -328,17 +333,8 @@ void parse_admin_settings()
 // 保存站点信息 (POST /admin/settings.fcgi)
 void save_admin_settings()
 {
-	if (!verify_session())
-	{
-		cout << "Status: 302 Found\r\n"
-			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
-			<< GLOBAL_HEADER;
+	if (!session())
 		return;
-	}
-	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
-	{
-		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
-	}
 
 	// 获取 POST 数据。
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
@@ -470,17 +466,8 @@ void decode_post_data(std::string & str)
 // 处理修改管理员信息页面 (GET /admin/change-pass.fcgi)
 void parse_admin_change_password()
 {
-	if (!verify_session())
-	{
-		cout << "Status: 302 Found\r\n"
-			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
-			<< GLOBAL_HEADER;
+	if (!session())
 		return;
-	}
-	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
-	{
-		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
-	}
 
 	cout << GLOBAL_HEADER
 		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, ADMIN_USER_NAME).c_str();
@@ -489,17 +476,8 @@ void parse_admin_change_password()
 // 修改管理员信息
 void do_admin_change_password()
 {
-	if (!verify_session())
-	{
-		cout << "Status: 302 Found\r\n"
-			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
-			<< GLOBAL_HEADER;
+	if (!session())
 		return;
-	}
-	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
-	{
-		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
-	}
 
 	// 获取 POST 数据。
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
@@ -559,17 +537,8 @@ void do_admin_change_password()
 // 处理广告轮播页面 (GET /admin/adv-card.fcgi)
 void parse_admin_adv_card()
 {
-	if (!verify_session())
-	{
-		cout << "Status: 302 Found\r\n"
-			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
-			<< GLOBAL_HEADER;
+	if (!session())
 		return;
-	}
-	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
-	{
-		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
-	}
 
 	cout << GLOBAL_HEADER
 		 << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
@@ -580,17 +549,8 @@ void parse_admin_adv_card()
 // 修改广告轮播信息
 void change_admin_adv_card()
 {
-	if (!verify_session())
-	{
-		cout << "Status: 302 Found\r\n"
-			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
-			<< GLOBAL_HEADER;
+	if (!session())
 		return;
-	}
-	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
-	{
-		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
-	}
 
 	// 获取 POST 数据。
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
@@ -626,17 +586,8 @@ void change_admin_adv_card()
 // 处理系统信息页面 (GET /admin/info.fcgi)
 void parse_admin_info()
 {
-	if (!verify_session())
-	{
-		cout << "Status: 302 Found\r\n"
-			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
-			<< GLOBAL_HEADER;
+	if (!session())
 		return;
-	}
-	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
-	{
-		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
-	}
 
 	if (strcmp(CGI_QUERY_STRING, "act=reset_query_counter") == 0)
 	{
@@ -657,17 +608,8 @@ void parse_admin_info()
 // 处理查找用户 (GET /admin/find-user.fcgi)
 void parse_find_user()
 {
-	if (!verify_session())
-	{
-		cout << "Status: 302 Found\r\n"
-			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
-			<< GLOBAL_HEADER;
+	if (!session())
 		return;
-	}
-	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
-	{
-		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
-	}
 
 	cout << GLOBAL_HEADER
 		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
@@ -677,17 +619,8 @@ void parse_find_user()
 // 处理查找用户
 void do_find_user()
 {
-	if (!verify_session())
-	{
-		cout << "Status: 302 Found\r\n"
-			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
-			<< GLOBAL_HEADER;
+	if (!session())
 		return;
-	}
-	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
-	{
-		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
-	}
 
 	// 获取 POST 数据。
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
@@ -766,17 +699,8 @@ void do_find_user()
 // 处理首页公告 (GET/POST /admin/homepage-notice.fcgi)
 void homepage_notice()
 {
-	if (!verify_session())
-	{
-		cout << "Status: 302 Found\r\n"
-			<< "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
-			<< GLOBAL_HEADER;
+	if (!session())
 		return;
-	}
-	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
-	{
-		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
-	}
 
 	if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
 	{
@@ -801,6 +725,48 @@ void homepage_notice()
 		std::string m_HOMEPAGE_NOTICE = _POST(post, "HOMEPAGE_NOTICE");
 		decode_post_data(m_HOMEPAGE_NOTICE);
 		UpdateSettings("HOMEPAGE_NOTICE", m_HOMEPAGE_NOTICE.c_str());
+
+		admin_error(u8"修改成功");
+		return;
+	}
+	admin_error(u8"发生未知错误");
+}
+
+// 处理交流讨论页面 (GET/POST /set-discussion.fcgi)
+void set_discussion()
+{
+	if (!session())
+		return;
+
+	if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+	{
+		cout << GLOBAL_HEADER;
+		cout << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, 
+				DISCUSSION_PAGE_CONTENT, DISCUSSION_PAGE_CODE).c_str();
+		return;
+	}
+	else if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
+	{
+		// 获取 POST 数据。
+		int m_post_length = atoi(CGI_CONTENT_LENGTH);
+		if (m_post_length <= 0)
+		{
+			admin_error(u8"<p><b>POST错误</b></p><p>提交的数据可能存在问题</p>");
+			return;
+		}
+		char *m_post_data = (char *)malloc(m_post_length + 2);
+		FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
+		std::string post(m_post_data);
+		free(m_post_data);
+
+		std::string m_DISCUSSION_PAGE_CONTENT = _POST(post, "DISCUSSION_PAGE_CONTENT");
+		std::string m_DISCUSSION_PAGE_CODE = _POST(post, "DISCUSSION_PAGE_CODE");
+
+		decode_post_data(m_DISCUSSION_PAGE_CONTENT);
+		decode_post_data(m_DISCUSSION_PAGE_CODE);
+
+		UpdateSettings("DISCUSSION_PAGE_CONTENT", m_DISCUSSION_PAGE_CONTENT.c_str());
+		UpdateSettings("DISCUSSION_PAGE_CODE", m_DISCUSSION_PAGE_CODE.c_str());
 
 		admin_error(u8"修改成功");
 		return;

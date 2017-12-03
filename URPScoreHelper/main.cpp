@@ -64,7 +64,7 @@ int main(int argc, const char *argv[])
 	fastcgi_app_intro();
 	printf("%s\n%s\n\n%s\n", SOFTWARE_NAME, SOFTWARE_COPYRIGHT, "\tOptions: [-p (localhost):port_number]");
 
-	// cleanup operations
+	// 清理操作，这些内存在 LoadConfig() 中分配。
 	free(HEADER_TEMPLATE_LOCATION);
 	free(FOOTER_TEMPLATE_LOCATION);
 	free(SERVER_URL);
@@ -84,6 +84,10 @@ int main(int argc, const char *argv[])
 	free(APP_DESCRIPTION);
 	free(FOOTER_TEXT);
 	free(ANALYSIS_CODE);
+	free(HOMEPAGE_NOTICE);
+	free(DISCUSSION_PAGE_CONTENT);
+	free(DISCUSSION_PAGE_CODE);
+
 	if (dbConnError != NULL)
 	{
 		free(dbConnError);

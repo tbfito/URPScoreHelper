@@ -83,9 +83,9 @@
 		  月中补缓清考
 		</p>
 	  </a>
-	  <a href="/Comments.html" class="weui-grid js_grid">
+	  <a href="/discussion.fcgi" class="weui-grid js_grid">
 		<div class="weui-grid__icon">
-		  <img src="img/Comments.png" alt="">
+		  <img src="img/discussion.png" alt="">
 		</div>
 		<p class="weui-grid__label">
 		  交流反馈

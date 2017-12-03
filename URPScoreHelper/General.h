@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #define SOFTWARE_NAME "iEdon URPScoreHelper"
-#define SOFTWARE_COPYRIGHT u8"著作权 (C) 2012-2017 iEdon"
+#define SOFTWARE_COPYRIGHT u8"Copyright (C) 2012-2017 iEdon"
 
 
 // 外部使用的变量
@@ -62,6 +62,8 @@ extern char *APP_DESCRIPTION;
 extern char *FOOTER_TEXT;
 extern char *ANALYSIS_CODE;
 extern char *HOMEPAGE_NOTICE;
+extern char *DISCUSSION_PAGE_CONTENT;
+extern char *DISCUSSION_PAGE_CODE;
 
 extern std::string ERROR_HTML;
 extern std::string error;

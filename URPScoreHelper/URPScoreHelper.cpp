@@ -225,6 +225,11 @@ void fastcgi_app_intro()
 				parse_ajax_avatar();
 				END_REQUEST(); continue;
 			}
+			if (strcmp(CGI_SCRIPT_NAME, "/discussion.fcgi") == 0)
+			{
+				parse_discussion();
+				END_REQUEST(); continue;
+			}
 			cout << "Status: 404 Not Found\r\n";
 			Error(u8"<p>找不到该页面</p>");
 			END_REQUEST(); continue;
@@ -451,6 +456,8 @@ void LoadConfig()
 		AddSettings("ANALYSIS_CODE", "");
 		AddSettings("ENABLE_QUICK_QUERY", "1");
 		AddSettings("HOMEPAGE_NOTICE", "");
+		AddSettings("DISCUSSION_PAGE_CONTENT", "");
+		AddSettings("DISCUSSION_PAGE_CODE", "");
 	}
 
 	if (SERVER_URL != NULL)
@@ -543,6 +550,16 @@ void LoadConfig()
 		free(HOMEPAGE_NOTICE);
 	}
 	HOMEPAGE_NOTICE = (char *)malloc(10240);
+	if (DISCUSSION_PAGE_CONTENT != NULL)
+	{
+		free(DISCUSSION_PAGE_CONTENT);
+	}
+	DISCUSSION_PAGE_CONTENT = (char *)malloc(10240);
+	if (DISCUSSION_PAGE_CODE != NULL)
+	{
+		free(DISCUSSION_PAGE_CODE);
+	}
+	DISCUSSION_PAGE_CODE = (char *)malloc(10240);
 
 	char *lpvBuffer = (char *)malloc(10240);
 
@@ -565,6 +582,8 @@ void LoadConfig()
 	memset(FOOTER_TEXT, 0, 10240);
 	memset(ANALYSIS_CODE, 0, 10240);
 	memset(HOMEPAGE_NOTICE, 0, 10240);
+	memset(DISCUSSION_PAGE_CONTENT, 0, 10240);
+	memset(DISCUSSION_PAGE_CODE, 0, 10240);
 
 	GetSettings("SERVER_URL", SERVER_URL);
 	GetSettings("USER_AGENT", USER_AGENT);
@@ -584,6 +603,8 @@ void LoadConfig()
 	GetSettings("FOOTER_TEXT", FOOTER_TEXT);
 	GetSettings("ANALYSIS_CODE", ANALYSIS_CODE);
 	GetSettings("HOMEPAGE_NOTICE", HOMEPAGE_NOTICE);
+	GetSettings("DISCUSSION_PAGE_CONTENT", DISCUSSION_PAGE_CONTENT);
+	GetSettings("DISCUSSION_PAGE_CODE", DISCUSSION_PAGE_CODE);
 
 	GetSettings("CURL_TIMEOUT", lpvBuffer);
 	CURL_TIMEOUT = atoi(lpvBuffer);
@@ -993,7 +1014,7 @@ void parse_main()
 		char token_e[4096] = { 0 };
 		strcpy(token_e, token.c_str());
 		EnCodeStr(token_e, token_e);
-		cout << "Set-Cookie: token=" << token_e << "; path=/\r\n";
+		cout << "Set-Cookie: token=" << token_e << "; max-age=604800; path=/\r\n";
 	}
 
 	// 读入主页面文件
@@ -3490,7 +3511,7 @@ void parse_teaching_evaluation()
 	}
 	else
 	{
-		strcpy(out_head, u8"<div class=\"weui-cells__title\"><p>嗯，你都评价好啦。真是好宝宝 O(∩_∩)O</div>");
+		strcpy(out_head, u8"<div class=\"weui-cells__title\"><p>嗯，你都评价好啦。</div>");
 		need_eval = false;
 	}
 
@@ -3873,4 +3894,30 @@ void do_change_password() //(POST /changePassword.fcgi)
 	mysql_stmt_close(stmt);
 	student_logout();
 	cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
+}
+
+// 交流讨论板块
+void parse_discussion()
+{
+	if (strlen(DISCUSSION_PAGE_CODE) == 0 && strlen(DISCUSSION_PAGE_CONTENT) == 0)
+	{
+		Error(u8"交流讨论功能已被关闭");
+		return;
+	}
+
+	cout << GLOBAL_HEADER;
+
+	if (!isAjaxRequest)
+	{
+		std::string title = u8"交流讨论 - ";
+		title += APP_NAME;
+		cout << strformat(header.c_str(), title.c_str());
+	}
+
+	cout << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), DISCUSSION_PAGE_CONTENT, DISCUSSION_PAGE_CODE);
+	
+	if (!isAjaxRequest)
+	{
+		cout << footer.c_str();
+	}
 }
