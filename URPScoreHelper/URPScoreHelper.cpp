@@ -366,10 +366,6 @@ void LoadConfig()
 		FOOTER_TEMPLATE_LOCATION = (char *)malloc(MAX_PATH);
 		memset(FOOTER_TEMPLATE_LOCATION, 0, MAX_PATH);
 	}
-	else
-	{
-		footer = strformat(ReadTextFileToMem(FOOTER_TEMPLATE_LOCATION).c_str(), APP_NAME, FOOTER_TEXT, SOFTWARE_NAME, ANALYSIS_CODE);
-	}
 
 	bool need_db_connection = false;
 	if (!isdbReady)
@@ -601,6 +597,11 @@ void LoadConfig()
 	memset(lpvBuffer, 0, 10240);
 	GetSettings("ENABLE_QUICK_QUERY", lpvBuffer);
 	ENABLE_QUICK_QUERY = (atoi(lpvBuffer) == 1);
+
+	if (FOOTER_TEMPLATE_LOCATION != NULL) // 每次更新 footer 的缓存
+	{
+		footer = strformat(ReadTextFileToMem(FOOTER_TEMPLATE_LOCATION).c_str(), APP_NAME, FOOTER_TEXT, SOFTWARE_NAME, ANALYSIS_CODE);
+	}
 
 	free(lpvBuffer);
 }
