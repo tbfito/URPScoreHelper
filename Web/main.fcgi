@@ -83,6 +83,14 @@
 		  月中补缓清考
 		</p>
 	  </a>
+	  <a href="/Comments.html" class="weui-grid js_grid">
+		<div class="weui-grid__icon">
+		  <img src="img/Comments.png" alt="">
+		</div>
+		<p class="weui-grid__label">
+		  交流反馈
+		</p>
+	  </a>
 	  <a id="logout" onclick="logout();" href="javascript:void(0);" class="weui-grid js_grid">
 		<div class="weui-grid__icon">
 		  <img src="img/logout.png" alt="">
