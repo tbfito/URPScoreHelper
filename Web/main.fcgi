@@ -83,7 +83,7 @@
 		  月中补缓清考
 		</p>
 	  </a>
-	  <a href="/discussion.fcgi" class="weui-grid js_grid">
+	  <a id="no_ajax" href="/discussion.fcgi" class="weui-grid js_grid">
 		<div class="weui-grid__icon">
 		  <img src="img/discussion.png" alt="">
 		</div>
