@@ -1,14 +1,17 @@
+@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+@keyframes logoLights {0%{left:-150px}to{left:150px}}
+@keyframes fade_in{0%{opacity:0;top:30px}100%{opacity:1;top:0px;will-change:auto}}
+@keyframes card_wave2{0%{left:0;top:0}50%{left:-40%;top:0}100%{left:0;top:0}}
+@keyframes card_wave{0%{left:0;top:0}50%{left:-30%;top:0}100%{left:0;top:0}}
 .loading{height:100%;width:100%;position:fixed;top:0;left:0;z-index:9999;background-color:rgba(250, 250, 250, 0.72)}
 .loading_animation{display:block;position:relative;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;border:3px solid transparent;border-top-color:#3498db;animation:spin 2s linear infinite;z-index:1001}
 .loading .round:nth-child(1){content:"";position:absolute;top:5px;left:5px;right:5px;bottom:5px;border-radius:50%;border:3px solid transparent;border-top-color:#e74c3c;animation:spin 3s linear infinite}
 .loading .round:nth-child(2){content:"";position:absolute;top:15px;left:15px;right:15px;bottom:15px;border-radius:50%;border:3px solid transparent;border-top-color:#f9c922;animation:spin 1s linear infinite}
 .loading .round:nth-child(3){transform:translateX(-100%);transition:all .7s .3s cubic-bezier(.645,.045,.355,1)}
 .loading .round:nth-child(4){transform:translateX(100%);transition:all .7s .3s cubic-bezier(.645,.045,.355,1)}
-@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
 .demos-title:before{content:"";margin-left:45%;position:absolute;width:100px;height:20px;background-color:rgba(255,255,255,.5);will-change:transform;transform:rotate(-90deg);animation:logoLights 1s ease-in 1s infinite}
-@keyframes logoLights {0%{left:-150px}to{left:150px}}
-@keyframes fade-in{0%{opacity:0;top:30px}100%{opacity:1;top:0px;will-change:auto}}
-.content{position:relative;margin:0 auto;width:30%;animation:fade-in;animation-duration:0.5s;will-change:transform;transform:translate3d(0,0,0)}
+.content{width:30%;position:relative;margin:0 auto;animation:fade_in;animation-duration:0.5s;will-change:transform;transform:translate3d(0,0,0)}
+.i_page-padding{height:40px;width:100px}
 .demos-header{padding-top:35px}
 .demos-title{text-align: center;font-size: 34px;color: #3cc51f;font-weight:400;margin: 0 15%}
 .signbox{padding-right:15px}
@@ -40,12 +43,17 @@
 @media screen and (max-width:440px){.content{width:100%}.demos-title:before{margin-left:30%}}
 #i_notice{color:#8A6D3B;background-color:#FCF8E3;border: 1px solid #FAEBCC;overflow:hidden;margin:10px auto -20px auto;padding:15px;border-radius:4px;font-size:12px;width:80%}
 #i_notice p{margin:0px}
-.i_page-title{font-size:16px;text-align:center;background-color:#01a9da;position:relative;height:160px;overflow:hidden}
-.i_page-navbar{line-height:40px;color:#fff;font-size:16px;text-align:center;background-color:#03a9f4;position:relative;height:40px;overflow:hidden}
+.i_page-title{background-size:100%;font-size:16px;text-align:center;background-image:linear-gradient(315deg,#4debaf,#aa7cf3,#d6867e);position:relative;height:160px;overflow:hidden}
+.i_page-navbar{width:100%;z-index:100;line-height:40px;color:#fff;font-size:16px;text-align:center;background-color:#03a9f4;position:fixed;height:40px;overflow:hidden}
 .i_page-navbar a.return {width:62px;padding-left: 0;text-indent: 8px;left:0}
 .i_page-navbar a {position: absolute;margin: 5px 6px;display: inline-block;padding-left: 15px;line-height: 30px;font-size: 14px;right: 0;color: #fff;width: 70px}
-.i_header{margin-left:5%;height:160px}
-.i_user-photo-container{margin-top:32px;float: left}
+.i_header{margin-left:5%;height:160px;text-shadow:0 0 0 #000, 0px 0px 1px #000}
+.i_vision{overflow:hidden;position:absolute;width:100%}
+.i_vision .mide{background:url(/img/card_star.png) no-repeat 0 0;background-size:100%;height:160px;position:relative}
+.i_vision .botm:nth-child(1n),.i_vision .botm:nth-child(2n){background:url(/img/card_cloud1.png) repeat-x 0 bottom;height:60%;margin-top:20%;position:absolute;top:0;left:0}
+.i_vision .botm:nth-child(1n){width:200%;background-size:10rem auto;animation:card_wave 10s linear 0s infinite alternate}
+.i_vision .botm:nth-child(2n){width:200%;background-size:12rem 2rem;background-image:url(/img/card_cloud2.png);left:-30rem;animation:card_wave2 5s linear 0s infinite alternate}
+.i_user-photo-container{margin-top:32px;float:left}
 .i_user-info-container{float:left;margin:44px 0 0 10px;line-height:20px}
 .i_user-info-container{text-align:left;color:#fff}
 .i_user-info-container h1{font-size:1.2em;font-weight:normal}

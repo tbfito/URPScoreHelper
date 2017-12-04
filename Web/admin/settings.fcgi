@@ -53,7 +53,7 @@
 		  </div>
 		  <div class="form-group">
 			<div class="label">
-			  <label><b>教务系统URL：</b>(URP系统服务端URL，末尾不加"/"。)</label>
+			  <label><b>教务系统URL：</b>(URP系统服务端URL，末尾不加"/")</label>
 			</div>
 			<div class="field">
 			  <input type="text" class="input" name="SERVER_URL" value="%s" />
@@ -61,7 +61,7 @@
 		  </div>
 		  <div class="form-group">
 			<div class="label">
-			  <label><b>爬虫UA：</b>(设置爬虫UA名称，当教务系统封杀自定义UA时，这里应该伪装为普通浏览器的标识。)</label>
+			  <label><b>爬虫UA：</b>(设置爬虫UA名称，当教务系统封杀自定义UA时，这里应该伪装为普通浏览器的标识)</label>
 			</div>
 			<div class="field">
 			  <input type="text" class="input" name="USER_AGENT" value="%s" />
@@ -79,7 +79,7 @@
 		  </div>
 		  <div class="form-group">
 			<div class="label">
-			  <label><b>是否使用代理：</b>(0-禁用,1-启用)</label>
+			  <label><b>是否使用代理：</b>(0-禁用, 1-启用)</label>
 			</div>
 			<div class="field">
 			  <input type="text" class="input" name="CURL_USE_PROXY" value="%d" />
@@ -88,7 +88,7 @@
 		  </div>
 		  <div class="form-group">
 			<div class="label">
-			  <label><b>代理URL：</b>(支持：SOCKS4, SOCKS5, SOCKS5h, HTTP, HTTPS。格式：scheme://usr:pwd@host.suffix)</label>
+			  <label><b>代理URL：</b>(支持：SOCKS4, SOCKS5, HTTP, HTTPS 格式：scheme://usr:pwd@host.suffix)</label>
 			</div>
 			<div class="field">
 			  <input type="text" class="input" name="CURL_PROXY_URL" value="%s" />
@@ -97,7 +97,7 @@
 		  </div>
 		  <div class="form-group">
 			<div class="label">
-			  <label><b>是否启用免密快速查询：</b>(0-禁用,1-启用 部分院校教务系统可能要求更高权限而无法使用此功能)</label>
+			  <label><b>是否启用免密快速查询：</b>(0-禁用, 1-启用 部分院校教务系统可能要求更高权限而无法使用此功能)</label>
 			</div>
 			<div class="field">
 			  <input type="text" class="input" name="ENABLE_QUICK_QUERY" value="%d" />
@@ -106,7 +106,7 @@
 		  </div>
 		  <div class="form-group">
 			<div class="label">
-			  <label><b>OAuth2 应用ID(AppID)：</b></label>
+			  <label><b>QQ OAuth2 应用ID(AppID)：</b></label>
 			</div>
 			<div class="field">
 			  <input type="text" class="input" name="OAUTH2_APPID" value="%s" />
@@ -115,7 +115,7 @@
 		  </div>
 		  <div class="form-group">
 			<div class="label">
-			  <label><b>OAuth2 应用密钥(Secret)：</b></label>
+			  <label><b>QQ OAuth2 应用密钥(Secret)：</b></label>
 			</div>
 			<div class="field">
 			  <input type="text" class="input" name="OAUTH2_SECRET" value="%s" />
@@ -124,10 +124,10 @@
 		  </div>
 		  <div class="form-group">
 			<div class="label">
-			  <label><b>页面尾部文字：</b>(版权说明或其他自定义文本)</label>
+			  <label><b>页面尾部文字：</b>(版权说明或其他自定义文本，可以使用 &lt;p&gt; 内允许使用的 HTML 标签)</label>
 			</div>
 			<div class="field">
-			  <input type="text" class="input" name="FOOTER_TEXT" value="%s" />
+			  <textarea class="input" name="FOOTER_TEXT">%s</textarea>
 			  <div class="tips"></div>
 			</div>
 		  </div>

@@ -4,8 +4,8 @@
 // 取文本左边
 char * left(char *dst, char *src, int n)
 {
-	char	*p = src;
-	char	*q = dst;
+	char *p = src;
+	char *q = dst;
 	int	len = strlen(src);
 	if (n > len)
 		n = len;
@@ -30,7 +30,7 @@ char * mid(char *dst, char *src, int n, int m)        /*n为长度，m为位置*
 	p += m;
 	while (n--)
 		*(q++) = *(p++);
-	*(q++) = '\0';                                  /*有必要吗？很有必要*/
+	*(q++) = '\0';                                  // 有必要吗？很有必要
 	return(dst);
 }
 
@@ -42,9 +42,8 @@ char * right(char *dst, char *src, int n)
 	int	len = strlen(src);
 	if (n > len)
 		n = len;
-	p += (len - n); /*从右边第n个字符开始，到0结束，很巧啊*/
-	while (*(q++) = *(p++))
-		;
+	p += (len - n);					// 从右边第n个字符开始，到0结束
+	while ((*(q++) = *(p++)));		// 遍历 src 并赋值给 dst
 	return(dst);
 }
 
@@ -91,8 +90,7 @@ static int htoi(char *s)
 
 char * url_encode(char const *s, int len, int *new_length)
 {
-	register unsigned char c;
-	unsigned char *to, *start;
+	unsigned char c, *to, *start;
 	unsigned char const *from, *end;
 
 	from = (unsigned char *)s;

@@ -1,9 +1,13 @@
-<div class="i_page-navbar">
-	%s
-</div>
+<div class="i_page-navbar">%s</div>
+<div class="i_page-padding"></div>
 <div class="i_page-title">
 	<div class="content">
-		<div class="swiper-container" data-space-between='10' data-pagination='.swiper-pagination' data-autoplay='5000'>
+		<div class="i_vision">
+			<div class="mide center layer" data-depth=".35"></div>
+			<div class="botm"></div>
+			<div class="botm"></div>
+		</div>
+		<div class="swiper-container" data-space-between="10" data-pagination=".swiper-pagination" data-autoplay="5000">
 		  <div class="swiper-wrapper">
 			<div class="swiper-slide">
 				<div class="i_header">

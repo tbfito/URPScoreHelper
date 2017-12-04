@@ -2421,7 +2421,6 @@ int system_registration()
 	// 填充电子注册信息
 	char m_post_reg_info[4096] = "zxjxjhh=";
 	strcat(m_post_reg_info, m_regval);
-	int m_post_reg_info_length = strlen(m_post_reg_info);
 
 	// 填充注册请求
 	char m_post_req[8192] = { 0 };
@@ -3115,7 +3114,7 @@ void OAuth2_Association(bool isPOST)
 	{
 		char student_id[512] = { 0 };
 		get_student_id(student_id);
-		if (student_id == NULL)
+		if (strlen(student_id) == 0)
 		{
 			Error(u8"非法操作！ (尚未登录)");
 			return;
@@ -3448,7 +3447,8 @@ void parse_teaching_evaluation()
 		}
 		char img_txt[128] = { 0 };
 		mid(img_txt, m_result + 11, m_result2 - m_result - 11, 0);
-		char dst[10][128] = {0};
+		char dst[10][128];
+		memset(dst, 0, sizeof(dst));
 
 		int split_ret = split(dst, img_txt, "#@");
 
@@ -3506,12 +3506,12 @@ void parse_teaching_evaluation()
 	if (to_eval && counts)
 	{
 		sprintf(out_head, 
-			u8"<div class=\"weui-cells__title\">嗯，当前还有 %d 门课程需要评估，总共 %d 门。</div>", 
+			u8"<div class=\"weui-cells__title\">嗯，当前还有 %d 门课程需要评估，总共 %d 门</div>", 
 			to_eval, counts);
 	}
 	else
 	{
-		strcpy(out_head, u8"<div class=\"weui-cells__title\"><p>嗯，你都评价好啦。</div>");
+		strcpy(out_head, u8"<div class=\"weui-cells__title\"><p>嗯，你都评价好啦</div>");
 		need_eval = false;
 	}
 
@@ -3520,7 +3520,7 @@ void parse_teaching_evaluation()
 
 	cout << strformat(
 		m_lpszTeachEvalPage.c_str(),
-		need_eval ? u8"老师很辛苦，给个赞呗。默认全好评，你懂的 :)" : "",
+		need_eval ? u8"老师很辛苦，给个赞呗。一键全好评，你懂的 :)" : "",
 		need_eval ? "block" : "none"
 		, outer.c_str());
 	if (!isAjaxRequest)
@@ -3608,7 +3608,8 @@ void teaching_evaluation()
 		}
 		char img_txt[128] = { 0 };
 		mid(img_txt, m_result + 11, m_result2 - m_result - 11, 0);
-		char dst[10][128] = { 0 };
+		char dst[10][128];
+		memset(dst, 0, sizeof(dst));
 
 		int split_ret = split(dst, img_txt, "#@");
 
@@ -3644,10 +3645,7 @@ void teaching_evaluation()
 			to_eval++;
 	}
 
-	std::string outer;
-	char out_head[1024] = { 0 };
 	char last[64] = {0};
-
 	if (to_eval && counts)
 	{
 		for (int i = 0; i < counts; i++)

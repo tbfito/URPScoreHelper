@@ -4,7 +4,7 @@
 				<a id="no_ajax" class="weui-footer__link">%s</a>
 			</p>
 			<p class="weui-footer__text">%s</p>
-			<p class="weui-footer__text">Powered by %s · <a id="no_ajax" href="admin/login.fcgi">后台管理平台</a></p>
+			<p class="weui-footer__text">Powered by %s | <a id="no_ajax" href="admin/login.fcgi">STAFF ONLY</a></p>
 		</div>
 		<div class="loading">
 			<div class="loading_animation">
@@ -18,7 +18,8 @@
 		<script charset="utf-8" src="js/jquery.min.js"></script>
 		<script charset="utf-8" src="js/jquery-weui.min.js"></script>
 		<script charset="utf-8" src="js/swiper.min.js"></script>
-		<script charset="utf-8" src="js/URPScoreHelper.js?ver=17.11.25"></script>
+		<script charset="utf-8" src="js/parallax.min.js"></script>
+		<script charset="utf-8" src="js/URPScoreHelper.js?ver=17.12.4"></script>
 		%s
 	</body>
 </html>

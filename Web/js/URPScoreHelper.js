@@ -38,7 +38,7 @@ function get_captcha() {
 		success: function(data) {
 			if(data == "LOGGED-IN")
 			{
-				$.toast("已登录过, 正在跳转", "text");
+				$.toast("已登录过，跳转中", "text");
 				ajax_page("/main.fcgi");
 			}
 			else if(data == "REQUEST-FAILED")
@@ -69,7 +69,7 @@ function get_avatar() {
 		success: function(data) {
 			if(data == "LOGGED-OUT")
 			{
-				$.toast("尚未登录，请登录！", "text");
+				$.toast("尚未登录，请登录", "text");
 				ajax_page("/index.fcgi?act=logout");
 			}
 			else
@@ -79,7 +79,7 @@ function get_avatar() {
 			}
 		},
 		error: function() {
-			$.toast("照片飘到火星啦，请刷新重试。", "text");
+			$.toast("照片飘到火星啦，请刷新重试", "text");
 		}
 	})
 }
@@ -136,7 +136,7 @@ function change_password() {
 		return false;
 	}
 	if(!document.getElementById("i_chk").checked){
-		$.toast("滑动右边开关来确认输入无误 :-)", "text");
+		$.toast("滑动右边开关来确认输入无误 :)", "text");
 		return false;
 	}
 	$.toptip("正在修改...", 2000, 'success');
@@ -170,6 +170,7 @@ function init(href){
 	adjust_form(href);
 	get_captcha();
 	get_avatar();
+	card_animation();
 	var r1 = document.getElementById("i_xh");
 	var r2 = document.getElementById("i_mm");
 	var r3 = document.getElementById("i_yzm");
@@ -200,7 +201,7 @@ function init(href){
 		}
 		if(r3 != undefined && r3.value == "")
 		{
-			$.toast("验证码还没输呢","cancel");
+			$.toast("请输入验证码","cancel");
 			return false;
 		}
 		if(r4 != undefined && !r4.checked)
@@ -210,7 +211,7 @@ function init(href){
 		}
 		if(r5 != undefined && r5.value == "")
 		{
-			$.toast("没写主观评价啊","cancel");
+			$.toast("请写主观评价","cancel");
 			return false;
 		}
 		$.toptip("正在提交，请稍后...", 2000, 'success');
@@ -265,7 +266,7 @@ function ajax_submit(mydata) {
 			},
 			error: function(request) {
 				$(".loading").hide();
-				$.toast("请求失败，请稍后再试。","text");
+				$.toast("请求失败，请稍后再试","text");
 				ajax_page("/");
 			},
 			success: function(data) {
@@ -292,5 +293,11 @@ function query_tests() {
 	$.toptip("正在查询...", 2000, 'success');
 	ajax_submit("tests=" + encodeURIComponent(r1 + "|" + r2));
 	return true;
+}
+function card_animation() {
+	var obj = document.getElementsByClassName("i_user-photo")[0];
+	if(obj == undefined)
+		return;
+	$('.i_vision').parallax();
 }
 $(document).ready(init(null));

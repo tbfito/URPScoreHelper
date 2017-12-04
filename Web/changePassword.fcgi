@@ -2,6 +2,7 @@
 	<a href="/main.fcgi" class="return"><i class="fa fa-arrow-left"></i>返回</a>
 	<i class="fa fa-lock"></i>教务密码修改
 </div>
+<div class="i_page-padding"></div>
 <div class="content">
 	<div id="i_total"><p>修改密码要<b>慎重</b>呐，丢了可<b>找不回来</b>，除非找教务处 :)</p></div>
 	<form id="ajax_submit" data-ajax-submit="/changePassword.fcgi" class="weui-cells weui-cells_form">
