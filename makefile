@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -O2 -Wall -std=c++11
+CFLAGS = -O3 -Wall -std=c++11
 
 DIR_SRC := ./URPScoreHelper
 DIR_OBJ := ./obj
