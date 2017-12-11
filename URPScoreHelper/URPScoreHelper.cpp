@@ -1328,7 +1328,7 @@ int parse_query()
 	std::string m_photo(" "); // 有数据，需要获取照片
 	process_cookie(&m_need_update_cookie, m_photo);
 
-	if (m_photo.empty()) // 还没登陆就丢去登陆。
+	if (m_photo.empty()) // 还没登录就丢去登录。
 	{
 		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
 		return 0;
@@ -2449,7 +2449,7 @@ int system_registration()
 // 登录学生
 bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 {
-	// 发送登陆请求。
+	// 发送登录请求。
 	const char *m_origin = "zjh1=&tips=&lx=&evalue=&eflag=&fs=&dzslh=&zjh=%s&mm=%s&v_yzm=%s";
 	char m_padding[512] = { 0 };
 	sprintf(m_padding, m_origin, p_xuehao, p_password, p_captcha);
@@ -3398,7 +3398,7 @@ void parse_teaching_evaluation()
 	std::string m_photo(" "); // 有数据，需要获取照片
 	process_cookie(&m_need_update_cookie, m_photo);
 
-	if (m_photo.empty()) // 还没登陆就丢去登陆。
+	if (m_photo.empty()) // 还没登录就丢去登录。
 	{
 		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
 		return;
@@ -3424,6 +3424,12 @@ void parse_teaching_evaluation()
 	if (m_result != NULL)
 	{
 		Error(u8"<p>学院还没有开放评教呢，或者你来晚了哦</p>");
+		return;
+	}
+	m_result = strstr(m_rep_body, "\xc4\xfa\xc3\xbb\xd3\xd0\xbf\xc9\xbb\xd8\xb4\xf0\xb5\xc4\xce\xca\xbe\xed" /*您没有可回答的问卷*/);
+	if (m_result != NULL)
+	{
+		Error(u8"<p>您没有可回答的问卷，无需教学评估哦</p>");
 		return;
 	}
 
@@ -3461,7 +3467,14 @@ void parse_teaching_evaluation()
 		strcpy(te[counts].wjbm, dst[0]);
 		strcpy(te[counts].bpr, dst[1]);
 		strcpy(te[counts].pgnr, dst[5]);
-		strcpy(te[counts].name, dst[4]);
+		strcpy(te[counts].bprm, dst[2]);
+		unsigned int to_len = 0;
+		unsigned int len = strlen(dst[4]);
+		char *tmp = (char *)malloc(len * 3 + 1);
+		memset(tmp, 0, len * 3 + 1);
+		gbk_to_utf8(dst[4], len, &tmp, &to_len);
+		strcpy(te[counts].name, tmp);
+		free(tmp);
 
 		counts++;
 		m_result1 = strstr(m_result, "\x3C\x74\x64\x20\x61\x6C\x69\x67\x6E\x3D\x22\x63\x65\x6E\x74\x65\x72\x22\x3E\xCA\xC7\x3C\x2F\x74\x64\x3E" /*"<td align=\"center\">是</td>"*/);
@@ -3472,7 +3485,15 @@ void parse_teaching_evaluation()
 	std::string to_eval_list = "<div class=\"weui-cells\">";
 	for (int i = 0; i < counts; i++)
 	{
-			to_eval_list += "<div class=\"weui-cell\"><div class=\"weui-cell__bd\"><p>";
+		to_eval_list += "<div class=\"weui-cell\"><div class=\"weui-cell__bd\"><p><span style=\"color:#4a82e5\">[";
+			unsigned int to_len = 0;
+			unsigned int len = strlen(te[i].bprm);
+			char *tmp = (char *)malloc(len * 3 + 1);
+			memset(tmp, 0, len * 3 + 1);
+			gbk_to_utf8(te[i].bprm, len, &tmp, &to_len);
+			to_eval_list += tmp;
+			to_eval_list += "]&nbsp;</span>";
+			free(tmp);
 			to_eval_list += te[i].name;
 			to_eval_list += "</p></div><div class=\"weui-cell__ft\">";
 			if (te[i].evaled == false)
@@ -3482,7 +3503,7 @@ void parse_teaching_evaluation()
 			}
 			else
 			{
-				to_eval_list += u8"<b style=\"color:#00a70e\">已评价</b>";
+				to_eval_list += u8"<span style=\"color:#00a70e\">已评价</span>";
 			}
 			to_eval_list += "</div></div>";
 	}
@@ -3536,7 +3557,7 @@ void teaching_evaluation()
 	std::string m_photo(" "); // 有数据，需要获取照片
 	process_cookie(&m_need_update_cookie, m_photo);
 
-	if (m_photo.empty()) // 还没登陆就丢去登陆。
+	if (m_photo.empty()) // 还没登录就丢去登录。
 	{
 		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
 		return;
@@ -3587,6 +3608,12 @@ void teaching_evaluation()
 		Error(u8"<p>学院还没有开放评教呢，或者你来晚了哦</p>");
 		return;
 	}
+	m_result = strstr(m_rep_body, "\xc4\xfa\xc3\xbb\xd3\xd0\xbf\xc9\xbb\xd8\xb4\xf0\xb5\xc4\xce\xca\xbe\xed" /*您没有可回答的问卷*/);
+	if (m_result != NULL)
+	{
+		Error(u8"<p>您没有可回答的问卷，无需教学评估哦</p>");
+		return;
+	}
 
 	int counts = 0;
 	teach_eval te[200];
@@ -3623,7 +3650,7 @@ void teaching_evaluation()
 		strcpy(te[counts].bpr, dst[1]);
 		strcpy(te[counts].pgnr, dst[5]);
 		strcpy(te[counts].name, dst[4]);
-		int new_len;
+		int new_len = 0;
 		char *tmp = url_encode(dst[3], strlen(dst[3]), &new_len);
 		left(te[counts].wjmc, tmp, new_len);
 		tmp = url_encode(dst[2], strlen(dst[2]), &new_len);
@@ -3666,8 +3693,8 @@ void teaching_evaluation()
 				char *m_result = strstr(m_rep_body, "\xce\xca\xbe\xed\xc6\xc0\xb9\xc0\xd2\xb3\xc3\xe6" /*"问卷评估页面"*/);
 				if (m_result == NULL)
 				{
-					std::string err_msg = "<p>出现错误</p><p>很抱歉，在评估《";
-					err_msg = err_msg + te[i].name + "》课程时出现了错误。</p><p>(进入详细页面失败)</p>";
+					std::string err_msg = u8"<p>出现错误</p><p>很抱歉，在评估《";
+					err_msg = err_msg + te[i].name + u8"》课程时出现了错误。</p><p>(进入详细页面失败)</p>";
 					Error(err_msg.c_str());
 					return;
 				}
@@ -3679,8 +3706,8 @@ void teaching_evaluation()
 					char *p1 = strstr(m_result + 26, "\"");
 					if (p1 == NULL)
 					{
-						std::string err_msg = "<p>出现错误</p><p>很抱歉，在评估《";
-						err_msg = err_msg + te[i].name + "》课程时出现了错误。</p><p>(名称条目引号闭合失败)</p>";
+						std::string err_msg = u8"<p>出现错误</p><p>很抱歉，在评估《";
+						err_msg = err_msg + te[i].name + u8"》课程时出现了错误。</p><p>(名称条目引号闭合失败)</p>";
 						Error(err_msg.c_str());
 						return;
 					}
@@ -3698,16 +3725,16 @@ void teaching_evaluation()
 					char *p2 = strstr(p1 + 1, "value=\"");
 					if (p2 == NULL)
 					{
-						std::string err_msg = "<p>出现错误</p><p>很抱歉，在评估《";
-						err_msg = err_msg + te[i].name + "》课程时出现了错误。</p><p>(值条目引号开启失败)</p>";
+						std::string err_msg = u8"<p>出现错误</p><p>很抱歉，在评估《";
+						err_msg = err_msg + te[i].name + u8"》课程时出现了错误。</p><p>(值条目引号开启失败)</p>";
 						Error(err_msg.c_str());
 						return;
 					}
 					char *p3 = strstr(p2 + 7, "\"");
 					if (p2 == NULL)
 					{
-						std::string err_msg = "<p>出现错误</p><p>很抱歉，在评估《";
-						err_msg = err_msg + te[i].name + "》课程时出现了错误。</p><p>(值条目引号闭合失败)</p>";
+						std::string err_msg = u8"<p>出现错误</p><p>很抱歉，在评估《";
+						err_msg = err_msg + te[i].name + u8"》课程时出现了错误。</p><p>(值条目引号闭合失败)</p>";
 						Error(err_msg.c_str());
 						return;
 					}
@@ -3727,8 +3754,8 @@ void teaching_evaluation()
 				CCurlTask req3;
 				if (!req3.Exec(false, POST_TEACH_EVAL, CGI_HTTP_COOKIE, true, post_data.c_str()))
 				{
-					std::string err_msg = "<p>出现错误</p><p>很抱歉，在评估《";
-					err_msg = err_msg + te[i].name + "》课程时出现了错误。</p><p>curl 操作失败</p>";
+					std::string err_msg = u8"<p>出现错误</p><p>很抱歉，在评估《";
+					err_msg = err_msg + te[i].name + u8"》课程时出现了错误。</p><p>curl 操作失败</p>";
 					Error(err_msg.c_str());
 				}
 
@@ -3736,8 +3763,8 @@ void teaching_evaluation()
 				m_result = strstr(m_rep_body, "\xb3\xc9\xb9\xa6" /*"成功"*/);
 				if (m_result == NULL)
 				{
-					std::string err_msg = "<p>出现错误</p><p>很抱歉，在评估《";
-					err_msg = err_msg + te[i].name + "》课程时出现了错误。</p>";
+					std::string err_msg = u8"<p>出现错误</p><p>很抱歉，在评估《";
+					err_msg = err_msg + te[i].name + u8"》课程时出现了错误。</p>";
 					Error(err_msg.c_str());
 					return;
 				}
@@ -3755,7 +3782,7 @@ void parse_change_password()
 	std::string m_photo(" "); // 有数据，需要获取照片
 	process_cookie(&m_need_update_cookie, m_photo);
 
-	if (m_photo.empty()) // 还没登陆就丢去登陆。
+	if (m_photo.empty()) // 还没登录就丢去登录。
 	{
 		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
 		return;
@@ -3789,7 +3816,7 @@ void do_change_password() //(POST /changePassword.fcgi)
 	std::string m_photo(" "); // 有数据，需要获取照片
 	process_cookie(&m_need_update_cookie, m_photo);
 
-	if (m_photo.empty()) // 还没登陆就丢去登陆。
+	if (m_photo.empty()) // 还没登录就丢去登录。
 	{
 		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
 		return;

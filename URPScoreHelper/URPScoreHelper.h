@@ -73,7 +73,7 @@
 		char wjbm[64] = { 0 };
 		char bpr[64] = { 0 };
 		char pgnr[64] = { 0 };
-		char name[256] = { 0 };
+		char name[1024] = { 0 };
 		char wjmc[1024] = { 0 };
 		char bprm[1024] = { 0 };
 		char pgnrm[1024] = { 0 };

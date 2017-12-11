@@ -174,6 +174,7 @@ function init(href){
 	var r1 = document.getElementById("i_xh");
 	var r2 = document.getElementById("i_mm");
 	var r3 = document.getElementById("i_yzm");
+	var r5 = document.getElementById("i_jxpg");
 	if(r1 != undefined && r1.value == "")
 	{
 		r1.focus();
@@ -186,9 +187,12 @@ function init(href){
 	{
 		r3.focus();
 	}
+	if(r5 != undefined)
+	{
+		getcharnum();
+	}
 	$("#i_submit").on("click", function(e) {
 		var r4 = document.getElementById("weuiAgree");
-		var r5 = document.getElementById("i_jxpj");
 		if(r1 != undefined && r1.value == "")
 		{
 			$.toast("学号还没输呢","cancel");
