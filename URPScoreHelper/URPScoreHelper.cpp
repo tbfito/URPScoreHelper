@@ -3565,7 +3565,7 @@ void teaching_evaluation()
 
 	// 获取 POST 数据。
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
-	if (m_post_length <= 0)
+	if (m_post_length <= 0 || m_post_length > 10240)
 	{
 		Error(u8"<p>发生错误，POST 数据长度异常</p>");
 		return;
@@ -3581,10 +3581,24 @@ void teaching_evaluation()
 		Error(u8"<p>无法获取主观评价内容</p>");
 		return;
 	}
-
-	char zgpj[1024] = { 0 };
+	
+	char zgpj[10240] = { 0 };
 	left(zgpj, pStr1 + 3, m_post_length - 3);
 	free(m_post_data);
+	int len = url_decode(zgpj, strlen(zgpj));
+	char *temp = (char *)malloc(10240);
+	memset(temp, 0, 10240);
+	left(temp, zgpj, len);
+	char *decoded = (char *)malloc(10240);
+	memset(decoded, 0, 10240);
+	unsigned int dlen = 0;
+	utf8_to_gbk(temp, strlen(temp), &decoded, &dlen);
+	free(temp);
+	int nlen = 0;
+	char *final_text = url_encode(decoded, strlen(decoded), &nlen);
+	strcpy(zgpj, final_text);
+	free(decoded);
+	free(final_text);
 
 	// 检查是否需要教学评估
 	CCurlTask req;
@@ -3653,16 +3667,17 @@ void teaching_evaluation()
 		int new_len = 0;
 		char *tmp = url_encode(dst[3], strlen(dst[3]), &new_len);
 		left(te[counts].wjmc, tmp, new_len);
-		tmp = url_encode(dst[2], strlen(dst[2]), &new_len);
-		left(te[counts].bprm, tmp, new_len);
-		tmp = url_encode(dst[4], strlen(dst[4]), &new_len);
-		left(te[counts].pgnrm, tmp, new_len);
+		free(tmp);
+		char *tmp2 = url_encode(dst[2], strlen(dst[2]), &new_len);
+		left(te[counts].bprm, tmp2, new_len);
+		free(tmp2);
+		char *tmp3 = url_encode(dst[4], strlen(dst[4]), &new_len);
+		left(te[counts].pgnrm, tmp3, new_len);
+		free(tmp3);
 
 		counts++;
 		m_result1 = strstr(m_result, "\x3C\x74\x64\x20\x61\x6C\x69\x67\x6E\x3D\x22\x63\x65\x6E\x74\x65\x72\x22\x3E\xCA\xC7\x3C\x2F\x74\x64\x3E" /*"<td align=\"center\">是</td>"*/);
 		m_result = strstr(m_result + 11, "<img name=\"");
-
-		free(tmp);
 	}
 
 	int to_eval = 0;
