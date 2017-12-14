@@ -40,14 +40,7 @@
 							</tr>
 						</thead>
 						<tbody>
-						  <tr class="even" onmouseout="this.className='even';" onmouseover="this.className='evenfocus';">
-								<td align="center">%s</td>
-								<td align="center">%s</td>
-								<td align="center">%s</td>
-								<td align="center">%s</td>
-								<td align="center">%s</td>
-								<td align="center">%s</td>
-							</tr>
+							%s
 						</tbody>
 					  </table>
 					</td>
@@ -98,14 +91,7 @@
 								</tr>
 							</thead>
 							<tbody>
-							  <tr class="even" onmouseout="this.className='even';" onmouseover="this.className='evenfocus';">
-									<td align="center">%s</td>
-									<td align="center">%s</td>
-									<td align="center">%s</td>
-									<td align="center">%s</td>
-									<td align="center">%s</td>
-									<td align="center">%s</td>
-								</tr>
+								%s
 							</tbody>
 						  </table>
 						</td>

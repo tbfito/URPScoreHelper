@@ -625,9 +625,11 @@ void parse_find_user()
 	if (!session())
 		return;
 
+	char temp[1024] = { 0 };
+	sprintf(temp, find_user_result_section, "", "", "", "", "", "");
+
 	cout << GLOBAL_HEADER
-		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
-			"", "", "", "", "", "", "", "", "", "", "", "", "", "").c_str();
+		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, "", temp, "", temp).c_str();
 }
 
 // 处理查找用户
@@ -707,9 +709,18 @@ void do_find_user()
 			strcpy(tmp1, u8"未找到");
 		}
 
+		char temp[1024] = { 0 };
+		sprintf(temp, find_user_result_section, "", "", "", "", "", "");
+
+		char* result = (char *)malloc(4096);
+		memset(result, 0, 4096);
+		sprintf(result, find_user_result_section, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6);
+
 		cout << GLOBAL_HEADER
 			<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
-				m_STUDENT_ID.c_str(), tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, "", "", "", "", "", "", "").c_str();
+				m_STUDENT_ID.c_str(), result, "", temp).c_str();
+
+		free(result);
 		return;
 	}
 	else if (strcmp(CGI_QUERY_STRING, "order=name") == 0)
@@ -755,6 +766,8 @@ void do_find_user()
 		query_ret[5].buffer = (void *)tmp6;
 		query_ret[5].buffer_length = sizeof(tmp6);
 
+		std::string result_str;
+
 		if (stmt != NULL)
 		{
 			mysql_stmt_prepare(stmt, query.c_str(), query.length());
@@ -762,18 +775,30 @@ void do_find_user()
 			mysql_stmt_bind_result(stmt, query_ret);
 			mysql_stmt_execute(stmt);
 			mysql_stmt_store_result(stmt);
-			while (mysql_stmt_fetch(stmt) == 0);
+			while (mysql_stmt_fetch(stmt) == 0)
+			{
+				char* result = (char *)malloc(4096);
+				memset(result, 0, 4096);
+				sprintf(result, find_user_result_section, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6);
+				result_str.append(result);
+				free(result);
+			}
 			mysql_stmt_close(stmt);
 		}
 
-		if (strlen(tmp1) == 0)
+		if (result_str.length() == 0)
 		{
 			strcpy(tmp1, u8"未找到");
+			result_str = strformat(find_user_result_section, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6);
 		}
 
+		char temp[1024] = { 0 };
+		sprintf(temp, find_user_result_section, "", "", "", "", "", "");
+
 		cout << GLOBAL_HEADER
-			<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, "", "", "", "", "", "", "",
-				m_STUDENT_NAME.c_str(), tmp1, tmp2, tmp3, tmp4, tmp5, tmp6).c_str();
+			<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, "", temp,
+				m_STUDENT_NAME.c_str(), result_str.c_str()).c_str();
+
 		return;
 	}
 	admin_error(u8"发生未知错误");
