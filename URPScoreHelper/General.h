@@ -64,6 +64,7 @@ extern char *ANALYSIS_CODE;
 extern char *HOMEPAGE_NOTICE;
 extern char *DISCUSSION_PAGE_CONTENT;
 extern char *DISCUSSION_PAGE_CODE;
+extern char *SITE_MAINTENANCE;
 
 extern std::string ERROR_HTML;
 extern std::string error;

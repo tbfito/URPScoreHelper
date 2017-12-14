@@ -11,9 +11,9 @@
 </head>
 <body>
 	<div class="panel admin-panel">
-	  <div class="panel-head"><strong><i class="fa fa-user"></i> 用户查询</strong></div>
+	  <div class="panel-head"><strong><i class="fa fa-user"></i> 按学号查找</strong></div>
 	  <div class="body-content">
-		<form method="post" class="form-x" action="find-user.fcgi">
+		<form method="post" class="form-x" action="find-user.fcgi?order=id">
 		  <div class="form-group">
 			<div class="label">
 			  <label for="sitename">请输入学生帐号：</label>
@@ -34,8 +34,8 @@
 								<th align="center" width="15%" class="sortable">ID</th>
 								<th align="center" width="15%" class="sortable">密码</th>
 								<th align="center" width="10%" class="sortable">姓名</th>
-								<th align="center" width="30%" class="sortable">OpenID</th>
-								<th align="center" width="10%" class="sortable">OAuth 用户名</th>
+								<th align="center" width="30%" class="sortable">第三方ID</th>
+								<th align="center" width="10%" class="sortable">第三方用户名</th>
 								<th align="center" width="20%" class="sortable">最后登录</th>
 							</tr>
 						</thead>
@@ -66,6 +66,64 @@
 		  </div>      
 		</form>
 	  </div>
+	</div>
+	<br />
+	<div class="panel admin-panel">
+		  <div class="panel-head"><strong><i class="fa fa-user"></i> 按姓名查找</strong></div>
+		  <div class="body-content">
+			<form method="post" class="form-x" action="find-user.fcgi?order=name">
+			  <div class="form-group">
+				<div class="label">
+				  <label for="sitename">请输入学生姓名：</label>
+				</div>
+				<div class="field">
+					<input type="text" class="input" id="musr" name="STUDENT_NAME" size="16" placeholder="请输入学生姓名" data-validate="required:请输入学生姓名" value="%s" autofocus /> 
+				</div>
+			  </div>
+			  <div class="form-group">
+				<div id="list_page">
+				  <table width="100%" border="0" cellpadding="0" cellspacing="0" class="titleTop2">
+					<tbody>
+					  <tr>
+						<td class="pageAlign">
+						  <table cellpadding="0" width="100%" class="displayTag" cellspacing="1" border="0" id="user">
+							<thead>
+							  <tr>
+									<th align="center" width="15%" class="sortable">ID</th>
+									<th align="center" width="15%" class="sortable">密码</th>
+									<th align="center" width="10%" class="sortable">姓名</th>
+									<th align="center" width="30%" class="sortable">第三方ID</th>
+									<th align="center" width="10%" class="sortable">第三方用户名</th>
+									<th align="center" width="20%" class="sortable">最后登录</th>
+								</tr>
+							</thead>
+							<tbody>
+							  <tr class="even" onmouseout="this.className='even';" onmouseover="this.className='evenfocus';">
+									<td align="center">%s</td>
+									<td align="center">%s</td>
+									<td align="center">%s</td>
+									<td align="center">%s</td>
+									<td align="center">%s</td>
+									<td align="center">%s</td>
+								</tr>
+							</tbody>
+						  </table>
+						</td>
+					  </tr>
+					</tbody>
+				  </table>
+				</div>
+			  </div>
+			  <div class="form-group">
+				<div class="label">
+				  <label></label>
+				</div>
+				<div class="field">
+				  <button class="button bg-main fa fa-check-square-o" type="submit"> 查询</button>   
+				</div>
+			  </div>      
+			</form>
+		  </div>
 	</div>
 </body>
 </html>

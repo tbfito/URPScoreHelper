@@ -96,6 +96,20 @@ void admin_intro()
 		}
 	}
 
+	if (strcmp(CGI_SCRIPT_NAME, "/admin/maintenance.fcgi") == 0)
+	{
+		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+		{
+			site_maintenance();
+			return;
+		}
+		if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
+		{
+			site_maintenance();
+			return;
+		}
+	}
+
 	if (strcmp(CGI_REQUEST_URI, "/admin/index.fcgi") == 0 || strcmp(CGI_REQUEST_URI, "/admin") == 0)
 	{
 		cout << "Status: 301 Moved Permanently\r\n" << "Location: " << getAppURL().c_str() << "/admin/\r\n" << GLOBAL_HEADER;
@@ -613,7 +627,7 @@ void parse_find_user()
 
 	cout << GLOBAL_HEADER
 		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
-			"", "", "", "", "", "", "").c_str();
+			"", "", "", "", "", "", "", "", "", "", "", "", "", "").c_str();
 }
 
 // 处理查找用户
@@ -634,66 +648,135 @@ void do_find_user()
 	std::string post(m_post_data);
 	free(m_post_data);
 
-	std::string m_STUDENT_ID = _POST(post, "STUDENT_ID");
-
-	decode_post_data(m_STUDENT_ID);
-
-	MYSQL_STMT *stmt = mysql_stmt_init(&db);
-	MYSQL_BIND bind[1];
-	MYSQL_BIND query_ret[6];
-	memset(bind, 0, sizeof(bind));
-	memset(query_ret, 0, sizeof(query_ret));
-	std::string query("SELECT `id`, `password`, `name`, `openid`, `OAuth_name`, `lastlogin` FROM `UserInfo` WHERE `id`=?");
-
-	char tmp1[36] = { 0 };
-	char tmp2[36] = { 0 };
-	char tmp3[36] = { 0 };
-	char tmp4[1024] = { 0 };
-	char tmp5[1024] = { 0 };
-	char tmp6[1024] = { 0 };
-	
-	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
-	bind[0].buffer = (void *)m_STUDENT_ID.c_str();
-	bind[0].buffer_length = m_STUDENT_ID.length();
-
-	query_ret[0].buffer_type = MYSQL_TYPE_VAR_STRING;
-	query_ret[0].buffer = (void *)tmp1;
-	query_ret[0].buffer_length = sizeof(tmp1);
-	query_ret[1].buffer_type = MYSQL_TYPE_VAR_STRING;
-	query_ret[1].buffer = (void *)tmp2;
-	query_ret[1].buffer_length = sizeof(tmp2);
-	query_ret[2].buffer_type = MYSQL_TYPE_VAR_STRING;
-	query_ret[2].buffer = (void *)tmp3;
-	query_ret[2].buffer_length = sizeof(tmp3);
-	query_ret[3].buffer_type = MYSQL_TYPE_VAR_STRING;
-	query_ret[3].buffer = (void *)tmp4;
-	query_ret[3].buffer_length = sizeof(tmp4);
-	query_ret[4].buffer_type = MYSQL_TYPE_VAR_STRING;
-	query_ret[4].buffer = (void *)tmp5;
-	query_ret[4].buffer_length = sizeof(tmp5);
-	query_ret[5].buffer_type = MYSQL_TYPE_VAR_STRING;
-	query_ret[5].buffer = (void *)tmp6;
-	query_ret[5].buffer_length = sizeof(tmp6);
-
-	if (stmt != NULL)
+	if (strcmp(CGI_QUERY_STRING, "order=id") == 0)
 	{
-		mysql_stmt_prepare(stmt, query.c_str(), query.length());
-		mysql_stmt_bind_param(stmt, bind);
-		mysql_stmt_bind_result(stmt, query_ret);
-		mysql_stmt_execute(stmt);
-		mysql_stmt_store_result(stmt);
-		while (mysql_stmt_fetch(stmt) == 0);
-		mysql_stmt_close(stmt);
-	}
+		std::string m_STUDENT_ID = _POST(post, "STUDENT_ID");
 
-	if (strlen(tmp1) == 0)
+		decode_post_data(m_STUDENT_ID);
+
+		MYSQL_STMT *stmt = mysql_stmt_init(&db);
+		MYSQL_BIND bind[1];
+		MYSQL_BIND query_ret[6];
+		memset(bind, 0, sizeof(bind));
+		memset(query_ret, 0, sizeof(query_ret));
+		std::string query("SELECT `id`, `password`, `name`, `openid`, `OAuth_name`, `lastlogin` FROM `UserInfo` WHERE `id`=?");
+
+		char tmp1[36] = { 0 };
+		char tmp2[36] = { 0 };
+		char tmp3[36] = { 0 };
+		char tmp4[1024] = { 0 };
+		char tmp5[1024] = { 0 };
+		char tmp6[1024] = { 0 };
+
+		bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+		bind[0].buffer = (void *)m_STUDENT_ID.c_str();
+		bind[0].buffer_length = m_STUDENT_ID.length();
+
+		query_ret[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+		query_ret[0].buffer = (void *)tmp1;
+		query_ret[0].buffer_length = sizeof(tmp1);
+		query_ret[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+		query_ret[1].buffer = (void *)tmp2;
+		query_ret[1].buffer_length = sizeof(tmp2);
+		query_ret[2].buffer_type = MYSQL_TYPE_VAR_STRING;
+		query_ret[2].buffer = (void *)tmp3;
+		query_ret[2].buffer_length = sizeof(tmp3);
+		query_ret[3].buffer_type = MYSQL_TYPE_VAR_STRING;
+		query_ret[3].buffer = (void *)tmp4;
+		query_ret[3].buffer_length = sizeof(tmp4);
+		query_ret[4].buffer_type = MYSQL_TYPE_VAR_STRING;
+		query_ret[4].buffer = (void *)tmp5;
+		query_ret[4].buffer_length = sizeof(tmp5);
+		query_ret[5].buffer_type = MYSQL_TYPE_VAR_STRING;
+		query_ret[5].buffer = (void *)tmp6;
+		query_ret[5].buffer_length = sizeof(tmp6);
+
+		if (stmt != NULL)
+		{
+			mysql_stmt_prepare(stmt, query.c_str(), query.length());
+			mysql_stmt_bind_param(stmt, bind);
+			mysql_stmt_bind_result(stmt, query_ret);
+			mysql_stmt_execute(stmt);
+			mysql_stmt_store_result(stmt);
+			while (mysql_stmt_fetch(stmt) == 0);
+			mysql_stmt_close(stmt);
+		}
+
+		if (strlen(tmp1) == 0)
+		{
+			strcpy(tmp1, u8"未找到");
+		}
+
+		cout << GLOBAL_HEADER
+			<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
+				m_STUDENT_ID.c_str(), tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, "", "", "", "", "", "", "").c_str();
+		return;
+	}
+	else if (strcmp(CGI_QUERY_STRING, "order=name") == 0)
 	{
-		strcpy(tmp1, u8"未找到");
-	}
+		std::string m_STUDENT_NAME = _POST(post, "STUDENT_NAME");
 
-	cout << GLOBAL_HEADER
-		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
-			m_STUDENT_ID.c_str(), tmp1, tmp2, tmp3, tmp4, tmp5, tmp6).c_str();
+		decode_post_data(m_STUDENT_NAME);
+
+		MYSQL_STMT *stmt = mysql_stmt_init(&db);
+		MYSQL_BIND bind[1];
+		MYSQL_BIND query_ret[6];
+		memset(bind, 0, sizeof(bind));
+		memset(query_ret, 0, sizeof(query_ret));
+		std::string query("SELECT `id`, `password`, `name`, `openid`, `OAuth_name`, `lastlogin` FROM `UserInfo` WHERE `name`=?");
+
+		char tmp1[36] = { 0 };
+		char tmp2[36] = { 0 };
+		char tmp3[36] = { 0 };
+		char tmp4[1024] = { 0 };
+		char tmp5[1024] = { 0 };
+		char tmp6[1024] = { 0 };
+
+		bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+		bind[0].buffer = (void *)m_STUDENT_NAME.c_str();
+		bind[0].buffer_length = m_STUDENT_NAME.length();
+
+		query_ret[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+		query_ret[0].buffer = (void *)tmp1;
+		query_ret[0].buffer_length = sizeof(tmp1);
+		query_ret[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+		query_ret[1].buffer = (void *)tmp2;
+		query_ret[1].buffer_length = sizeof(tmp2);
+		query_ret[2].buffer_type = MYSQL_TYPE_VAR_STRING;
+		query_ret[2].buffer = (void *)tmp3;
+		query_ret[2].buffer_length = sizeof(tmp3);
+		query_ret[3].buffer_type = MYSQL_TYPE_VAR_STRING;
+		query_ret[3].buffer = (void *)tmp4;
+		query_ret[3].buffer_length = sizeof(tmp4);
+		query_ret[4].buffer_type = MYSQL_TYPE_VAR_STRING;
+		query_ret[4].buffer = (void *)tmp5;
+		query_ret[4].buffer_length = sizeof(tmp5);
+		query_ret[5].buffer_type = MYSQL_TYPE_VAR_STRING;
+		query_ret[5].buffer = (void *)tmp6;
+		query_ret[5].buffer_length = sizeof(tmp6);
+
+		if (stmt != NULL)
+		{
+			mysql_stmt_prepare(stmt, query.c_str(), query.length());
+			mysql_stmt_bind_param(stmt, bind);
+			mysql_stmt_bind_result(stmt, query_ret);
+			mysql_stmt_execute(stmt);
+			mysql_stmt_store_result(stmt);
+			while (mysql_stmt_fetch(stmt) == 0);
+			mysql_stmt_close(stmt);
+		}
+
+		if (strlen(tmp1) == 0)
+		{
+			strcpy(tmp1, u8"未找到");
+		}
+
+		cout << GLOBAL_HEADER
+			<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, "", "", "", "", "", "", "",
+				m_STUDENT_NAME.c_str(), tmp1, tmp2, tmp3, tmp4, tmp5, tmp6).c_str();
+		return;
+	}
+	admin_error(u8"发生未知错误");
 }
 
 // 处理首页公告 (GET/POST /admin/homepage-notice.fcgi)
@@ -767,6 +850,44 @@ void set_discussion()
 
 		UpdateSettings("DISCUSSION_PAGE_CONTENT", m_DISCUSSION_PAGE_CONTENT.c_str());
 		UpdateSettings("DISCUSSION_PAGE_CODE", m_DISCUSSION_PAGE_CODE.c_str());
+
+		admin_error(u8"修改成功");
+		return;
+	}
+	admin_error(u8"发生未知错误");
+}
+
+// 处理维护模式页面 (GET/POST /maintenance.fcgi)
+void site_maintenance()
+{
+	if (!session())
+		return;
+
+	if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+	{
+		cout << GLOBAL_HEADER;
+		cout << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, SITE_MAINTENANCE).c_str();
+		return;
+	}
+	else if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
+	{
+		// 获取 POST 数据。
+		int m_post_length = atoi(CGI_CONTENT_LENGTH);
+		if (m_post_length <= 0)
+		{
+			admin_error(u8"<p><b>POST错误</b></p><p>提交的数据可能存在问题</p>");
+			return;
+		}
+		char *m_post_data = (char *)malloc(m_post_length + 2);
+		FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
+		std::string post(m_post_data);
+		free(m_post_data);
+
+		std::string m_SITE_MAINTENANCE = _POST(post, "SITE_MAINTENANCE");
+
+		decode_post_data(m_SITE_MAINTENANCE);
+
+		UpdateSettings("SITE_MAINTENANCE", m_SITE_MAINTENANCE.c_str());
 
 		admin_error(u8"修改成功");
 		return;

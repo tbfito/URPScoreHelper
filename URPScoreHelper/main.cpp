@@ -16,6 +16,29 @@
 
 int main(int argc, const char *argv[])
 {
+	initialize();
+
+	int FCGX_SocketId = 0;
+	if (argc == 3)
+	{
+		if (strcmp(argv[1], "-p") == 0)
+		{
+			FCGX_SocketId = FCGX_OpenSocket(argv[2], 5);
+			if (FCGX_SocketId == -1)
+				FCGX_SocketId = 0;
+		}
+	}
+
+	FCGX_InitRequest(&request, FCGX_SocketId, 0);
+	fastcgi_app_intro();
+	printf("%s\n%s\n\n%s\n", SOFTWARE_NAME, SOFTWARE_COPYRIGHT, "\tOptions: [-p (localhost):port_number]");
+
+	cleanup();
+	return 0;
+}
+
+void initialize()
+{
 	strcat(GLOBAL_HEADER, "Content-Type: text/html; charset=utf-8\r\nX-Powered-By: ");
 	strcat(GLOBAL_HEADER, SOFTWARE_NAME);
 	strcat(GLOBAL_HEADER, "\r\n\r\n");
@@ -48,22 +71,10 @@ int main(int argc, const char *argv[])
 
 	LoadConfig();
 	isPageSrcLoadSuccess = false;
+}
 
-	int FCGX_SocketId = 0;
-	if (argc == 3)
-	{
-		if (strcmp(argv[1], "-p") == 0)
-		{
-			FCGX_SocketId = FCGX_OpenSocket(argv[2], 5);
-			if (FCGX_SocketId == -1)
-				FCGX_SocketId = 0;
-		}
-	}
-
-	FCGX_InitRequest(&request, FCGX_SocketId, 0);
-	fastcgi_app_intro();
-	printf("%s\n%s\n\n%s\n", SOFTWARE_NAME, SOFTWARE_COPYRIGHT, "\tOptions: [-p (localhost):port_number]");
-
+void cleanup()
+{
 	// 清理操作，这些内存在 LoadConfig() 中分配。
 	free(HEADER_TEMPLATE_LOCATION);
 	free(FOOTER_TEMPLATE_LOCATION);
@@ -87,6 +98,7 @@ int main(int argc, const char *argv[])
 	free(HOMEPAGE_NOTICE);
 	free(DISCUSSION_PAGE_CONTENT);
 	free(DISCUSSION_PAGE_CODE);
+	free(SITE_MAINTENANCE);
 
 	if (dbConnError != NULL)
 	{
@@ -96,5 +108,4 @@ int main(int argc, const char *argv[])
 
 	mysql_close(&db);
 	curl_global_cleanup();
-	return 0;
 }

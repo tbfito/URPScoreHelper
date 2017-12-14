@@ -29,3 +29,4 @@ void admin_intro();
 void homepage_notice();
 void set_discussion();
 bool session();
+void site_maintenance();

@@ -458,6 +458,7 @@ void LoadConfig()
 		AddSettings("HOMEPAGE_NOTICE", "");
 		AddSettings("DISCUSSION_PAGE_CONTENT", "");
 		AddSettings("DISCUSSION_PAGE_CODE", "");
+		AddSettings("SITE_MAINTENANCE", "");
 	}
 
 	if (SERVER_URL != NULL)
@@ -560,6 +561,11 @@ void LoadConfig()
 		free(DISCUSSION_PAGE_CODE);
 	}
 	DISCUSSION_PAGE_CODE = (char *)malloc(10240);
+	if (SITE_MAINTENANCE != NULL)
+	{
+		free(SITE_MAINTENANCE);
+	}
+	SITE_MAINTENANCE = (char *)malloc(10240);
 
 	char *lpvBuffer = (char *)malloc(10240);
 
@@ -584,6 +590,7 @@ void LoadConfig()
 	memset(HOMEPAGE_NOTICE, 0, 10240);
 	memset(DISCUSSION_PAGE_CONTENT, 0, 10240);
 	memset(DISCUSSION_PAGE_CODE, 0, 10240);
+	memset(SITE_MAINTENANCE, 0, 10240);
 
 	GetSettings("SERVER_URL", SERVER_URL);
 	GetSettings("USER_AGENT", USER_AGENT);
@@ -605,6 +612,7 @@ void LoadConfig()
 	GetSettings("HOMEPAGE_NOTICE", HOMEPAGE_NOTICE);
 	GetSettings("DISCUSSION_PAGE_CONTENT", DISCUSSION_PAGE_CONTENT);
 	GetSettings("DISCUSSION_PAGE_CODE", DISCUSSION_PAGE_CODE);
+	GetSettings("SITE_MAINTENANCE", SITE_MAINTENANCE);
 
 	GetSettings("CURL_TIMEOUT", lpvBuffer);
 	CURL_TIMEOUT = atoi(lpvBuffer);
@@ -1096,8 +1104,14 @@ void parse_main()
 }
 
 // 处理主页面请求 (GET / /index.fcgi)
-int parse_index()
+void parse_index()
 {
+	if (strlen(SITE_MAINTENANCE) != 0)
+	{
+		Error(SITE_MAINTENANCE);
+		return;
+	}
+
 	// 如果是QQ登录回来，则自动填充帐号密码。
 	char *m_xh = NULL;
 	char *m_mm = NULL;
@@ -1217,7 +1231,6 @@ int parse_index()
 		free(token_xh);
 	if (token_mm != NULL)
 		free(token_mm);
-	return 0;
 }
 
 // 处理验证码 Ajax 请求
