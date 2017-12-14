@@ -732,8 +732,10 @@ void do_find_user()
 		MYSQL_STMT *stmt = mysql_stmt_init(&db);
 		MYSQL_BIND bind[1];
 		MYSQL_BIND query_ret[6];
+		my_bool is_null[6];
 		memset(bind, 0, sizeof(bind));
 		memset(query_ret, 0, sizeof(query_ret));
+		memset(is_null, 0, sizeof(is_null));
 		std::string query("SELECT `id`, `password`, `name`, `openid`, `OAuth_name`, `lastlogin` FROM `UserInfo` WHERE `name`=?");
 
 		char tmp1[36] = { 0 };
@@ -750,21 +752,27 @@ void do_find_user()
 		query_ret[0].buffer_type = MYSQL_TYPE_VAR_STRING;
 		query_ret[0].buffer = (void *)tmp1;
 		query_ret[0].buffer_length = sizeof(tmp1);
+		query_ret[0].is_null = &is_null[0];
 		query_ret[1].buffer_type = MYSQL_TYPE_VAR_STRING;
 		query_ret[1].buffer = (void *)tmp2;
 		query_ret[1].buffer_length = sizeof(tmp2);
+		query_ret[1].is_null = &is_null[1];
 		query_ret[2].buffer_type = MYSQL_TYPE_VAR_STRING;
 		query_ret[2].buffer = (void *)tmp3;
 		query_ret[2].buffer_length = sizeof(tmp3);
+		query_ret[2].is_null = &is_null[2];
 		query_ret[3].buffer_type = MYSQL_TYPE_VAR_STRING;
 		query_ret[3].buffer = (void *)tmp4;
 		query_ret[3].buffer_length = sizeof(tmp4);
+		query_ret[3].is_null = &is_null[3];
 		query_ret[4].buffer_type = MYSQL_TYPE_VAR_STRING;
 		query_ret[4].buffer = (void *)tmp5;
 		query_ret[4].buffer_length = sizeof(tmp5);
+		query_ret[4].is_null = &is_null[4];
 		query_ret[5].buffer_type = MYSQL_TYPE_VAR_STRING;
 		query_ret[5].buffer = (void *)tmp6;
 		query_ret[5].buffer_length = sizeof(tmp6);
+		query_ret[5].is_null = &is_null[5];
 
 		std::string result_str;
 
@@ -780,12 +788,12 @@ void do_find_user()
 				char* result = (char *)malloc(4096);
 				memset(result, 0, 4096);
 				
-				sprintf(result, find_user_result_section, *query_ret[0].is_null ? "" : tmp1,
-														  *query_ret[1].is_null ? "" : tmp2,
-														  *query_ret[2].is_null ? "" : tmp3,
-														  *query_ret[3].is_null ? "" : tmp4,
-														  *query_ret[4].is_null ? "" : tmp5,
-														  *query_ret[5].is_null ? "" : tmp6
+				sprintf(result, find_user_result_section, is_null[0] ? "" : tmp1,
+														  is_null[1] ? "" : tmp2,
+														  is_null[2] ? "" : tmp3,
+														  is_null[3] ? "" : tmp4,
+														  is_null[4] ? "" : tmp5,
+														  is_null[5] ? "" : tmp6
 						);
 
 				result_str.append(result);
