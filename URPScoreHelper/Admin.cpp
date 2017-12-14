@@ -779,7 +779,14 @@ void do_find_user()
 			{
 				char* result = (char *)malloc(4096);
 				memset(result, 0, 4096);
-				sprintf(result, find_user_result_section, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6);
+				
+				sprintf(result, find_user_result_section, query_ret[0].is_null ? "" : tmp1,
+														  query_ret[1].is_null ? "" : tmp2,
+														  query_ret[2].is_null ? "" : tmp3,
+														  query_ret[3].is_null ? "" : tmp4,
+														  query_ret[4].is_null ? "" : tmp5,
+														  query_ret[5].is_null ? "" : tmp6);
+
 				result_str.append(result);
 				free(result);
 			}
