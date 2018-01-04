@@ -6,6 +6,6 @@
 <div class="content">
 	<div class="page">
 		%s
-		%s
 	</div>
+	%s
 </div>
