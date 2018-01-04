@@ -4,7 +4,6 @@
 				<a id="no_ajax" class="weui-footer__link">%s</a>
 			</p>
 			<p class="weui-footer__text">%s</p>
-			<p class="weui-footer__text">Powered by %s | <a id="no_ajax" href="admin/login.fcgi">STAFF ONLY</a></p>
 		</div>
 		<div class="loading">
 			<div class="loading_animation">

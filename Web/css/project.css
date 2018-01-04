@@ -13,6 +13,7 @@
 .content{width:30%;position:relative;margin:0 auto;animation:fade_in;animation-duration:0.5s;will-change:transform;transform:translate3d(0,0,0)}
 .i_page-padding{height:40px;width:100px}
 .demos-header{padding-top:35px}
+.content .page{margin:0 auto;text-align:center;margin-top:15px;width:95%}
 .demos-title{text-align:center;font-size:34px;color:#3cc51f;font-weight:400;margin:0 15%}
 .signbox{padding-right:15px}
 .evalbox{margin-top:0;margin-right:15px}

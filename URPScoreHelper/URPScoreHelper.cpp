@@ -275,8 +275,8 @@ void fastcgi_app_intro()
 				}
 			}
 		}
-		cout << "Status: 500 Internal Server Error\r\n";
-		Error(u8"<p>发生错误，FastCGI 接口可能存在问题</p>");
+		cout << "Status: 405 Method Not Allowed\r\n";
+		Error(u8"<p>发生错误，请求的方法不被允许</p>");
 		END_REQUEST(); continue;
 	}
 }
@@ -333,7 +333,7 @@ void LoadPageSrc()
 	strcat(file_root, "footer.fcgi");
 	strcpy(FOOTER_TEMPLATE_LOCATION, file_root); // FOOTER_TEMPLATE_LOCATION 内存在 LoadConfig() 中做了初始化
 
-	footer = strformat(ReadTextFileToMem(file_root).c_str(), APP_NAME, FOOTER_TEXT, SOFTWARE_NAME, ANALYSIS_CODE);
+	footer = strformat(ReadTextFileToMem(file_root).c_str(), APP_NAME, FOOTER_TEXT, ANALYSIS_CODE);
 
 	strcpy(file_root, doc_root);
 	strcat(file_root, "error.fcgi");
@@ -629,7 +629,7 @@ void LoadConfig()
 
 	if (FOOTER_TEMPLATE_LOCATION != NULL) // 每次更新 footer 的缓存
 	{
-		footer = strformat(ReadTextFileToMem(FOOTER_TEMPLATE_LOCATION).c_str(), APP_NAME, FOOTER_TEXT, SOFTWARE_NAME, ANALYSIS_CODE);
+		footer = strformat(ReadTextFileToMem(FOOTER_TEMPLATE_LOCATION).c_str(), APP_NAME, FOOTER_TEXT, ANALYSIS_CODE);
 	}
 
 	free(lpvBuffer);
@@ -1993,8 +1993,16 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		//Trim(m_subXuefen);
 		//if (atof(m_subXuefen) == 0) sprintf(m_subXuefen, "暂无数据");
 
-		pStr2 = pStr3;
-		pStr2 = strstr(pStr2 + 19, "<td align=\"center\">");
+		pStr2 = strstr(pStr3, "<td align=\"center\">");
+		if (pStr2 == NULL) break;
+		pStr3 = strstr(pStr2, "</td>");
+		if (pStr3 == NULL) break;
+		char m_kcsx[128] = { 0 };
+		mid(m_kcsx, pStr2, pStr3 - pStr2 - 19, 19);
+		
+		//pStr2 = pStr3;
+		//pStr2 = strstr(pStr2 + 19, "<td align=\"center\">");
+		pStr2 = strstr(pStr3, "<td align=\"center\">");
 		if (pStr2 == NULL) break;
 		pStr3 = strstr(pStr2, "</td>");
 		if (pStr3 == NULL) break;
@@ -2085,7 +2093,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		float m_xuefen = atof(m_subXuefen);
 		float m_chengji = atof(m_subchengji);
 		float m_kcxfjd = m_xuefen * cj2jd(m_chengji);
-		if (strstr(m_subName, "\xcc\xe5\xd3\xfd" /*体育*/) == NULL && strstr(m_subName, "\xbe\xfc\xca\xc2\xd1\xb5\xc1\xb7" /*军事训练*/) == NULL
+		if (strstr(m_kcsx, "\xd1\xa1\xd0\xde" /*选修*/) == NULL && strstr(m_kcsx, "\xc8\xce\xd1\xa1" /*任选*/) == NULL && strstr(m_subName, "\xcc\xe5\xd3\xfd" /*体育*/) == NULL && strstr(m_subName, "\xbe\xfc\xca\xc2\xd1\xb5\xc1\xb7" /*军事训练*/) == NULL
 			/* && strstr(m_subName, "\xca\xb5\xbc\xf9" [实践]) == NULL */)
 		{
 			if (m_chengji != 0 || atof(m_subzuidifen) != 0 || atof(m_subzuigaofen) != 0 || atof(m_subjunfen) != 0)
@@ -2108,8 +2116,8 @@ void parse_friendly_score(std::string & p_strlpszScore)
 			}*/
 		}
 
-		char *m_StrTmp = new char[strlen(SCORE_TEMPLATE) + 50 + strlen(m_subName) + strlen(m_subchengji) + strlen(m_subjunfen) + strlen(m_subzuigaofen) + strlen(m_subzuidifen) + strlen(m_submingci) + strlen(m_subXuefen) + 16 + 1];
-		sprintf(m_StrTmp, SCORE_TEMPLATE, isPassed ? "": "background-color:rgba(255,0,0,0.5);color:#fff", m_subName, m_subchengji, m_subjunfen, m_subzuigaofen, m_subzuidifen,
+		char *m_StrTmp = new char[strlen(SCORE_TEMPLATE) + 50 + strlen(m_subName) + strlen(m_kcsx) + strlen(m_subchengji) + strlen(m_subjunfen) + strlen(m_subzuigaofen) + strlen(m_subzuidifen) + strlen(m_submingci) + strlen(m_subXuefen) + 16 + 1];
+		sprintf(m_StrTmp, SCORE_TEMPLATE, isPassed ? "": "background-color:rgba(255,0,0,0.5);color:#fff", m_subName, m_kcsx, m_subchengji, m_subjunfen, m_subzuigaofen, m_subzuidifen,
 			m_submingci, m_subXuefen, m_kcxfjd);
 
 		char *u8strtmp = (char *)malloc(strlen(m_StrTmp) * 3 + 1);
@@ -2127,7 +2135,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	if (hasChengji == false)
 	{
 		char *m_StrTmp = new char[strlen(SCORE_TEMPLATE) + 25 + 64 + 1];
-		sprintf(m_StrTmp, SCORE_TEMPLATE, "", u8"本学期还未出成绩", "", "", "", "", "", "", 0.0);
+		sprintf(m_StrTmp, SCORE_TEMPLATE, "", u8"本学期还未出成绩", "", "", "", "", "", "", "", 0.0);
 		m_Output.append(m_StrTmp);
 		delete[]m_StrTmp;
 	}
@@ -2157,7 +2165,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		gpa = 0.0;
 	}
 		char m_jiaquanfen[1024] = { 0 };
-		sprintf(m_jiaquanfen, u8"<div id=\"i_total\"><p>加权平均分 / GPA(平均绩点)：</p><center>%.1f&nbsp;&nbsp;&nbsp;&nbsp;%.2f</center></div>",
+		sprintf(m_jiaquanfen, u8"<div id=\"i_total\"><p>加权平均分 / GPA (仅供参考)：</p><center>%.1f&nbsp;&nbsp;&nbsp;&nbsp;%.2f</center></div>",
 				jiaquan, gpa);
 		m_Output.insert(0, m_jiaquanfen);
 	//}

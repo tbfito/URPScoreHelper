@@ -4,6 +4,8 @@
 </div>
 <div class="i_page-padding"></div>
 <div class="content">
-	%s
-	%s
+	<div class="page">
+		%s
+		%s
+	</div>
 </div>

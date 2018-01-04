@@ -192,7 +192,7 @@ void admin_error(const char *err_msg)
 	delete[]file_root;
 }
 
-// 处理管理员录 (POST /admin/login.fcgi)
+// 处理管理员登录 (POST /admin/login.fcgi)
 void do_admin_login()
 {
 	// 获取 POST 数据。
@@ -228,7 +228,7 @@ void do_admin_login()
 	// 判断管理员登录
 	if (strcmp(m_user.c_str(), ADMIN_USER_NAME) != 0 || strcmp(m_password.c_str(), ADMIN_PASSWORD) != 0)
 	{
-		admin_error(u8"<p><b>あなたは一体誰ですか</b></p><p>非官方人员请迅速撤离</p>");
+		admin_error(u8"<p><b>认证失败</b></p><p>请检查帐号密码是否正确</p>");
 		return;
 	}
 
@@ -409,7 +409,7 @@ void save_admin_settings()
 
 	// 因为header(部分)内容一直缓存在内存中，所以需要单独对其进行更新。(footer 内容每请求都会在 LoadConfig() 当中更新)
 	header = strformat(ReadTextFileToMem(HEADER_TEMPLATE_LOCATION).c_str(), "%s", m_SECONDARY_TITLE.c_str(), m_APP_KEYWORDS.c_str(), m_APP_DESCRIPTION.c_str());
-	footer = strformat(ReadTextFileToMem(FOOTER_TEMPLATE_LOCATION).c_str(), m_APP_NAME.c_str(), m_FOOTER_TEXT.c_str(), SOFTWARE_NAME, m_ANALYSIS_CODE.c_str());
+	footer = strformat(ReadTextFileToMem(FOOTER_TEMPLATE_LOCATION).c_str(), m_APP_NAME.c_str(), m_FOOTER_TEXT.c_str(), m_ANALYSIS_CODE.c_str());
 
 	admin_error(u8"设定已保存");
 }

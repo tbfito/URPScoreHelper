@@ -16,7 +16,7 @@
 			<div class="weui-cell weui-cell_vcode">
 				<div class="weui-cell__hd">
 					<label class="weui-label">
-						<i class="fa fa-user"></i>学号
+						学号
 					</label>
 				</div>
 				<div class="weui-cell__bd">
@@ -31,7 +31,7 @@
 			<div class="weui-cell weui-cell_vcode">
 				<div class="weui-cell__hd">
 					<label class="weui-label">
-						<i class="fa fa-key"></i>密码
+						密码
 					</label>
 				</div>
 				<div class="weui-cell__bd">
@@ -46,7 +46,7 @@
 			<div class="weui-cell weui-cell_vcode">
 				<div class="weui-cell__hd">
 					<label class="weui-label">
-						<i class="fa fa-image"></i>验证码
+						验证码
 					</label>
 				</div>
 				<div class="weui-cell__bd">
