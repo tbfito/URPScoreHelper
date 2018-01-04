@@ -27,19 +27,14 @@
 					</button>
 				</div>
 			</div>
-			<div class="weui-cell weui-cell_vcode">
+			<div class="weui-cell">
 				<div class="weui-cell__hd">
 					<label class="weui-label">
 						密码
 					</label>
 				</div>
 				<div class="weui-cell__bd">
-					<input class="weui-input" name="mm" id="i_mm" type="password" placeholder="默认相同" value="%s" />
-				</div>
-				<div class="weui-cell__ft">
-					<button type="button" class="weui-vcode-btn" onclick="autofill();">
-						自动补充
-					</button>
+					<input class="weui-input" name="mm" id="i_mm" type="password" placeholder="输入密码" value="%s" />
 				</div>
 			</div>
 			<div class="weui-cell weui-cell_vcode">
@@ -49,7 +44,7 @@
 					</label>
 				</div>
 				<div class="weui-cell__bd">
-					<input class="weui-input" name="yzm" id="i_yzm" type="text" placeholder="输入右侧验证码" />
+					<input class="weui-input" name="yzm" id="i_yzm" type="text" placeholder="输入验证码" />
 				</div>
 				<div class="weui-cell__ft">
 					<div class="weui-vcode-img"><img onclick="get_captcha();" id="login_captcha" alt="验证码" src="/img/refresh.png" width="60" height="20" /></div>

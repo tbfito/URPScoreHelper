@@ -90,17 +90,6 @@ function autoreset() {
 	obj2.value = "";
 	obj1.focus();
 }
-function autofill() {
-	obj = document.getElementById("i_xh");
-	if(obj.value=="")
-	{
-		$.toast("学号还没输呢","cancel");
-		return false;
-	}
-	$.toptip("已自动填入密码，密码与学号相同方可用", 3000, 'success');
-	document.getElementById("i_mm").value = obj.value;
-	document.getElementById("i_yzm").focus();
-}
 function checkRows() {
 	var rows = document.getElementById("i_xh").value.split(/\r?\n|\r/).length;
 	document.getElementById("i_xhhs").innerHTML = rows;
