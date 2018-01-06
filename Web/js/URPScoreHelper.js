@@ -149,10 +149,10 @@ function adjust_form(href) {
 		return;
 	}
 	if(r1.value != "") {
-		document.getElementsByClassName("weui-cell weui-cell_vcode")[0].style.display = "none";
+		document.getElementsByClassName("weui-cell")[0].style.display = "none";
 	}
 	if(r2.value != "") {
-		document.getElementsByClassName("weui-cell weui-cell_vcode")[1].style.display = "none";
+		document.getElementsByClassName("weui-cell")[1].style.display = "none";
 	}
 }
 function init(href){
