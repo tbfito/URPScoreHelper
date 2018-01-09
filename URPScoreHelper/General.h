@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #define SOFTWARE_NAME "iEdon URPScoreHelper"
-#define SOFTWARE_COPYRIGHT u8"Copyright (C) 2012-2017 iEdon"
+#define SOFTWARE_COPYRIGHT u8"Copyright (C) 2012-2018 iEdon"
 
 
 // 外部使用的变量

@@ -2711,7 +2711,7 @@ void parse_QuickQuery_Result()
 		free(m_post_data);
 		if (m_need_update_cookie)
 			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-		Error(u8"<p>无法获取学号信息。</p>");
+		Error(u8"<p>无法获取学号信息</p>");
 		return;
 	}
 	char *pStr2 = strstr(pStr1 + 3, "&");
@@ -2771,7 +2771,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error(u8"<p>投递免密查询请求失败。</p><p>请确认教务系统是可用的。</p>");
+				Error(u8"<p>投递免密查询请求失败</p><p>请确认教务系统是可用的</p>");
 				return;
 			}
 
@@ -2781,7 +2781,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error(u8"<p>获取报表ID错误。(1)</p>");
+				Error(u8"<p>获取报表ID错误 (1)</p>");
 				return;
 			}
 			pStr2 = strstr(pStr1 + 16, "\r\n");
@@ -2789,7 +2789,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error(u8"<p>获取报表ID错误。(2)</p>");
+				Error(u8"<p>获取报表ID错误 (2)</p>");
 				return;
 			}
 			char m_paramsID[512] = { 0 };
@@ -2808,7 +2808,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error(u8"<p>通过ID免密查询失败。</p><p>发生了天知道的错误。</p>");
+				Error(u8"<p>通过ID免密查询失败</p><p>发生了未知错误</p>");
 				return;
 			}
 			m_lpvBuffer = req2.GetResult();
@@ -2817,7 +2817,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error(u8"<p>教务系统出错了，免密查询失败，请稍后重试~</p>");
+				Error(u8"<p>教务系统出错了，免密查询失败，请稍后重试</p>");
 				return;
 			}
 			pStr1 = NULL;
@@ -2828,7 +2828,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error(u8"<p>免密查询返回参数错误。(1)</p>");
+				Error(u8"<p>免密查询返回参数错误 (1)</p>");
 				return;
 			}
 			pStr2 = strstr(pStr1 + 46, "\";");
@@ -2836,7 +2836,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error(u8"<p>免密查询返回参数错误。(2)</p>");
+				Error(u8"<p>免密查询返回参数错误 (2)</p>");
 				return;
 			}
 			char m_txt_req_path[512] = { 0 };
@@ -2864,7 +2864,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error(u8"<p>学生姓名获取失败！(1)</p>");
+				Error(u8"<p>学生姓名获取失败 (1)</p>");
 				return;
 			}
 			pStr2 = strstr(pStr1 + 4, "\t\t");
@@ -2872,7 +2872,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error(u8"<p>学生姓名获取失败！(2)</p>");
+				Error(u8"<p>学生姓名获取失败 (2)</p>");
 				return;
 			}
 
@@ -2894,7 +2894,7 @@ void parse_QuickQuery_Result()
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error,
-					u8"<p><b>获取信息失败，请确认输入正确。</b></p><p>发生错误的学号: %s</p>",
+					u8"<p><b>获取信息失败，请确认输入正确</b></p><p>发生错误的学号: %s</p>",
 					m_xh[xh_index]);
 				Error(m_friendly_error);
 				return;
@@ -2917,19 +2917,7 @@ void parse_QuickQuery_Result()
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error,
-					u8"<p><b>接收到的报表存在问题。</b></p><p>发生错误的学号: %s</p>",
-					m_xh[xh_index]);
-				Error(m_friendly_error);
-				return;
-			}
-
-			if (strlen(m_lpvBuffer) <= 800)
-			{
-				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				char m_friendly_error[512] = { 0 };
-				sprintf(m_friendly_error,
-					u8"<p><b>收到的报表大小存在问题</b></p><p>发生错误的学号: %s</p>",
+					u8"<p><b>接收到的报表存在问题</b></p><p>发生错误的学号: %s</p>",
 					m_xh[xh_index]);
 				Error(m_friendly_error);
 				return;
@@ -3029,7 +3017,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
-				Error(u8"<p>抱歉，免密查询过程中失败，请稍后再试</p>");
+				Error(u8"<p>还没有出成绩或者发生了错误</p>");
 				return;
 			}
 
@@ -3437,7 +3425,7 @@ void parse_teaching_evaluation()
 	char *m_result = strstr(m_rep_body, "\xd1\xa7\xc9\xfa\xc6\xc0\xb9\xc0\xce\xca\xbe\xed\xc1\xd0\xb1\xed" /*"学生评估问卷列表"*/);
 	if (m_result == NULL)
 	{
-		Error(u8"<p>从服务器拉取教学评估信息失败。</p>");
+		Error(u8"<p>从服务器拉取教学评估信息失败</p>");
 		return;
 	}
 
