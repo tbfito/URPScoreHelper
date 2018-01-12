@@ -16,6 +16,7 @@
 		<link rel="stylesheet" href="/css/weui.min.css">
 		<link rel="stylesheet" href="/css/jquery-weui.min.css">
 		<link rel="stylesheet" href="/css/project.css?ver=18.1.4">
+		<link rel="stylesheet" href="/css/fonts-logo.css">
 		<link rel="stylesheet" href="/css/font-awesome.min.css">
 		<link rel="shortcut icon" href="URPScoreHelper.ico">
 	</head>
