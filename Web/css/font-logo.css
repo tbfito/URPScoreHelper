@@ -1,0 +1,3 @@
+@font-face{font-family:"font-logo";src:url("../fonts/font-logo.woff")format("woff"),url("../fonts/font-logo.ttf")format("truetype"),url("../fonts/font-logo.svg#../fonts/font-logo")format("svg");font-style:normal;font-weight:normal}
+@font-face{font-family:"font-logo";src:url("../fonts/font-logo.eot");font-style:normal;font-weight:normal}
+.demos-title{font-family:"font-logo"}

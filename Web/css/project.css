@@ -1,5 +1,4 @@
 @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-@keyframes logoLights {0%{left:-150px}to{left:150px}}
 @keyframes fade_in{0%{opacity:0;top:30px}100%{opacity:1;top:0px;will-change:auto}}
 @keyframes card_wave2{0%{left:0;top:0}50%{left:-40%;top:0}100%{left:0;top:0}}
 @keyframes card_wave{0%{left:0;top:0}50%{left:-30%;top:0}100%{left:0;top:0}}
@@ -9,7 +8,6 @@
 .loading .round:nth-child(2){content:"";position:absolute;top:15px;left:15px;right:15px;bottom:15px;border-radius:50%;border:3px solid transparent;border-top-color:#f9c922;animation:spin 1s linear infinite}
 .loading .round:nth-child(3){transform:translateX(-100%);transition:all .7s .3s cubic-bezier(.645,.045,.355,1)}
 .loading .round:nth-child(4){transform:translateX(100%);transition:all .7s .3s cubic-bezier(.645,.045,.355,1)}
-.demos-title:before{content:"";margin-left:45%;position:absolute;width:100px;height:20px;background-color:rgba(255,255,255,.5);will-change:transform;transform:rotate(-90deg);animation:logoLights 1s ease-in 1s infinite}
 .content{width:30%;position:relative;margin:0 auto;animation:fade_in;animation-duration:0.5s;will-change:transform;transform:translate3d(0,0,0)}
 .i_page-padding{height:40px;width:100px}
 .demos-header{padding-top:35px}
@@ -64,7 +62,7 @@
 .i_user-photo{border-radius:50%;border:2px solid #6cc8e2}
 #i_submit{cursor:pointer}
 #i_total p{padding:10px 0 0 20px}
-#i_total center{margin:0 auto;font-family:'LeagueGothic',Impact;font-size:3em;color:#0092bf}
+#i_total center{margin:0 auto;font-size:3em;color:#0092bf}
 #list_page{background-color:#FFF}
 #list_page td{font-size:12px;text-decoration:none;color:#000000}
 #list_page table{table-layout:auto;word-wrap:break-word;background-color:#fff;width:100%;position:relative;margin:0 auto}
