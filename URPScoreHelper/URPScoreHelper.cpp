@@ -2093,7 +2093,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		float m_xuefen = atof(m_subXuefen);
 		float m_chengji = atof(m_subchengji);
 		float m_kcxfjd = m_xuefen * cj2jd(m_chengji);
-		if (strstr(m_kcsx, "\xd1\xa1\xd0\xde" /*选修*/) == NULL && strstr(m_kcsx, "\xc8\xce\xd1\xa1" /*任选*/) == NULL && strstr(m_subName, "\xcc\xe5\xd3\xfd" /*体育*/) == NULL && strstr(m_subName, "\xbe\xfc\xca\xc2\xd1\xb5\xc1\xb7" /*军事训练*/) == NULL
+		if (/*strstr(m_kcsx, "\xd1\xa1\xd0\xde" // 选修) == NULL && strstr(m_kcsx, "\xc8\xce\xd1\xa1" // 任选) == NULL && */strstr(m_subName, "\xcc\xe5\xd3\xfd" /*体育*/) == NULL && strstr(m_subName, "\xbe\xfc\xca\xc2\xd1\xb5\xc1\xb7" /*军事训练*/) == NULL
 			/* && strstr(m_subName, "\xca\xb5\xbc\xf9" [实践]) == NULL */)
 		{
 			if (m_chengji != 0 || atof(m_subzuidifen) != 0 || atof(m_subzuigaofen) != 0 || atof(m_subjunfen) != 0)
@@ -2882,7 +2882,7 @@ void parse_QuickQuery_Result()
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error, 
-					u8"<p><b>出现错误。请确认所输信息是正确的</b></p><p>发生错误的学号: %s</p>", 
+					u8"<p><b>出现错误，请确认输入正确</b></p><p>发生错误的学号: %s</p>", 
 					m_xh[xh_index]);
 				Error(m_friendly_error);
 				return;
@@ -2917,7 +2917,7 @@ void parse_QuickQuery_Result()
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 				char m_friendly_error[512] = { 0 };
 				sprintf(m_friendly_error,
-					u8"<p><b>接收到的报表存在问题</b></p><p>发生错误的学号: %s</p>",
+					u8"<p><b>接收到的数据存在问题</b></p><p>发生错误的学号: %s</p>",
 					m_xh[xh_index]);
 				Error(m_friendly_error);
 				return;
