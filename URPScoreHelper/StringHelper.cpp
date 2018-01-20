@@ -228,7 +228,7 @@ std::string _POST(std::string & post, const char *name)
 	return _URLFIND(post, name);
 }
 
-static std::string _URLFIND(std::string & url, const char *name)
+std::string _URLFIND(std::string & url, const char *name)
 {
 	std::string var(name);
 	var.append("=");
