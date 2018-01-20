@@ -56,9 +56,8 @@ void DeCodeStr(char *pCode)
 		decrypted.insert(decrypted.end(), tmp, tmp + 16);
 	}
 
-	// rebuild string from data. stop at the terminator or end.
-	auto last = std::find(decrypted.begin(), decrypted.end(), 0);
-	std::string res(decrypted.begin(), last);
+	// rebuild string from data
+	std::string res(decrypted.begin(), decrypted.end());
 
 	// 因为解码后的字符串在范围控制内啊 TAT
 	size_t srclen = res.length() + 1;
