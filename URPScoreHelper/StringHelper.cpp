@@ -217,18 +217,18 @@ int Ascii2Hex(char* ascii, char* hex)
 }
 
 // 获取 GET 中的内容
-std::string _GET(std::string & get, const char *name)
+std::string _GET(const std::string & get, const char *name)
 {
 	return _URLFIND(get, name);
 }
 
 // 获取 POST 中的内容
-std::string _POST(std::string & post, const char *name)
+std::string _POST(const std::string & post, const char *name)
 {
 	return _URLFIND(post, name);
 }
 
-std::string _URLFIND(std::string & url, const char *name)
+std::string _URLFIND(const std::string & url, const char *name)
 {
 	std::string var(name);
 	var.append("=");
@@ -253,7 +253,7 @@ std::string _URLFIND(std::string & url, const char *name)
 }
 
 // 获取 COOKIE 中的内容
-std::string _COOKIE(std::string & cookie, const char *name)
+std::string _COOKIE(const std::string & cookie, const char *name)
 {
 	std::string var(name);
 	var.append("=");
