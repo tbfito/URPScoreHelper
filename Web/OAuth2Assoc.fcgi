@@ -3,7 +3,7 @@
 		%s
 	</h1>
 	<div class="weui-cells__title status">
-		欢迎使用 QQ登录功能
+		微信用户绑定
 	</div>
 </header>
 <div class="content">

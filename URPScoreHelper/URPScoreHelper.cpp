@@ -106,37 +106,24 @@ void fastcgi_app_intro()
 		}
 
 		// 为第三方接入做名称转换
-		if (CGI_QUERY_STRING != NULL && strstr(CGI_QUERY_STRING, "3rd_party=") != NULL)
+		std::string str_qs_3rd_party = _GET(std::string(CGI_QUERY_STRING), "3rd_party");
+		if (!str_qs_3rd_party.empty())
 		{
-			if (strstr(CGI_QUERY_STRING, "&") == NULL)
-			{
-				char _3rd_party[4096] = {0};
-				std::cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n";
-				if (strcmp(CGI_QUERY_STRING, "3rd_party=") != 0)
-				{
-					right(_3rd_party, CGI_QUERY_STRING, strlen(CGI_QUERY_STRING) - 10);
-					std::cout << "Set-Cookie: 3rd_party=" << _3rd_party << "; max-age=1800; path=/\r\n";
-				}
-				std::cout << GLOBAL_HEADER;
-				END_REQUEST(); continue;
-			}
-		}
-		char * pStr_3rd_party = strstr(CGI_HTTP_COOKIE, "3rd_party=");
-		if (CGI_HTTP_COOKIE != NULL && pStr_3rd_party != NULL)
-		{
-			char *pStr2 = strstr(pStr_3rd_party + 10, ";");
 			char _3rd_party[4096] = { 0 };
-			if (pStr2 == NULL) // 如果这条 Cookie 在最后一条
-			{
-				right(_3rd_party, CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - (pStr_3rd_party - CGI_HTTP_COOKIE) - 10);
-			}
-			else
-			{
-				mid(_3rd_party, pStr_3rd_party, pStr2 - pStr_3rd_party - 10, 10);
-			}
-			_3rd_party[1023] = '\0';
-			url_decode(_3rd_party, 1024);
-			strncpy(APP_NAME, _3rd_party, 1024);
+			strncpy(_3rd_party, str_qs_3rd_party.c_str(), sizeof(_3rd_party) - 1);
+			std::cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n";
+			std::cout << "Set-Cookie: 3rd_party=" << _3rd_party << "; max-age=1800; path=/\r\n";
+			std::cout << GLOBAL_HEADER;
+			END_REQUEST(); continue;
+		}
+		std::string str_c_3rd_party = _COOKIE(std::string(CGI_HTTP_COOKIE), "3rd_party");
+		if (!str_c_3rd_party.empty())
+		{
+			char _3rd_party[4096] = { 0 };
+			strncpy(_3rd_party, str_c_3rd_party.c_str(), sizeof(_3rd_party) - 1);
+			url_decode(_3rd_party, str_c_3rd_party.length());
+			memset(APP_NAME, 0, 10240);
+			strncpy(APP_NAME, _3rd_party, sizeof(_3rd_party) - 1);
 		}
 
 		// 普通请求处理
@@ -144,13 +131,13 @@ void fastcgi_app_intro()
 		{
 			if (strcmp(CGI_SCRIPT_NAME, "/") == 0 || strcmp(CGI_SCRIPT_NAME, "/index.fcgi") == 0)
 			{
-				if (strcmp(CGI_QUERY_STRING, "act=logout") == 0)
+				if (_GET(std::string(CGI_QUERY_STRING), "act") == "logout")
 				{
 					student_logout();
 					cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
 					END_REQUEST(); continue;
 				}
-				if (strcmp(CGI_QUERY_STRING, "act=requestAssoc") == 0)
+				if (_GET(std::string(CGI_QUERY_STRING), "act") == "requestAssoc")
 				{
 					bool m_need_update_cookie = false;
 					std::string photo(" ");
@@ -243,12 +230,12 @@ void fastcgi_app_intro()
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/query.fcgi") == 0)
 			{
-				if (strcmp(CGI_QUERY_STRING, "act=QuickQuery") == 0)
+				if (_GET(std::string(CGI_QUERY_STRING), "act") == "QuickQuery")
 				{
 					parse_QuickQuery_Result();
 					END_REQUEST(); continue;
 				}
-				if (strcmp(CGI_QUERY_STRING, "order=tests") == 0)
+				if (_GET(std::string(CGI_QUERY_STRING), "order") == "tests")
 				{
 					parse_query_tests();
 					END_REQUEST(); continue;
@@ -268,7 +255,7 @@ void fastcgi_app_intro()
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/TeachEval.fcgi") == 0)
 			{
-				if (strcmp(CGI_QUERY_STRING, "act=Evaluate") == 0)
+				if (_GET(std::string(CGI_QUERY_STRING), "act") == "Evaluate")
 				{
 					teaching_evaluation();
 					END_REQUEST(); continue;
@@ -284,7 +271,7 @@ void fastcgi_app_intro()
 // 结束请求
 void END_REQUEST()
 {
-	ZeroMemory(JSESSIONID, 256);
+	memset(JSESSIONID, 0, sizeof(JSESSIONID));
 	FCGX_Finish_r(&request);
 }
 
@@ -321,21 +308,23 @@ void LoadPageSrc()
 
 	mid(doc_root, CGI_SCRIPT_FILENAME, Last - CGI_SCRIPT_FILENAME + 1, 0);
 	char *file_root = new char[MAX_PATH];
-	memset(file_root, 0, MAX_PATH);
 
-	strcpy(file_root, doc_root);
+	memset(file_root, 0, MAX_PATH);
+	strncpy(file_root, doc_root, MAX_PATH - 1);
 	strcat(file_root, "header.fcgi");
-	strcpy(HEADER_TEMPLATE_LOCATION, file_root); // HEADER_TEMPLATE_LOCATION 内存在 LoadConfig() 中做了初始化
+	strncpy(HEADER_TEMPLATE_LOCATION, file_root, MAX_PATH - 1); // HEADER_TEMPLATE_LOCATION 内存在 LoadConfig() 中做了初始化，内存大小 MAX_PATH 已清零
 
 	header = strformat(ReadTextFileToMem(file_root).c_str(), "%s", SECONDARY_TITLE, APP_KEYWORDS, APP_DESCRIPTION);
 
-	strcpy(file_root, doc_root);
+	memset(file_root, 0, MAX_PATH);
+	strncpy(file_root, doc_root, MAX_PATH - 1);
 	strcat(file_root, "footer.fcgi");
-	strcpy(FOOTER_TEMPLATE_LOCATION, file_root); // FOOTER_TEMPLATE_LOCATION 内存在 LoadConfig() 中做了初始化
+	strncpy(FOOTER_TEMPLATE_LOCATION, file_root, MAX_PATH - 1); // FOOTER_TEMPLATE_LOCATION 内存在 LoadConfig() 中做了初始化，内存大小 MAX_PATH 已清零
 
 	footer = strformat(ReadTextFileToMem(file_root).c_str(), APP_NAME, FOOTER_TEXT, ANALYSIS_CODE);
 
-	strcpy(file_root, doc_root);
+	memset(file_root, 0, MAX_PATH);
+	strncpy(file_root, doc_root, MAX_PATH - 1);
 	strcat(file_root, "error.fcgi");
 	
 	error = ReadTextFileToMem(file_root);
@@ -399,8 +388,10 @@ void LoadConfig()
 				free(dbConnError);
 				dbConnError = NULL;
 			}
-			dbConnError = (char *)malloc(strlen(mysql_error(&db)) + 1);
-			strcpy(dbConnError, mysql_error(&db));
+			size_t errlen = strlen(mysql_error(&db));
+			dbConnError = (char *)malloc(errlen + 1);
+			memset(dbConnError, 0, errlen + 1);
+			strncpy(dbConnError, mysql_error(&db), errlen);
 			mysql_close(&db);
 			memset(&db, 0, sizeof(MYSQL));
 			mysql_init(&db);
@@ -725,7 +716,7 @@ void UpdateCounter()
 	mysql_stmt_close(stmt);
 }
 
-// 读取数据库设置表中的内容(注意value的内存分配)
+// 读取数据库设置表中的内容(注意value的内存分配 10240B)
 bool GetSettings(const char *name, char *value)
 {
 	// 获取多少用户使用了我们的服务 :)
@@ -757,7 +748,7 @@ bool GetSettings(const char *name, char *value)
 		mysql_stmt_store_result(stmt) != 0)
 	{
 		mysql_stmt_close(stmt);
-		strcpy(value, "");
+		strncpy(value, "", 1);
 		return false;
 	}
 
@@ -766,12 +757,12 @@ bool GetSettings(const char *name, char *value)
 	if (strlen(query_ret) == 0)
 	{
 		mysql_stmt_close(stmt);
-		strcpy(value, "");
+		strncpy(value, "", 1);
 		return false;
 	}
 
 	mysql_stmt_close(stmt);
-	strcpy(value, query_ret);
+	strncpy(value, query_ret, 10240 - 1);
 	return true;
 }
 
@@ -848,8 +839,8 @@ void SetQueryCounter(int current_counts)
 // 处理 Cookie、照片(p_photo_uri 为空代表不要照片, 随便设置内容不为空则会向里面写入照片数据)
 int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 {
-	char *pStr = strstr(CGI_HTTP_COOKIE, "JSESSIONID=");
-	if (pStr != NULL) // 如果客户端已经拿到 JSESSIONID，看看原 Cookie 是否过期、有效（即服务器是否设置了新 Cookie）
+	std::string str_JSESSIONID = _COOKIE(std::string(CGI_HTTP_COOKIE), "JSESSIONID");
+	if (!str_JSESSIONID.empty()) // 如果客户端已经拿到 JSESSIONID，看看原 Cookie 是否过期、有效（即服务器是否设置了新 Cookie）
 	{
 		CCurlTask req;
 		if (!req.Exec(true, REQUEST_HOME_PAGE, CGI_HTTP_COOKIE))
@@ -857,33 +848,17 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 			p_photo_uri.erase();
 			return -1;
 		}
-		char *m_rep_header = req.GetResult();
-
-		char *pStr1 = strstr(m_rep_header, "JSESSIONID=");
-		if (pStr1 != NULL)
+		
+		std::string str_newJSESSIONID = _COOKIE(req.GetResultString(), "JSESSIONID");
+		if (!str_newJSESSIONID.empty())
 		{
-			char *pStr2 = strstr(pStr1 + 11, ";");
-			if (pStr2 == NULL)
-			{
-				Error(u8"<p>无法获取 Session ID</p><p>Cookie 结尾失败</p>");
-				p_photo_uri.erase();
-				return -1;
-			}
-			mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11); // 成功获得新 Session ID。
+			strncpy(JSESSIONID, str_newJSESSIONID.c_str(), sizeof(JSESSIONID) - 1);
 			*p_need_update_cookie = true;
 			return -1;
 		}
 		else // 如果 Cookie 还能用，就获取它。
 		{
-			char *pStr2 = strstr(pStr + 11, ";");
-			if (pStr2 == NULL) // 如果这条 Cookie 在最后一条
-			{
-				right(JSESSIONID, CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - (pStr - CGI_HTTP_COOKIE) - 11);
-			}
-			else
-			{
-				mid(JSESSIONID, pStr, pStr2 - pStr - 11, 11);
-			}
+			strncpy(JSESSIONID, str_JSESSIONID.c_str(), sizeof(JSESSIONID) - 1);
 		}
 	}
 	else
@@ -894,24 +869,17 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 			p_photo_uri.erase();
 			return -1;
 		}
-		char *m_rep_header = req.GetResult();
+
 		// 获取 Session ID。
-		char *pStr1 = strstr(m_rep_header, "JSESSIONID=");
-		if (pStr1 == NULL)
+		str_JSESSIONID = _COOKIE(req.GetResultString(), "JSESSIONID");
+		if (str_JSESSIONID.empty())
 		{
-			Error(u8"<p>无法获取 Session ID</p><p>Cookie 标头失败</p>");
-			p_photo_uri.erase();
-			return -1;
-		}
-		char *pStr2 = strstr(pStr1 + 11, ";");
-		if (pStr2 == NULL)
-		{
-			Error(u8"<p>无法获取 Session ID</p><p>Cookie 结尾失败</p>");
+			Error(u8"<p>无法获取 Session ID</p>");
 			p_photo_uri.erase();
 			return -1;
 		}
 
-		mid(JSESSIONID, pStr1, pStr2 - pStr1 - 11, 11); // 成功获得 Session ID。
+		strncpy(JSESSIONID, str_JSESSIONID.c_str(), sizeof(JSESSIONID) - 1); // 成功获得 Session ID。
 		*p_need_update_cookie = true;
 	}
 
@@ -919,11 +887,11 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 		return -1;  // p_photo_uri 指定了 NULL 代表不需要照片。
 
 	// 看看登录没
-	std::string Jsess ("JSESSIONID=");
-	Jsess += JSESSIONID;
+	std::string tmpStr ("JSESSIONID=");
+	tmpStr += JSESSIONID;
 
 	CCurlTask req;
-	if (!req.Exec(false, REQUEST_PHOTO, Jsess))
+	if (!req.Exec(false, REQUEST_PHOTO, tmpStr))
 	{
 		p_photo_uri.erase();
 		return -1;
@@ -931,16 +899,20 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 	char *m_photo = req.GetResult();
 	if (strstr(m_photo, "\xb5\xc7\xc2\xbc" /*登录*/) == NULL)
 	{
-		int m_photoLength = req.GetLength();
-
+		size_t m_photoLength = req.GetLength();
 		char *m_base64 = (char *)malloc(m_photoLength * 3 + 1);
-		ZeroMemory(m_base64, m_photoLength * 3 + 1);
+		memset(m_base64, 0, m_photoLength * 3 + 1);
+
 		base64_encode((const unsigned char *)m_photo, m_base64, m_photoLength);
-		char *m_PhotoDataURI = (char *)malloc(m_photoLength * 3 + 1 + 24);
-		ZeroMemory(m_PhotoDataURI, m_photoLength * 3 + 1 + 24);
-		strcpy(m_PhotoDataURI, "data:image/jpg;base64,");
+
+		size_t m_PhotoDataURI_len = m_photoLength * 3 + 1 + 24;
+		char *m_PhotoDataURI = (char *)malloc(m_PhotoDataURI_len);
+		memset(m_PhotoDataURI, 0, m_PhotoDataURI_len);
+
+		strncpy(m_PhotoDataURI, "data:image/jpg;base64,", m_PhotoDataURI_len - 1);
 		strcat(m_PhotoDataURI, m_base64);
 		p_photo_uri = m_PhotoDataURI;
+
 		free(m_base64);
 		free(m_PhotoDataURI);
 	}
@@ -960,58 +932,49 @@ void parse_main()
 		int m_post_length = atoi(CGI_CONTENT_LENGTH);
 		if (m_post_length <= 0 || m_post_length > 127)
 		{
-			Error(u8"<p>帐号或密码输入有问题哦，请重试</p>");
+			Error(u8"<p>帐号或密码输入有问题，请重试</p>");
 			return;
 		}
 		char *m_post_data = (char *)malloc(m_post_length + 2);
 		FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
+		std::string post(m_post_data);
+		free(m_post_data);
 
 		// 获取学号
-		char *pStr1 = strstr(m_post_data, "xh=");
-		if (pStr1 == NULL)
+		std::string str_xuehao = _POST(post, "xh");
+		if (str_xuehao.empty())
 		{
-			free(m_post_data);
-			Error(u8"<p>无法获取学号信息。</p>");
+			Error(u8"<p>无法获取学号信息</p>");
 			return;
 		}
-		char *pStr2 = strstr(pStr1 + 3, "&");
 		char m_xuehao[128] = { 0 };
-		mid(m_xuehao, pStr1, pStr2 - pStr1 - 3, 3);
-		pStr1 = NULL;
-		pStr2 = NULL;
+		strncpy(m_xuehao, str_xuehao.c_str(), sizeof(m_xuehao) - 1);
 
 		// 获取密码
-		pStr1 = strstr(m_post_data, "mm=");
-		if (pStr1 == NULL)
+		std::string str_password = _POST(post, "mm");
+		if (str_password.empty())
 		{
-			free(m_post_data);
-			Error(u8"<p>无法获取密码信息。</p>");
+			Error(u8"<p>无法获取密码信息</p>");
 			return;
 		}
-		pStr2 = strstr(pStr1 + 3, "&");
 		char m_password[128] = { 0 };
-		mid(m_password, pStr1, pStr2 - pStr1 - 3, 3);
-		pStr1 = NULL;
-		pStr2 = NULL;
+		strncpy(m_password, str_password.c_str(), sizeof(m_password) - 1);
 
 		// 获取验证码
-		pStr1 = strstr(m_post_data, "yzm=");
-		if (pStr1 == NULL)
+		std::string str_captcha = _POST(post, "yzm");
+		if (str_captcha.empty())
 		{
-			free(m_post_data);
-			Error(u8"<p>无法获取验证码信息。</p>");
+			Error(u8"<p>无法获取验证码信息</p>");
 			return;
 		}
 		char m_captcha[128] = { 0 };
-		right(m_captcha, pStr1 + 4, 4);
+		strncpy(m_captcha, str_captcha.c_str(), sizeof(m_captcha) - 1);
 
 		if (!student_login(m_xuehao, m_password, m_captcha))
 		{
-			// 其余资源清理已在学生登录里面做过了。
-			free(m_post_data);
 			return;
 		}
-		free(m_post_data);
+
 		char m_xuehaoe[1024] = { 0 };
 		char m_passworde[1024] = { 0 };
 		EnCodeStr(m_xuehao, m_xuehaoe);
@@ -1020,7 +983,7 @@ void parse_main()
 		token += "X";
 		token += m_passworde;
 		char token_e[4096] = { 0 };
-		strcpy(token_e, token.c_str());
+		strncpy(token_e, token.c_str(), sizeof(token_e) - 1);
 		EnCodeStr(token_e, token_e);
 		cout << "Set-Cookie: token=" << token_e << "; max-age=604800; path=/\r\n";
 	}
@@ -1028,13 +991,13 @@ void parse_main()
 	// 读入主页面文件
 	std::string m_lpszHomepage = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
-	char m_student_name[1024] = {0};
-	char m_student_id[512] = { 0 };
+	char m_student_name[128] = {0};
+	char m_student_id[128] = { 0 };
 	char m_avatar_url[4096] = { 0 };
 	get_student_id(m_student_id);
-	if (!GetOAuthUserInfo(m_student_id, m_student_name, m_avatar_url))
+	if (!GetOAuthUserInfo(m_student_id, m_student_name, m_avatar_url, sizeof(m_student_name), sizeof(m_avatar_url)))
 	{
-		memset(m_student_name, 0, 1024);
+		memset(m_student_name, 0, sizeof(m_student_name));
 		get_student_name(m_student_name);
 	}
 
@@ -1112,39 +1075,27 @@ void parse_index()
 		return;
 	}
 
-	// 如果是QQ登录回来，则自动填充帐号密码。
+	// 如果是微信登录回来，则自动填充帐号密码。
 	char *m_xh = NULL;
 	char *m_mm = NULL;
 	char *token_xh = NULL;
 	char *token_mm = NULL;
-	char *pStr1 = strstr((char *)CGI_QUERY_STRING, "stid=");
-	if (pStr1 != NULL)
+	std::string str_id = _GET(std::string(CGI_QUERY_STRING), "stid");
+	if (!str_id.empty())
 	{
-		char *pStr2 = strstr(pStr1 + 5, "&");
-		char *id = new char[strlen(CGI_QUERY_STRING)];
-		if (pStr2 == NULL)
-		{
-			right(id, pStr1 + 5, strlen(CGI_QUERY_STRING) - 5);
-		}
-		else
-		{
-			mid(id, pStr1 + 5, pStr2 - pStr1 - 5, 0);
-		}
+		size_t qslen = strlen(CGI_QUERY_STRING);
+		char *id = new char[qslen];
+		memset(id, 0, qslen);
+		strncpy(id, str_id.c_str(), qslen - 1);
 		DeCodeStr(id);
 		m_xh = id;
-		pStr1 = strstr((char *)CGI_QUERY_STRING, "pass=");
-		if (pStr1 != NULL)
+		std::string str_pass = _GET(std::string(CGI_QUERY_STRING), "pass");
+		if (!str_pass.empty())
 		{
-			char *pStr2 = strstr(pStr1 + 5, "&");
-			char *pass = new char[strlen(CGI_QUERY_STRING)];
-			if (pStr2 == NULL)
-			{
-				right(pass, pStr1 + 5, strlen(CGI_QUERY_STRING) - 5);
-			}
-			else
-			{
-				mid(pass, pStr1 + 5, pStr2 - pStr1 - 5, 0);
-			}
+			size_t qslen = strlen(CGI_QUERY_STRING);
+			char *pass = new char[qslen];
+			memset(pass, 0, qslen);
+			strncpy(pass, str_pass.c_str(), qslen - 1);
 			DeCodeStr(pass);
 			m_mm = pass;
 		}
@@ -1152,18 +1103,10 @@ void parse_index()
 	else
 	{
 		char token[4096] = { 0 };
-		char *pStr = strstr(CGI_HTTP_COOKIE, "token=");
-		if (pStr != NULL)
+		std::string str_token = _COOKIE(std::string(CGI_HTTP_COOKIE), "token");
+		if (!str_token.empty())
 		{
-			char *pStr2 = strstr(pStr + 6, ";");
-			if (pStr2 == NULL) // 如果这条 Cookie 在最后一条
-			{
-				right(token, CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - (pStr - CGI_HTTP_COOKIE) - 6);
-			}
-			else
-			{
-				mid(token, pStr, pStr2 - pStr - 6, 6);
-			}
+			strncpy(token, str_token.c_str(), sizeof(token) - 1);
 		}
 		DeCodeStr(token);
 		token_xh = (char *)malloc(1024);
@@ -1217,7 +1160,7 @@ void parse_index()
 	else 
 	{
 		cout << strformat( m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter, hasNotice ? notice.c_str() : "",
-						u8"QQ登录成功，输入验证码继续吧 :)", m_xh, m_mm, "", u8"继续", "", "");
+						u8"微信登录成功，输入验证码继续吧 :)", m_xh, m_mm, "", u8"继续", "", "");
 	}
 	if (!isAjaxRequest)
 	{
@@ -1253,7 +1196,7 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 	}
 
 	// 置随机数种子，并取得一个随机数，用于获取验证码。
-	srand((int)time(0));
+	srand((int)time(NULL));
 	int m_rand = rand();
 	char Captcha[256] = { 0 };
 	sprintf(Captcha, REQUEST_CAPTCHA, m_rand);
@@ -1283,8 +1226,9 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 	// 将验证码转化为 base64 编码后的 DataURL，浏览器直接显示，供用户查看。
 	char *m_base64 = new char[m_CaptchaLength * 2 + 1];
 	base64_encode((const unsigned char *)m_rep_body, m_base64, m_CaptchaLength);
-	char *m_DataURL = new char[m_CaptchaLength * 2 + 24];;
-	strcpy(m_DataURL, "data:image/jpg;base64,");
+	char *m_DataURL = new char[m_CaptchaLength * 2 + 24];
+	memset(m_DataURL, 0, m_CaptchaLength * 2 + 24);
+	strncpy(m_DataURL, "data:image/jpg;base64,", m_CaptchaLength * 2 + 24 - 1);
 	strcat(m_DataURL, m_base64);
 
 	cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
@@ -1317,7 +1261,7 @@ void parse_ajax_avatar()
 	char m_avatar_url[4096] = { 0 };
 	char m_student_name[1024] = { 0 };
 	get_student_id(m_student_id);
-	if (!GetOAuthUserInfo(m_student_id, m_student_name, m_avatar_url))
+	if (!GetOAuthUserInfo(m_student_id, m_student_name, m_avatar_url, sizeof(m_student_name), sizeof(m_avatar_url)))
 	{
 		if (m_photo != "data:image/jpg;base64,") // 判断教务系统中有无头像，即 datauri 有没有值
 		{
@@ -1335,7 +1279,7 @@ void parse_ajax_avatar()
 }
 
 // 处理查询页面请求 (GET /query.fcgi)
-int parse_query()
+void parse_query()
 {
 	bool m_need_update_cookie = false;
 	std::string m_photo(" "); // 有数据，需要获取照片
@@ -1344,56 +1288,37 @@ int parse_query()
 	if (m_photo.empty()) // 还没登录就丢去登录。
 	{
 		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
-		return 0;
+		return;
 	}
 
 	// 开始查分(本学期)。
 	CCurlTask req;
 	if (!req.Exec(false, REQUEST_QUERY_SCORE, CGI_HTTP_COOKIE))
 	{
-		Error(u8"<p><b>接收数据失败</b></p><p>curl 操作失败</p>");
+		Error(u8"<p><b>接收数据失败</b></p><p>网络通信异常</p>");
 		student_logout();
-		return -1;
+		return;
 	}
 
-	// 优化接收结果，显示查询页面
-	parse_friendly_score(req.GetResultString());
-	return 0;
-}
-
-// 输出分数页面
-void parse_friendly_score(std::string & p_strlpszScore)
-{
 	char m_Student[128] = { 0 };
 	get_student_name(m_Student);
 
 	std::string m_lpszQuery = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
-	char *p_lpszScore = (char *)malloc(p_strlpszScore.length() + 1);
-	strcpy(p_lpszScore, p_strlpszScore.c_str());
-
-	char *m_query_not_reg = strstr(p_lpszScore, "\xc3\xbb\xd3\xd0\xd7\xa2\xb2\xe1" /*没有注册*/);
+	char *m_query_not_reg = strstr((char *)req.GetResultString().c_str(), "\xc3\xbb\xd3\xd0\xd7\xa2\xb2\xe1" /*没有注册*/);
 	if (m_query_not_reg != NULL) // 如果还没有电子注册
 	{
-		/*std::string m_original_str (u8"<p><b>亲爱的%s，每学期首次使用需要电子注册</b></p><p>不注册的话，是查不了信息的哦！</p><p>我可以施展法术，\
-<b>一键帮你在教务系统注册哦~</b></p><p>--&gt; 点按下方按钮，自动注册，直达查分界面 :P &lt;--</p>\
-<div class=\"weui-msg__opr-area\"><p class=\"weui-btn-area\"><a style=\"color:#fff\" href=\"query.fcgi?act=system_registration\" class=\"weui-btn weui-btn_primary\">【点我】一键注册</a></p></div>");
-		m_original_str = strformat(m_original_str.c_str(), m_Student);
-		Error(m_original_str.c_str());
-		*/
 		if (system_registration() != 0)
 		{
-			free(p_lpszScore);
 			return;
 		}
 	}
-	if (strcmp(CGI_QUERY_STRING, "order=tests") == 0)
+	if (_GET(std::string(CGI_QUERY_STRING), "order") == "tests")
 	{
-		free(p_lpszScore);
 		CCurlTask req;
 		if (!req.Exec(false, GET_TEST_LIST, CGI_HTTP_COOKIE))
 		{
-			Error(u8"<p><b>接收数据失败</b></p><p>curl 操作失败</p>");
+			Error(u8"<p><b>接收数据失败</b></p><p>网络通信异常</p>");
 			return;
 		}
 
@@ -1472,13 +1397,12 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		return;
 	}
 
-	if (strcmp(CGI_QUERY_STRING, "order=passed") == 0)
+	if (_GET(std::string(CGI_QUERY_STRING), "order") == "passed")
 	{
-		free(p_lpszScore);
 		CCurlTask req;
 		if (!req.Exec(false, GET_GRADE_BY_QBINFO, CGI_HTTP_COOKIE))
 		{
-			Error(u8"<p><b>接收数据失败</b></p><p>curl 操作失败</p>");
+			Error(u8"<p><b>接收数据失败</b></p><p>网络通信异常</p>");
 			return;
 		}
 		if (req.GetLength() <= 256) // 经过测试，当新生没有已过科目的时候，服务器返回空body的内容，大小211b.
@@ -1502,7 +1426,8 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		}
 		m_result += 92;
 		char *m_prep = (char *)malloc(req.GetLength());
-		strcpy(m_prep, "<div id=\"list_page\">");
+		memset(m_prep, 0, req.GetLength());
+		strncpy(m_prep, "<div id=\"list_page\">", req.GetLength() - 1);
 		char *m_end_body = strstr(m_result, "</body>");
 		if (m_end_body == NULL)
 		{
@@ -1543,13 +1468,12 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		return;
 	}
 
-	if (strcmp(CGI_QUERY_STRING, "order=byplan") == 0)
+	if (_GET(std::string(CGI_QUERY_STRING), "order") == "byplan")
 	{
-		free(p_lpszScore);
 		CCurlTask req;
 		if (!req.Exec(false, GET_GRADE_BY_PLAN, CGI_HTTP_COOKIE))
 		{
-			Error(u8"<p><b>接收数据失败</b></p><p>curl 操作失败</p>");
+			Error(u8"<p><b>接收数据失败</b></p><p>网络通信异常</p>");
 			return;
 		}
 		
@@ -1720,7 +1644,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 						char temp[512] = "<b style=\"color:#f6383a\">";
 						strcat(temp, m_chengji);
 						strcat(temp, "</b>");
-						strcpy(m_chengji, temp);
+						strncpy(m_chengji, temp, sizeof(m_chengji) - 1);
 					}
 					flags++;
 					break;
@@ -1800,13 +1724,12 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		return;
 	}
 
-	if (strcmp(CGI_QUERY_STRING, "order=failed") == 0)
+	if (_GET(std::string(CGI_QUERY_STRING), "order") == "failed")
 	{
-		free(p_lpszScore);
 		CCurlTask req;
 		if (!req.Exec(false, GET_GRADE_BY_FAILED, CGI_HTTP_COOKIE))
 		{
-			Error(u8"<p><b>接收数据失败</b></p><p>curl 操作失败</p>");
+			Error(u8"<p><b>接收数据失败</b></p><p>网络通信异常</p>");
 			return;
 		}
 		
@@ -1834,7 +1757,8 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		replace_string(m_result, "\t", "");
 		replace_string(m_result, "\r", "");
 		replace_string(m_result, "\n", "");
-		strcpy(m_prep, "<div id=\"list_page\">");
+		memset(m_prep, 0, req.GetLength());
+		strncpy(m_prep, "<div id=\"list_page\">", req.GetLength() - 1);
 		char *m_end_body = strstr(m_result, "</body>");
 		if (m_result == NULL)
 		{
@@ -1869,13 +1793,12 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		return;
 	}
 
-	if (strcmp(CGI_QUERY_STRING, "order=schedule") == 0)
+	if (_GET(std::string(CGI_QUERY_STRING), "order") == "schedule")
 	{
-		free(p_lpszScore);
 		CCurlTask req;
 		if (!req.Exec(false, REQUEST_SCHEDULE, CGI_HTTP_COOKIE))
 		{
-			Error(u8"<p><b>接收数据失败</b></p><p>curl 操作失败</p>");
+			Error(u8"<p><b>接收数据失败</b></p><p>网络通信异常</p>");
 			return;
 		}
 		
@@ -1908,7 +1831,8 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		replace_string(m_result, /*"\xd0\xc7\xc6\xda\xc1\xf9", "\xc1\xf9"*/ u8"星期六", u8"六");
 		replace_string(m_result, /*"\xd0\xc7\xc6\xda\xc8\xd5", "\xc8\xd5"*/ u8"星期日", u8"日");
 
-		strcpy(m_prep, "<div id=\"list_page\">");
+		memset(m_prep, 0, req.GetLength());
+		strncpy(m_prep, "<div id=\"list_page\">", req.GetLength() - 1);
 		char *m_end_body = strstr(m_result, "</table>");
 		if (m_result == NULL)
 		{
@@ -1949,7 +1873,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	}
 
 	// 定位到第一项成绩
-	char *pStr1 = strstr(p_lpszScore,"<tr class=\"odd\" onMouseOut=\"this.className='even';\" onMouseOver=\"this.className='evenfocus';\">");
+	char *pStr1 = strstr((char *)req.GetResultString().c_str(),"<tr class=\"odd\" onMouseOut=\"this.className='even';\" onMouseOver=\"this.className='evenfocus';\">");
 	bool hasChengji = true;
 	if (pStr1 == NULL)
 	{
@@ -1991,7 +1915,6 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		char m_subXuefen[128] = { 0 };
 		mid(m_subXuefen, pStr2, pStr3 - pStr2 - 19, 19);
 		//Trim(m_subXuefen);
-		//if (atof(m_subXuefen) == 0) sprintf(m_subXuefen, "暂无数据");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
 		if (pStr2 == NULL) break;
@@ -2000,8 +1923,6 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		char m_kcsx[128] = { 0 };
 		mid(m_kcsx, pStr2, pStr3 - pStr2 - 19, 19);
 		
-		//pStr2 = pStr3;
-		//pStr2 = strstr(pStr2 + 19, "<td align=\"center\">");
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
 		if (pStr2 == NULL) break;
 		pStr3 = strstr(pStr2, "</td>");
@@ -2009,7 +1930,6 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		char m_subzuigaofen[128] = { 0 };
 		mid(m_subzuigaofen, pStr2, pStr3 - pStr2 - 19, 19);
 		//Trim(m_subzuigaofen);
-		//if (atof(m_subzuigaofen) == 0) sprintf(m_subzuigaofen, "暂无数据");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
 		if (pStr2 == NULL) break;
@@ -2018,7 +1938,6 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		char m_subzuidifen[128] = { 0 };
 		mid(m_subzuidifen, pStr2, pStr3 - pStr2 - 19, 19);
 		//Trim(m_subzuidifen);
-		//if (atof(m_subzuidifen) == 0) sprintf(m_subzuidifen, "暂无数据");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
 		if (pStr2 == NULL) break;
@@ -2027,7 +1946,6 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		char m_subjunfen[128] = { 0 };
 		mid(m_subjunfen, pStr2, pStr3 - pStr2 - 19, 19);
 		//Trim(m_subjunfen);
-		//if (atof(m_subjunfen) == 0) sprintf(m_subjunfen, "暂无数据");
 
 		pStr2 = strstr(pStr3, "<td align=\"center\">");
 		if (pStr2 == NULL) break;
@@ -2036,44 +1954,45 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		char m_subchengji[256] = { 0 };
 		mid(m_subchengji, pStr2, pStr3 - pStr2 - 19, 19);
 		//Trim(m_subchengji);
+
 		if (strstr(m_subchengji, "\xd3\xc5\xd0\xe3" /*优秀*/) != NULL)
 		{
-			strcpy(m_subchengji,"95");
+			strncpy(m_subchengji,"95", sizeof(m_subchengji) - 1);
 		}
 		if (strstr(m_subchengji, "\xc1\xbc\xba\xc3" /*良好*/) != NULL)
 		{
-			strcpy(m_subchengji, "85");
+			strncpy(m_subchengji, "85", sizeof(m_subchengji) - 1);
 		}
 		if (strstr(m_subchengji, "\xd6\xd0\xb5\xc8" /*中等*/) != NULL)
 		{
-			strcpy(m_subchengji, "75");
+			strncpy(m_subchengji, "75", sizeof(m_subchengji) - 1);
 		}
 		if (strstr(m_subchengji, "\xbc\xb0\xb8\xf1" /*及格*/) != NULL)
 		{
 			if (atoi(m_subzuidifen) > 60)
 			{
-				strcpy(m_subchengji, m_subzuidifen);
+				strncpy(m_subchengji, m_subzuidifen, sizeof(m_subchengji) - 1);
 			}
 			else
 			{
-				strcpy(m_subchengji, "60");
+				strncpy(m_subchengji, "60", sizeof(m_subchengji) - 1);
 			}
 			
 		}
 		if (strstr(m_subchengji, "\xb2\xbb\xbc\xb0\xb8\xf1" /*不及格*/) != NULL)
 		{
-				strcpy(m_subchengji, "55");
+				strncpy(m_subchengji, "55", sizeof(m_subchengji) - 1);
 				isPassed = false;
 		}
-		//if (atoi(m_subchengji) == 0) strcpy(m_subchengji, "暂无数据");
+
 		if (atof(m_subchengji) < 60) 
 		{
 
 			char m_completecj[256] = "<b style=\"color:#f6383a\">";
 			strcat(m_completecj, m_subchengji);
 			strcat(m_completecj, "</b>");
-			ZeroMemory(m_subchengji, 256);
-			strcpy(m_subchengji, m_completecj);
+			memset(m_subchengji, 0, sizeof(m_subchengji));
+			strncpy(m_subchengji, m_completecj, sizeof(m_subchengji) - 1);
 			if (atof(m_subchengji) != 0 || atof(m_subzuidifen) != 0 || atof(m_subzuigaofen) != 0 || atof(m_subjunfen) != 0)
 			{
 				isPassed = false;
@@ -2087,14 +2006,12 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		char m_submingci[128] = { 0 };
 		mid(m_submingci, pStr2, pStr3 - pStr2 - 19, 19);
 		//Trim(m_submingci);
-		//if (atof(m_submingci) == 0) sprintf(m_submingci, "暂无数据");
 
-		// （分数x学分）全都加起来/总学分 = 加权分，排除体育和课程设计
+		// （分数x学分）全都加起来/总学分 = 加权分，排除体育和课程设计，任选类课程
 		float m_xuefen = atof(m_subXuefen);
 		float m_chengji = atof(m_subchengji);
 		float m_kcxfjd = m_xuefen * cj2jd(m_chengji);
-		if (/*strstr(m_kcsx, "\xd1\xa1\xd0\xde" // 选修) == NULL && strstr(m_kcsx, "\xc8\xce\xd1\xa1" // 任选) == NULL && */strstr(m_subName, "\xcc\xe5\xd3\xfd" /*体育*/) == NULL && strstr(m_subName, "\xbe\xfc\xca\xc2\xd1\xb5\xc1\xb7" /*军事训练*/) == NULL
-			/* && strstr(m_subName, "\xca\xb5\xbc\xf9" [实践]) == NULL */)
+		if (strstr(m_kcsx, "\xc8\xce\xd1\xa1" /* 任选 */) == NULL && strstr(m_subName, "\xcc\xe5\xd3\xfd" /*体育*/) == NULL && strstr(m_subName, "\xbe\xfc\xca\xc2\xd1\xb5\xc1\xb7" /*军事训练*/) == NULL)
 		{
 			if (m_chengji != 0 || atof(m_subzuidifen) != 0 || atof(m_subzuigaofen) != 0 || atof(m_subjunfen) != 0)
 			{
@@ -2143,7 +2060,6 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	// 假如发生了错误
 	if (!m_success) 
 	{
-		free(p_lpszScore);
 		Error(u8"<p>现在还没有出成绩或发生了错误噢</p>");
 		return;
 	}
@@ -2165,7 +2081,7 @@ void parse_friendly_score(std::string & p_strlpszScore)
 		gpa = 0.0;
 	}
 		char m_jiaquanfen[1024] = { 0 };
-		sprintf(m_jiaquanfen, u8"<div id=\"i_total\"><p>加权平均分 / GPA (仅供参考)：</p><center>%.1f&nbsp;&nbsp;&nbsp;&nbsp;%.2f</center></div>",
+		sprintf(m_jiaquanfen, u8"<div id=\"i_total\"><p>加权平均分 / GPA (仅供参考)：</p><center>%.1f&nbsp;&nbsp;%.2f</center></div>",
 				jiaquan, gpa);
 		m_Output.insert(0, m_jiaquanfen);
 	//}
@@ -2186,10 +2102,9 @@ void parse_friendly_score(std::string & p_strlpszScore)
 	}
 
 	SetQueryCounter(++g_QueryCounter);
-	free(p_lpszScore);
 }
 
-// 处理 期中/月考/补考/缓考/清考等各种疑难杂考
+// 处理 期中/月考/补考/缓考/清考等各种疑难杂考 (GET /query.fcgi?order=tests)
 void parse_query_tests()
 {
 	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
@@ -2212,21 +2127,22 @@ void parse_query_tests()
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);
 	FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
+	std::string post(m_post_data);
+	free(m_post_data);
 
-	char *pStr1 = strstr(m_post_data, "tests=");
-	if (pStr1 == NULL)
+	std::string str_tests = _POST(post, "tests");
+	if (str_tests.empty())
 	{
-		free(m_post_data);
-		Error(u8"<p>发生错误，无法获取 POST 数据。</p>");
+		Error(u8"<p>发生错误，无法获取数据</p>");
 		return;
 	}
 	char tests[4096] = { 0 };
-	left(tests, pStr1 + 6, m_post_length - 6);
+	strncpy(tests, str_tests.c_str(), sizeof(tests) - 1);
 	int len = url_decode(tests, strlen(tests));
 	char temp[4096] = { 0 };
 	left(temp, tests, len);
-	strcpy(tests, temp);
-	free(m_post_data);
+	memset(tests, 0, sizeof(tests));
+	strncpy(tests, temp, sizeof(tests) - 1);
 
 	if (len > 2048 || len <= 0)
 	{
@@ -2251,7 +2167,7 @@ void parse_query_tests()
 	CCurlTask req;
 	if (!req.Exec(false, GET_TEST_DETAIL, CGI_HTTP_COOKIE, true, request))
 	{
-		Error(u8"<p><b>接收数据失败</b></p><p>curl 操作失败</p>");
+		Error(u8"<p><b>接收数据失败</b></p><p>网络通信异常</p>");
 		return;
 	}
 
@@ -2268,13 +2184,18 @@ void parse_query_tests()
 		Error(u8"<p><b>从服务器拉取分数失败 (BeginOfTable)</b></p><p>系统可能正忙，请稍后再试</p>");
 		return;
 	}
+
 	m_result += 93;
 	char *m_prep = (char *)malloc(req.GetLength());
+
 	replace_string(m_result, "&nbsp;", "");
 	replace_string(m_result, "\t", "");
 	replace_string(m_result, "\r", "");
 	replace_string(m_result, "\n", "");
-	strcpy(m_prep, "<div id=\"list_page\">");
+
+	memset(m_prep, 0, req.GetLength());
+	strncpy(m_prep, "<div id=\"list_page\">", req.GetLength() - 1);
+
 	char *m_end_body = strstr(m_result, "</table>");
 	if (m_result == NULL)
 	{
@@ -2316,19 +2237,20 @@ void parse_query_tests()
 	return;
 }
 
-// 获取学生姓名
+// 获取学生姓名 (buffer 必须大于等于 36)
 void get_student_name(char *p_lpszBuffer)
 {
+	memset(p_lpszBuffer, 0, 36);
 	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
 	{
-		strcpy(p_lpszBuffer, u8"(无名氏)");
+		strncpy(p_lpszBuffer, APP_NAME, 36 - 1);
 		return;
 	}
 
 	CCurlTask req;
 	if (!req.Exec(false, REQUEST_GET_REGISTER_INTERFACE, CGI_HTTP_COOKIE))
 	{
-		strcpy(p_lpszBuffer, u8"(无名氏)");
+		strncpy(p_lpszBuffer, APP_NAME, 36 - 1);
 		return;
 	}
 	char *m_rep_header = req.GetResult();
@@ -2336,31 +2258,31 @@ void get_student_name(char *p_lpszBuffer)
 	char *pStr1 = strstr(m_rep_header, "\x3c\x74\x64\x20\x63\x6c\x61\x73\x73\x3d\x22\x66\x69\x65\x6c\x64\x4e\x61\x6d\x65\x22\x3e\xd0\xd5\xc3\xfb\x3a\x26\x6e\x62\x73\x70\x3b\x3c\x2f\x74\x64\x3e" /*"<td class=\"fieldName\">姓名:&nbsp;</td>"*/);
 	if (pStr1 == NULL)
 	{
-		strcpy(p_lpszBuffer, u8"(无名氏)");
+		strncpy(p_lpszBuffer, APP_NAME, 36 - 1);
 		return;
 	}
 	pStr1 = strstr(pStr1 + 39, "<td>");
 	if (pStr1 == NULL)
 	{
-		strcpy(p_lpszBuffer, u8"(无名氏)");
+		strncpy(p_lpszBuffer, APP_NAME, 36 - 1);
 		return;
 	}
 	char *pStr2 = strstr(pStr1 + 5,"</td>");
 	if (pStr2 == NULL)
 	{
-		strcpy(p_lpszBuffer, u8"(无名氏)");
+		strncpy(p_lpszBuffer, APP_NAME, 36 - 1);
 		return;
 	}
 	mid(p_lpszBuffer, pStr1, pStr2 - pStr1 - 4, 4);
 	if (strstr(p_lpszBuffer, "<td") != NULL || strstr(p_lpszBuffer, "td>") != NULL) //如果教务系统中没有姓名可以获取，则会获取到html乱码
 	{
-		strcpy(p_lpszBuffer, u8"(无名氏)");
+		strncpy(p_lpszBuffer, APP_NAME, 36 - 1);
 		return;
 	}
 	char *temp = (char *)malloc(512);
 	unsigned int u8len = 0;
 	gbk_to_utf8(p_lpszBuffer, (unsigned int)strlen(p_lpszBuffer), &temp, &u8len);
-	strcpy(p_lpszBuffer, temp);
+	strncpy(p_lpszBuffer, temp, 36 - 1);
 	free(temp);
 }
 
@@ -2369,29 +2291,29 @@ void get_student_id(char *p_lpszBuffer)
 {
 	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
 	{
-		strcpy(p_lpszBuffer, "\0");
+		*p_lpszBuffer = '\0';
 		return;
 	}
 
 	CCurlTask req;
 	if (!req.Exec(false, REQUEST_TOP, CGI_HTTP_COOKIE))
 	{
-		strcpy(p_lpszBuffer, "\0");
+		*p_lpszBuffer = '\0';
 		return;
 	}
 
 	char *m_rep_header = req.GetResult();
 	// 拉取学生姓名
-	char *pStr1 = strstr(m_rep_header, "\xb5\xb1\xc7\xb0\xd3\xc3\xbb\xa7\x3a" /*"当前用户:"*/);
+	char *pStr1 = strstr(m_rep_header, "\xb5\xb1\xc7\xb0\xd3\xc3\xbb\xa7\x3a" /* 当前用户: */);
 	if (pStr1 == NULL)
 	{
-		strcpy(p_lpszBuffer, "\0");
+		*p_lpszBuffer = '\0';
 		return;
 	}
 	char *pStr2 = strstr(pStr1 + 8, "(");
 	if (pStr2 == NULL)
 	{
-		strcpy(p_lpszBuffer, "\0");
+		*p_lpszBuffer = '\0';
 		return;
 	}
 	mid(p_lpszBuffer, pStr1, pStr2 - pStr1 - 9, 9);
@@ -2410,7 +2332,7 @@ int system_registration()
 	CCurlTask req;
 	if (!req.Exec(false, REQUEST_GET_REGISTER_INTERFACE, CGI_HTTP_COOKIE))
 	{
-		Error(u8"<p><b>投递电子注册信息失败</b></p><p>curl 操作失败</p>");
+		Error(u8"<p><b>投递电子注册信息失败</b></p><p>网络通信异常</p>");
 		return -1;
 	}
 	char *m_rep_header = req.GetResult();
@@ -2418,21 +2340,21 @@ int system_registration()
 	char *pStr1 = strstr(m_rep_header, "selected>");
 	if (pStr1 == NULL)
 	{
-		Error(u8"<p><b>不好意思，电子注册失败。</b></p><p>本学期学费是否已交齐？或请登录教务系统查看具体原因。</p>");
+		Error(u8"<p><b>电子注册失败</b></p><p>本学期学费是否已交齐？请登录教务系统查看具体原因 (1)</p>");
 		return -1;
 	}
 	pStr1 -= 70;
 	char *pStr2 = strstr(pStr1, "<option value=\"");
 	if (pStr2 == NULL)
 	{
-		Error(u8"<p>数据错误。不好意思，电子注册失败，请登录教务系统查看具体原因。 (2)</p>");
+		Error(u8"<p><b>电子注册失败</b></p><p>请登录教务系统查看具体原因 (2)</p>");
 		return -1;
 	}
 	pStr1 = pStr2;
 	pStr2 = strstr(pStr1 + 16, "\"");
 	if (pStr2 == NULL)
 	{
-		Error(u8"<p>数据错误。不好意思，电子注册失败，请登录教务系统查看具体原因。 (3)</p>");
+		Error(u8"<p><b>电子注册失败</b></p><p>请登录教务系统查看具体原因 (3)</p>");
 		return -1;
 	}
 
@@ -2451,7 +2373,7 @@ int system_registration()
 	// 开始电子注册
 	if (!req2.Exec(false, m_post_req, CGI_HTTP_COOKIE, true, m_post_reg_info))
 	{
-		Error(u8"<p><b>POST电子注册信息失败</b></p><p>curl 操作失败</p>");
+		Error(u8"<p><b>电子注册失败</b></p><p>网络通信异常</p>");
 		return -1;
 	}
 	m_rep_header = req2.GetResult();
@@ -2459,11 +2381,10 @@ int system_registration()
 	pStr1 = strstr(m_rep_header, "\xd7\xa2\xb2\xe1\xb3\xc9\xb9\xa6" /*注册成功*/);
 	if (pStr1 == NULL)
 	{
-		Error(u8"<p>不好意思，电子注册失败，请登录教务系统查看具体原因。 (4)</p>");
+		Error(u8"<p><b>电子注册失败</b></p><p>请登录教务系统查看具体原因 (4)</p>");
 		return -1;
 	}
 
-	//cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/query.fcgi\r\n" << GLOBAL_HEADER;
 	return 0;
 }
 
@@ -2478,7 +2399,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	CCurlTask req;
 	if (!req.Exec(false, REQUEST_LOGIN, CGI_HTTP_COOKIE, true, m_padding))
 	{
-		Error(u8"<p><b>登录失败</b></p><p>curl 操作失败</p>");
+		Error(u8"<p><b>登录失败</b></p><p>网络通信异常</p>");
 		return false;
 	}
 	char *m_rep_body = req.GetResult();
@@ -2490,13 +2411,13 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	char *m_login_not_auth = strstr(m_result, "\xd6\xa4\xbc\xfe\xba\xc5" /*"证件号"*/); // for some urp systems
 	if (m_login_not_auth != NULL)
 	{
-		Error(u8"<p><b>学号或密码不对</b></p><p>如果你曾修改过帐号密码，请用新密码试一试</p>");
+		Error(u8"<p><b>学号或密码不对</b></p><p>如果修改过帐号密码，用新密码试一试</p>");
 		return false;
 	}
 	m_login_not_auth = strstr(m_result, "\xc3\xdc\xc2\xeb\xb2\xbb\xd5\xfd\xc8\xb7" /*密码不正确*/);
 	if (m_login_not_auth != NULL)
 	{
-		Error(u8"<p><b>学号或密码不对</b></p><p>如果你曾修改过帐号密码，请用新密码试一试</p>");
+		Error(u8"<p><b>学号或密码不对</b></p><p>如果修改过帐号密码，用新密码试一试</p>");
 		return false;
 	}
 	m_login_not_auth = strstr(m_result, "\xd1\xe9\xd6\xa4\xc2\xeb\xb4\xed\xce\xf3" /*验证码错误*/);
@@ -2508,13 +2429,13 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	m_login_not_auth = strstr(m_result, "\xca\xfd\xbe\xdd\xbf\xe2" /*数据库*/);
 	if (m_login_not_auth != NULL)
 	{
-		Error(u8"<p>教务系统数据库繁忙</p><p>请先等等再来吧</p>");
+		Error(u8"<p>教务系统数据库繁忙</p><p>请稍后再试</p>");
 		return false;
 	}
 	char *m_login_success = strstr(m_result, "\xd1\xa7\xb7\xd6\xd6\xc6\xd7\xdb\xba\xcf\xbd\xcc\xce\xf1" /*学分制综合教务*/);
 	if (m_login_success == NULL)
 	{
-		Error(u8"<p>发生了未知错误</p><p>请稍后再试</p>");
+		Error(u8"<p>发生未知错误</p><p>请稍后再试</p>");
 		return false;
 	}
 
@@ -2546,10 +2467,12 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	}
 
 	// 对密码做URL解码
-	int len = url_decode(p_password, strlen(p_password));
+	size_t pass_len = strlen(p_password) + 1;
+	int len = url_decode(p_password, pass_len - 1);
 	char temp[128] = { 0 };
 	left(temp, p_password, len);
-	strcpy(p_password, temp);
+	memset(p_password, 0, pass_len);
+	strncpy(p_password, temp, pass_len - 1);
 
 	if (strcmp(id, p_xuehao) != 0) // 无记录，则写入数据库
 	{
@@ -2561,7 +2484,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		if (stmt == NULL)
 		{
 			student_logout();
-			std::string Err_Msg(u8"<b>很抱歉，登录失败。</b><p>数据库错误 (statement 初始化失败)</p>");
+			std::string Err_Msg(u8"<b>很抱歉，登录失败</b><p>数据库错误 (statement 初始化失败)</p>");
 			Error(Err_Msg.c_str());
 			return false;
 		}
@@ -2592,7 +2515,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 			)
 		{
 			student_logout();
-			std::string Err_Msg(u8"<b>很抱歉，登录失败。</b><p>数据库错误 (");
+			std::string Err_Msg(u8"<b>很抱歉，登录失败</b><p>数据库错误 (");
 			Err_Msg += mysql_stmt_error(stmt);
 			Err_Msg += ")</p>";
 			Error(Err_Msg.c_str());
@@ -2611,7 +2534,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		if (stmt == NULL)
 		{
 			student_logout();
-			std::string Err_Msg(u8"<b>很抱歉，登录失败。</b><p>数据库错误 (statement 初始化失败)</p>");
+			std::string Err_Msg(u8"<b>很抱歉，登录失败</b><p>数据库错误 (statement 初始化失败)</p>");
 			Error(Err_Msg.c_str());
 			return false;
 		}
@@ -2641,7 +2564,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 			mysql_stmt_execute(stmt) != 0)
 		{
 			student_logout();
-			std::string Err_Msg(u8"<b>很抱歉，登录失败。</b><p>数据库错误 (");
+			std::string Err_Msg(u8"<b>很抱歉，登录失败</b><p>数据库错误 (");
 			Err_Msg += mysql_stmt_error(stmt);
 			Err_Msg += ")</p>";
 			Error(Err_Msg.c_str());
@@ -2701,22 +2624,22 @@ void parse_QuickQuery_Result()
 		Error(u8"<p>发生错误，POST 数据长度异常</p>");
 		return;
 	}
-	char *m_post_data = (char *)malloc(m_post_length + 2);	// TORESEARCH
+	char *m_post_data = (char *)malloc(m_post_length + 2);
 	FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
+	std::string post(m_post_data);
+	free(m_post_data);
 
 	// 获取学号
-	char *pStr1 = strstr(m_post_data, "xh=");
-	if (pStr1 == NULL)
+	std::string str_xuehao = _POST(post, "xh");
+	if (str_xuehao.empty())
 	{
-		free(m_post_data);
 		if (m_need_update_cookie)
 			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 		Error(u8"<p>无法获取学号信息</p>");
 		return;
 	}
-	char *pStr2 = strstr(pStr1 + 3, "&");
 	char m_xuehao[1024] = { 0 };
-	right(m_xuehao, pStr1, strlen(pStr1) - 3);
+	strncpy(m_xuehao, str_xuehao.c_str(), sizeof(m_xuehao) - 1);
 	if(strstr(m_xuehao, "%0D%0A") != NULL)
 		replace_string(m_xuehao, "%0D%0A", "|");
 	char *p = strtok(m_xuehao, "|");
@@ -2727,11 +2650,8 @@ void parse_QuickQuery_Result()
 		m_xh[m_xhgs++] = p;
 		p = strtok(NULL, "|");
 	}
-	pStr1 = NULL;
-	pStr2 = NULL;
 	if (m_xhgs > 5 || m_xhgs <= 0)
 	{
-		free(m_post_data);
 		if (m_need_update_cookie)
 			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 		Error(u8"<p>输入的学号个数存在问题，请确认！</p>");
@@ -2740,7 +2660,6 @@ void parse_QuickQuery_Result()
 	
 	std::string m_list;
 	char m_xxmz[512] = { 0 };
-	free(m_post_data);
 
 	std::string COOKIE("JSESSIONID=");
 	if (m_need_update_cookie)
@@ -2776,7 +2695,7 @@ void parse_QuickQuery_Result()
 			}
 
 			char *m_lpvBuffer = req.GetResult();
-			pStr1 = strstr(m_lpvBuffer, "&reportParamsId=");
+			char *pStr1 = strstr(m_lpvBuffer, "&reportParamsId=");
 			if (pStr1 == NULL)
 			{
 				if (m_need_update_cookie)
@@ -2784,7 +2703,7 @@ void parse_QuickQuery_Result()
 				Error(u8"<p>获取报表ID错误 (1)</p>");
 				return;
 			}
-			pStr2 = strstr(pStr1 + 16, "\r\n");
+			char *pStr2 = strstr(pStr1 + 16, "\r\n");
 			if (pStr1 == NULL)
 			{
 				if (m_need_update_cookie)
@@ -2962,7 +2881,8 @@ void parse_QuickQuery_Result()
 					char m_red[64] = "<b style=\"color:#f6383a\">";
 					strcat(m_red, m_cj);
 					strcat(m_red, "</b>");
-					strcpy(m_cj, m_red);
+					memset(m_cj, 0, sizeof(m_red));
+					strncpy(m_cj, m_red, sizeof(m_red) - 1);
 				}
 
 				//cout << " - " << m_cj;
@@ -2980,7 +2900,8 @@ void parse_QuickQuery_Result()
 					char m_kcmz_cx[256] = { 0 };
 					strcat(m_kcmz_cx, "\x3c\x62\x20\x73\x74\x79\x6c\x65\x3d\x22\x63\x6f\x6c\x6f\x72\x3a\x23\x66\x35\x37\x63\x30\x30\x22\x3e\x5b\xd6\xd8\xd0\xde\x5d\x3c\x2f\x62\x3e\x20" /*"<b style=\"color:#f57c00\">[重修]</b> "*/); // 这里不用做U8转换，因为下面做过了
 					strcat(m_kcmz_cx, m_kcmz);
-					strcpy(m_kcmz, m_kcmz_cx);
+					memset(m_kcmz, 0, sizeof(m_kcmz));
+					strncpy(m_kcmz, m_kcmz_cx, sizeof(m_kcmz) - 1);
 				}
 
 				//cout << " - " << m_lb;
@@ -3007,8 +2928,8 @@ void parse_QuickQuery_Result()
 					break;
 				}
 
-				strcpy(m_test_info[m_index].cj, m_cj);
-				strcpy(m_test_info[m_index].kcmz, m_kcmz);
+				strncpy(m_test_info[m_index].cj, m_cj, sizeof(m_test_info[m_index].cj) - 1);
+				strncpy(m_test_info[m_index].kcmz, m_kcmz, sizeof(m_test_info[m_index].kcmz) - 1);
 				m_test_info[m_index].date = atoi(m_date_4);
 				m_index++;
 			}
@@ -3108,39 +3029,29 @@ void parse_QuickQuery_Result()
 		SetQueryCounter(g_QueryCounter);
 }
 
-// QQ帐号绑定入口与解绑逻辑 (/OAuth2Assoc.fcgi)
+// 微信帐号绑定入口与解绑逻辑 (/OAuth2Assoc.fcgi)
 void OAuth2_Association(bool isPOST)
 {
-	if (CGI_QUERY_STRING == NULL)
-	{
-		Error(u8"参数错误 (Null QUERY_STRING)");
-		return;
-	}
-
 	// 解除绑定逻辑
-	char *pStr1 = strstr(CGI_QUERY_STRING, "release=");
-	if (pStr1 != NULL)
+	std::string str_release = _GET(std::string(CGI_QUERY_STRING), "release");
+	if (!str_release.empty())
 	{
 		char student_id[512] = { 0 };
 		get_student_id(student_id);
 		if (strlen(student_id) == 0)
 		{
-			Error(u8"非法操作！ (尚未登录)");
+			Error(u8"非法操作 (尚未登录)");
 			return;
 		}
-		char *pStr2 = strstr(pStr1 + 8, "&");
-		char *releaseid = new char[strlen(CGI_QUERY_STRING)];
-		if (pStr2 == NULL)
-		{
-			right(releaseid, pStr1 + 8, strlen(CGI_QUERY_STRING) - 8);
-		}
-		else
-		{
-			mid(releaseid, pStr1 + 8, pStr2 - pStr1 - 8, 0);
-		}
+
+		size_t qslen = strlen(CGI_QUERY_STRING);
+		char *releaseid = new char[qslen];
+		memset(releaseid, 0, qslen);
+		strncpy(releaseid, str_release.c_str(), qslen - 1);
+
 		if (strcmp(releaseid, student_id) != 0)
 		{
-			Error(u8"非法操作！ (身份错误)");
+			Error(u8"非法操作 (身份错误)");
 			return;
 		}
 
@@ -3176,58 +3087,34 @@ void OAuth2_Association(bool isPOST)
 		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/main.fcgi\r\n" << GLOBAL_HEADER;
 		return;
 	}
-
-	pStr1 = strstr(CGI_QUERY_STRING, "openid=");
-	if (pStr1 == NULL)
+	std::string str_openid = _GET(std::string(CGI_QUERY_STRING), "openid");
+	if (str_openid.empty())
 	{
-		Error(u8"鉴权失败 (Null openid)");
+		Error(u8"鉴权失败 (openid)");
 		return;
 	}
-	char *pStr2 = strstr(pStr1 + 7, "&");
-	char *openid = new char[strlen(CGI_QUERY_STRING)];
-	if (pStr2 == NULL)
-	{
-		right(openid, pStr1 + 7, strlen(CGI_QUERY_STRING) - 7);
-	}
-	else
-	{
-		mid(openid, pStr1 + 7, pStr2 - pStr1 - 7, 0);
-	}
+	size_t qslen = strlen(CGI_QUERY_STRING);
+	char *openid = new char[qslen];
+	strncpy(openid, str_openid.c_str(), qslen - 1);
 
 	char access_token[1024] = { 0 };
-	pStr1 = strstr(CGI_QUERY_STRING, "proc=");
-	if (pStr1 == NULL)
+	std::string str_proc = _GET(std::string(CGI_QUERY_STRING), "proc");
+	if (str_proc.empty())
 	{
-		Error(u8"没有过程状态信息 (Null proc)");
+		Error(u8"没有过程状态信息 (proc)");
 		delete[]openid;
 		return;
 	}
-	pStr2 = strstr(pStr1 + 5, "&");
-	if (pStr2 == NULL)
-	{
-		right(access_token, pStr1 + 5, strlen(CGI_QUERY_STRING) - 5);
-	}
-	else
-	{
-		mid(access_token, pStr1 + 5, pStr2 - pStr1 - 5, 0);
-	}
+	strncpy(access_token, str_proc.c_str(), sizeof(access_token) - 1);
 
 	if (!isPOST)
 	{
 		// 如果传进 sid，则自动填写学号、并且从数据库中拿密码。
-		pStr1 = strstr(CGI_QUERY_STRING, "stid=");
+		std::string str_stid = _GET(std::string(CGI_QUERY_STRING), "stid");
 		char stid[128] = { 0 };
-		if (pStr1 != NULL)
+		if (!str_stid.empty())
 		{
-			pStr2 = strstr(pStr1 + 5, "&");
-			if (pStr2 == NULL)
-			{
-				right(stid, pStr1 + 5, strlen(CGI_QUERY_STRING) - 5);
-			}
-			else
-			{
-				mid(stid, pStr1 + 5, pStr2 - pStr1 - 5, 0);
-			}
+			strncpy(stid, str_stid.c_str(), sizeof(stid) - 1);
 			DeCodeStr(stid);
 		}
 
@@ -3265,23 +3152,23 @@ void OAuth2_Association(bool isPOST)
 
 		cout << GLOBAL_HEADER;
 
-		std::string title(u8"QQ用户绑定 - ");
+		std::string title(u8"微信用户绑定 - ");
 		title += APP_NAME;
 		cout << strformat( header.c_str(), title.c_str());
 
 		if (strlen(stid) == 0 || strcmp(stid, "NONE") == 0)
 		{
-			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"感谢使用QQ登录，请先绑定自己的学号吧 :)",
+			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"感谢使用微信登录，请先绑定自己的学号吧 :)",
 				 "", pass);
 		}
 		else if(strlen(pass) == 0)
 		{
-			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"感谢使用QQ登录，请输入密码来继续操作 :)",
+			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"感谢使用微信登录，请输入密码来继续操作 :)",
 				stid, "");
 		}
 		else
 		{
-			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"感谢使用QQ登录，请输入验证码来继续操作 :)",
+			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"感谢使用微信登录，请输入验证码来继续操作 :)",
 				stid, pass);
 		}
 		cout << footer.c_str();
@@ -3292,58 +3179,46 @@ void OAuth2_Association(bool isPOST)
 		int m_post_length = atoi(CGI_CONTENT_LENGTH);
 		if (m_post_length <= 0 || m_post_length > 127)
 		{
-			Error(u8"<p>发生错误，POST 数据长度异常</p>");
-			delete[]openid;
+			Error(u8"<p>帐号或密码输入有问题，请重试</p>");
 			return;
 		}
 		char *m_post_data = (char *)malloc(m_post_length + 2);
 		FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
+		std::string post(m_post_data);
+		free(m_post_data);
 
 		// 获取学号
-		char *pStr1 = strstr(m_post_data, "xh=");
-		if (pStr1 == NULL)
+		std::string str_xuehao = _POST(post, "xh");
+		if (str_xuehao.empty())
 		{
-			free(m_post_data);
-			Error(u8"<p>无法获取学号信息。</p>");
-			delete[]openid;
+			Error(u8"<p>无法获取学号信息</p>");
 			return;
 		}
-		char *pStr2 = strstr(pStr1 + 3, "&");
 		char m_xuehao[128] = { 0 };
-		mid(m_xuehao, pStr1, pStr2 - pStr1 - 3, 3);
-		pStr1 = NULL;
-		pStr2 = NULL;
+		strncpy(m_xuehao, str_xuehao.c_str(), sizeof(m_xuehao) - 1);
 
 		// 获取密码
-		pStr1 = strstr(m_post_data, "mm=");
-		if (pStr1 == NULL)
+		std::string str_password = _POST(post, "mm");
+		if (str_password.empty())
 		{
-			free(m_post_data);
-			Error(u8"<p>无法获取密码信息。</p>");
-			delete[]openid;
+			Error(u8"<p>无法获取密码信息</p>");
 			return;
 		}
-		pStr2 = strstr(pStr1 + 3, "&");
 		char m_password[128] = { 0 };
-		mid(m_password, pStr1, pStr2 - pStr1 - 3, 3);
-		pStr1 = NULL;
-		pStr2 = NULL;
+		strncpy(m_password, str_password.c_str(), sizeof(m_password) - 1);
 
 		// 获取验证码
-		pStr1 = strstr(m_post_data, "yzm=");
-		if (pStr1 == NULL)
+		std::string str_captcha = _POST(post, "yzm");
+		if (str_captcha.empty())
 		{
-			free(m_post_data);
-			Error(u8"<p>无法获取验证码信息。</p>");
-			delete[]openid;
+			Error(u8"<p>无法获取验证码信息</p>");
 			return;
 		}
 		char m_captcha[128] = { 0 };
-		right(m_captcha, pStr1 + 4, 4);
+		strncpy(m_captcha, str_captcha.c_str(), sizeof(m_captcha) - 1);
 
 		if (!student_login(m_xuehao, m_password, m_captcha))
 		{
-			free(m_post_data);
 			delete[]openid;
 			return;
 		}
@@ -3356,9 +3231,8 @@ void OAuth2_Association(bool isPOST)
 
 		if (stmt == NULL)
 		{
-			char Err_Msg[1024] = u8"<b>很抱歉，QQ绑定失败。</b><p>数据库错误 (statement 初始化失败)</p><p>但还是可以正常登录的。</p>";
+			char Err_Msg[1024] = u8"<b>很抱歉，微信绑定失败。</b><p>数据库错误 (statement 初始化失败)</p><p>但还是可以正常登录的。</p>";
 			Error(Err_Msg);
-			free(m_post_data);
 			delete[]openid;
 			return;
 		}
@@ -3376,11 +3250,10 @@ void OAuth2_Association(bool isPOST)
 			mysql_stmt_execute(stmt) != 0
 			)
 		{
-			char Err_Msg[1024] = u8"<b>很抱歉，QQ绑定失败。</b><p>数据库错误 (";
+			char Err_Msg[1024] = u8"<b>很抱歉，微信绑定失败。</b><p>数据库错误 (";
 			strcat(Err_Msg, mysql_stmt_error(stmt));
 			strcat(Err_Msg, u8")</p><p>但还是可以正常登录的。</p>");
 			Error(Err_Msg);
-			free(m_post_data);
 			delete[]openid;
 			mysql_stmt_close(stmt);
 			return;
@@ -3393,7 +3266,6 @@ void OAuth2_Association(bool isPOST)
 		cout << "Status: 302 Found\r\n";
 		cout << "Location: " << getAppURL().c_str() << "/main.fcgi\r\n";
 		cout << GLOBAL_HEADER;
-		free(m_post_data);
 	}
 	
 	delete[]openid;
@@ -3417,7 +3289,7 @@ void parse_teaching_evaluation()
 	CCurlTask req;
 	if (!req.Exec(false, GET_TEACH_EVAL_LIST, CGI_HTTP_COOKIE))
 	{
-		Error(u8"<p><b>教学评估请求投递失败</b></p><p>curl 操作失败</p>");
+		Error(u8"<p><b>教学评估请求投递失败</b></p><p>网络通信异常</p>");
 		return;
 	}
 
@@ -3473,16 +3345,16 @@ void parse_teaching_evaluation()
 			return;
 		}
 
-		strcpy(te[counts].wjbm, dst[0]);
-		strcpy(te[counts].bpr, dst[1]);
-		strcpy(te[counts].pgnr, dst[5]);
-		strcpy(te[counts].bprm, dst[2]);
+		strncpy(te[counts].wjbm, dst[0], sizeof(te[counts].wjbm) - 1);
+		strncpy(te[counts].bpr, dst[1], sizeof(te[counts].bpr) - 1);
+		strncpy(te[counts].pgnr, dst[5], sizeof(te[counts].pgnr) - 1);
+		strncpy(te[counts].bprm, dst[2], sizeof(te[counts].bprm) - 1);
 		unsigned int to_len = 0;
 		unsigned int len = strlen(dst[4]);
 		char *tmp = (char *)malloc(len * 3 + 1);
 		memset(tmp, 0, len * 3 + 1);
 		gbk_to_utf8(dst[4], len, &tmp, &to_len);
-		strcpy(te[counts].name, tmp);
+		strncpy(te[counts].name, tmp, sizeof(te[counts].name) - 1);
 		free(tmp);
 
 		counts++;
@@ -3541,7 +3413,7 @@ void parse_teaching_evaluation()
 	}
 	else
 	{
-		strcpy(out_head, u8"<div class=\"weui-cells__title\"><p>嗯，你都评价好啦</div>");
+		strncpy(out_head, u8"<div class=\"weui-cells__title\"><p>嗯，你都评价好啦</div>", sizeof(out_head) - 1);
 		need_eval = false;
 	}
 
@@ -3581,19 +3453,19 @@ void teaching_evaluation()
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);
 	FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
+	std::string post(m_post_data);
+	free(m_post_data);
 
 	// 获取主观评价
-	char *pStr1 = strstr(m_post_data, "nr=");
-	if (pStr1 == NULL)
+	std::string str_zgpj = _POST(post, "nr");
+	if (str_zgpj.empty())
 	{
-		free(m_post_data);
 		Error(u8"<p>无法获取主观评价内容</p>");
 		return;
 	}
-	
+
 	char zgpj[10240] = { 0 };
-	left(zgpj, pStr1 + 3, m_post_length - 3);
-	free(m_post_data);
+	strncpy(zgpj, str_zgpj.c_str(), sizeof(zgpj) - 1);
 	int len = url_decode(zgpj, strlen(zgpj));
 	char *temp = (char *)malloc(10240);
 	memset(temp, 0, 10240);
@@ -3605,7 +3477,8 @@ void teaching_evaluation()
 	free(temp);
 	int nlen = 0;
 	char *final_text = url_encode(decoded, strlen(decoded), &nlen);
-	strcpy(zgpj, final_text);
+	memset(zgpj, 0, sizeof(zgpj));
+	strncpy(zgpj, final_text, sizeof(zgpj) - 1);
 	free(decoded);
 	free(final_text);
 
@@ -3613,7 +3486,7 @@ void teaching_evaluation()
 	CCurlTask req;
 	if (!req.Exec(false, GET_TEACH_EVAL_LIST, CGI_HTTP_COOKIE))
 	{
-		Error(u8"<p><b>教学评估请求投递失败</b></p><p>curl 操作失败</p>");
+		Error(u8"<p><b>教学评估请求投递失败</b></p><p>网络通信异常</p>");
 		return;
 	}
 
@@ -3669,10 +3542,10 @@ void teaching_evaluation()
 			return;
 		}
 
-		strcpy(te[counts].wjbm, dst[0]);
-		strcpy(te[counts].bpr, dst[1]);
-		strcpy(te[counts].pgnr, dst[5]);
-		strcpy(te[counts].name, dst[4]);
+		strncpy(te[counts].wjbm, dst[0], sizeof(te[counts].wjbm) - 1);
+		strncpy(te[counts].bpr, dst[1], sizeof(te[counts].bpr) - 1);
+		strncpy(te[counts].pgnr, dst[5], sizeof(te[counts].pgnr) - 1);
+		strncpy(te[counts].name, dst[4], sizeof(te[counts].name) - 1);
 		int new_len = 0;
 		char *tmp = url_encode(dst[3], strlen(dst[3]), &new_len);
 		left(te[counts].wjmc, tmp, new_len);
@@ -3709,7 +3582,7 @@ void teaching_evaluation()
 				CCurlTask req2;
 				if (!req2.Exec(false, POST_PRE_TEACH_EVAL, CGI_HTTP_COOKIE, true, pre_post.c_str()))
 				{
-					Error(u8"<p><b>准备评估时发生了错误</b></p><p>curl 操作失败</p>");
+					Error(u8"<p><b>准备评估时发生了错误</b></p><p>网络通信异常</p>");
 					return;
 				}
 
@@ -3718,7 +3591,7 @@ void teaching_evaluation()
 				if (m_result == NULL)
 				{
 					std::string err_msg = u8"<p>出现错误</p><p>很抱歉，在评估《";
-					err_msg = err_msg + te[i].name + u8"》课程时出现了错误。</p><p>(进入详细页面失败)</p>";
+					err_msg = err_msg + te[i].name + u8"》课程时出现了错误</p><p>(进入详细页面失败)</p>";
 					Error(err_msg.c_str());
 					return;
 				}
@@ -3731,7 +3604,7 @@ void teaching_evaluation()
 					if (p1 == NULL)
 					{
 						std::string err_msg = u8"<p>出现错误</p><p>很抱歉，在评估《";
-						err_msg = err_msg + te[i].name + u8"》课程时出现了错误。</p><p>(名称条目引号闭合失败)</p>";
+						err_msg = err_msg + te[i].name + u8"》课程时出现了错误</p><p>(名称条目引号闭合失败)</p>";
 						Error(err_msg.c_str());
 						return;
 					}
@@ -3744,13 +3617,14 @@ void teaching_evaluation()
 					}
 					else 
 					{
-						strcpy(last, num);
+						memset(last, 0, sizeof(last));
+						strncpy(last, num, sizeof(last) - 1);
 					}
 					char *p2 = strstr(p1 + 1, "value=\"");
 					if (p2 == NULL)
 					{
 						std::string err_msg = u8"<p>出现错误</p><p>很抱歉，在评估《";
-						err_msg = err_msg + te[i].name + u8"》课程时出现了错误。</p><p>(值条目引号开启失败)</p>";
+						err_msg = err_msg + te[i].name + u8"》课程时出现了错误</p><p>(值条目引号开启失败)</p>";
 						Error(err_msg.c_str());
 						return;
 					}
@@ -3758,7 +3632,7 @@ void teaching_evaluation()
 					if (p2 == NULL)
 					{
 						std::string err_msg = u8"<p>出现错误</p><p>很抱歉，在评估《";
-						err_msg = err_msg + te[i].name + u8"》课程时出现了错误。</p><p>(值条目引号闭合失败)</p>";
+						err_msg = err_msg + te[i].name + u8"》课程时出现了错误</p><p>(值条目引号闭合失败)</p>";
 						Error(err_msg.c_str());
 						return;
 					}
@@ -3779,7 +3653,7 @@ void teaching_evaluation()
 				if (!req3.Exec(false, POST_TEACH_EVAL, CGI_HTTP_COOKIE, true, post_data.c_str()))
 				{
 					std::string err_msg = u8"<p>出现错误</p><p>很抱歉，在评估《";
-					err_msg = err_msg + te[i].name + u8"》课程时出现了错误。</p><p>curl 操作失败</p>";
+					err_msg = err_msg + te[i].name + u8"》课程时出现了错误</p><p>网络通信异常</p>";
 					Error(err_msg.c_str());
 				}
 
@@ -3788,7 +3662,7 @@ void teaching_evaluation()
 				if (m_result == NULL)
 				{
 					std::string err_msg = u8"<p>出现错误</p><p>很抱歉，在评估《";
-					err_msg = err_msg + te[i].name + u8"》课程时出现了错误。</p>";
+					err_msg = err_msg + te[i].name + u8"》课程时出现了错误</p>";
 					Error(err_msg.c_str());
 					return;
 				}
@@ -3835,7 +3709,6 @@ void parse_change_password()
 // 修改密码 (POST /changePassword.fcgi)
 void do_change_password() //(POST /changePassword.fcgi)
 {
-	// modifyPassWordAction.do?pwd=
 	bool m_need_update_cookie = false;
 	std::string m_photo(" "); // 有数据，需要获取照片
 	process_cookie(&m_need_update_cookie, m_photo);
@@ -3855,23 +3728,24 @@ void do_change_password() //(POST /changePassword.fcgi)
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);
 	FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
+	std::string post(m_post_data);
+	free(m_post_data);
 
 	// 获取新密码
-	char *pStr1 = strstr(m_post_data, "mm=");
-	if (pStr1 == NULL)
+	std::string str_pwd = _POST(post, "mm");
+	if (str_pwd.empty())
 	{
-		free(m_post_data);
 		Error(u8"<p>发生错误，无法获取 POST 数据。</p>");
 		return;
 	}
 
 	char pwd[128] = { 0 };
-	left(pwd, pStr1 + 3, m_post_length - 3);
+	strncpy(pwd, str_pwd.c_str(), sizeof(pwd) - 1);
 	int len = url_decode(pwd, strlen(pwd));
 	char temp[128];
 	left(temp, pwd, len);
-	strcpy(pwd, temp);
-	free(m_post_data);
+	memset(pwd, 0, sizeof(pwd));
+	strncpy(pwd, temp, sizeof(pwd) - 1);
 
 	if (len > 12 || len <= 0)
 	{
@@ -3885,13 +3759,13 @@ void do_change_password() //(POST /changePassword.fcgi)
 	CCurlTask req;
 	if (!req.Exec(false, GET_RET, CGI_HTTP_COOKIE))
 	{
-		Error(u8"<p><b>修改密码时发生了错误</b></p><p>curl 操作失败</p>");
+		Error(u8"<p><b>修改密码时发生了错误</b></p><p>网络通信异常</p>");
 		return;
 	}
 
 	// 拉取改密结果
 	char *m_rep_header = req.GetResult();
-	pStr1 = strstr(m_rep_header, "\xb3\xc9\xb9\xa6" /*"成功"*/);
+	char *pStr1 = strstr(m_rep_header, "\xb3\xc9\xb9\xa6" /*"成功"*/);
 	if (pStr1 == NULL)
 	{
 		Error(u8"<p>密码修改失败，请确认是否输入了非法字符，或请稍后再试。</p>");

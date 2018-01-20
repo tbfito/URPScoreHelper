@@ -35,8 +35,7 @@
 	void parse_main();
 	int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri);
 	void parse_index();
-	int parse_query();
-	void parse_friendly_score(std::string & p_strlpszScore);
+	void parse_query();
 	void get_student_name(char *p_lpszBuffer);
 	void get_student_id(char *p_lpszBuffer);
 	int system_registration();

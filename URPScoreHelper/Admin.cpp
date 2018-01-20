@@ -129,7 +129,7 @@ void admin_intro()
 // 处理管理员登录入口 (GET /admin/login.fcgi)
 void parse_admin_login()
 {
-	if (strstr(CGI_QUERY_STRING, "act=logout") != NULL)
+	if (_GET(std::string(CGI_QUERY_STRING), "act") == "logout")
 	{
 		cout << "Status: 302 Found\r\n"
 			 << "Set-Cookie: admin_sessid=; max-age=-1; path=/admin/\r\n"
@@ -185,7 +185,7 @@ void admin_error(const char *err_msg)
 	mid(doc_root, CGI_SCRIPT_FILENAME, Last - CGI_SCRIPT_FILENAME + 1, 0);
 	char *file_root = new char[MAX_PATH];
 	memset(file_root, 0, MAX_PATH);
-	strcpy(file_root, doc_root);
+	strncpy(file_root, doc_root, MAX_PATH - 1);
 	strcat(file_root, "tips.fcgi");
 	delete[]doc_root;
 	cout << strformat(ReadTextFileToMem(file_root).c_str(), APP_NAME, APP_NAME, err_msg).c_str();
@@ -241,7 +241,7 @@ void do_admin_login()
 // 生成登录会话 Session，由 sessino() 调用
 std::string generate_session()
 {
-	unsigned long long result = std::time(nullptr);
+	unsigned long long result = time(NULL);
 	result += 600;
 	char tmp[128] = { 0 };
 	sprintf(tmp, "%lld", result);
@@ -259,18 +259,10 @@ bool verify_session()
 	char *session = (char *)malloc(1024);
 	memset(session, 0, 1024);
 
-	char *pStr1 = strstr(CGI_HTTP_COOKIE, "admin_sessid=");
-	if (pStr1 != NULL)
+	std::string str_admin_sesid = _COOKIE(std::string(CGI_HTTP_COOKIE), "admin_sessid");
+	if (!str_admin_sesid.empty())
 	{
-		char *pStr2 = strstr(pStr1 + 13, ";");
-		if (pStr2 == NULL) // 如果这条 Cookie 在最后一条
-		{
-			right(session, CGI_HTTP_COOKIE, strlen(CGI_HTTP_COOKIE) - (pStr1 - CGI_HTTP_COOKIE) - 13);
-		}
-		else
-		{
-			mid(session, pStr1, pStr2 - pStr1 - 13, 13);
-		}
+		strncpy(session, str_admin_sesid.c_str(), 1024 - 1);
 	}
 	else
 	{
@@ -293,7 +285,7 @@ bool verify_session()
 
 	char *unused;
 	unsigned long long timestamp = strtoull(tmp1, &unused, 10);
-	unsigned long long now = std::time(nullptr);
+	unsigned long long now = time(NULL);
 	if (timestamp <= now) // 会话超时
 	{
 		free(session);
@@ -412,28 +404,6 @@ void save_admin_settings()
 	footer = strformat(ReadTextFileToMem(FOOTER_TEMPLATE_LOCATION).c_str(), m_APP_NAME.c_str(), m_FOOTER_TEXT.c_str(), m_ANALYSIS_CODE.c_str());
 
 	admin_error(u8"设定已保存");
-}
-
-// 获取 POST 中的内容(缺陷：表单名称不能中不能有重叠)
-std::string _POST(std::string & post, const char *name)
-{
-	std::string ret;
-	size_t len = strlen(name);
-	size_t pos1 = post.find(name);
-	size_t pos2 = post.find("&", pos1 + len + 1);
-	if (pos1 == std::string::npos)
-	{
-		return ret;
-	}
-	if (pos2 == std::string::npos)
-	{
-		ret = post.substr(pos1 + len + 1, post.length() - pos1 - len - 1);
-	}
-	else
-	{
-		ret = post.substr(pos1 + len + 1, pos2 - pos1 - len - 1);
-	}
-	return ret;
 }
 
 // 更新设置表
@@ -603,7 +573,7 @@ void parse_admin_info()
 	if (!session())
 		return;
 
-	if (strcmp(CGI_QUERY_STRING, "act=reset_query_counter") == 0)
+	if (_GET(std::string(CGI_QUERY_STRING), "act") == "reset_query_counter")
 	{
 		UpdateSettings("QueryCounter", "0");
 		admin_error(u8"操作成功");
@@ -650,7 +620,7 @@ void do_find_user()
 	std::string post(m_post_data);
 	free(m_post_data);
 
-	if (strcmp(CGI_QUERY_STRING, "order=id") == 0)
+	if (_GET(std::string(CGI_QUERY_STRING),  "order") == "id")
 	{
 		std::string m_STUDENT_ID = _POST(post, "STUDENT_ID");
 
@@ -706,7 +676,7 @@ void do_find_user()
 
 		if (strlen(tmp1) == 0)
 		{
-			strcpy(tmp1, u8"未找到");
+			strncpy(tmp1, u8"未找到", sizeof(tmp1) - 1);
 		}
 
 		char temp[1024] = { 0 };
@@ -723,7 +693,7 @@ void do_find_user()
 		free(result);
 		return;
 	}
-	else if (strcmp(CGI_QUERY_STRING, "order=name") == 0)
+	else if (_GET(std::string(CGI_QUERY_STRING), "order") == "name")
 	{
 		std::string m_STUDENT_NAME = _POST(post, "STUDENT_NAME");
 
@@ -804,7 +774,7 @@ void do_find_user()
 
 		if (result_str.length() == 0)
 		{
-			strcpy(tmp1, u8"未找到");
+			strncpy(tmp1, u8"未找到", sizeof(tmp1) - 1);
 			result_str = strformat(find_user_result_section, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6);
 		}
 

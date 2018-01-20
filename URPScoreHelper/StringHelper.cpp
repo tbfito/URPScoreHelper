@@ -2,7 +2,7 @@
 #include "StringHelper.h"
 
 // 取文本左边
-char * left(char *dst, char *src, int n)
+char *left(char *dst, char *src, int n)
 {
 	char *p = src;
 	char *q = dst;
@@ -16,7 +16,7 @@ char * left(char *dst, char *src, int n)
 }
 
 // 取文本中间
-char * mid(char *dst, char *src, int n, int m)        /*n为长度，m为位置*/
+char *mid(char *dst, char *src, int n, int m)        /*n为长度，m为位置*/
 {
 	char	*p = src;
 	char	*q = dst;
@@ -35,7 +35,7 @@ char * mid(char *dst, char *src, int n, int m)        /*n为长度，m为位置*
 }
 
 // 取文本右边
-char * right(char *dst, char *src, int n)
+char *right(char *dst, char *src, int n)
 {
 	char	*p = src;
 	char	*q = dst;
@@ -174,13 +174,13 @@ int split(char dst[][128], char* str, const char* spliter)
 	result = strtok(str, spliter);
 	while (result != NULL)
 	{
-		strcpy(dst[n++], result);
+		strncpy(dst[n++], result, 127);
 		result = strtok(NULL, spliter);
 	}
 	return n;
 }
 
-int Hex2Ascii(char* hex, char* ascii)
+int Hex2Ascii(char* hex, unsigned char* ascii)
 {
 	int len = strlen(hex), tlen, i, cnt;
 
@@ -205,16 +205,74 @@ int Hex2Ascii(char* hex, char* ascii)
 int Ascii2Hex(char* ascii, char* hex)
 {
 	int i, len = strlen(ascii);
-	char chHex[] = "0123456789ABCDEF";
 
 	for (i = 0; i<len; i++)
 	{
-		hex[i * 2] = chHex[((unsigned char)ascii[i]) >> 4];
-		hex[i * 2 + 1] = chHex[((unsigned char)ascii[i]) & 0xf];
-		//hex[i * 3 + 2] = ' ';
+		hex[i * 2] = hexchars[((unsigned char)ascii[i]) >> 4];
+		hex[i * 2 + 1] = hexchars[((unsigned char)ascii[i]) & 0xf];
 	}
 
 	hex[len * 2] = '\0';
-
 	return len * 2;
+}
+
+// 获取 GET 中的内容
+std::string _GET(std::string & get, const char *name)
+{
+	return _URLFIND(get, name);
+}
+
+// 获取 POST 中的内容
+std::string _POST(std::string & post, const char *name)
+{
+	return _URLFIND(post, name);
+}
+
+static std::string _URLFIND(std::string & url, const char *name)
+{
+	std::string var(name);
+	var.append("=");
+	size_t len = var.length();
+	std::string ret;
+
+	size_t pos1 = url.find(var);
+	size_t pos2 = url.find("&", pos1 + len);
+	if (pos1 == std::string::npos)
+	{
+		return ret;
+	}
+	if (pos2 == std::string::npos)
+	{
+		ret = url.substr(pos1 + len, url.length() - pos1 - len);
+	}
+	else
+	{
+		ret = url.substr(pos1 + len, pos2 - pos1 - len);
+	}
+	return ret;
+}
+
+// 获取 COOKIE 中的内容
+std::string _COOKIE(std::string & cookie, const char *name)
+{
+	std::string var(name);
+	var.append("=");
+	size_t len = var.length();
+	std::string ret;
+
+	size_t pos1 = cookie.find(var);
+	size_t pos2 = cookie.find(";", pos1 + len);
+	if (pos1 == std::string::npos)
+	{
+		return ret;
+	}
+	if (pos2 == std::string::npos)
+	{
+		ret = cookie.substr(pos1 + len, cookie.length() - pos1 - len);
+	}
+	else
+	{
+		ret = cookie.substr(pos1 + len, pos2 - pos1 - len);
+	}
+	return ret;
 }

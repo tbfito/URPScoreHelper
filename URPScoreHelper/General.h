@@ -71,7 +71,7 @@ extern std::string ERROR_HTML;
 extern std::string error;
 extern bool isAjaxRequest;
 
-extern char JSESSIONID[256];
+extern char JSESSIONID[1024];
 
 void Error(const char *p_ErrMsg);
 char * base64_encode(const unsigned char * bindata, char * base64, int binlength);

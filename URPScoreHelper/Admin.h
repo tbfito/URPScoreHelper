@@ -15,7 +15,6 @@ bool verify_session();
 void parse_admin_index();
 void parse_admin_settings();
 void save_admin_settings();
-std::string _POST(std::string & post, const char *name);
 void UpdateSettings(const char *name, const char *value);
 void decode_post_data(std::string & str);
 void parse_admin_change_password();

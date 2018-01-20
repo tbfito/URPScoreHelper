@@ -43,7 +43,7 @@ function get_captcha() {
 			}
 			else if(data == "REQUEST-FAILED")
 			{
-				$.toast("验证码失踪了！学院系统可能发生故障", "text");
+				$.toast("无法连接学校服务器", "text");
 				obj.src = "/img/refresh.png";
 			}
 			else
@@ -79,7 +79,7 @@ function get_avatar() {
 			}
 		},
 		error: function() {
-			$.toast("照片飘到火星啦，请刷新重试", "text");
+			$.toast("网络错误，请重试", "text");
 		}
 	})
 }
@@ -106,7 +106,7 @@ function logout() {
 	});
 }
 function releaseAssoc(id) {
-	$.confirm("确定要解除学号与QQ号的关联吗？", function() {
+	$.confirm("确定要解除与微信帐号的绑定吗？", function() {
 		$.toptip("正在解绑...", 2000, 'success');
 		ajax_page("/OAuth2Assoc.fcgi?release=" + id);
 	}, function() {
@@ -114,9 +114,15 @@ function releaseAssoc(id) {
 }
 function change_password() {
 	var r1 = document.getElementById("i_xhs").value;
+	var r2 = document.getElementById("i_qr").value;
 	if(r1=="")
 	{
 		$.toast("请输入新密码","cancel");
+		return false;
+	}
+	if(r2=="" || r2 != r1)
+	{
+		$.toast("输入不一致","cancel");
 		return false;
 	}
 	var patrn=/^(\w){6,12}$/;
@@ -259,7 +265,7 @@ function ajax_submit(mydata) {
 			},
 			error: function(request) {
 				$(".loading").hide();
-				$.toast("请求失败，请稍后再试","text");
+				$.toast("请求失败，请重试","text");
 				ajax_page("/");
 			},
 			success: function(data) {
@@ -280,7 +286,7 @@ function query_tests() {
 	var r2 = $("#tests").attr("data-values");
 	if(r2 == undefined || r2 == "")
 	{
-		$.toast("发生未知错误，请稍后再试","text");
+		$.toast("未知错误，请重试","text");
 		return false;
 	}
 	$.toptip("正在查询...", 2000, 'success');

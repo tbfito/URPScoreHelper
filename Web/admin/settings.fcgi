@@ -106,7 +106,7 @@
 		  </div>
 		  <div class="form-group">
 			<div class="label">
-			  <label><b>QQ OAuth2 应用ID(AppID)：</b></label>
+			  <label><b>微信 OAuth 2.0 应用ID(AppID)：</b></label>
 			</div>
 			<div class="field">
 			  <input type="text" class="input" name="OAUTH2_APPID" value="%s" />
@@ -115,7 +115,7 @@
 		  </div>
 		  <div class="form-group">
 			<div class="label">
-			  <label><b>QQ OAuth2 应用密钥(Secret)：</b></label>
+			  <label><b>微信 OAuth 2.0 应用密钥(Secret)：</b></label>
 			</div>
 			<div class="field">
 			  <input type="text" class="input" name="OAUTH2_SECRET" value="%s" />
