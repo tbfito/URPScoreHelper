@@ -89,8 +89,13 @@ void fastcgi_app_intro()
 		// 单独为 Admin 做处理，将其请求转发到 admin.cpp 控制器。
 		if (strstr(CGI_REQUEST_URI, "/admin") != NULL)
 		{
-			admin_intro();
-			END_REQUEST(); continue;
+			char left_str[128] = { 0 };
+			left(left_str, CGI_REQUEST_URI, 6);
+			if (strcmp(left_str, "/admin") == 0)
+			{
+				admin_intro();
+				END_REQUEST(); continue;
+			}
 		}
 
 		if (!isPageSrcLoadSuccess)
@@ -111,7 +116,7 @@ void fastcgi_app_intro()
 		{
 			char _3rd_party[4096] = { 0 };
 			strncpy(_3rd_party, str_qs_3rd_party.c_str(), sizeof(_3rd_party) - 1);
-			std::cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n";
+			std::cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << CGI_SCRIPT_NAME << "\r\n";
 			std::cout << "Set-Cookie: 3rd_party=" << _3rd_party << "; max-age=1800; path=/\r\n";
 			std::cout << GLOBAL_HEADER;
 			END_REQUEST(); continue;
