@@ -88,6 +88,7 @@ static int htoi(char *s)
 	return (value);
 }
 
+//注意释放内存
 char * url_encode(char const *s, int len, int *new_length)
 {
 	unsigned char c, *to, *start;
@@ -319,7 +320,7 @@ bool base64_decode(const char *strIn, unsigned char *pOut, size_t *uOutLen)
 	size_t len = strlen(strIn);
 	for (x = y = z = t = 0; x < len; x++)
 	{
-		c = (unsigned char)g_pMap[strIn[x]];
+		c = g_pMap[(const unsigned char)strIn[x]];
 		if (c == 255) continue;
 		if (c == 254) { c = 0; g--; }
 
