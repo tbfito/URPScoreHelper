@@ -116,7 +116,7 @@ void admin_intro()
 		return;
 	}
 
-	if (strcmp(CGI_REQUEST_URI, "/admin/") == 0)
+	if (strcmp(CGI_REQUEST_URI, "/admin/") == 0 || strcmp(CGI_SCRIPT_FILENAME, "/admin/") == 0)
 	{
 		parse_admin_index();
 		return;

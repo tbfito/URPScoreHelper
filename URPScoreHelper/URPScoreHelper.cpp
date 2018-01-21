@@ -47,7 +47,8 @@ void fastcgi_app_intro()
 		CGI_HTTP_COOKIE = FCGX_GetParam("HTTP_COOKIE", request.envp); // Cookie
 		CGI_HTTPS = FCGX_GetParam("HTTPS", request.envp); // 是否使用 HTTPS
 		CGI_HTTP_HOST = FCGX_GetParam("HTTP_HOST", request.envp); // 请求主机
-		isAjaxRequest = (FCGX_GetParam("HTTP_X_AJAX_REQUEST", request.envp) != NULL); // 是否是 AJAX 请求
+		CGI_X_FORWARDED_PROTO = FCGX_GetParam("HTTP_X_FORWARDED_PROTO", request.envp); // 上游代理与客户端所使用的协议
+		CGI_X_IS_AJAX_REQUEST = (FCGX_GetParam("HTTP_X_AJAX_REQUEST", request.envp) != NULL); // 是否是 AJAX 请求
 
 		if (!isdbReady)
 		{
@@ -87,7 +88,7 @@ void fastcgi_app_intro()
 		}
 
 		// 单独为 Admin 做处理，将其请求转发到 admin.cpp 控制器。
-		if (strstr(CGI_REQUEST_URI, "/admin") != NULL)
+		if (strlen(CGI_REQUEST_URI) >= 6)
 		{
 			char left_str[128] = { 0 };
 			left(left_str, CGI_REQUEST_URI, 6);
@@ -1035,7 +1036,7 @@ void parse_main()
 
 	cout << GLOBAL_HEADER;
 
-	if (!isAjaxRequest)
+	if (!CGI_X_IS_AJAX_REQUEST)
 	{
 		std::string title(m_student_name);
 		title += u8" - ";
@@ -1065,7 +1066,7 @@ void parse_main()
 		cout << strformat(m_lpszHomepage.c_str(), APP_NAME, m_student_name, m_student_id,
 							strformat(RLS_ASSOC_LINK_HTML, m_student_id).c_str(), OutputAd.c_str());
 	}
-	if (!isAjaxRequest)
+	if (!CGI_X_IS_AJAX_REQUEST)
 	{
 		cout << footer.c_str();
 	}
@@ -1134,7 +1135,7 @@ void parse_index()
 	std::string m_lpszHomepage = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
 	cout << GLOBAL_HEADER;
-	if (!isAjaxRequest)
+	if (!CGI_X_IS_AJAX_REQUEST)
 	{
 		cout << strformat(header.c_str(), APP_NAME);
 	}
@@ -1167,7 +1168,7 @@ void parse_index()
 		cout << strformat( m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter, hasNotice ? notice.c_str() : "",
 						u8"微信登录成功，输入验证码继续吧 :)", m_xh, m_mm, "", u8"继续", "", "");
 	}
-	if (!isAjaxRequest)
+	if (!CGI_X_IS_AJAX_REQUEST)
 	{
 		cout << footer.c_str();
 	}
@@ -1387,7 +1388,7 @@ void parse_query()
 		}
 		script = script + "]});}</script>" + TEST_LIST_HTML;
 		cout << GLOBAL_HEADER;
-		if (!isAjaxRequest)
+		if (!CGI_X_IS_AJAX_REQUEST)
 		{
 			std::string title(m_Student);
 			title += u8"的考试成绩 - ";
@@ -1395,7 +1396,7 @@ void parse_query()
 			cout << strformat(header.c_str(), title.c_str());
 		}
 		cout << strformat(m_lpszQuery.c_str(), m_Student, script.c_str());
-		if (!isAjaxRequest)
+		if (!CGI_X_IS_AJAX_REQUEST)
 		{
 			cout << footer.c_str();
 		}
@@ -1454,7 +1455,7 @@ void parse_query()
 		*(m_end_body + 6) = '\0';
 		strcat(m_prep, m_result);
 
-		if (!isAjaxRequest)
+		if (!CGI_X_IS_AJAX_REQUEST)
 		{
 			std::string title(m_Student);
 			title += u8"的通过科目 - ";
@@ -1462,7 +1463,7 @@ void parse_query()
 			cout << strformat(header.c_str(), title.c_str());
 		}
 		cout << strformat( m_lpszQuery.c_str(), m_Student, m_prep);
-		if (!isAjaxRequest)
+		if (!CGI_X_IS_AJAX_REQUEST)
 		{
 			cout << footer.c_str();
 		}
@@ -1713,7 +1714,7 @@ void parse_query()
 
 		cout << GLOBAL_HEADER;
 
-		if (!isAjaxRequest)
+		if (!CGI_X_IS_AJAX_REQUEST)
 		{
 			std::string title(m_Student);
 			title += u8"的专业方案 - ";
@@ -1721,7 +1722,7 @@ void parse_query()
 			cout << strformat(header.c_str(), title.c_str());
 		}
 		cout << strformat(m_lpszQuery.c_str(), m_Student, m_Output.c_str());
-		if (!isAjaxRequest)
+		if (!CGI_X_IS_AJAX_REQUEST)
 		{
 			cout << footer.c_str();
 		}
@@ -1779,7 +1780,7 @@ void parse_query()
 		*(m_end_body + 6) = '\0';
 		strcat(m_prep, m_result);
 
-		if (!isAjaxRequest)
+		if (!CGI_X_IS_AJAX_REQUEST)
 		{
 			std::string title(m_Student);
 			title += u8"的未通过科目 - ";
@@ -1787,7 +1788,7 @@ void parse_query()
 			cout << strformat(header.c_str(), title.c_str());
 		}
 		cout << strformat( m_lpszQuery.c_str(), m_Student, m_prep);
-		if (!isAjaxRequest)
+		if (!CGI_X_IS_AJAX_REQUEST)
 		{
 			cout << footer.c_str();
 		}
@@ -1860,14 +1861,14 @@ void parse_query()
 		strcat(m_prep, m_before);
 		strcat(m_prep, m_result);
 
-		if (!isAjaxRequest)
+		if (!CGI_X_IS_AJAX_REQUEST)
 		{
 			std::string title(u8"本学期课程表 - ");
 			title += APP_NAME;
 			cout << strformat(header.c_str(), title.c_str());
 		}
 		cout << strformat(m_lpszQuery.c_str(), m_Student, m_prep);
-		if (!isAjaxRequest)
+		if (!CGI_X_IS_AJAX_REQUEST)
 		{
 			cout << footer.c_str();
 		}
@@ -2093,7 +2094,7 @@ void parse_query()
 
 	cout << GLOBAL_HEADER;
 
-	if (!isAjaxRequest)
+	if (!CGI_X_IS_AJAX_REQUEST)
 	{
 		std::string title(m_Student);
 		title += u8"的本学期成绩 - ";
@@ -2101,7 +2102,7 @@ void parse_query()
 		cout << strformat(header.c_str(), title.c_str());
 	}
 	cout << strformat( m_lpszQuery.c_str(), m_Student, m_Output.c_str());
-	if (!isAjaxRequest)
+	if (!CGI_X_IS_AJAX_REQUEST)
 	{
 		cout << footer.c_str();
 	}
@@ -2223,7 +2224,7 @@ void parse_query_tests()
 	strcat(m_prep, m_before);
 	strcat(m_prep, m_result);
 
-	if (!isAjaxRequest)
+	if (!CGI_X_IS_AJAX_REQUEST)
 	{
 		std::string title(m_Student);
 		title += " - ";
@@ -2231,7 +2232,7 @@ void parse_query_tests()
 		cout << strformat(header.c_str(), title.c_str());
 	}
 	cout << strformat(m_lpszQuery.c_str(), m_Student, m_prep);
-	if (!isAjaxRequest)
+	if (!CGI_X_IS_AJAX_REQUEST)
 	{
 		cout << footer.c_str();
 	}
@@ -2598,14 +2599,14 @@ void parse_QuickQuery_Intro()
 
 	cout << GLOBAL_HEADER;
 
-	if (!isAjaxRequest)
+	if (!CGI_X_IS_AJAX_REQUEST)
 	{
 		std::string title(u8"免密成绩查询 - ");
 		title += APP_NAME;
 		cout << strformat(header.c_str(), title.c_str());
 	}
 	cout << strformat( m_lpszQuery.c_str(), APP_NAME, g_users, g_QueryCounter);
-	if (!isAjaxRequest)
+	if (!CGI_X_IS_AJAX_REQUEST)
 	{
 		cout << footer.c_str();
 	}
@@ -3001,7 +3002,7 @@ void parse_QuickQuery_Result()
 
 		if (m_xhgs > 1)
 		{
-			if (!isAjaxRequest)
+			if (!CGI_X_IS_AJAX_REQUEST)
 			{
 				std::string title(u8"多人查询 - 免密成绩查询 - ");
 				title += APP_NAME;
@@ -3015,7 +3016,7 @@ void parse_QuickQuery_Result()
 			unsigned int u8len = 0;
 			gbk_to_utf8(m_xxmz, (unsigned int)strlen(m_xxmz), &m_xxmz_u8, &u8len);
 
-			if (!isAjaxRequest)
+			if (!CGI_X_IS_AJAX_REQUEST)
 			{
 				std::string title(m_xxmz_u8);
 				title += u8" - 免密成绩查询 - ";
@@ -3025,7 +3026,7 @@ void parse_QuickQuery_Result()
 			cout << strformat( m_lpszQuery.c_str(), m_xxmz_u8, m_list.c_str());
 			free(m_xxmz_u8);
 		}
-		if (!isAjaxRequest)
+		if (!CGI_X_IS_AJAX_REQUEST)
 		{
 			cout << footer.c_str();
 		}
@@ -3402,7 +3403,7 @@ void parse_teaching_evaluation()
 
 	cout << GLOBAL_HEADER;
 
-	if (!isAjaxRequest)
+	if (!CGI_X_IS_AJAX_REQUEST)
 	{
 		std::string title = u8"一键评教 - ";
 		title += APP_NAME;
@@ -3430,7 +3431,7 @@ void parse_teaching_evaluation()
 		need_eval ? u8"老师很辛苦，给个赞呗。一键全好评，你懂的 :)" : "",
 		need_eval ? "block" : "none"
 		, outer.c_str());
-	if (!isAjaxRequest)
+	if (!CGI_X_IS_AJAX_REQUEST)
 	{
 		cout << footer.c_str();
 	}
@@ -3697,7 +3698,7 @@ void parse_change_password()
 		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
 	cout << GLOBAL_HEADER;
 
-	if (!isAjaxRequest)
+	if (!CGI_X_IS_AJAX_REQUEST)
 	{
 		std::string title(u8"修改密码 - ");
 		title += APP_NAME;
@@ -3705,7 +3706,7 @@ void parse_change_password()
 	}
 	cout << strformat( m_lpszQuery.c_str());
 
-	if (!isAjaxRequest)
+	if (!CGI_X_IS_AJAX_REQUEST)
 	{
 		cout << footer.c_str();
 	}
@@ -3835,7 +3836,7 @@ void parse_discussion()
 
 	cout << GLOBAL_HEADER;
 
-	if (!isAjaxRequest)
+	if (!CGI_X_IS_AJAX_REQUEST)
 	{
 		std::string title = u8"交流讨论 - ";
 		title += APP_NAME;
@@ -3844,7 +3845,7 @@ void parse_discussion()
 
 	cout << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), DISCUSSION_PAGE_CONTENT, DISCUSSION_PAGE_CODE);
 	
-	if (!isAjaxRequest)
+	if (!CGI_X_IS_AJAX_REQUEST)
 	{
 		cout << footer.c_str();
 	}

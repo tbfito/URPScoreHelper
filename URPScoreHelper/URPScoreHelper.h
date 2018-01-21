@@ -1,33 +1,35 @@
 ﻿#pragma once
 
-#ifndef URPSCOREHELPER_H
+#ifndef __URPSCOREHELPER_H__
 
-	#define URPSCOREHELPER_H
+	#define __URPSCOREHELPER_H__
 
 	std::string header;
 	std::string footer;
 	std::string error;
 
-	int g_QueryCounter;
-	int g_users;
+	int g_QueryCounter = 0;
+	int g_users = 0;
 
 	MYSQL db;
 
-	FCGX_Request request; //全局可以使用的请求
+	FCGX_Request request;
 	static const char *emptystr = "";
 
 	char *dbConnError = NULL;
-	char *CGI_SCRIPT_NAME;
-	char *CGI_REQUEST_URI;
-	char *CGI_REQUEST_METHOD;
-	char *CGI_CONTENT_LENGTH;
-	char *CGI_QUERY_STRING;
-	char *CGI_SCRIPT_FILENAME;
-	char *CGI_HTTP_COOKIE;
-	char *CGI_HTTP_HOST;
-	char *CGI_HTTPS;
-	bool isAjaxRequest;
-	bool isPageSrcLoadSuccess;
+	char *CGI_SCRIPT_NAME = NULL;
+	char *CGI_REQUEST_URI = NULL;
+	char *CGI_REQUEST_METHOD = NULL;
+	char *CGI_CONTENT_LENGTH = NULL;
+	char *CGI_QUERY_STRING = NULL;
+	char *CGI_SCRIPT_FILENAME = NULL;
+	char *CGI_HTTP_COOKIE = NULL;
+	char *CGI_HTTP_HOST = NULL;
+	char *CGI_HTTPS = NULL;
+	char *CGI_X_FORWARDED_PROTO = NULL;
+	bool CGI_X_IS_AJAX_REQUEST = false;
+
+	bool isPageSrcLoadSuccess = false;
 	bool isdbReady = false;
 
 	void fastcgi_app_intro();
