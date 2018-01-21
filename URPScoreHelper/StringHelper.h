@@ -16,5 +16,9 @@
 	std::string _GET(const std::string & get, const char *name);
 	std::string _POST(const std::string & post, const char *name);
 	std::string _COOKIE(const std::string & cookie, const char *name);
+	char * base64_encode(const unsigned char * bindata, char * base64, int binlength);
+	bool base64_decode(const char *strIn, unsigned char *pOut, size_t *uOutLen);
+	std::string ReadTextFileToMem(const char *lpszLocalPath);
+	std::string strformat(const char *format, ...);
 
 #endif

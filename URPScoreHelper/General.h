@@ -79,10 +79,6 @@
 	extern char JSESSIONID[1024];
 
 	void Error(const char *p_ErrMsg);
-	char * base64_encode(const unsigned char * bindata, char * base64, int binlength);
-	bool base64_decode(const char *strIn, unsigned char *pOut, size_t *uOutLen);
-	std::string ReadTextFileToMem(const char *lpszLocalPath);
-	std::string strformat(const char *format, ...);
 	float cj2jd(float cj);
 	std::string getAppURL();
 

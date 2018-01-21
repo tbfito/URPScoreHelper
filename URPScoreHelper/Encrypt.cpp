@@ -46,7 +46,7 @@ void DeCodeStr(char *pCode)
 
 	std::vector<uint8_t> decrypted;
 	std::vector<uint8_t> encryptedBytes;
-	for (int i = 0; i < outlen; i++)
+	for (size_t i = 0; i < outlen; i++)
 	{
 		encryptedBytes.insert(encryptedBytes.end(), *(strCode + i));
 	}
