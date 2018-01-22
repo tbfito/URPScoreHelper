@@ -434,6 +434,7 @@ void LoadConfig()
 		AddSettings("QueryCounter", "0");
 		AddSettings("SERVER_URL", "http://0.0.0.0");
 		AddSettings("USER_AGENT", SOFTWARE_NAME);
+		AddSettings("ENABLE_OAUTH2", "0");
 		AddSettings("OAUTH2_APPID", "");
 		AddSettings("OAUTH2_SECRET", "");
 		AddSettings("CURL_PROXY_URL", "");
@@ -618,18 +619,22 @@ void LoadConfig()
 	memset(lpvBuffer, 0, 10240);
 
 	GetSettings("CURL_USE_PROXY", lpvBuffer);
-	CURL_USE_PROXY = (atoi(lpvBuffer) == 1);
+	CURL_USE_PROXY = (atoi(lpvBuffer) >= 1);
 
 	memset(lpvBuffer, 0, 10240);
 	GetSettings("ENABLE_QUICK_QUERY", lpvBuffer);
-	ENABLE_QUICK_QUERY = (atoi(lpvBuffer) == 1);
+	ENABLE_QUICK_QUERY = (atoi(lpvBuffer) >= 1);
+
+	memset(lpvBuffer, 0, 10240);
+	GetSettings("ENABLE_OAUTH2", lpvBuffer);
+	ENABLE_OAUTH2 = (atoi(lpvBuffer) >= 1);
+
+	free(lpvBuffer);
 
 	if (FOOTER_TEMPLATE_LOCATION != NULL) // 每次更新 footer 的缓存
 	{
 		footer = strformat(ReadTextFileToMem(FOOTER_TEMPLATE_LOCATION).c_str(), APP_NAME, FOOTER_TEXT, ANALYSIS_CODE);
 	}
-
-	free(lpvBuffer);
 }
 
 // 更新用户数量、查询计数器
@@ -1059,12 +1064,12 @@ void parse_main()
 	if (strlen(openid) == 0)
 	{
 		cout << strformat(m_lpszHomepage.c_str(), APP_NAME, m_student_name, m_student_id, 
-							ASSOC_LINK_HTML, OutputAd.c_str());
+							ENABLE_OAUTH2 ? ASSOC_LINK_HTML : "", OutputAd.c_str());
 	}
 	else
 	{
 		cout << strformat(m_lpszHomepage.c_str(), APP_NAME, m_student_name, m_student_id,
-							strformat(RLS_ASSOC_LINK_HTML, m_student_id).c_str(), OutputAd.c_str());
+							ENABLE_OAUTH2 ? strformat(RLS_ASSOC_LINK_HTML, m_student_id).c_str() : "", OutputAd.c_str());
 	}
 	if (!CGI_X_IS_AJAX_REQUEST)
 	{
@@ -1153,14 +1158,14 @@ void parse_index()
 		if (token_xh != NULL && token_mm != NULL)
 		{
 			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter, hasNotice ? notice.c_str() : "",
-				u8"输入你的教务系统帐号来登录吧 :)", token_xh, token_mm, " col-50", u8"登录",
-				OAUTH2_LOGIN_HTML, ENABLE_QUICK_QUERY ? QUICKQUERY_HTML : "");
+				u8"输入你的教务帐号来登录吧 :)", token_xh, token_mm, ENABLE_OAUTH2 ? " col-50" : "", u8"登录",
+				ENABLE_OAUTH2 ? OAUTH2_LOGIN_HTML : "", ENABLE_QUICK_QUERY ? QUICKQUERY_HTML : "");
 		}
 		else
 		{
 			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter, hasNotice ? notice.c_str() : "",
-				u8"输入你的教务系统帐号来登录吧 :)", "", "", " col-50", u8"登录",
-				OAUTH2_LOGIN_HTML, ENABLE_QUICK_QUERY ? QUICKQUERY_HTML : "");
+				u8"输入你的教务帐号来登录吧 :)", "", "", ENABLE_OAUTH2 ? " col-50" : "", u8"登录",
+				ENABLE_OAUTH2 ? OAUTH2_LOGIN_HTML : "", ENABLE_QUICK_QUERY ? QUICKQUERY_HTML : "");
 		}
 	}
 	else 
@@ -3164,17 +3169,17 @@ void OAuth2_Association(bool isPOST)
 
 		if (strlen(stid) == 0 || strcmp(stid, "NONE") == 0)
 		{
-			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"感谢使用微信登录，请先绑定自己的学号吧 :)",
+			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"请先绑定自己的学号吧 :)",
 				 "", pass);
 		}
 		else if(strlen(pass) == 0)
 		{
-			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"感谢使用微信登录，请输入密码来继续操作 :)",
+			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"请输入密码来继续操作 :)",
 				stid, "");
 		}
 		else
 		{
-			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"感谢使用微信登录，请输入验证码来继续操作 :)",
+			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"请输入验证码来继续操作 :)",
 				stid, pass);
 		}
 		cout << footer.c_str();
@@ -3237,7 +3242,7 @@ void OAuth2_Association(bool isPOST)
 
 		if (stmt == NULL)
 		{
-			char Err_Msg[1024] = u8"<b>很抱歉，微信绑定失败。</b><p>数据库错误 (statement 初始化失败)</p><p>但还是可以正常登录的。</p>";
+			char Err_Msg[1024] = u8"<b>很抱歉，微信绑定失败</b><p>数据库错误 (statement 初始化失败)</p><p>请稍后再试</p>";
 			Error(Err_Msg);
 			delete[]openid;
 			return;
@@ -3256,9 +3261,9 @@ void OAuth2_Association(bool isPOST)
 			mysql_stmt_execute(stmt) != 0
 			)
 		{
-			char Err_Msg[1024] = u8"<b>很抱歉，微信绑定失败。</b><p>数据库错误 (";
+			char Err_Msg[1024] = u8"<b>很抱歉，微信绑定失败</b><p>数据库错误 (";
 			strcat(Err_Msg, mysql_stmt_error(stmt));
-			strcat(Err_Msg, u8")</p><p>但还是可以正常登录的。</p>");
+			strcat(Err_Msg, u8")</p><p>请稍后再试</p>");
 			Error(Err_Msg);
 			delete[]openid;
 			mysql_stmt_close(stmt);

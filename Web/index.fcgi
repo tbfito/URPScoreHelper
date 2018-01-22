@@ -63,7 +63,7 @@
 				<i class="fa fa-check-square-o"></i>%s
 			</button>
 			%s
+			%s
 		</div>
-		%s
 	</form>
 </div>

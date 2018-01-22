@@ -20,7 +20,7 @@ const char *BEFORE_TEMPLATE_BY_PLAN = u8"<div id=\"list_page\" style=\"backgroun
 const char *SCORE_TEMPLATE_BY_PLAN = u8"<tr class=\"even\"onmouseout=\"this.className='even';\"onmouseover=\"this.className='evenfocus';\"><td align=\"center\"style=\"%s\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%.2f</td><td align=\"center\">%s</td></tr>";
 const char *QUICK_SCORE = u8"<div class=\"weui-cell\"><div class=\"weui-cell__bd\"><p>%s</p></div><div class=\"weui-cell__ft\">%s</div></div>";
 const char *OAUTH2_LOGIN_HTML = u8"<a id=\"no_ajax\" title=\"微信登录\" class=\"weui-btn weui-btn_default col-50\" href=\"OAuth2.fcgi\"><i class=\"fa fa-weixin\"></i>微信登录</a>";
-const char *QUICKQUERY_HTML = u8"<div class=\"quickquery\"><a class=\"weui-btn weui-btn_warn\" href=\"QuickQuery.fcgi\"><i class=\"fa fa-search\"></i>免密快速查询入口</a></div>";
+const char *QUICKQUERY_HTML = u8"<a class=\"weui-btn quickquery\" href=\"QuickQuery.fcgi\"><i class=\"fa fa-search\"></i>免密快速查询入口</a>";
 const char *ASSOC_LINK_HTML = u8"<a id=\"no_ajax\" href=\"index.fcgi?act=requestAssoc\"><i class=\"fa fa-link\"></i>绑定微信</a>";
 const char *RLS_ASSOC_LINK_HTML = u8"<span style=\"color:rgb(0,255,90)\"><i class=\"fa fa-weixin\"></i>微信已绑定</span>&nbsp;&nbsp;<a id=\"no_ajax\" href=\"javascript:void(0);\" onclick=\"releaseAssoc('%s');\"><i class=\"fa fa-unlink\"></i>解除绑定</a>";
 const char *CARD_AD_BANNER_HTML = u8"<div class=\"swiper-slide\"><a id=\"no_ajax\" href=\"%s\" target=\"_blank\"><img data-src=\"%s\" height=\"160\" width=\"100%%\" class=\"swiper-lazy\"></a><div class=\"swiper-lazy-preloader\"></div></div>";
@@ -34,6 +34,7 @@ char *FOOTER_TEMPLATE_LOCATION = NULL;
 char *SERVER_URL = NULL;
 char *USER_AGENT = NULL;
 int CURL_TIMEOUT = 10;
+bool ENABLE_OAUTH2 = false;
 char *OAUTH2_APPID = NULL;
 char *OAUTH2_SECRET = NULL;
 bool CURL_USE_PROXY = false;

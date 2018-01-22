@@ -53,6 +53,7 @@
 	extern char *USER_AGENT;
 	extern char *CURL_PROXY_URL;
 	extern char *APP_NAME;
+	extern bool ENABLE_OAUTH2;
 	extern char *OAUTH2_APPID;
 	extern char *OAUTH2_SECRET;
 	extern char *CARD_AD_BANNER_1_IMG;

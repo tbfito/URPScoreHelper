@@ -53,7 +53,7 @@
 		  </div>
 		  <div class="form-group">
 			<div class="label">
-			  <label><b>教务系统URL：</b>(URP系统服务端URL，末尾不加"/")</label>
+			  <label><b>教务系统URL：</b>(URP综合教务系统服务端URL，末尾不加"/")</label>
 			</div>
 			<div class="field">
 			  <input type="text" class="input" name="SERVER_URL" value="%s" />
@@ -101,24 +101,6 @@
 			</div>
 			<div class="field">
 			  <input type="text" class="input" name="ENABLE_QUICK_QUERY" value="%d" />
-			  <div class="tips"></div>
-			</div>
-		  </div>
-		  <div class="form-group">
-			<div class="label">
-			  <label><b>微信 OAuth 2.0 应用ID(AppID)：</b></label>
-			</div>
-			<div class="field">
-			  <input type="text" class="input" name="OAUTH2_APPID" value="%s" />
-			  <div class="tips"></div>
-			</div>
-		  </div>
-		  <div class="form-group">
-			<div class="label">
-			  <label><b>微信 OAuth 2.0 应用密钥(Secret)：</b></label>
-			</div>
-			<div class="field">
-			  <input type="text" class="input" name="OAUTH2_SECRET" value="%s" />
 			  <div class="tips"></div>
 			</div>
 		  </div>

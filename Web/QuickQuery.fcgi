@@ -29,7 +29,7 @@
 		</label>
 		<div class="weui-btn-area">
 			<button id="i_submit" type="button" class="weui-btn weui-btn_primary"><i class="fa fa-search"></i>快速查询 (期末成绩)</button>
-			<a title="&lt;&lt; 登录后综合查询" class="weui-btn weui-btn_default" href="/">
+			<a title="登录后综合查询" class="weui-btn weui-btn_default" href="/">
 				<i class="fa fa-arrow-left"></i>登录后综合查询
 			</a>
 		</div>

@@ -15,10 +15,9 @@
 .demos-title{text-align:center;font-size:34px;color:#3cc51f;font-weight:400;margin:0 15%}
 .signbox{padding-right:15px}
 .evalbox{margin-top:0;margin-right:15px}
-.col-50{width: 48% !important;float:left;margin:0 1% 0 1% !important}
-.quickquery{width:92%;margin:72px auto 0 auto}
-.quickquery a{background-color:#006fe2}
-.quickquery a:active{background-color:#0061c5 !important}
+.col-50{width: 48% !important;float:left;margin:0 1% 10px 1% !important}
+.quickquery{background-color:#006fe2;margin-top:10px !important}
+.quickquery:active{background-color:#0061c5}
 .weui-label{width:95px !important}
 .weui-cells__title.status{text-align:center}
 .weui-cells:before{border-top:0}

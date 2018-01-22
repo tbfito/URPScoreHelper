@@ -56,6 +56,12 @@ void admin_intro()
 		}
 	}
 
+	if (strcmp(CGI_SCRIPT_NAME, "/admin/set-oauth2.fcgi") == 0)
+	{
+		set_oauth2();
+		return;
+	}
+
 	if (strcmp(CGI_SCRIPT_NAME, "/admin/homepage-notice.fcgi") == 0)
 	{
 		homepage_notice();
@@ -199,7 +205,7 @@ void do_admin_login()
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0 || m_post_length > 64)
 	{
-		admin_error(u8"<p><b>POST前方高能</b></p><p>非官方人员请迅速撤离</p>");
+		admin_error(u8"<p><b>请求非法</b></p><p>提交内容有误</p>");
 		return;
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);
@@ -241,7 +247,7 @@ void do_admin_login()
 // 生成登录会话 Session，由 sessino() 调用
 std::string generate_session()
 {
-	unsigned long long result = time(NULL);
+	size_t result = time(NULL);
 	result += 600;
 	char tmp[128] = { 0 };
 	sprintf(tmp, "%lld", result);
@@ -284,8 +290,8 @@ bool verify_session()
 	right(tmp1, session, strlen(session) - tmp.length());
 
 	char *unused;
-	unsigned long long timestamp = strtoull(tmp1, &unused, 10);
-	unsigned long long now = time(NULL);
+	size_t timestamp = strtoull(tmp1, &unused, 10);
+	size_t now = time(NULL);
 	if (timestamp <= now) // 会话超时
 	{
 		free(session);
@@ -333,7 +339,7 @@ void parse_admin_settings()
 		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(),
 			APP_NAME, APP_NAME, SECONDARY_TITLE, APP_DESCRIPTION, APP_KEYWORDS, SERVER_URL,
 			USER_AGENT, CURL_TIMEOUT, CURL_USE_PROXY ? 1 : 0, CURL_PROXY_URL, ENABLE_QUICK_QUERY ? 1 : 0,
-			OAUTH2_APPID, OAUTH2_SECRET, FOOTER_TEXT, ANALYSIS_CODE).c_str();
+			FOOTER_TEXT, ANALYSIS_CODE).c_str();
 }
 
 // 保存站点信息 (POST /admin/settings.fcgi)
@@ -346,7 +352,7 @@ void save_admin_settings()
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0)
 	{
-		admin_error(u8"<p><b>POST错误</b></p><p>提交的数据可能存在问题</p>");
+		admin_error(u8"<p><b>请求非法</b></p><p>提交内容有误</p>");
 		return;
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);
@@ -364,8 +370,6 @@ void save_admin_settings()
 	std::string m_CURL_USE_PROXY = _POST(post, "CURL_USE_PROXY");
 	std::string m_CURL_PROXY_URL = _POST(post, "CURL_PROXY_URL");
 	std::string m_ENABLE_QUICK_QUERY = _POST(post, "ENABLE_QUICK_QUERY");
-	std::string m_OAUTH2_APPID = _POST(post, "OAUTH2_APPID");
-	std::string m_OAUTH2_SECRET = _POST(post, "OAUTH2_SECRET");
 	std::string m_FOOTER_TEXT = _POST(post, "FOOTER_TEXT");
 	std::string m_ANALYSIS_CODE = _POST(post, "ANALYSIS_CODE");
 
@@ -379,8 +383,6 @@ void save_admin_settings()
 	decode_post_data(m_CURL_USE_PROXY);
 	decode_post_data(m_CURL_PROXY_URL);
 	decode_post_data(m_ENABLE_QUICK_QUERY);
-	decode_post_data(m_OAUTH2_APPID);
-	decode_post_data(m_OAUTH2_SECRET);
 	decode_post_data(m_FOOTER_TEXT);
 	decode_post_data(m_ANALYSIS_CODE);
 
@@ -394,8 +396,6 @@ void save_admin_settings()
 	UpdateSettings("CURL_USE_PROXY", m_CURL_USE_PROXY.c_str());
 	UpdateSettings("CURL_PROXY_URL", m_CURL_PROXY_URL.c_str());
 	UpdateSettings("ENABLE_QUICK_QUERY", m_ENABLE_QUICK_QUERY.c_str());
-	UpdateSettings("OAUTH2_APPID", m_OAUTH2_APPID.c_str());
-	UpdateSettings("OAUTH2_SECRET", m_OAUTH2_SECRET.c_str());
 	UpdateSettings("FOOTER_TEXT", m_FOOTER_TEXT.c_str());
 	UpdateSettings("ANALYSIS_CODE", m_ANALYSIS_CODE.c_str());
 
@@ -467,7 +467,7 @@ void do_admin_change_password()
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0)
 	{
-		admin_error(u8"<p><b>POST错误</b></p><p>提交的数据可能存在问题</p>");
+		admin_error(u8"<p><b>请求非法</b></p><p>提交内容有误</p>");
 		return;
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);
@@ -540,7 +540,7 @@ void change_admin_adv_card()
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0)
 	{
-		admin_error(u8"<p><b>POST错误</b></p><p>提交的数据可能存在问题</p>");
+		admin_error(u8"<p><b>请求非法</b></p><p>提交内容有误</p>");
 		return;
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);
@@ -612,7 +612,7 @@ void do_find_user()
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0)
 	{
-		admin_error(u8"<p><b>POST错误</b></p><p>提交的数据可能存在问题</p>");
+		admin_error(u8"<p><b>请求非法</b></p><p>提交内容有误</p>");
 		return;
 	}
 	char *m_post_data = (char *)malloc(m_post_length + 2);
@@ -808,7 +808,7 @@ void homepage_notice()
 		int m_post_length = atoi(CGI_CONTENT_LENGTH);
 		if (m_post_length <= 0 || m_post_length > 10240)
 		{
-			admin_error(u8"<p><b>POST错误</b></p><p>提交的数据可能存在问题</p>");
+			admin_error(u8"<p><b>请求非法</b></p><p>提交内容有误</p>");
 			return;
 		}
 		char *m_post_data = (char *)malloc(m_post_length + 2);
@@ -845,7 +845,7 @@ void set_discussion()
 		int m_post_length = atoi(CGI_CONTENT_LENGTH);
 		if (m_post_length <= 0)
 		{
-			admin_error(u8"<p><b>POST错误</b></p><p>提交的数据可能存在问题</p>");
+			admin_error(u8"<p><b>请求非法</b></p><p>提交内容有误</p>");
 			return;
 		}
 		char *m_post_data = (char *)malloc(m_post_length + 2);
@@ -886,7 +886,7 @@ void site_maintenance()
 		int m_post_length = atoi(CGI_CONTENT_LENGTH);
 		if (m_post_length <= 0)
 		{
-			admin_error(u8"<p><b>POST错误</b></p><p>提交的数据可能存在问题</p>");
+			admin_error(u8"<p><b>请求非法</b></p><p>提交内容有误</p>");
 			return;
 		}
 		char *m_post_data = (char *)malloc(m_post_length + 2);
@@ -899,6 +899,50 @@ void site_maintenance()
 		decode_post_data(m_SITE_MAINTENANCE);
 
 		UpdateSettings("SITE_MAINTENANCE", m_SITE_MAINTENANCE.c_str());
+
+		admin_error(u8"修改成功");
+		return;
+	}
+	admin_error(u8"发生未知错误");
+}
+
+// 处理维护模式页面 (GET/POST /set-oauth2.fcgi)
+void set_oauth2()
+{
+	if (!session())
+		return;
+
+	if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+	{
+		cout << GLOBAL_HEADER;
+		cout << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, ENABLE_OAUTH2 ? "1" : "0", OAUTH2_APPID, OAUTH2_SECRET).c_str();
+		return;
+	}
+	else if (strcmp(CGI_REQUEST_METHOD, "POST") == 0)
+	{
+		// 获取 POST 数据。
+		int m_post_length = atoi(CGI_CONTENT_LENGTH);
+		if (m_post_length <= 0)
+		{
+			admin_error(u8"<p><b>请求非法</b></p><p>提交内容有误</p>");
+			return;
+		}
+		char *m_post_data = (char *)malloc(m_post_length + 2);
+		FCGX_GetLine(m_post_data, m_post_length + 1, request.in);
+		std::string post(m_post_data);
+		free(m_post_data);
+
+		std::string m_ENABLE_OAUTH2 = _POST(post, "ENABLE_OAUTH2");
+		std::string m_OAUTH2_APPID = _POST(post, "OAUTH2_APPID");
+		std::string m_OAUTH2_SECRET = _POST(post, "OAUTH2_SECRET");
+
+		decode_post_data(m_ENABLE_OAUTH2);
+		decode_post_data(m_OAUTH2_APPID);
+		decode_post_data(m_OAUTH2_SECRET);
+
+		UpdateSettings("ENABLE_OAUTH2", m_ENABLE_OAUTH2.c_str());
+		UpdateSettings("OAUTH2_APPID", m_OAUTH2_APPID.c_str());
+		UpdateSettings("OAUTH2_SECRET", m_OAUTH2_SECRET.c_str());
 
 		admin_error(u8"修改成功");
 		return;

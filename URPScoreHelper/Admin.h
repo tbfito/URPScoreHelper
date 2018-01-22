@@ -32,5 +32,6 @@
 	void set_discussion();
 	bool session();
 	void site_maintenance();
+	void set_oauth2();
 
 #endif

@@ -13,7 +13,7 @@
 	<div class="panel admin-panel" id="add">
 	  <div class="panel-head"><strong><i class="fa fa-pencil-square-o"></i> 广告轮播 (留空则不显示广告)</strong></div>
 	  <div class="body-content">
-		<form method="post" class="form-x" action="">    
+		<form method="post" class="form-x" action="adv-card.fcgi">    
 		  <div class="form-group">
 			<div class="label">
 			  <label>广告一：图片URL</label>

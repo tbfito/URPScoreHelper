@@ -13,7 +13,7 @@
 	<div class="panel admin-panel" id="add">
 	  <div class="panel-head"><strong><i class="fa fa-pencil-square-o"></i> 首页公告 (留空则不显示公告)</strong></div>
 	  <div class="body-content">
-		<form method="post" class="form-x" action="">    
+		<form method="post" class="form-x" action="homepage-notice.fcgi">    
 		  <div class="form-group">
 			<div class="label">
 			  <label><b>首页公告：</b>(可以使用 &lt;div&gt; 内允许使用的 HTML 标签)</label>

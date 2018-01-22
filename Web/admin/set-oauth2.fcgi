@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>交流讨论 - %s</title>
+	<title>微信 OAuth 2.0 设置 - %s</title>
 	<link rel="stylesheet" href="css/pintuer.css">
 	<link rel="stylesheet" href="../css/font-awesome.min.css">
 	<link rel="stylesheet" href="css/admin.css">
@@ -11,24 +11,33 @@
 </head>
 <body>
 	<div class="panel admin-panel" id="add">
-	  <div class="panel-head"><strong><i class="fa fa-pencil-square-o"></i> 交流讨论 (全部留空则关闭交流讨论功能)</strong></div>
+	  <div class="panel-head"><strong><i class="fa fa-pencil-square-o"></i> 微信 OAuth 2.0 设置</strong></div>
 	  <div class="body-content">
-		<form method="post" class="form-x" action="set-discussion.fcgi">
+		<form method="post" class="form-x" action="set-oauth2.fcgi">
 		  <div class="form-group">
 			<div class="label">
-			  <label><b>页面内容：</b>(可以使用 &lt;div&gt; 内允许使用的 HTML 标签)</label>
+			  <label><b>是否开启微信 OAuth 2.0 功能：</b>(提供微信绑定，微信登录，信息关联等功能。0-禁用, 1-启用)</label>
 			</div>
 			<div class="field">
-			  <textarea class="input" name="DISCUSSION_PAGE_CONTENT">%s</textarea>
+			  <input type="text" class="input" name="ENABLE_OAUTH2" value="%s" />
+			  <div class="tips"></div>
+			</div>
+		  </div>		
+		  <div class="form-group">
+			<div class="label">
+			  <label><b>微信 OAuth 2.0 应用ID(AppID)：</b></label>
+			</div>
+			<div class="field">
+			  <input type="text" class="input" name="OAUTH2_APPID" value="%s" />
 			  <div class="tips"></div>
 			</div>
 		  </div>
 		  <div class="form-group">
 			<div class="label">
-			  <label><b>第三方评论代码：</b>(本系统需要使用第三方提供的评论系统功能，展示在页面内容下方)</label>
+			  <label><b>微信 OAuth 2.0 应用密钥(Secret)：</b></label>
 			</div>
 			<div class="field">
-			  <textarea class="input" name="DISCUSSION_PAGE_CODE">%s</textarea>
+			  <input type="text" class="input" name="OAUTH2_SECRET" value="%s" />
 			  <div class="tips"></div>
 			</div>
 		  </div>

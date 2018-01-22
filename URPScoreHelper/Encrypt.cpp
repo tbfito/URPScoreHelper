@@ -3,7 +3,6 @@
 #include "General.h"
 #include "StringHelper.h"
 #include "AES.h"
-#include <vector>
 
 static uint8_t key[] = "e360b63e-4b61-4171-9531-8165a1af"; //加密密钥
 static uint8_t iv[] = "c986fcfa-5c41-4fd6-ad8f-81000661"; //初始化向量
@@ -30,10 +29,17 @@ void EnCodeStr(const char *str, char *out)
 	}
 
 	base64_encode(encryptedBytes.data(), out, encryptedBytes.size());
+
+	int newlen = 0;
+	char *urlenc = url_encode(out, (int)strlen(out), &newlen);
+	memset(out, 0, newlen + 1);
+	strncpy(out, urlenc, newlen);
+	free(urlenc);
 }
 
 void DeCodeStr(char *pCode)
 {
+	url_decode(pCode, strlen(pCode));
 	size_t outlen = 4096;
 	uint8_t *strCode = (uint8_t *)malloc(outlen);
 	memset(strCode, 0, outlen);

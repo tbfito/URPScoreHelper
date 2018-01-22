@@ -13,7 +13,7 @@
 	<div class="panel admin-panel" id="add">
 	  <div class="panel-head"><strong><i class="fa fa-pencil-square-o"></i> 维护模式 (留空则不处于维护模式，非空则会显示维护公告)</strong></div>
 	  <div class="body-content">
-		<form method="post" class="form-x" action="">
+		<form method="post" class="form-x" action="maintenance.fcgi">
 		  <div class="form-group">
 			<div class="label">
 			  <label><b>维护公告：</b>(可以使用 &lt;div&gt; 内允许使用的 HTML 标签)</label>
