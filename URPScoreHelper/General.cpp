@@ -1,5 +1,9 @@
 ﻿#include "headers.h"
 #include "General.h"
+#include "StringHelper.h"
+#include "ctype.h"
+#include "Encrypt.h"
+#include <algorithm>
 
 char JSESSIONID[1024] = {0};
 
@@ -60,11 +64,10 @@ bool ENABLE_QUICK_QUERY = false;
 /*
 输出错误页面
 */
-extern std::string strformat(const char *format, ...);
 void Error(const char *p_ErrMsg)
 {
 	std::cout << GLOBAL_HEADER;
-	if (CGI_X_IS_AJAX_REQUEST)
+	if (CGI_HTTP_X_IS_AJAX_REQUEST)
 	{
 		std::cout << strformat(error.c_str(), p_ErrMsg).c_str();
 	}
@@ -84,30 +87,60 @@ float cj2jd(float cj)
 	return ((((int)cj % 60) / 10.0) + 1.0);
 }
 
+/* 获取应用的URL */
 std::string getAppURL()
 {
 	std::string text;
-	if (CGI_HTTPS != NULL && strcmp(CGI_HTTPS, "") != 0
-		&& strcmp(CGI_HTTPS, "off") != 0
-		&& strcmp(CGI_HTTPS, "Off") != 0
-		&& strcmp(CGI_HTTPS, "OFF") != 0
-		&& strcmp(CGI_HTTPS, "0") != 0)
+	bool isHTTPS = false;
+
+	if (CGI_HTTPS != NULL)
 	{
-		text.append("https://");
+		std::string https(CGI_HTTPS);
+		if (!https.empty())
+		{
+			std::transform(https.begin(), https.end(), https.begin(), tolower);
+			if (https == "on" || https == "1") {
+				isHTTPS = true;
+			}
+		}
 	}
-	else if(
-			 CGI_X_FORWARDED_PROTO != NULL &&
-				(strcmp(CGI_X_FORWARDED_PROTO, "https") == 0 ||
-				 strcmp(CGI_X_FORWARDED_PROTO, "HTTPS") == 0 ||
-				 strcmp(CGI_X_FORWARDED_PROTO, "Https") == 0)
-		   )
+	else if(CGI_HTTP_X_FORWARDED_PROTO != NULL)
 	{
-		text.append("https://");
+		std::string proto(CGI_HTTP_X_FORWARDED_PROTO);
+		std::transform(proto.begin(), proto.end(), proto.begin(), tolower);
+		if (proto == "https") {
+			isHTTPS = true;
+		}
 	}
-	else
+	else if (CGI_HTTP_FORWARDED != NULL)
 	{
-		text.append("http://");
+		std::string proto = _COOKIE(CGI_HTTP_FORWARDED, "proto"); // 解析 Forwarded 字段中 proto 值的方法与取 Cookie 的办法相同，可以直接套用
+		if (!proto.empty())
+		{
+			std::transform(proto.begin(), proto.end(), proto.begin(), tolower);
+			if (proto == "https") {
+				isHTTPS = true;
+			}
+		}
 	}
+
+	text.append(isHTTPS ? "https://" : "http://");
 	text.append(CGI_HTTP_HOST);
 	return text;
+}
+
+/* 生成并输出 token Cookie 头 */
+void output_token_header(const char *m_xuehao, const char *m_password)
+{
+	char m_xuehaoe[4096] = { 0 };
+	char m_passworde[4096] = { 0 };
+	EnCodeStr(m_xuehao, m_xuehaoe);
+	EnCodeStr(m_password, m_passworde);
+	std::string token(m_xuehaoe);
+	token += "-";
+	token += m_passworde;
+	char token_e[10240] = { 0 };
+	strncpy(token_e, token.c_str(), sizeof(token_e) - 1);
+	EnCodeStr(token_e, token_e);
+	cout << "Set-Cookie: token=" << token_e << "; max-age=604800; path=/\r\n";
 }

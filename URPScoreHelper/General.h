@@ -19,7 +19,8 @@
 	extern char *CGI_HTTP_COOKIE; // Cookie
 	extern char *CGI_HTTP_HOST; // 请求主机
 	extern char *CGI_HTTPS; // HTTPS
-	extern char *CGI_X_FORWARDED_PROTO; // Upstream protocol
+	extern char *CGI_HTTP_X_FORWARDED_PROTO; // Upstream protocol
+	extern char *CGI_HTTP_FORWARDED; // 2014 年 RFC7239 标准化
 
 	extern char *HEADER_TEMPLATE_LOCATION;
 	extern char *FOOTER_TEMPLATE_LOCATION;
@@ -75,12 +76,13 @@
 
 	extern std::string ERROR_HTML;
 	extern std::string error;
-	extern bool CGI_X_IS_AJAX_REQUEST;
+	extern bool CGI_HTTP_X_IS_AJAX_REQUEST;
 
 	extern char JSESSIONID[1024];
 
 	void Error(const char *p_ErrMsg);
 	float cj2jd(float cj);
 	std::string getAppURL();
+	void output_token_header(const char *m_xuehao, const char *m_password);
 
 #endif

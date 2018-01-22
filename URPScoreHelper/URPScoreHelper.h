@@ -26,8 +26,9 @@
 	char *CGI_HTTP_COOKIE = NULL;
 	char *CGI_HTTP_HOST = NULL;
 	char *CGI_HTTPS = NULL;
-	char *CGI_X_FORWARDED_PROTO = NULL;
-	bool CGI_X_IS_AJAX_REQUEST = false;
+	char *CGI_HTTP_X_FORWARDED_PROTO = NULL;
+	char *CGI_HTTP_FORWARDED = NULL; // 2014 年 RFC7239 标准化
+	bool CGI_HTTP_X_IS_AJAX_REQUEST = false;
 
 	bool isPageSrcLoadSuccess = false;
 	bool isdbReady = false;
