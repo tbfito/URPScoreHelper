@@ -104,14 +104,6 @@ std::string getAppURL()
 			}
 		}
 	}
-	else if(CGI_HTTP_X_FORWARDED_PROTO != NULL)
-	{
-		std::string proto(CGI_HTTP_X_FORWARDED_PROTO);
-		std::transform(proto.begin(), proto.end(), proto.begin(), tolower);
-		if (proto == "https") {
-			isHTTPS = true;
-		}
-	}
 	else if (CGI_HTTP_FORWARDED != NULL)
 	{
 		std::string proto = _COOKIE(CGI_HTTP_FORWARDED, "proto"); // 解析 Forwarded 字段中 proto 值的方法与取 Cookie 的办法相同，可以直接套用
@@ -121,6 +113,14 @@ std::string getAppURL()
 			if (proto == "https") {
 				isHTTPS = true;
 			}
+		}
+	}
+	else if(CGI_HTTP_X_FORWARDED_PROTO != NULL)
+	{
+		std::string proto(CGI_HTTP_X_FORWARDED_PROTO);
+		std::transform(proto.begin(), proto.end(), proto.begin(), tolower);
+		if (proto == "https") {
+			isHTTPS = true;
 		}
 	}
 
