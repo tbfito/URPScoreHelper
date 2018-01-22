@@ -250,7 +250,7 @@ std::string generate_session()
 	size_t result = time(NULL);
 	result += 600;
 	char tmp[128] = { 0 };
-	sprintf(tmp, "%lld", result);
+	sprintf(tmp, "%zu", result);
 	std::string ret;
 	ret = ret + ADMIN_USER_NAME + "-" + ADMIN_PASSWORD + "-" + tmp;
 	char encoded[1024] = { 0 };
