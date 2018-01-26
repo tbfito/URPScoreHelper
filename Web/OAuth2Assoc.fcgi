@@ -1,10 +1,6 @@
 <header class="demos-header">
-	<h1 class="demos-title">
-		%s
-	</h1>
-	<div class="weui-cells__title status">
-		微信用户绑定
-	</div>
+	<h1 class="demos-title">%s</h1>
+	<div class="weui-cells__title status">微信用户绑定</div>
 </header>
 <div class="content">
 	<form id="ajax_submit" data-ajax-submit="/OAuth2Assoc.fcgi?openid=%s&proc=%s" class="weui-cells weui-cells_form">
@@ -54,7 +50,7 @@
 		<label for="weuiAgree" class="weui-agree">
 			<input id="weuiAgree" type="checkbox" class="weui-agree__checkbox" checked="checked">
 			<span class="weui-agree__text">
-				同意我们的服务条款
+				同意服务条款
 			</span>
 		</label>
 		<div class="weui-btn-area">

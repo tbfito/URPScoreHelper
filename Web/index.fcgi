@@ -1,10 +1,5 @@
 <header class="demos-header">
-	<h1 class="demos-title">
-		%s
-	</h1>
-	<div class="weui-cells__title status">
-		共&nbsp;<big>%d</big>&nbsp;位同学进行了&nbsp;<big>%d</big>&nbsp;次查询
-	</div>
+	<h1 class="demos-title">%s</h1>
 </header>
 <div class="content">
 	%s
@@ -55,7 +50,7 @@
 		<label for="weuiAgree" class="weui-agree">
 			<input id="weuiAgree" type="checkbox" class="weui-agree__checkbox" checked="checked">
 			<span class="weui-agree__text">
-				同意我们的服务条款
+				同意服务条款
 			</span>
 		</label>
 		<div class="weui-btn-area">

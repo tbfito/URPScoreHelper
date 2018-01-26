@@ -1148,21 +1148,21 @@ void parse_index()
 	{
 		if (token_xh != NULL && token_mm != NULL)
 		{
-			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter, hasNotice ? notice.c_str() : "",
-				u8"输入你的教务帐号来登录吧 :)", token_xh, token_mm, ENABLE_OAUTH2 ? " col-50" : "", u8"登录",
+			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, hasNotice ? notice.c_str() : "",
+				u8"教务帐号登录", token_xh, token_mm, ENABLE_OAUTH2 ? " col-50" : "", u8"登录",
 				ENABLE_OAUTH2 ? OAUTH2_LOGIN_HTML : "", ENABLE_QUICK_QUERY ? QUICKQUERY_HTML : "");
 		}
 		else
 		{
-			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter, hasNotice ? notice.c_str() : "",
-				u8"输入你的教务帐号来登录吧 :)", "", "", ENABLE_OAUTH2 ? " col-50" : "", u8"登录",
+			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, hasNotice ? notice.c_str() : "",
+				u8"教务帐号登录", "", "", ENABLE_OAUTH2 ? " col-50" : "", u8"登录",
 				ENABLE_OAUTH2 ? OAUTH2_LOGIN_HTML : "", ENABLE_QUICK_QUERY ? QUICKQUERY_HTML : "");
 		}
 	}
 	else 
 	{
-		cout << strformat( m_lpszHomepage.c_str(), APP_NAME, g_users, g_QueryCounter, hasNotice ? notice.c_str() : "",
-						u8"微信登录成功，输入验证码继续吧 :)", m_xh, m_mm, "", u8"继续", "", "");
+		cout << strformat( m_lpszHomepage.c_str(), APP_NAME, hasNotice ? notice.c_str() : "",
+						u8"请输入验证码", m_xh, m_mm, "", u8"继续", "", "");
 	}
 	if (!CGI_HTTP_X_IS_AJAX_REQUEST)
 	{
@@ -2601,7 +2601,7 @@ void parse_QuickQuery_Intro()
 		title += APP_NAME;
 		cout << strformat(header.c_str(), title.c_str());
 	}
-	cout << strformat( m_lpszQuery.c_str(), APP_NAME, g_users, g_QueryCounter);
+	cout << strformat( m_lpszQuery.c_str(), APP_NAME);
 	if (!CGI_HTTP_X_IS_AJAX_REQUEST)
 	{
 		cout << footer.c_str();
@@ -3156,21 +3156,21 @@ void OAuth2_Association(bool isPOST)
 
 		std::string title(u8"微信用户绑定 - ");
 		title += APP_NAME;
-		cout << strformat( header.c_str(), title.c_str());
+		cout << strformat(header.c_str(), title.c_str());
 
 		if (strlen(stid) == 0 || strcmp(stid, "NONE") == 0)
 		{
-			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"请先绑定自己的学号吧 :)",
+			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"教务帐号绑定",
 				 "", pass);
 		}
 		else if(strlen(pass) == 0)
 		{
-			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"请输入密码来继续操作 :)",
+			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"请输入密码",
 				stid, "");
 		}
 		else
 		{
-			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"请输入验证码来继续操作 :)",
+			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"请输入验证码",
 				stid, pass);
 		}
 		cout << footer.c_str();

@@ -1,15 +1,10 @@
 <header class="demos-header">
-	<h1 class="demos-title">
-		%s
-	</h1>
-	<div class="weui-cells__title status">
-		共&nbsp;<big>%d</big>&nbsp;位同学进行了&nbsp;<big>%d</big>&nbsp;次查询
-	</div>
+	<h1 class="demos-title">%s</h1>
 </header>
 <div class="content">
 	<form id="ajax_submit" data-ajax-submit="query.fcgi?act=QuickQuery" class="weui-cells weui-cells_form">
 		<div class="weui-cells__title">
-			输入学号来查询成绩，仅支持部分院校 :)
+			请输入学号(仅支持部分学校)
 		</div>
 		<div class="signbox">
 			<div class="weui-cells weui-cells_form bigbox">
@@ -24,7 +19,7 @@
 		<label for="weuiAgree" class="weui-agree">
 			<input id="weuiAgree" type="checkbox" class="weui-agree__checkbox" checked="checked">
 			<span class="weui-agree__text">
-				同意我们的服务条款
+				同意服务条款
 			</span>
 		</label>
 		<div class="weui-btn-area">
