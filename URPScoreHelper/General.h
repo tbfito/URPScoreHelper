@@ -39,7 +39,8 @@
 	extern const char *RLS_ASSOC_LINK_HTML;
 	extern const char *CARD_AD_BANNER_HTML;
 	extern const char *TEST_LIST_HTML;
-	extern const char *find_user_result_section;
+	extern const char *FIND_USER_RESULT_SECTION;
+	extern const char *LOGGED_USER_HTML;
 
 	extern MYSQL db;
 	extern char MYSQL_HOST[64];

@@ -1,13 +1,12 @@
 <header class="demos-header">
 	<h1 class="demos-title">%s</h1>
+	<div class="weui-cells__title status">%s</div>
 </header>
 <div class="content">
 	%s
 	<form id="ajax_submit" data-ajax-submit="/main.fcgi" class="weui-cells weui-cells_form">
-		<div class="weui-cells__title">
-			%s
-		</div>
 		<div class="signbox">
+			%s
 			<div class="weui-cell weui-cell_vcode">
 				<div class="weui-cell__hd">
 					<label class="weui-label">

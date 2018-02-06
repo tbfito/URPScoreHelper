@@ -1,12 +1,9 @@
 <header class="demos-header">
 	<h1 class="demos-title">%s</h1>
-	<div class="weui-cells__title status">微信用户绑定</div>
+	<div class="weui-cells__title status">%s</div>
 </header>
 <div class="content">
 	<form id="ajax_submit" data-ajax-submit="/OAuth2Assoc.fcgi?openid=%s&proc=%s" class="weui-cells weui-cells_form">
-		<div class="weui-cells__title">
-			%s
-		</div>
 		<div class="signbox">
 			<div class="weui-cell weui-cell_vcode">
 				<div class="weui-cell__hd">

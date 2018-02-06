@@ -386,6 +386,11 @@ void WriteOAuthUserInfo(char *access_token, char *openid, char *student_id)
 // 读取第三方账户昵称与头像URL
 bool GetOAuthUserInfo(char *student_id, char *nickname, char *avatar_url, size_t nickname_bufflen, size_t avatar_url_bufflen)
 {
+	if (student_id == NULL || nickname == NULL || avatar_url == NULL)
+	{
+		return false;
+	}
+
 	memset(nickname, 0, nickname_bufflen);
 	memset(avatar_url, 0, avatar_url_bufflen);
 
@@ -410,7 +415,7 @@ bool GetOAuthUserInfo(char *student_id, char *nickname, char *avatar_url, size_t
 	query_ret[0].buffer = (void *)OAuth_name;
 	query_ret[0].buffer_length = sizeof(OAuth_name);
 
-	char OAuth_avatar[4096] = { 0 };
+	char OAuth_avatar[MAX_PATH] = { 0 };
 	query_ret[1].buffer_type = MYSQL_TYPE_VAR_STRING;
 	query_ret[1].buffer = (void *)OAuth_avatar;
 	query_ret[1].buffer_length = sizeof(OAuth_avatar);

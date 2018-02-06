@@ -14,7 +14,7 @@
 .content .page{margin:15px auto 15px auto;text-align:center;width:95%}
 .demos-title{text-align:center;font-size:34px;color:#3cc51f;font-weight:400;margin:0 15%}
 .signbox{padding-right:15px}
-.evalbox{margin-top:0;margin-right:15px}
+.evalbox{margin-right:15px}
 .col-50{width: 48% !important;float:left;margin:0 1% 10px 1% !important}
 .quickquery{background-color:#006fe2;margin-top:10px !important}
 .quickquery:active{background-color:#0061c5}
@@ -22,7 +22,7 @@
 .weui-cells__title.status{text-align:center}
 .weui-cells:before{border-top:0}
 .weui-cells:after{border-bottom:0}
-.weui-cells.weui-cells_form.bigbox{margin-left:15px;border:1px solid rgba(81, 203, 238, 1);border-radius:3px}
+.weui-cells.weui-cells_form.bigbox{margin-top:0;margin-left:15px;border:1px solid rgba(81, 203, 238, 1);border-radius:3px}
 .weui-footer{margin-top:60px}
 #login_captcha{margin:10px;border-radius:2px}
 .info_tag{padding-top:5px;font-size:12px}
@@ -40,7 +40,7 @@
 @media screen and (max-width:550px){.content{width:80%}.demos-title:before{margin-left:35%}}
 @media screen and (max-width:525px){.content{width:85%}.demos-title:before{margin-left:35%}}
 @media screen and (max-width:440px){.content{width:100%}.demos-title:before{margin-left:30%}}
-#i_notice{color:#8A6D3B;background-color:#FCF8E3;border: 1px solid #FAEBCC;overflow:hidden;margin:10px auto -20px auto;padding:15px;border-radius:4px;font-size:12px;width:80%}
+#i_notice{color:#8A6D3B;background-color:#FCF8E3;border: 1px solid #FAEBCC;overflow:hidden;margin:10px auto 0 auto;padding:15px;border-radius:4px;font-size:12px;width:80%}
 #i_notice p{margin:0px}
 .i_page-title{background-size:100%;font-size:16px;text-align:center;background-image:linear-gradient(315deg,#4debaf,#aa7cf3,#d6867e);position:relative;height:160px;overflow:hidden}
 .i_page-navbar{width:100%;z-index:100;line-height:40px;color:#fff;font-size:16px;text-align:center;background-color:#03a9f4;position:fixed;height:40px;overflow:hidden}
@@ -59,6 +59,9 @@
 .i_user-info-container p,.i_user-info-container a{font-size:14px}
 .i_user-info-container a{color:#fff}
 .i_user-photo{border-radius:50%;border:2px solid #6cc8e2}
+.logged-user{margin:0 auto 10px auto;text-align:center}
+.logged-user .avatar{border-radius:50%;border:1px solid #e6e6e6}
+.logged-user p{color:#3d4145;font-size:16px}
 #i_submit{cursor:pointer}
 #i_total p{padding:10px 0 0 20px}
 #i_total center{margin:0 auto;font-size:3em;color:#0092bf}

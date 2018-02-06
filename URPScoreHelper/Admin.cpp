@@ -596,7 +596,7 @@ void parse_find_user()
 		return;
 
 	char temp[1024] = { 0 };
-	sprintf(temp, find_user_result_section, "", "", "", "", "", "");
+	sprintf(temp, FIND_USER_RESULT_SECTION, "", "", "", "", "", "");
 
 	cout << GLOBAL_HEADER
 		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, "", temp, "", temp).c_str();
@@ -680,11 +680,11 @@ void do_find_user()
 		}
 
 		char temp[1024] = { 0 };
-		sprintf(temp, find_user_result_section, "", "", "", "", "", "");
+		sprintf(temp, FIND_USER_RESULT_SECTION, "", "", "", "", "", "");
 
 		char* result = (char *)malloc(4096);
 		memset(result, 0, 4096);
-		sprintf(result, find_user_result_section, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6);
+		sprintf(result, FIND_USER_RESULT_SECTION, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6);
 
 		cout << GLOBAL_HEADER
 			<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
@@ -758,7 +758,7 @@ void do_find_user()
 				char* result = (char *)malloc(4096);
 				memset(result, 0, 4096);
 				
-				sprintf(result, find_user_result_section, is_null[0] ? "" : tmp1,
+				sprintf(result, FIND_USER_RESULT_SECTION, is_null[0] ? "" : tmp1,
 														  is_null[1] ? "" : tmp2,
 														  is_null[2] ? "" : tmp3,
 														  is_null[3] ? "" : tmp4,
@@ -775,11 +775,11 @@ void do_find_user()
 		if (result_str.length() == 0)
 		{
 			strncpy(tmp1, u8"未找到", sizeof(tmp1) - 1);
-			result_str = strformat(find_user_result_section, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6);
+			result_str = strformat(FIND_USER_RESULT_SECTION, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6);
 		}
 
 		char temp[1024] = { 0 };
-		sprintf(temp, find_user_result_section, "", "", "", "", "", "");
+		sprintf(temp, FIND_USER_RESULT_SECTION, "", "", "", "", "", "");
 
 		cout << GLOBAL_HEADER
 			<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, "", temp,

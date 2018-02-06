@@ -994,8 +994,8 @@ void parse_main()
 	std::string m_lpszHomepage = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
 	char m_student_name[128] = {0};
-	char m_student_id[128] = { 0 };
-	char m_avatar_url[4096] = { 0 };
+	char m_student_id[512] = { 0 };
+	char m_avatar_url[MAX_PATH] = { 0 };
 	get_student_id(m_student_id);
 	if (!GetOAuthUserInfo(m_student_id, m_student_name, m_avatar_url, sizeof(m_student_name), sizeof(m_avatar_url)))
 	{
@@ -1148,21 +1148,28 @@ void parse_index()
 	{
 		if (token_xh != NULL && token_mm != NULL)
 		{
-			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, hasNotice ? notice.c_str() : "",
-				u8"教务帐号登录", token_xh, token_mm, ENABLE_OAUTH2 ? " col-50" : "", u8"登录",
+			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, u8"教务系统登录", hasNotice ? notice.c_str() : "", "",
+				token_xh, token_mm, ENABLE_OAUTH2 ? " col-50" : "", u8"登录",
 				ENABLE_OAUTH2 ? OAUTH2_LOGIN_HTML : "", ENABLE_QUICK_QUERY ? QUICKQUERY_HTML : "");
 		}
 		else
 		{
-			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, hasNotice ? notice.c_str() : "",
-				u8"教务帐号登录", "", "", ENABLE_OAUTH2 ? " col-50" : "", u8"登录",
+			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, u8"教务系统登录", hasNotice ? notice.c_str() : "", "",
+				"", "", ENABLE_OAUTH2 ? " col-50" : "", u8"登录",
 				ENABLE_OAUTH2 ? OAUTH2_LOGIN_HTML : "", ENABLE_QUICK_QUERY ? QUICKQUERY_HTML : "");
 		}
 	}
-	else 
+	else
 	{
-		cout << strformat( m_lpszHomepage.c_str(), APP_NAME, hasNotice ? notice.c_str() : "",
-						u8"请输入验证码", m_xh, m_mm, "", u8"继续", "", "");
+
+		char m_OAuth_name[512];
+		char m_OAuth_avatar[MAX_PATH];
+		GetOAuthUserInfo(m_xh, m_OAuth_name, m_OAuth_avatar, sizeof(m_OAuth_name), sizeof(m_OAuth_avatar));
+
+		cout << strformat(m_lpszHomepage.c_str(), APP_NAME, u8"微信快速登录", hasNotice ? notice.c_str() : "",
+						  (strlen(m_OAuth_name) != 0 && strlen(m_OAuth_avatar) != 0) ? strformat(LOGGED_USER_HTML, m_OAuth_avatar, m_OAuth_name).c_str() : "",
+						  m_xh, m_mm, "", u8"继续", "", "");
+
 	}
 	if (!CGI_HTTP_X_IS_AJAX_REQUEST)
 	{
@@ -1260,7 +1267,7 @@ void parse_ajax_avatar()
 	}
 	cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
 	char m_student_id[512] = { 0 };
-	char m_avatar_url[4096] = { 0 };
+	char m_avatar_url[MAX_PATH] = { 0 };
 	char m_student_name[1024] = { 0 };
 	get_student_id(m_student_id);
 	if (!GetOAuthUserInfo(m_student_id, m_student_name, m_avatar_url, sizeof(m_student_name), sizeof(m_avatar_url)))
@@ -3160,17 +3167,17 @@ void OAuth2_Association(bool isPOST)
 
 		if (strlen(stid) == 0 || strcmp(stid, "NONE") == 0)
 		{
-			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"教务帐号绑定",
+			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, u8"微信用户绑定", openid, access_token,
 				 "", pass);
 		}
 		else if(strlen(pass) == 0)
 		{
-			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"请输入密码",
+			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, u8"微信快速登录", openid, access_token,
 				stid, "");
 		}
 		else
 		{
-			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, openid, access_token, u8"请输入验证码",
+			cout << strformat( m_lpszHomepage.c_str(), APP_NAME, u8"微信快速登录", openid, access_token,
 				stid, pass);
 		}
 		cout << footer.c_str();

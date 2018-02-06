@@ -1,11 +1,9 @@
 <header class="demos-header">
 	<h1 class="demos-title">%s</h1>
+	<div class="weui-cells__title status">学号快速查询</div>
 </header>
 <div class="content">
 	<form id="ajax_submit" data-ajax-submit="query.fcgi?act=QuickQuery" class="weui-cells weui-cells_form">
-		<div class="weui-cells__title">
-			请输入学号(仅支持部分学校)
-		</div>
 		<div class="signbox">
 			<div class="weui-cells weui-cells_form bigbox">
 				  <div class="weui-cell">
