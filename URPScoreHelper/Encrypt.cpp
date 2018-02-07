@@ -34,12 +34,23 @@ void EnCodeStr(const char *str, char *out)
 	char *urlenc = url_encode(out, (int)strlen(out), &newlen);
 	memset(out, 0, newlen + 1);
 	strncpy(out, urlenc, newlen);
+	for(size_t i = 0; i < newlen; i++)
+	{
+		if (*(out + i) == '%')
+			*(out + i) = '_';
+	}
 	free(urlenc);
 }
 
 void DeCodeStr(char *pCode)
 {
-	url_decode(pCode, strlen(pCode));
+	size_t pCodelen = strlen(pCode);
+	for (size_t i = 0; i < pCodelen; i++)
+	{
+		if (*(pCode + i) == '_')
+			*(pCode + i) = '%';
+	}
+	url_decode(pCode, pCodelen);
 	size_t outlen = 4096;
 	uint8_t *strCode = (uint8_t *)malloc(outlen);
 	memset(strCode, 0, outlen);

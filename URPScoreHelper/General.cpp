@@ -24,7 +24,7 @@ const char *BEFORE_TEMPLATE_BY_PLAN = u8"<div id=\"list_page\" style=\"backgroun
 const char *SCORE_TEMPLATE_BY_PLAN = u8"<tr class=\"even\"onmouseout=\"this.className='even';\"onmouseover=\"this.className='evenfocus';\"><td align=\"center\"style=\"%s\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%.2f</td><td align=\"center\">%s</td></tr>";
 const char *QUICK_SCORE = u8"<div class=\"weui-cell\"><div class=\"weui-cell__bd\"><p>%s</p></div><div class=\"weui-cell__ft\">%s</div></div>";
 const char *OAUTH2_LOGIN_HTML = u8"<a id=\"no_ajax\" title=\"微信登录\" class=\"weui-btn weui-btn_default col-50\" href=\"OAuth2.fcgi\"><i class=\"fa fa-weixin\"></i>微信登录</a>";
-const char *QUICKQUERY_HTML = u8"<a class=\"weui-btn quickquery\" href=\"QuickQuery.fcgi\"><i class=\"fa fa-search\"></i>免密快速查询入口</a>";
+const char *QUICKQUERY_HTML = u8"<a class=\"weui-btn quickquery\" href=\"QuickQuery.fcgi\"><i class=\"fa fa-search\"></i>学号快速查询入口</a>";
 const char *ASSOC_LINK_HTML = u8"<a id=\"no_ajax\" href=\"index.fcgi?act=requestAssoc\"><i class=\"fa fa-link\"></i>绑定微信</a>";
 const char *RLS_ASSOC_LINK_HTML = u8"<span style=\"color:rgb(0,255,90)\"><i class=\"fa fa-weixin\"></i>微信已绑定</span>&nbsp;&nbsp;<a id=\"no_ajax\" href=\"javascript:void(0);\" onclick=\"releaseAssoc('%s');\"><i class=\"fa fa-unlink\"></i>解除绑定</a>";
 const char *CARD_AD_BANNER_HTML = u8"<div class=\"swiper-slide\"><a id=\"no_ajax\" href=\"%s\" target=\"_blank\"><img data-src=\"%s\" height=\"160\" width=\"100%%\" class=\"swiper-lazy\"></a><div class=\"swiper-lazy-preloader\"></div></div>";
@@ -130,8 +130,14 @@ std::string getAppURL()
 	return text;
 }
 
-/* 生成并输出 token Cookie 头 */
+/* 输出 token Cookie 头 */
 void output_token_header(const char *m_xuehao, const char *m_password)
+{
+	cout << "Set-Cookie: token=" << generate_token(m_xuehao, m_password).c_str() << "; max-age=604800; path=/\r\n";
+}
+
+/* 生成 token */
+std::string generate_token(const char *m_xuehao, const char *m_password)
 {
 	char m_xuehaoe[4096] = { 0 };
 	char m_passworde[4096] = { 0 };
@@ -143,5 +149,25 @@ void output_token_header(const char *m_xuehao, const char *m_password)
 	char token_e[10240] = { 0 };
 	strncpy(token_e, token.c_str(), sizeof(token_e) - 1);
 	EnCodeStr(token_e, token_e);
-	cout << "Set-Cookie: token=" << token_e << "; max-age=604800; path=/\r\n";
+	std::string ret(token_e);
+	return ret;
+}
+
+/* 解开 token */
+void decode_token(char *token, std::string & token_xh, std::string & token_mm)
+{
+	token_xh.erase();
+	token_mm.erase();
+	DeCodeStr(token);
+	char *xh = (char *)malloc(1024);
+	char *mm = (char *)malloc(1024);
+	if (sscanf(token, "%[^-]-%s", xh, mm) == 2)
+	{
+		DeCodeStr(xh);
+		DeCodeStr(mm);
+		token_xh = xh;
+		token_mm = mm;
+	}
+	free(xh);
+	free(mm);
 }

@@ -45,7 +45,7 @@
 	});
 	</script>
 	<ul class="bread">
-	  <li>请注意及时保存修改的信息。为确保服务稳定，建议避开高峰时期再修改设置。</li>
+	  <li>请注意及时保存修改的信息，所有设置项内容的大小不能超过10KB。</li>
 	</ul>
 	<div class="admin">
 	  <iframe scrolling="auto" rameborder="0" src="settings.fcgi" name="right" width="100%%" height="100%%"></iframe>

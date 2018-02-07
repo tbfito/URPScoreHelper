@@ -85,5 +85,7 @@
 	float cj2jd(float cj);
 	std::string getAppURL();
 	void output_token_header(const char *m_xuehao, const char *m_password);
+	std::string generate_token(const char *m_xuehao, const char *m_password);
+	void decode_token(char *token, std::string & token_xh, std::string & token_mm);
 
 #endif

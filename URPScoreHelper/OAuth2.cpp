@@ -17,7 +17,7 @@ void OAuth2_process()
 	char m_Domain[4096];
 	char *stid = NULL;
 
-	std::string str_stid = _GET(std::string(CGI_QUERY_STRING), "stid");
+	std::string str_stid = _GET(std::string(CGI_QUERY_STRING), "user");
 	if (!str_stid.empty())
 	{
 		size_t qslen = strlen(CGI_QUERY_STRING);
@@ -35,29 +35,25 @@ void OAuth2_process()
 	strncpy(m_Domain, m_UrlEncodedDomain, sizeof(m_Domain) - 1);
 	free(m_UrlEncodedDomain);
 
-	char *m_lpszURL = NULL;
+	std::string m_lpszURL;
 	if (stid == NULL) // 如果没有传入学号
 	{
-		m_lpszURL = new char[strlen(OAUTH2_AUTHENTICATION) + strlen(OAUTH2_APPID) + strlen(m_Domain) + 5];
-		sprintf(m_lpszURL, OAUTH2_AUTHENTICATION, OAUTH2_APPID, m_Domain, "NONE");
+		m_lpszURL = strformat(OAUTH2_AUTHENTICATION, OAUTH2_APPID, m_Domain, "NONE");
 	}
 	else if(strlen(stid) == 0)  // 如果学号无效
 	{
-		m_lpszURL = new char[strlen(OAUTH2_AUTHENTICATION) + strlen(OAUTH2_APPID) + strlen(m_Domain) + 5];
-		sprintf(m_lpszURL, OAUTH2_AUTHENTICATION, OAUTH2_APPID, m_Domain, "NONE");
+		m_lpszURL = strformat(OAUTH2_AUTHENTICATION, OAUTH2_APPID, m_Domain, "NONE");
 		delete[]stid;
 	}
 	else // 传入了学号
 	{
-		m_lpszURL = new char[strlen(OAUTH2_AUTHENTICATION) + strlen(OAUTH2_APPID) + strlen(m_Domain) + strlen(stid) + 1];
-		sprintf(m_lpszURL, OAUTH2_AUTHENTICATION, OAUTH2_APPID, m_Domain, stid);
+		m_lpszURL = strformat(OAUTH2_AUTHENTICATION, OAUTH2_APPID, m_Domain, stid);
 		delete[]stid;
 	}
 
 	cout << "Status: 302 Found\r\n";
-	cout << "Location: " << m_lpszURL << "\r\n";
+	cout << "Location: " << m_lpszURL.c_str() << "\r\n";
 	cout << GLOBAL_HEADER;
-	delete[]m_lpszURL;
 }
 
 // 微信授权回调
@@ -69,7 +65,7 @@ void OAuth2_CallBack()
 	std::string str_code = _GET(std::string(CGI_QUERY_STRING), "code");
 	if (str_code.empty())
 	{
-		Error(u8"鉴权失败 (Null Code)");
+		Error(u8"鉴权失败 (code)");
 		return;
 	}
 	size_t qslen = strlen(CGI_QUERY_STRING);
@@ -77,20 +73,13 @@ void OAuth2_CallBack()
 	memset(code, 0, qslen);
 	strncpy(code, str_code.c_str(), qslen - 1);
 
-	char *access_token_req = new char[strlen(OAUTH2_ACCESS_TOKEN) +
-		strlen(OAUTH2_APPID) +
-		strlen(OAUTH2_SECRET) +
-		/* [FOR QQ] + strlen(m_Domain) */
-		+ strlen(code) + 1];
-
-	sprintf(access_token_req, OAUTH2_ACCESS_TOKEN, OAUTH2_APPID, OAUTH2_SECRET, code /* [FOR QQ] , m_Domain */);
+	std::string access_token_req = strformat(OAUTH2_ACCESS_TOKEN, OAUTH2_APPID, OAUTH2_SECRET, code /* [FOR QQ] , m_Domain */);
 
 	CURL* curl = curl_easy_init();
 
 	if (curl == NULL)
 	{
 		Error(u8"网络通信异常");
-		delete[]access_token_req;
 		delete[]code;
 		return;
 	}
@@ -100,14 +89,13 @@ void OAuth2_CallBack()
 	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, CURL_TIMEOUT);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &html);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, OAuth2_curl_receive);
-	curl_easy_setopt(curl, CURLOPT_URL, access_token_req);
+	curl_easy_setopt(curl, CURLOPT_URL, access_token_req.c_str());
 	curl_easy_setopt(curl, CURLOPT_USERAGENT, USER_AGENT);
 	CURLcode ret = curl_easy_perform(curl);
 
 	if (ret != CURLE_OK)
 	{
 		Error(u8"网络通信异常");
-		delete[]access_token_req;
 		delete[]code;
 		curl_easy_cleanup(curl);
 		return;
@@ -120,7 +108,6 @@ void OAuth2_CallBack()
 		err.append(html);
 		err.append("</p>");
 		Error(err.c_str());
-		delete[]access_token_req;
 		delete[]code;
 		curl_easy_cleanup(curl);
 		return;
@@ -130,7 +117,6 @@ void OAuth2_CallBack()
 	if (pStr2 == NULL)
 	{
 		Error(u8"<p><b>无法读取 access_token</b></p><p>");
-		delete[]access_token_req;
 		delete[]code;
 		curl_easy_cleanup(curl);
 		return;
@@ -145,11 +131,10 @@ void OAuth2_CallBack()
 	pStr1 = strstr((char *)html.c_str(), "\"openid\":\"");
 	if (pStr1 == NULL)
 	{
-		std::string err(u8"<p><b>无法读取 openid</b></p><p>");
+		std::string err(u8"<p><b>无法读取 openid(1)</b></p><p>");
 		err.append(html);
 		err.append("</p>");
 		Error(err.c_str());
-		delete[]access_token_req;
 		delete[]code;
 		return;
 	}
@@ -157,8 +142,7 @@ void OAuth2_CallBack()
 	pStr2 = strstr(pStr1 + 11, "\"");
 	if (pStr2 == NULL)
 	{
-		Error(u8"<p><b>无法读取 openid</b></p><p>");
-		delete[]access_token_req;
+		Error(u8"<p><b>无法读取 openid(2)</b></p><p>");
 		delete[]code;
 		return;
 	}
@@ -180,7 +164,6 @@ void OAuth2_CallBack()
 		char Err_Msg[1024] = u8"<b>数据库操作失败</b><p>(statement 初始化失败)</p>";
 		Error(Err_Msg);
 		delete[]access_token;
-		delete[]access_token_req;
 		delete[]openid;
 		delete[]code;
 		return;
@@ -195,7 +178,7 @@ void OAuth2_CallBack()
 	query_ret[0].buffer = (void *)id;
 	query_ret[0].buffer_length = sizeof(id);
 
-	char password[36] = { 0 };
+	char password[1024] = { 0 };
 	query_ret[1].buffer_type = MYSQL_TYPE_VAR_STRING;
 	query_ret[1].buffer = (void *)password;
 	query_ret[1].buffer_length = sizeof(password);
@@ -213,7 +196,6 @@ void OAuth2_CallBack()
 		strcat(Err_Msg, ")</p>");
 		Error(Err_Msg);
 		delete[]access_token;
-		delete[]access_token_req;
 		delete[]openid;
 		delete[]code;
 		return;
@@ -222,6 +204,8 @@ void OAuth2_CallBack()
 	while (mysql_stmt_fetch(stmt) == 0);
 
 	mysql_stmt_close(stmt);
+
+	DeCodeStr(password);
 
 	if (strlen(id) == 0 || strlen(password) == 0) // 无记录，跳转至 OAuth2Assoc.fcgi
 	{
@@ -245,7 +229,7 @@ void OAuth2_CallBack()
 			if (strlen(id) != 0) // 但通过 openid 却能查到数据库中对应的学号
 			{
 				EnCodeStr(id, id_encrypt);
-				cout << "Location: " << getAppURL().c_str() << "/OAuth2Assoc.fcgi?openid=" << openid << "&stid=" << id_encrypt << "&proc=" << encrypt_access_token << "\r\n";
+				cout << "Location: " << getAppURL().c_str() << "/OAuth2Assoc.fcgi?openid=" << openid << "&user=" << id_encrypt << "&proc=" << encrypt_access_token << "\r\n";
 			}
 			else // 完全不存在学号，则为新绑定用户
 			{
@@ -254,29 +238,21 @@ void OAuth2_CallBack()
 		}
 		else // OAuth State 传来有效的需要绑定的学号
 		{
-			cout << "Location: " << getAppURL().c_str() << "/OAuth2Assoc.fcgi?openid=" << openid << "&stid=" << id_state << "&proc=" << encrypt_access_token << "\r\n";
+			cout << "Location: " << getAppURL().c_str() << "/OAuth2Assoc.fcgi?openid=" << openid << "&user=" << id_state << "&proc=" << encrypt_access_token << "\r\n";
 		}
 		cout << GLOBAL_HEADER;
 
 		delete[]access_token;
-		delete[]access_token_req;
 		delete[]openid;
 		delete[]code;
 		return;
 	}
 
-	char encrypt_pass[512] = { 0 };
-	char encrypt_id[512] = { 0 };
-	strncpy(encrypt_id, (char *)id, sizeof(encrypt_id) - 1);
-	strncpy(encrypt_pass, (char *)password, sizeof(encrypt_pass) - 1);
-	EnCodeStr(encrypt_id, encrypt_id);
-	EnCodeStr(encrypt_pass, encrypt_pass);
 	WriteOAuthUserInfo(access_token, openid, (char *)id);
 	cout << "Status: 302 Found\r\n"
-		<< "Location: " << getAppURL().c_str() << "/index.fcgi?stid=" << encrypt_id << "&pass=" << encrypt_pass << "\r\n"
+		<< "Location: " << getAppURL().c_str() << "/index.fcgi?token=" << generate_token((const char *)id, (const char *)password).c_str() << "\r\n"
 		<< GLOBAL_HEADER;
 	delete[]access_token;
-	delete[]access_token_req;
 	delete[]openid;
 	delete[]code;
 }
@@ -284,19 +260,62 @@ void OAuth2_CallBack()
 // 向数据库中写入第三方账户的昵称与头像URL
 void WriteOAuthUserInfo(char *access_token, char *openid, char *student_id)
 {
+	std::string nickname;
+	std::string avatar;
+	PullOAuthUserInfo(access_token, openid, nickname, avatar);
+	if (nickname.length() == 0 || avatar.length() == 0)
+	{
+		return;
+	}
+
+	MYSQL_STMT *stmt = mysql_stmt_init(&db);
+	MYSQL_BIND bind[3];
+	memset(bind, 0, sizeof(bind));
+	std::string query("UPDATE `UserInfo` SET `OAuth_name`=?, `OAuth_avatar`=? WHERE `id`=?");
+
+	if (stmt == NULL)
+	{
+		return;
+	}
+
+	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[0].buffer = (void *)nickname.c_str();
+	bind[0].buffer_length = nickname.length();
+
+	bind[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[1].buffer = (void *)avatar.c_str();
+	bind[1].buffer_length = avatar.length();
+
+	bind[2].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[2].buffer = (void *)student_id;
+	bind[2].buffer_length = strlen(student_id);
+
+	if (mysql_stmt_prepare(stmt, query.c_str(), query.length()) != 0 || 
+		mysql_stmt_bind_param(stmt, bind) != 0 || 
+		mysql_stmt_execute(stmt) != 0)
+	{
+		mysql_stmt_close(stmt);
+		return;
+	}
+
+	mysql_stmt_close(stmt);
+}
+
+// 实时网络获取第三方账户的昵称与头像URL
+void PullOAuthUserInfo(char *access_token, char *openid, std::string & OAuth_name, std::string & OAuth_avatar)
+{
 	CURL *curl = curl_easy_init();
 	if (curl == NULL)
 	{
 		return;
 	}
-	char get_user_info_req[512] = { 0 };
 	std::string html;
-	sprintf(get_user_info_req, OAUTH2_GET_USER_INFO, access_token, openid);
+	std::string get_user_info_req = strformat(OAUTH2_GET_USER_INFO, access_token, openid);
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
 	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, CURL_TIMEOUT);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &html);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, OAuth2_curl_receive);
-	curl_easy_setopt(curl, CURLOPT_URL, get_user_info_req);
+	curl_easy_setopt(curl, CURLOPT_URL, get_user_info_req.c_str());
 	curl_easy_setopt(curl, CURLOPT_USERAGENT, USER_AGENT);
 	CURLcode ret = curl_easy_perform(curl);
 	curl_easy_cleanup(curl);
@@ -324,7 +343,7 @@ void WriteOAuthUserInfo(char *access_token, char *openid, char *student_id)
 	char *nickname = new char[html.length()];
 	memset(nickname, 0, html.length());
 	mid(nickname, pStr1 + 12, pStr2 - pStr1 - 12, 0);
-	
+
 	pStr1 = strstr(html_str, "\"headimgurl\":\"");
 	if (pStr1 == NULL)
 	{
@@ -344,46 +363,14 @@ void WriteOAuthUserInfo(char *access_token, char *openid, char *student_id)
 	mid(avatar, pStr1 + 14, pStr2 - pStr1 - 14, 0);
 	free(html_str);
 
-	MYSQL_STMT *stmt = mysql_stmt_init(&db);
-	MYSQL_BIND bind[3];
-	memset(bind, 0, sizeof(bind));
-	std::string query("UPDATE `UserInfo` SET `OAuth_name`=?, `OAuth_avatar`=? WHERE `id`=?");
+	OAuth_name = nickname;
+	OAuth_avatar = avatar;
 
-	if (stmt == NULL)
-	{
-		delete[]nickname;
-		delete[]avatar;
-		return;
-	}
-
-	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
-	bind[0].buffer = (void *)nickname;
-	bind[0].buffer_length = strlen(nickname);
-
-	bind[1].buffer_type = MYSQL_TYPE_VAR_STRING;
-	bind[1].buffer = (void *)avatar;
-	bind[1].buffer_length = strlen(avatar);
-
-	bind[2].buffer_type = MYSQL_TYPE_VAR_STRING;
-	bind[2].buffer = (void *)student_id;
-	bind[2].buffer_length = strlen(student_id);
-
-	if (mysql_stmt_prepare(stmt, query.c_str(), query.length()) != 0 || 
-		mysql_stmt_bind_param(stmt, bind) != 0 || 
-		mysql_stmt_execute(stmt) != 0)
-	{
-		mysql_stmt_close(stmt);
-		delete[]nickname;
-		delete[]avatar;
-		return;
-	}
-
-	mysql_stmt_close(stmt);
 	delete[]nickname;
 	delete[]avatar;
 }
 
-// 读取第三方账户昵称与头像URL
+// 数据库读取第三方账户昵称与头像URL
 bool GetOAuthUserInfo(char *student_id, char *nickname, char *avatar_url, size_t nickname_bufflen, size_t avatar_url_bufflen)
 {
 	if (student_id == NULL || nickname == NULL || avatar_url == NULL)

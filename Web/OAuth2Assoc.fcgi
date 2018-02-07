@@ -4,6 +4,7 @@
 </header>
 <div class="content">
 	<form id="ajax_submit" data-ajax-submit="/OAuth2Assoc.fcgi?openid=%s&proc=%s" class="weui-cells weui-cells_form">
+		%s
 		<div class="signbox">
 			<div class="weui-cell weui-cell_vcode">
 				<div class="weui-cell__hd">

@@ -16,7 +16,7 @@
 	void getRedirectUri(char *buffer, size_t bufflen);
 	void OAuth2_process();
 	void OAuth2_CallBack();
-
+	void PullOAuthUserInfo(char *access_token, char *openid, std::string & OAuth_name, std::string & OAuth_avatar);
 	void WriteOAuthUserInfo(char *access_token, char *openid, char *student_id);
 	bool GetOAuthUserInfo(char *student_id, char *nickname, char *avatar_url, size_t nickname_bufflen, size_t avatar_url_bufflen);
 	size_t OAuth2_curl_receive(char *buffer, size_t size, size_t nmemb, std::string *html);

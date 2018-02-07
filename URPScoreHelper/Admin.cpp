@@ -151,7 +151,6 @@ void parse_admin_login()
 			 << GLOBAL_HEADER;
 		return;
 	}
-
 	cout << GLOBAL_HEADER
 	     << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(),
 			 APP_NAME, APP_NAME, SOFTWARE_NAME, SOFTWARE_COPYRIGHT).c_str();
@@ -249,10 +248,8 @@ std::string generate_session()
 {
 	size_t result = time(NULL);
 	result += 600;
-	char tmp[128] = { 0 };
-	sprintf(tmp, "%zu", result);
 	std::string ret;
-	ret = ret + ADMIN_USER_NAME + "-" + ADMIN_PASSWORD + "-" + tmp;
+	ret = ret + ADMIN_USER_NAME + "-" + ADMIN_PASSWORD + "-" + strformat("%zu", result);
 	char encoded[1024] = { 0 };
 	EnCodeStr((char *)ret.c_str(), encoded);
 	std::string txt(encoded);
@@ -585,7 +582,7 @@ void parse_admin_info()
 	cout << GLOBAL_HEADER
 		 << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
 			 SOFTWARE_NAME, g_users, g_QueryCounter,
-			 (server_software == NULL) ? "Unknown" : server_software, mysql_get_client_info(), mysql_get_server_info(&db),
+			 (server_software == NULL) ? "[未知]" : server_software, mysql_get_client_info(), mysql_get_server_info(&db),
 			__DATE__, __TIME__, SOFTWARE_COPYRIGHT).c_str();
 }
 
@@ -595,11 +592,10 @@ void parse_find_user()
 	if (!session())
 		return;
 
-	char temp[1024] = { 0 };
-	sprintf(temp, FIND_USER_RESULT_SECTION, "", "", "", "", "", "");
+	std::string temp = strformat(FIND_USER_RESULT_SECTION, "", "", "", "", "", "");
 
 	cout << GLOBAL_HEADER
-		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, "", temp, "", temp).c_str();
+		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, "", temp.c_str(), "", temp.c_str()).c_str();
 }
 
 // 处理查找用户
@@ -634,7 +630,7 @@ void do_find_user()
 		std::string query("SELECT `id`, `password`, `name`, `openid`, `OAuth_name`, `lastlogin` FROM `UserInfo` WHERE `id`=?");
 
 		char tmp1[36] = { 0 };
-		char tmp2[36] = { 0 };
+		char tmp2[1024] = { 0 };
 		char tmp3[36] = { 0 };
 		char tmp4[1024] = { 0 };
 		char tmp5[1024] = { 0 };
@@ -679,18 +675,14 @@ void do_find_user()
 			strncpy(tmp1, u8"未找到", sizeof(tmp1) - 1);
 		}
 
-		char temp[1024] = { 0 };
-		sprintf(temp, FIND_USER_RESULT_SECTION, "", "", "", "", "", "");
-
-		char* result = (char *)malloc(4096);
-		memset(result, 0, 4096);
-		sprintf(result, FIND_USER_RESULT_SECTION, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6);
+		std::string temp = strformat(FIND_USER_RESULT_SECTION, "", "", "", "", "", "");
+		DeCodeStr(tmp2); // 解密
+		std::string result  = strformat(FIND_USER_RESULT_SECTION, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6);
 
 		cout << GLOBAL_HEADER
 			<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
-				m_STUDENT_ID.c_str(), result, "", temp).c_str();
+				m_STUDENT_ID.c_str(), result.c_str(), "", temp.c_str()).c_str();
 
-		free(result);
 		return;
 	}
 	else if (_GET(std::string(CGI_QUERY_STRING), "order") == "name")
@@ -709,7 +701,7 @@ void do_find_user()
 		std::string query("SELECT `id`, `password`, `name`, `openid`, `OAuth_name`, `lastlogin` FROM `UserInfo` WHERE `name`=?");
 
 		char tmp1[36] = { 0 };
-		char tmp2[36] = { 0 };
+		char tmp2[1024] = { 0 };
 		char tmp3[36] = { 0 };
 		char tmp4[1024] = { 0 };
 		char tmp5[1024] = { 0 };
@@ -755,19 +747,17 @@ void do_find_user()
 			mysql_stmt_store_result(stmt);
 			while (mysql_stmt_fetch(stmt) == 0)
 			{
-				char* result = (char *)malloc(4096);
-				memset(result, 0, 4096);
-				
-				sprintf(result, FIND_USER_RESULT_SECTION, is_null[0] ? "" : tmp1,
+				if(!is_null[1])
+					DeCodeStr(tmp2); // 解密
+				std::string result = strformat(FIND_USER_RESULT_SECTION, is_null[0] ? "" : tmp1,
 														  is_null[1] ? "" : tmp2,
 														  is_null[2] ? "" : tmp3,
 														  is_null[3] ? "" : tmp4,
 														  is_null[4] ? "" : tmp5,
 														  is_null[5] ? "" : tmp6
-						);
+											  );
 
 				result_str.append(result);
-				free(result);
 			}
 			mysql_stmt_close(stmt);
 		}
@@ -775,14 +765,13 @@ void do_find_user()
 		if (result_str.length() == 0)
 		{
 			strncpy(tmp1, u8"未找到", sizeof(tmp1) - 1);
-			result_str = strformat(FIND_USER_RESULT_SECTION, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6);
+			result_str = strformat(FIND_USER_RESULT_SECTION, tmp1, "", "", "", "", "");
 		}
 
-		char temp[1024] = { 0 };
-		sprintf(temp, FIND_USER_RESULT_SECTION, "", "", "", "", "", "");
+		std::string temp = strformat(FIND_USER_RESULT_SECTION, "", "", "", "", "", "");
 
 		cout << GLOBAL_HEADER
-			<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, "", temp,
+			<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, "", temp.c_str(),
 				m_STUDENT_NAME.c_str(), result_str.c_str()).c_str();
 
 		return;

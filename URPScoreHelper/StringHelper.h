@@ -10,7 +10,7 @@
 	void replace_string(char * source_str, const char * targ_str, const char *val);
 	char * url_encode(char const *s, int len, int *new_length);
 	int url_decode(char *str, int len);
-	void get_time(char *lpszTime);
+	std::string get_time();
 	int split(char dst[][128], char* str, const char* spliter);
 	std::string _URLFIND(const std::string & url, const char *name);
 	std::string _GET(const std::string & get, const char *name);
