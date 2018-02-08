@@ -1,0 +1,167 @@
+// Add to http context
+
+http {
+	upstream URPScoreHelper {
+		server 127.0.0.1:8123 weight=1 max_fails=10 fail_timeout=20;
+		server 172.17.110.68:8123 weight=10 max_fails=10 fail_timeout=20;
+		server 192.168.1.200:8123 weight=10 max_fails=10 fail_timeout=20;
+		server 192.168.1.230:8123 weight=11 max_fails=10 fail_timeout=20;
+	}
+}
+
+// vhost file
+
+server {
+	listen 80;
+	server_name glxy.iedon.com;
+	root /data/URPScoreHelper/Web;
+	index index.html index.htm index.fcgi;
+
+	access_log /data/URPScoreHelper/logs/glxy.iedon.com.log main;
+
+	add_header Content-Security-Policy 'upgrade-insecure-requests';
+	add_header Strict-Transport-Security 'max-age=15768000';
+	add_header X-UA-Compatible 'IE=Edge,chrome=1';
+	add_header X-Frame-Options 'SAMEORIGIN';
+
+	error_page 404 /data/URPScoreHelper/error.html;
+	error_page 502 /data/URPScoreHelper/error.html;
+	error_page 403 /data/URPScoreHelper/error.html;
+	error_page 503 /data/URPScoreHelper/error.html;
+	error_page 400 /data/URPScoreHelper/error.html;
+
+	location ~ [^/]\.fcgi(/|$) {
+		proxy_redirect off;
+		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header Host $http_host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		client_max_body_size 1m;
+		client_body_buffer_size 128k;
+		proxy_connect_timeout 10;
+		proxy_send_timeout 15;
+		proxy_read_timeout 15;
+		proxy_buffer_size 4k;
+		proxy_buffers 4 32k;
+		proxy_busy_buffers_size 64k;
+		proxy_temp_file_write_size 64k;
+		proxy_pass http://URPScoreHelper;
+	}
+
+	location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|flv|mp4|ico|ttf|eot|woff|woff2|svg|txt|map)$ {
+		expires 30d;
+		access_log off;
+	}
+	
+	location ~ .*\.(js|css)?$ {
+		expires 7d;
+		access_log off;
+	}
+	
+	location ~ /\.ht {
+		deny all;
+	}
+	
+	location /idn_status {
+		stub_status on;
+		access_log off;
+	}
+}
+server {
+	listen 80;
+	server_name yzu.iedon.com;
+	root /data/URPScoreHelper/Web;
+	index index.html index.htm index.fcgi;
+
+	access_log /data/URPScoreHelper/logs/yzu.iedon.com.log main;
+
+	add_header Content-Security-Policy 'upgrade-insecure-requests';
+	add_header Strict-Transport-Security 'max-age=15768000';
+	add_header X-UA-Compatible 'IE=Edge,chrome=1';
+	add_header X-Frame-Options 'SAMEORIGIN';
+
+	error_page 404 /data/URPScoreHelper/error.html;
+	error_page 502 /data/URPScoreHelper/error.html;
+	error_page 403 /data/URPScoreHelper/error.html;
+	error_page 503 /data/URPScoreHelper/error.html;
+	error_page 400 /data/URPScoreHelper/error.html;
+
+	location ~ [^/]\.fcgi(/|$) {
+		proxy_redirect off;
+		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header Host $http_host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		client_max_body_size 1m;
+		client_body_buffer_size 128k;
+		proxy_connect_timeout 10;
+		proxy_send_timeout 15;
+		proxy_read_timeout 15;
+		proxy_buffer_size 4k;
+		proxy_buffers 4 32k;
+		proxy_busy_buffers_size 64k;
+		proxy_temp_file_write_size 64k;
+		proxy_pass http://URPScoreHelper;
+	}
+
+	location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|flv|mp4|ico|ttf|eot|woff|woff2|svg|txt|map)$ {
+		expires 30d;
+		access_log off;
+	}
+	
+	location ~ .*\.(js|css)?$ {
+		expires 7d;
+		access_log off;
+	}
+	
+	location ~ /\.ht {
+		deny all;
+	}
+	
+	location /idn_status {
+		stub_status on;
+		access_log off;
+	}
+}
+
+
+--------------------------------------------
+----------------- Apache -------------------
+--------------------------------------------
+
+---------------- vhost.conf ----------------
+
+<VirtualHost *:8123>
+    DocumentRoot "/data/URPScoreHelper/Web"
+    ServerName glxy.iedon.com
+	<IfModule mod_fcgid.c>
+		AddHandler fcgid-script .fcgi
+		FcgidWrapper "/data/URPScoreHelper/Guangling/URPScoreHelper.exe" .fcgi
+		AddType application/x-iedon-urpscorehelper .fcgi
+	</IfModule>
+	Options FollowSymLinks ExecCGI
+	Header set X-iEdon-Backend "main"
+</VirtualHost>
+
+<VirtualHost *:8123>
+    DocumentRoot "/data/URPScoreHelper/Web"
+    ServerName yzu.iedon.com
+	<IfModule mod_fcgid.c>
+		AddHandler fcgid-script .fcgi
+		FcgidWrapper "/data/URPScoreHelper/Yangda/URPScoreHelper.exe" .fcgi
+		AddType application/x-iedon-urpscorehelper .fcgi
+	</IfModule>
+	Options FollowSymLinks ExecCGI
+	Header set X-iEdon-Backend "main"
+</VirtualHost>
+
+---------------- httpd.conf ----------------
+
+LoadModule fcgid_module modules/mod_fcgid.so
+
+<IfModule mod_fcgid.c>
+	FcgidMaxRequestsPerProcess 10000
+	FcgidMaxProcesses 10
+	FcgidIOTimeout 120
+	FcgidIdleTimeout 120
+</IfModule>
