@@ -157,7 +157,7 @@ void OAuth2_CallBack()
 	MYSQL_BIND query_ret[2];
 	memset(bind, 0, sizeof(bind));
 	memset(query_ret, 0, sizeof(query_ret));
-	std::string query("SELECT `id`, `password` FROM `UserInfo` WHERE `openid`=?");
+	std::string query("SELECT `id`, `password` FROM `userinfo` WHERE `openid`=?");
 
 	if (stmt == NULL)
 	{
@@ -271,7 +271,7 @@ void WriteOAuthUserInfo(char *access_token, char *openid, char *student_id)
 	MYSQL_STMT *stmt = mysql_stmt_init(&db);
 	MYSQL_BIND bind[3];
 	memset(bind, 0, sizeof(bind));
-	std::string query("UPDATE `UserInfo` SET `OAuth_name`=?, `OAuth_avatar`=? WHERE `id`=?");
+	std::string query("UPDATE `userinfo` SET `OAuth_name`=?, `OAuth_avatar`=? WHERE `id`=?");
 
 	if (stmt == NULL)
 	{
@@ -386,7 +386,7 @@ bool GetOAuthUserInfo(char *student_id, char *nickname, char *avatar_url, size_t
 	MYSQL_BIND query_ret[2];
 	memset(bind, 0, sizeof(bind));
 	memset(query_ret, 0, sizeof(query_ret));
-	std::string query("SELECT `OAuth_name`, `OAuth_avatar` FROM `UserInfo` WHERE `id`=?");
+	std::string query("SELECT `OAuth_name`, `OAuth_avatar` FROM `userinfo` WHERE `id`=?");
 
 	if (stmt == NULL)
 	{

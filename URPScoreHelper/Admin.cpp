@@ -414,7 +414,7 @@ void UpdateSettings(const char *name, const char *value)
 
 	MYSQL_BIND bind[2];
 	memset(bind, 0, sizeof(bind));
-	std::string query("UPDATE `Settings` SET `value`=? WHERE `name`=?");
+	std::string query("UPDATE `settings` SET `value`=? WHERE `name`=?");
 
 	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
 	bind[0].buffer = (void *)value;
@@ -627,7 +627,7 @@ void do_find_user()
 		MYSQL_BIND query_ret[6];
 		memset(bind, 0, sizeof(bind));
 		memset(query_ret, 0, sizeof(query_ret));
-		std::string query("SELECT `id`, `password`, `name`, `openid`, `OAuth_name`, `lastlogin` FROM `UserInfo` WHERE `id`=?");
+		std::string query("SELECT `id`, `password`, `name`, `openid`, `OAuth_name`, `lastlogin` FROM `userinfo` WHERE `id`=?");
 
 		char tmp1[36] = { 0 };
 		char tmp2[1024] = { 0 };
@@ -698,7 +698,7 @@ void do_find_user()
 		memset(bind, 0, sizeof(bind));
 		memset(query_ret, 0, sizeof(query_ret));
 		memset(is_null, 0, sizeof(is_null));
-		std::string query("SELECT `id`, `password`, `name`, `openid`, `OAuth_name`, `lastlogin` FROM `UserInfo` WHERE `name`=?");
+		std::string query("SELECT `id`, `password`, `name`, `openid`, `OAuth_name`, `lastlogin` FROM `userinfo` WHERE `name`=?");
 
 		char tmp1[36] = { 0 };
 		char tmp2[1024] = { 0 };

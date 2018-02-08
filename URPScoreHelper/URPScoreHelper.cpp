@@ -424,13 +424,13 @@ void LoadConfig()
 
 		isdbReady = true;
 
-		std::string query("CREATE TABLE IF NOT EXISTS `UserInfo` (`id` varchar(36) NOT NULL,`password` varchar(1024) NOT NULL,`name` varchar(36) DEFAULT NULL,`openid` varchar(1024) DEFAULT NULL,`OAuth_name` varchar(1024) DEFAULT NULL,`OAuth_avatar` varchar(4096) DEFAULT NULL,`lastlogin` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+		std::string query("CREATE TABLE IF NOT EXISTS `userinfo` (`id` varchar(36) NOT NULL,`password` varchar(1024) NOT NULL,`name` varchar(36) DEFAULT NULL,`openid` varchar(1024) DEFAULT NULL,`OAuth_name` varchar(1024) DEFAULT NULL,`OAuth_avatar` varchar(4096) DEFAULT NULL,`lastlogin` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
 		if (mysql_query(&db, query.c_str()) != 0)
 		{
 			return;
 		}
 
-		query = "CREATE TABLE IF NOT EXISTS `Settings` (`name` varchar(254) NOT NULL,`value` varchar(10240) NOT NULL,PRIMARY KEY (`name`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+		query = "CREATE TABLE IF NOT EXISTS `settings` (`name` varchar(254) NOT NULL,`value` varchar(10240) NOT NULL,PRIMARY KEY (`name`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 		if (mysql_query(&db, query.c_str()) != 0)
 		{
 			return;
@@ -656,7 +656,7 @@ void UpdateCounter()
 	MYSQL_STMT *stmt = mysql_stmt_init(&db);
 	MYSQL_BIND bind[1];
 	memset(bind, 0, sizeof(bind));
-	std::string query("SELECT `value` FROM `Settings` WHERE `name`='QueryCounter'");
+	std::string query("SELECT `value` FROM `settings` WHERE `name`='QueryCounter'");
 
 	if (stmt == NULL)
 	{
@@ -698,7 +698,7 @@ void UpdateCounter()
 	stmt = mysql_stmt_init(&db);
 	MYSQL_BIND bind2[1];
 	memset(bind2, 0, sizeof(bind2));
-	query = "SELECT COUNT(*) FROM `UserInfo`";
+	query = "SELECT COUNT(*) FROM `userinfo`";
 
 	if (stmt == NULL)
 	{
@@ -744,7 +744,7 @@ bool GetSettings(const char *name, char *value)
 	MYSQL_BIND ret[1];
 	memset(bind, 0, sizeof(bind));
 	memset(ret, 0, sizeof(ret));
-	std::string query("SELECT `value` FROM `Settings` WHERE `name`=?");
+	std::string query("SELECT `value` FROM `settings` WHERE `name`=?");
 
 	if (stmt == NULL)
 	{
@@ -791,7 +791,7 @@ bool AddSettings(const char *name, const char *value)
 	MYSQL_STMT *stmt = mysql_stmt_init(&db);
 	MYSQL_BIND bind[2];
 	memset(bind, 0, sizeof(bind));
-	std::string query("INSERT IGNORE INTO `Settings` (`name`, `value`) VALUES (?, ?)");
+	std::string query("INSERT IGNORE INTO `settings` (`name`, `value`) VALUES (?, ?)");
 
 	if (stmt == NULL)
 	{
@@ -832,7 +832,7 @@ void SetQueryCounter(int current_counts)
 	MYSQL_STMT *stmt = mysql_stmt_init(&db);
 	MYSQL_BIND bind[1];
 	memset(bind, 0, sizeof(bind));
-	std::string query("UPDATE `Settings` SET `value`=? WHERE `name`='QueryCounter'");
+	std::string query("UPDATE `settings` SET `value`=? WHERE `name`='QueryCounter'");
 
 	if (stmt == NULL)
 	{
@@ -1014,7 +1014,7 @@ void parse_main()
 	MYSQL_BIND ret[1];
 	memset(bind, 0, sizeof(bind));
 	memset(ret, 0, sizeof(ret));
-	std::string query("SELECT `openid` FROM `UserInfo` WHERE `id`=?");
+	std::string query("SELECT `openid` FROM `userinfo` WHERE `id`=?");
 
 	char openid[1024] = { 0 };
 	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
@@ -2397,7 +2397,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	MYSQL_BIND ret[1];
 	memset(bind, 0, sizeof(bind));
 	memset(ret, 0, sizeof(ret));
-	std::string query("SELECT `id` FROM `UserInfo` WHERE `id`=?");
+	std::string query("SELECT `id` FROM `userinfo` WHERE `id`=?");
 
 	bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
 	bind[0].buffer = (void *)p_xuehao;
@@ -2433,7 +2433,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		MYSQL_STMT *stmt = mysql_stmt_init(&db);
 		MYSQL_BIND bind[3];
 		memset(bind, 0, sizeof(bind));
-		std::string query("INSERT INTO `UserInfo` (`id`, `password`, `name`) VALUES (?, ?, ?)");
+		std::string query("INSERT INTO `userinfo` (`id`, `password`, `name`) VALUES (?, ?, ?)");
 
 		if (stmt == NULL)
 		{
@@ -2477,7 +2477,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		MYSQL_STMT *stmt = mysql_stmt_init(&db);
 		MYSQL_BIND bind[3];
 		memset(bind, 0, sizeof(bind));
-		std::string query("UPDATE `UserInfo` SET `password`=?, `name`=? WHERE `id`=?");
+		std::string query("UPDATE `userinfo` SET `password`=?, `name`=? WHERE `id`=?");
 
 		if (stmt == NULL)
 		{
@@ -2982,7 +2982,7 @@ void OAuth2_Association(bool isPOST)
 		MYSQL_STMT *stmt = mysql_stmt_init(&db);
 		MYSQL_BIND bind[1];
 		memset(bind, 0, sizeof(bind));
-		std::string query("UPDATE `UserInfo` SET `openid`=NULL, `OAuth_name`=NULL, `OAuth_avatar`=NULL WHERE `id`=?");
+		std::string query("UPDATE `userinfo` SET `openid`=NULL, `OAuth_name`=NULL, `OAuth_avatar`=NULL WHERE `id`=?");
 
 		if (stmt == NULL)
 		{
@@ -3050,7 +3050,7 @@ void OAuth2_Association(bool isPOST)
 			MYSQL_BIND ret[1];
 			memset(bind, 0, sizeof(bind));
 			memset(ret, 0, sizeof(ret));
-			std::string query("SELECT `password` FROM `UserInfo` WHERE `id`=?");
+			std::string query("SELECT `password` FROM `userinfo` WHERE `id`=?");
 
 			bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
 			bind[0].buffer = (void *)stid;
@@ -3162,7 +3162,7 @@ void OAuth2_Association(bool isPOST)
 		MYSQL_STMT *stmt = mysql_stmt_init(&db);
 		MYSQL_BIND bind[2];
 		memset(bind, 0, sizeof(bind));
-		std::string query("UPDATE `UserInfo` SET `openid`=? WHERE `id`=?");
+		std::string query("UPDATE `userinfo` SET `openid`=? WHERE `id`=?");
 
 		if (stmt == NULL)
 		{
@@ -3709,7 +3709,7 @@ void do_change_password() //(POST /changePassword.fcgi)
 	MYSQL_STMT *stmt = mysql_stmt_init(&db);
 	MYSQL_BIND bind[2];
 	memset(bind, 0, sizeof(bind));
-	std::string query("UPDATE `UserInfo` SET `password`=? WHERE `id`=?");
+	std::string query("UPDATE `userinfo` SET `password`=? WHERE `id`=?");
 
 	if (stmt == NULL)
 	{
