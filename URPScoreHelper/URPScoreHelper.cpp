@@ -657,7 +657,7 @@ void UpdateCounter()
 	MYSQL_STMT *stmt = mysql_stmt_init(&db);
 	MYSQL_BIND bind[1];
 	memset(bind, 0, sizeof(bind));
-	std::string query("SELECT `value` FROM `Settings` WHERE `name`='QueryCounter';");
+	std::string query("SELECT `value` FROM `Settings` WHERE `name`='QueryCounter'");
 
 	if (stmt == NULL)
 	{
@@ -699,7 +699,7 @@ void UpdateCounter()
 	stmt = mysql_stmt_init(&db);
 	MYSQL_BIND bind2[1];
 	memset(bind2, 0, sizeof(bind2));
-	query = "SELECT COUNT(*) FROM `UserInfo`;";
+	query = "SELECT COUNT(*) FROM `UserInfo`";
 
 	if (stmt == NULL)
 	{
@@ -740,7 +740,6 @@ void UpdateCounter()
 // 读取数据库设置表中的内容(注意value的内存分配 10240B)
 bool GetSettings(const char *name, char *value)
 {
-	// 获取多少用户使用了我们的服务 :)
 	MYSQL_STMT *stmt = mysql_stmt_init(&db);
 	MYSQL_BIND bind[1];
 	MYSQL_BIND ret[1];
