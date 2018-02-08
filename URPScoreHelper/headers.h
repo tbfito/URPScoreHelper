@@ -13,6 +13,7 @@
 	#include <malloc.h>
 	#include <iostream>
 	#include <string>
+	#include <algorithm>
 	#include "libfcgi/fcgio.h"
 	#include "libmysql/mysql.h"
 	#include "curl/curl.h"

@@ -28,13 +28,22 @@ void EnCodeStr(const char *str, char *out)
 		encryptedBytes.insert(encryptedBytes.end(), enc, enc + 16);
 	}
 
+	// 第一步加密后，第二步进行base64编码并去掉编码后字符中的等于号
 	base64_encode(encryptedBytes.data(), out, encryptedBytes.size());
+	for (int i = 0; *(out + i) != NULL; i++)
+	{
+		if (*(out + i) == '=') {
+			*(out + i) = '\0';
+			break;
+		}
+	}
 
 	int newlen = 0;
-	char *urlenc = url_encode(out, (int)strlen(out), &newlen);
+	char *urlenc = url_encode(out, (int)strlen(out), &newlen); // 第三步，URL编码
 	memset(out, 0, newlen + 1);
 	strncpy(out, urlenc, newlen);
-	for(int i = 0; i < newlen; i++)
+
+	for(int i = 0; i < newlen; i++) // 第四步，进行URL安全化
 	{
 		if (*(out + i) == '%')
 			*(out + i) = '_';
@@ -51,10 +60,17 @@ void DeCodeStr(char *pCode)
 			*(pCode + i) = '%';
 	}
 	url_decode(pCode, pCodelen);
+
+	pCodelen = strlen(pCode);
+	int mod_len = pCodelen % 4;
+	for (; mod_len > 0; mod_len--)
+	{
+		strcat(pCode, "=");
+	}
+
 	size_t outlen = 4096;
 	uint8_t *strCode = (uint8_t *)malloc(outlen);
 	memset(strCode, 0, outlen);
-
 	if (!base64_decode(pCode, strCode, &outlen)) // Overflow
 	{
 		free(strCode);

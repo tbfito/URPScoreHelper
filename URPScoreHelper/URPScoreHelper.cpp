@@ -18,7 +18,6 @@
 #include "Encrypt.h"
 #include "gbkutf8.h"
 #include "Admin.h"
-#include <algorithm>
 
 // 请求映射入口 (主控制器：FastCGI 处理循环)
 void fastcgi_app_intro()
@@ -2432,9 +2431,9 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	if (strcmp(id, p_xuehao) != 0) // 无记录，则写入数据库
 	{
 		MYSQL_STMT *stmt = mysql_stmt_init(&db);
-		MYSQL_BIND bind[4];
+		MYSQL_BIND bind[3];
 		memset(bind, 0, sizeof(bind));
-		std::string query("INSERT INTO `UserInfo` (`id`, `password`, `name`, `lastlogin`) VALUES (?, ?, ?, ?)");
+		std::string query("INSERT INTO `UserInfo` (`id`, `password`, `name`) VALUES (?, ?, ?)");
 
 		if (stmt == NULL)
 		{
@@ -2458,11 +2457,6 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		bind[2].buffer = (void *)m_stname;
 		bind[2].buffer_length = strlen(m_stname);
 
-		std::string m_time = get_time();
-		bind[3].buffer_type = MYSQL_TYPE_VAR_STRING;
-		bind[3].buffer = (void *)m_time.c_str();
-		bind[3].buffer_length = m_time.length();
-
 		if (mysql_stmt_prepare(stmt, query.c_str(), query.length()) != 0 || 
 			mysql_stmt_bind_param(stmt, bind) != 0 || 
 			mysql_stmt_execute(stmt) != 0
@@ -2481,9 +2475,9 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	else // 为成功登录的学生更新记录
 	{
 		MYSQL_STMT *stmt = mysql_stmt_init(&db);
-		MYSQL_BIND bind[4];
+		MYSQL_BIND bind[3];
 		memset(bind, 0, sizeof(bind));
-		std::string query("UPDATE `UserInfo` SET `password`=?, `lastlogin`=?, `name`=? WHERE `id`=?");
+		std::string query("UPDATE `UserInfo` SET `password`=?, `name`=? WHERE `id`=?");
 
 		if (stmt == NULL)
 		{
@@ -2497,20 +2491,15 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		bind[0].buffer = (void *)temp;
 		bind[0].buffer_length = strlen(temp);
 
-		std::string m_time = get_time();
-		bind[1].buffer_type = MYSQL_TYPE_VAR_STRING;
-		bind[1].buffer = (void *)m_time.c_str();
-		bind[1].buffer_length = m_time.length();
-
 		char m_stname[128] = { 0 };
 		get_student_name(m_stname);
-		bind[2].buffer_type = MYSQL_TYPE_VAR_STRING;
-		bind[2].buffer = (void *)m_stname;
-		bind[2].buffer_length = strlen(m_stname);
+		bind[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+		bind[1].buffer = (void *)m_stname;
+		bind[1].buffer_length = strlen(m_stname);
 
-		bind[3].buffer_type = MYSQL_TYPE_VAR_STRING;
-		bind[3].buffer = (void *)p_xuehao;
-		bind[3].buffer_length = strlen(p_xuehao);
+		bind[2].buffer_type = MYSQL_TYPE_VAR_STRING;
+		bind[2].buffer = (void *)p_xuehao;
+		bind[2].buffer_length = strlen(p_xuehao);
 
 		if (mysql_stmt_prepare(stmt, query.c_str(), query.length()) != 0 || 
 			mysql_stmt_bind_param(stmt, bind) != 0 || 
@@ -3718,9 +3707,9 @@ void do_change_password() //(POST /changePassword.fcgi)
 
 	EnCodeStr(pwd, pwd);
 	MYSQL_STMT *stmt = mysql_stmt_init(&db);
-	MYSQL_BIND bind[3];
+	MYSQL_BIND bind[2];
 	memset(bind, 0, sizeof(bind));
-	std::string query("UPDATE `UserInfo` SET `password`=?, `lastlogin`=? WHERE `id`=?");
+	std::string query("UPDATE `UserInfo` SET `password`=? WHERE `id`=?");
 
 	if (stmt == NULL)
 	{
@@ -3735,16 +3724,11 @@ void do_change_password() //(POST /changePassword.fcgi)
 	bind[0].buffer = (void *)pwd;
 	bind[0].buffer_length = strlen(pwd);
 
-	std::string m_time = get_time();
-	bind[1].buffer_type = MYSQL_TYPE_VAR_STRING;
-	bind[1].buffer = (void *)m_time.c_str();
-	bind[1].buffer_length = m_time.length();
-
 	char id[128] = { 0 };
 	get_student_id(id);
-	bind[2].buffer_type = MYSQL_TYPE_VAR_STRING;
-	bind[2].buffer = (void *)id;
-	bind[2].buffer_length = strlen(id);
+	bind[1].buffer_type = MYSQL_TYPE_VAR_STRING;
+	bind[1].buffer = (void *)id;
+	bind[1].buffer_length = strlen(id);
 
 	if (mysql_stmt_prepare(stmt, query.c_str(), query.length()) != 0 || 
 		mysql_stmt_bind_param(stmt, bind) != 0 || 

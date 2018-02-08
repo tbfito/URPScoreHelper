@@ -3,7 +3,6 @@
 #include "StringHelper.h"
 #include "ctype.h"
 #include "Encrypt.h"
-#include <algorithm>
 
 char JSESSIONID[1024] = {0};
 
@@ -159,8 +158,8 @@ void decode_token(char *token, std::string & token_xh, std::string & token_mm)
 	token_xh.erase();
 	token_mm.erase();
 	DeCodeStr(token);
-	char *xh = (char *)malloc(1024);
-	char *mm = (char *)malloc(1024);
+	char *xh = (char *)malloc(4096);
+	char *mm = (char *)malloc(4096);
 	if (sscanf(token, "%[^-]-%s", xh, mm) == 2)
 	{
 		DeCodeStr(xh);
