@@ -34,7 +34,7 @@ void EnCodeStr(const char *str, char *out)
 	char *urlenc = url_encode(out, (int)strlen(out), &newlen);
 	memset(out, 0, newlen + 1);
 	strncpy(out, urlenc, newlen);
-	for(size_t i = 0; i < newlen; i++)
+	for(int i = 0; i < newlen; i++)
 	{
 		if (*(out + i) == '%')
 			*(out + i) = '_';
@@ -44,8 +44,8 @@ void EnCodeStr(const char *str, char *out)
 
 void DeCodeStr(char *pCode)
 {
-	size_t pCodelen = strlen(pCode);
-	for (size_t i = 0; i < pCodelen; i++)
+	int pCodelen = strlen(pCode);
+	for (int i = 0; i < pCodelen; i++)
 	{
 		if (*(pCode + i) == '_')
 			*(pCode + i) = '%';
