@@ -30,7 +30,7 @@ void EnCodeStr(const char *str, char *out)
 
 	// 第一步加密后，第二步进行base64编码并去掉编码后字符中的等于号
 	base64_encode(encryptedBytes.data(), out, encryptedBytes.size());
-	for (int i = 0; *(out + i) != NULL; i++)
+	for (int i = 0; *(out + i) != '\0'; i++)
 	{
 		if (*(out + i) == '=') {
 			*(out + i) = '\0';
