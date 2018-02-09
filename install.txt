@@ -138,7 +138,7 @@ Listen 8123
 
 <IfModule mod_fcgid.c>
 	FcgidMaxRequestsPerProcess 10000
-	FcgidMaxProcesses 10
+	FcgidMaxProcesses 50
 	FcgidIOTimeout 120
-	FcgidIdleTimeout 120
+	FcgidIdleTimeout 300
 </IfModule>
