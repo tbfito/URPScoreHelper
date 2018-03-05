@@ -152,7 +152,7 @@ void fastcgi_app_intro()
 					cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
 					END_REQUEST(); continue;
 				}
-				if (_GET(std::string(CGI_QUERY_STRING), "act") == "requestAssoc")
+				if (_GET(std::string(CGI_QUERY_STRING), "act") == "linking")
 				{
 					bool m_need_update_cookie = false;
 					std::string photo(" ");
@@ -184,17 +184,17 @@ void fastcgi_app_intro()
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2.fcgi") == 0)
 			{
+				if (_GET(std::string(CGI_QUERY_STRING), "act") == "callback")
+				{
+					OAuth2_callback();
+					END_REQUEST(); continue;
+				}
+				if (_GET(std::string(CGI_QUERY_STRING), "act") == "link")
+				{
+					OAuth2_linking(false);
+					END_REQUEST(); continue;
+				}
 				OAuth2_process();
-				END_REQUEST(); continue;
-			}
-			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2CallBack.fcgi") == 0)
-			{
-				OAuth2_CallBack();
-				END_REQUEST(); continue;
-			}
-			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.fcgi") == 0)
-			{
-				OAuth2_Association(false);
 				END_REQUEST(); continue;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/query.fcgi") == 0)
@@ -263,9 +263,14 @@ void fastcgi_app_intro()
 				parse_main();
 				END_REQUEST(); continue;
 			}
-			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2Assoc.fcgi") == 0)
+			if (strcmp(CGI_SCRIPT_NAME, "/OAuth2.fcgi") == 0)
 			{
-				OAuth2_Association(true);
+				if (_GET(std::string(CGI_QUERY_STRING), "act") == "link")
+				{
+					OAuth2_linking(true);
+					END_REQUEST(); continue;
+				}
+				OAuth2_process();
 				END_REQUEST(); continue;
 			}
 			if (strcmp(CGI_SCRIPT_NAME, "/TeachEval.fcgi") == 0)
@@ -343,8 +348,15 @@ void LoadPageSrc()
 	strcat(file_root, "error.fcgi");
 	
 	error = ReadTextFileToMem(file_root);
+
+	memset(file_root, 0, MAX_PATH);
+	strncpy(file_root, doc_root, MAX_PATH - 1);
+	strcat(file_root, "OAuth2.fcgi");
+
+	OAUTH2_HTML = ReadTextFileToMem(file_root);
+
 	// 未能加载这些模板
-	if (header.empty() || footer.empty() || error.empty())
+	if (header.empty() || footer.empty() || error.empty() || OAUTH2_HTML.empty())
 	{
 		isPageSrcLoadSuccess = false;
 		delete[]doc_root;
@@ -2477,7 +2489,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		MYSQL_STMT *stmt = mysql_stmt_init(&db);
 		MYSQL_BIND bind[3];
 		memset(bind, 0, sizeof(bind));
-		std::string query("UPDATE `userinfo` SET `password`=?, `name`=? WHERE `id`=?");
+		std::string query("UPDATE `userinfo` SET `password`=?, `name`=?, `lastlogin`=now() WHERE `id`=?");
 
 		if (stmt == NULL)
 		{
@@ -2953,8 +2965,8 @@ void parse_QuickQuery_Result()
 		SetQueryCounter(g_QueryCounter);
 }
 
-// 微信帐号绑定入口与解绑逻辑 (/OAuth2Assoc.fcgi)
-void OAuth2_Association(bool isPOST)
+// 微信帐号绑定入口与解绑逻辑 (/OAuth2.fcgi?act=link)
+void OAuth2_linking(bool isPOST)
 {
 	// 解除绑定逻辑
 	std::string str_release = _GET(std::string(CGI_QUERY_STRING), "release");
@@ -3073,8 +3085,6 @@ void OAuth2_Association(bool isPOST)
 			}
 		}
 
-		std::string m_lpszHomepage = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
-
 		cout << GLOBAL_HEADER;
 
 		std::string title(u8"微信用户绑定 - ");
@@ -3090,19 +3100,19 @@ void OAuth2_Association(bool isPOST)
 
 		if (strlen(stid) == 0 || strcmp(stid, "NONE") == 0)
 		{
-			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, u8"微信用户绑定", openid, access_token,
+			cout << strformat(OAUTH2_HTML.c_str(), APP_NAME, u8"微信用户绑定", openid, access_token,
 								(!m_OAuth_name.empty() && !m_OAuth_avatar.empty()) ? strformat(LOGGED_USER_HTML, m_OAuth_avatar.c_str(), m_OAuth_name.c_str()).c_str() : "",
 								 "", pass);
 		}
 		else if(strlen(pass) == 0)
 		{
-			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, u8"微信用户绑定", openid, access_token,
+			cout << strformat(OAUTH2_HTML.c_str(), APP_NAME, u8"微信用户绑定", openid, access_token,
 								(!m_OAuth_name.empty() && !m_OAuth_avatar.empty()) ? strformat(LOGGED_USER_HTML, m_OAuth_avatar.c_str(), m_OAuth_name.c_str()).c_str() : "",
 								stid, "");
 		}
 		else
 		{
-			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, u8"微信用户绑定", openid, access_token,
+			cout << strformat(OAUTH2_HTML.c_str(), APP_NAME, u8"微信用户绑定", openid, access_token,
 								(!m_OAuth_name.empty() && !m_OAuth_avatar.empty()) ? strformat(LOGGED_USER_HTML, m_OAuth_avatar.c_str(), m_OAuth_name.c_str()).c_str() : "",
 								stid, pass);
 		}
@@ -3166,7 +3176,7 @@ void OAuth2_Association(bool isPOST)
 
 		if (stmt == NULL)
 		{
-			char Err_Msg[1024] = u8"<b>很抱歉，微信绑定失败</b><p>数据库错误 (statement 初始化失败)</p><p>请稍后再试</p>";
+			char Err_Msg[1024] = u8"<b>很抱歉，微信绑定失败</b><p>数据库错误，请稍后再试</p>";
 			Error(Err_Msg);
 			delete[]openid;
 			return;

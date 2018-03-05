@@ -43,7 +43,7 @@ function get_captcha() {
 			}
 			else if(data == "REQUEST-FAILED")
 			{
-				$.toast("无法连接学校服务器", "text");
+				$.toast("学校后端连接失败", "text");
 				obj.src = "/img/refresh.png";
 			}
 			else
@@ -105,10 +105,10 @@ function logout() {
 	}, function() {
 	});
 }
-function releaseAssoc(id) {
+function unlink(id) {
 	$.confirm("确定要解除与微信帐号的绑定吗？", function() {
 		$.toptip("正在解绑...", 2000, 'success');
-		ajax_page("/OAuth2Assoc.fcgi?release=" + id);
+		ajax_page("/OAuth2.fcgi?act=link&release=" + id);
 	}, function() {
 	});
 }

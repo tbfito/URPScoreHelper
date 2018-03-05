@@ -76,6 +76,7 @@
 	extern char *SITE_MAINTENANCE;
 
 	extern std::string ERROR_HTML;
+	extern std::string OAUTH2_HTML;
 	extern std::string error;
 	extern bool CGI_HTTP_X_IS_AJAX_REQUEST;
 

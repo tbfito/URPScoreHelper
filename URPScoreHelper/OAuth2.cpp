@@ -8,7 +8,7 @@ void getRedirectUri(char *buffer, size_t bufflen)
 {
 	memset(buffer, 0, bufflen);
 	strncpy(buffer, getAppURL().c_str(), bufflen - 1);
-	strcat(buffer, "/OAuth2CallBack.fcgi");
+	strcat(buffer, "/OAuth2.fcgi?act=callback");
 }
 
 // 处理微信登录入口请求
@@ -57,7 +57,7 @@ void OAuth2_process()
 }
 
 // 微信授权回调
-void OAuth2_CallBack()
+void OAuth2_callback()
 {
 	char m_Domain[4096] = { 0 };
 	getRedirectUri(m_Domain, sizeof(m_Domain) - 1);
@@ -207,7 +207,7 @@ void OAuth2_CallBack()
 
 	DeCodeStr(password);
 
-	if (strlen(id) == 0 || strlen(password) == 0) // 无记录，跳转至 OAuth2Assoc.fcgi
+	if (strlen(id) == 0 || strlen(password) == 0) // 无记录，跳转至 OAuth2.fcgi?act=link
 	{
 		std::string str_state = _GET(std::string(CGI_QUERY_STRING), "state");
 		char id_encrypt[128] = { 0 };
@@ -229,16 +229,16 @@ void OAuth2_CallBack()
 			if (strlen(id) != 0) // 但通过 openid 却能查到数据库中对应的学号
 			{
 				EnCodeStr(id, id_encrypt);
-				cout << "Location: " << getAppURL().c_str() << "/OAuth2Assoc.fcgi?openid=" << openid << "&user=" << id_encrypt << "&proc=" << encrypt_access_token << "\r\n";
+				cout << "Location: " << getAppURL().c_str() << "/OAuth2.fcgi?act=link&openid=" << openid << "&user=" << id_encrypt << "&proc=" << encrypt_access_token << "\r\n";
 			}
 			else // 完全不存在学号，则为新绑定用户
 			{
-				cout << "Location: " << getAppURL().c_str() << "/OAuth2Assoc.fcgi?openid=" << openid << "&proc=" << encrypt_access_token << "\r\n";
+				cout << "Location: " << getAppURL().c_str() << "/OAuth2.fcgi?act=link&openid=" << openid << "&proc=" << encrypt_access_token << "\r\n";
 			}
 		}
 		else // OAuth State 传来有效的需要绑定的学号
 		{
-			cout << "Location: " << getAppURL().c_str() << "/OAuth2Assoc.fcgi?openid=" << openid << "&user=" << id_state << "&proc=" << encrypt_access_token << "\r\n";
+			cout << "Location: " << getAppURL().c_str() << "/OAuth2.fcgi?act=link&openid=" << openid << "&user=" << id_state << "&proc=" << encrypt_access_token << "\r\n";
 		}
 		cout << GLOBAL_HEADER;
 

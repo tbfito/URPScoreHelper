@@ -47,7 +47,7 @@
 	void parse_QuickQuery_Intro();
 	void parse_QuickQuery_Result();
 	void LoadPageSrc();
-	void OAuth2_Association(bool isPOST);
+	void OAuth2_linking(bool isPOST);
 	void LoadConfig();
 	void parse_teaching_evaluation();
 	void teaching_evaluation();

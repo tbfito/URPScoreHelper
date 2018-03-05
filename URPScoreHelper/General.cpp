@@ -24,8 +24,8 @@ const char *SCORE_TEMPLATE_BY_PLAN = u8"<tr class=\"even\"onmouseout=\"this.clas
 const char *QUICK_SCORE = u8"<div class=\"weui-cell\"><div class=\"weui-cell__bd\"><p>%s</p></div><div class=\"weui-cell__ft\">%s</div></div>";
 const char *OAUTH2_LOGIN_HTML = u8"<a id=\"no_ajax\" title=\"微信登录\" class=\"weui-btn weui-btn_default col-50\" href=\"OAuth2.fcgi\"><i class=\"fa fa-weixin\"></i>微信登录</a>";
 const char *QUICKQUERY_HTML = u8"<a class=\"weui-btn quickquery\" href=\"QuickQuery.fcgi\"><i class=\"fa fa-search\"></i>学号快速查询入口</a>";
-const char *ASSOC_LINK_HTML = u8"<a id=\"no_ajax\" href=\"index.fcgi?act=requestAssoc\"><i class=\"fa fa-link\"></i>绑定微信</a>";
-const char *RLS_ASSOC_LINK_HTML = u8"<span style=\"color:rgb(0,255,90)\"><i class=\"fa fa-weixin\"></i>微信已绑定</span>&nbsp;&nbsp;<a id=\"no_ajax\" href=\"javascript:void(0);\" onclick=\"releaseAssoc('%s');\"><i class=\"fa fa-unlink\"></i>解除绑定</a>";
+const char *ASSOC_LINK_HTML = u8"<a id=\"no_ajax\" href=\"index.fcgi?act=linking\"><i class=\"fa fa-link\"></i>绑定微信</a>";
+const char *RLS_ASSOC_LINK_HTML = u8"<span style=\"color:rgb(0,255,90)\"><i class=\"fa fa-weixin\"></i>微信已绑定</span>&nbsp;&nbsp;<a id=\"no_ajax\" href=\"javascript:void(0);\" onclick=\"unlink('%s');\"><i class=\"fa fa-unlink\"></i>解除绑定</a>";
 const char *CARD_AD_BANNER_HTML = u8"<div class=\"swiper-slide\"><a id=\"no_ajax\" href=\"%s\" target=\"_blank\"><img data-src=\"%s\" height=\"160\" width=\"100%%\" class=\"swiper-lazy\"></a><div class=\"swiper-lazy-preloader\"></div></div>";
 const char *TEST_LIST_HTML = u8"<form id=\"ajax_submit\"data-ajax-submit=\"/query.fcgi?order=tests\"class=\"weui-cells weui-cells_form\"><div class=\"weui-cells__title\">请选择考试类别来查看分数 :)</div><div class=\"signbox\"><div class=\"weui-cell\"><div class=\"weui-cell__hd\"><label for=\"name\"class=\"weui-label\">考试名称</label></div><div class=\"weui-cell__bd\"><input name=\"tests\" class=\"weui-input\" id=\"tests\" type=\"text\" value=\"点击这里选择...\" readonly=\"readonly\"/></div></div></div><div class=\"weui-btn-area\"><button onclick=\"return query_tests();\"type=\"button\"class=\"weui-btn weui-btn_primary\"><i class=\"fa fa-check-square-o\"></i>查询</button></div></form>";
 const char *FIND_USER_RESULT_SECTION = "<tr class=\"even\" onmouseout=\"this.className='even';\" onmouseover=\"this.className='evenfocus';\"><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td><td align=\"center\">%s</td></tr>";
@@ -33,6 +33,7 @@ const char *LOGGED_USER_HTML = "<div class=\"logged-user\"><img src=\"%s\" class
 
 // 错误页面和配置初始化
 std::string ERROR_HTML;
+std::string OAUTH2_HTML;
 char *HEADER_TEMPLATE_LOCATION = NULL;
 char *FOOTER_TEMPLATE_LOCATION = NULL;
 char *SERVER_URL = NULL;
