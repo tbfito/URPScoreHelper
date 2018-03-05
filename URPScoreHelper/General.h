@@ -43,11 +43,11 @@
 	extern const char *LOGGED_USER_HTML;
 
 	extern MYSQL db;
-	extern char MYSQL_HOST[64];
-	extern char MYSQL_PORT_NUMBER[64];
-	extern char MYSQL_USERNAME[64];
-	extern char MYSQL_PASSWORD[64];
-	extern char MYSQL_DBNAME[128];
+	extern char MYSQL_HOST[1024];
+	extern char MYSQL_PORT_NUMBER[1024];
+	extern char MYSQL_USERNAME[1024];
+	extern char MYSQL_PASSWORD[1024];
+	extern char MYSQL_DBNAME[1024];
 
 	extern int CURL_TIMEOUT;
 	extern bool CURL_USE_PROXY;
@@ -76,7 +76,6 @@
 	extern char *SITE_MAINTENANCE;
 
 	extern std::string ERROR_HTML;
-	extern std::string OAUTH2_HTML;
 	extern std::string error;
 	extern bool CGI_HTTP_X_IS_AJAX_REQUEST;
 

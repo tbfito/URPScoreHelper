@@ -9,11 +9,11 @@ char JSESSIONID[1024] = {0};
 char GLOBAL_HEADER[256] = {0};
 char GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT[512] = { 0 };
 
-char MYSQL_HOST[64] = { 0 };
-char MYSQL_PORT_NUMBER[64] = { 0 };
-char MYSQL_USERNAME[64] = { 0 };
-char MYSQL_PASSWORD[64] = { 0 };
-char MYSQL_DBNAME[128] = { 0 };
+char MYSQL_HOST[1024] = { 0 };
+char MYSQL_PORT_NUMBER[1024] = { 0 };
+char MYSQL_USERNAME[1024] = { 0 };
+char MYSQL_PASSWORD[1024] = { 0 };
+char MYSQL_DBNAME[1024] = { 0 };
 
 // HTMLS
 const char *BEFORE_TEMPLATE = u8"<div id=\"list_page\" style=\"background-color:transparent !important\"><table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"titleTop2\" style=\"background-color:transparent !important;border:none\"><tbody><tr><td class=\"pageAlign\"><table cellpadding=\"0\" width=\"100%\" class=\"displayTag\" cellspacing=\"1\" border=\"0\" id=\"user\"><thead><tr><th align=\"center\" width=\"20%\" class=\"sortable\">课名</th><th align=\"center\" width=\"10%\" class=\"sortable\">类别</th><th align=\"center\" width=\"10%\" class=\"sortable\">成绩</th><th align=\"center\" width=\"10%\" class=\"sortable\">均分</th><th align=\"center\" width=\"10%\" class=\"sortable\">最高</th><th align=\"center\" width=\"10%\" class=\"sortable\">最低</th><th align=\"center\" width=\"10%\" class=\"sortable\">名次</th><th align=\"center\" width=\"10%\" class=\"sortable\">学分</th><th align=\"center\" width=\"10%\" class=\"sortable\">绩点</th></tr></thead><tbody>";
@@ -33,7 +33,6 @@ const char *LOGGED_USER_HTML = "<div class=\"logged-user\"><img src=\"%s\" class
 
 // 错误页面和配置初始化
 std::string ERROR_HTML;
-std::string OAUTH2_HTML;
 char *HEADER_TEMPLATE_LOCATION = NULL;
 char *FOOTER_TEMPLATE_LOCATION = NULL;
 char *SERVER_URL = NULL;

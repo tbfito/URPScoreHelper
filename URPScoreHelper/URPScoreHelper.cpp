@@ -349,14 +349,8 @@ void LoadPageSrc()
 	
 	error = ReadTextFileToMem(file_root);
 
-	memset(file_root, 0, MAX_PATH);
-	strncpy(file_root, doc_root, MAX_PATH - 1);
-	strcat(file_root, "OAuth2.fcgi");
-
-	OAUTH2_HTML = ReadTextFileToMem(file_root);
-
 	// 未能加载这些模板
-	if (header.empty() || footer.empty() || error.empty() || OAUTH2_HTML.empty())
+	if (header.empty() || footer.empty() || error.empty())
 	{
 		isPageSrcLoadSuccess = false;
 		delete[]doc_root;
@@ -3084,6 +3078,8 @@ void OAuth2_linking(bool isPOST)
 				DeCodeStr(pass);
 			}
 		}
+
+		std::string OAUTH2_HTML = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
 		cout << GLOBAL_HEADER;
 
