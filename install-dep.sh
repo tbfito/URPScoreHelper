@@ -1,2 +1,2 @@
 #!/bin/bash
-apt-get install make libfcgi-dev libfcgi curl libcurl4-openssl-dev
+apt-get install gcc make libfcgi-dev libfcgi curl libcurl4-openssl-dev libmariadbclient-dev

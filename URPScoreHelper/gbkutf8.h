@@ -1,27 +1,11 @@
-/**
- * Copyright(c) 2012-2013, All Rights Reserved.
- * http://my.huhoo.net
- * @file gbkutf8.h
- * @details Check GBK character you could do
- *     code >= 0x8000 && _pGbk2Utf16[code - 0x8000] != 0
- * @author cnangel
- * @version 1.0.0
- * @date 2012/10/09 11:44:58
- */
+#pragma once
 
-#ifndef __STRNORMALIZE_H__
-#define __STRNORMALIZE_H__
+#ifndef __GBKUTF8_H__
 
-#define SNO_TO_LOWER        1
-#define SNO_TO_UPPER        2
-#define SNO_TO_HALF         4
-#define SNO_TO_SIMPLIFIED   8
+	#define __GBKUTF8_H__
 
-void str_normalize_init();
-void str_normalize_gbk(char *text, unsigned options);
-void str_normalize_utf8(char *text, unsigned options);
+	int charset_convert(const char *from_charset, const char *to_charset, char *in_buf, size_t in_left, char *out_buf, size_t out_left);
+	int gbk_to_utf8(const char *from, unsigned int from_len, char **to, unsigned int *to_len);
+	int utf8_to_gbk(const char *from, unsigned int from_len, char **to, unsigned int *to_len);
 
-int gbk_to_utf8(const char *from, unsigned int from_len, char **to, unsigned int *to_len);
-int utf8_to_gbk(const char *from, unsigned int from_len, char **to, unsigned int *to_len);
-
-#endif /* __STRNORMALIZE_H__ */
+#endif

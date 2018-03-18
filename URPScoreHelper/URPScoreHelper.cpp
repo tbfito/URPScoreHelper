@@ -898,7 +898,6 @@ int process_cookie(bool *p_need_update_cookie, std::string & p_photo_uri)
 		str_JSESSIONID = _COOKIE(req.GetResultString(), "JSESSIONID");
 		if (str_JSESSIONID.empty())
 		{
-			Error(u8"<p>无法获取 Session ID</p>");
 			p_photo_uri.erase();
 			return -1;
 		}
@@ -1161,7 +1160,11 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 {
 	bool m_need_update_cookie = false;
 	std::string m_photo(" "); // 有数据，需要获取照片
-	process_cookie(&m_need_update_cookie, m_photo);
+	if (process_cookie(&m_need_update_cookie, m_photo) == -1) {
+		cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
+		cout << "REQUEST-FAILED";
+		return;
+	}
 
 	if (m_need_update_cookie)
 	{
@@ -1222,7 +1225,11 @@ void parse_ajax_avatar()
 {
 	bool m_need_update_cookie = false;
 	std::string m_photo(" "); // 有数据，需要获取照片
-	process_cookie(&m_need_update_cookie, m_photo);
+	if (process_cookie(&m_need_update_cookie, m_photo) == -1) {
+		cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
+		cout << "LOGGED-OUT";
+		return;
+	}
 
 	if (m_need_update_cookie)
 	{
@@ -1475,8 +1482,8 @@ void parse_query()
 			{
 				char zymc[128] = { 0 };
 				mid(zymc, p1 + 19, p2 - p1 - 19, 0);
-				char *u8strtmp = (char *)malloc(strlen(zymc) * 3 + 1);
-				unsigned int u8len = 0;
+				unsigned int u8len = strlen(zymc) * 3 + 1;
+				char *u8strtmp = (char *)malloc(u8len);
 				gbk_to_utf8(zymc, (unsigned int)strlen(zymc), &u8strtmp, &u8len);
 				m_Output.append("<div id=\"i_total\"><p style=\"font-size: 16px\"><b>").append(u8strtmp).append(u8"</b>：</p>");
 				free(u8strtmp);
@@ -1490,8 +1497,8 @@ void parse_query()
 						mid(info, p1, p2 - p1 + 9, 0);
 						replace_string(info, " style=\"font-weight: bold\"", "");
 						replace_string(info, "tblView", "byplan");
-						char *u8strtmp = (char *)malloc(strlen(info) * 3 + 1);
-						unsigned int u8len = 0;
+						unsigned int u8len = strlen(info) * 3 + 1;
+						char *u8strtmp = (char *)malloc(u8len);
 						gbk_to_utf8(info, (unsigned int)strlen(info), &u8strtmp, &u8len);
 						m_Output.append(u8strtmp);
 						free(u8strtmp);
@@ -1634,9 +1641,8 @@ void parse_query()
 					std::string  m_StrTmp = strformat(SCORE_TEMPLATE_BY_PLAN,
 														(f_chengji < 60 && f_xuefen != 0) ? "background-color:rgba(255,0,0,0.5);color:#fff" : "",
 														m_kechengming, m_shuxing, m_chengji, m_xuefen, f_jidian, m_weiguoyuanyin);
-
-					char *u8strtmp = (char *)malloc(m_StrTmp.length() * 3 + 1);
-					unsigned int u8len = 0;
+					unsigned int u8len = m_StrTmp.length() * 3 + 1;
+					char *u8strtmp = (char *)malloc(u8len);
 					gbk_to_utf8(m_StrTmp.c_str(), (unsigned int)m_StrTmp.length(), &u8strtmp, &u8len);
 
 					m_Output.append(u8strtmp);
@@ -2008,9 +2014,9 @@ void parse_query()
 		
 		std::string m_StrTmp = strformat(SCORE_TEMPLATE, isPassed ? "": "background-color:rgba(255,0,0,0.5);color:#fff", m_subName, m_kcsx, m_subchengji, m_subjunfen, m_subzuigaofen, m_subzuidifen,
 			m_submingci, m_subXuefen, m_kcxfjd);
-
-		char *u8strtmp = (char *)malloc(m_StrTmp.length() * 3 + 1);
-		unsigned int u8len = 0;
+		
+		unsigned int u8len = m_StrTmp.length() * 3 + 1;
+		char *u8strtmp = (char *)malloc(u8len);
 		gbk_to_utf8(m_StrTmp.c_str(), (unsigned int)m_StrTmp.length(), &u8strtmp, &u8len);
 
 		m_Output.append(u8strtmp);
@@ -2240,8 +2246,8 @@ void get_student_name(char *p_lpszBuffer)
 		strncpy(p_lpszBuffer, APP_NAME, 36 - 1);
 		return;
 	}
-	char *temp = (char *)malloc(512);
-	unsigned int u8len = 0;
+	unsigned int u8len = 512;
+	char *temp = (char *)malloc(u8len);
 	gbk_to_utf8(p_lpszBuffer, (unsigned int)strlen(p_lpszBuffer), &temp, &u8len);
 	strncpy(p_lpszBuffer, temp, 36 - 1);
 	free(temp);
@@ -2537,6 +2543,12 @@ void student_logout()
 // 免密查询入口 (/QuickQuery.fcgi)
 void parse_QuickQuery_Intro()
 {
+	if (!ENABLE_QUICK_QUERY)
+	{
+		Error(u8"免密快速查询入口已关闭");
+		return;
+	}
+
 	std::string m_lpszQuery = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
 	cout << GLOBAL_HEADER;
@@ -2757,8 +2769,8 @@ void parse_QuickQuery_Result()
 			}
 			std::string m_xxmz_div = strformat("<div class=\"weui-cells__title\">%s</div>", m_xxmz);
 
-			char *m_xxmz_htmlu8 = (char *)malloc(m_xxmz_div.length() * 3);
-			unsigned int u8len = 0;
+			unsigned int u8len = m_xxmz_div.length() * 3 + 1;
+			char *m_xxmz_htmlu8 = (char *)malloc(u8len);
 			gbk_to_utf8(m_xxmz_div.c_str(), (unsigned int)m_xxmz_div.length(), &m_xxmz_htmlu8, &u8len);
 			std::string m_xxmz_html(m_xxmz_htmlu8);
 			free(m_xxmz_htmlu8);
@@ -2902,8 +2914,8 @@ void parse_QuickQuery_Result()
 					if (m_test_info[i].date == m_max_date)
 					{
 						std::string m_temp = strformat(QUICK_SCORE, m_test_info[i].kcmz, m_test_info[i].cj);
-						char *m_u8tmp = (char *)malloc(4096);
-						unsigned int u8len = 0;
+						unsigned int u8len = 4096;
+						char *m_u8tmp = (char *)malloc(u8len);
 						gbk_to_utf8(m_temp.c_str(), (unsigned int)m_temp.length(), &m_u8tmp, &u8len);
 						m_list.append(m_u8tmp);
 						free(m_u8tmp);
@@ -2912,8 +2924,8 @@ void parse_QuickQuery_Result()
 				else if (m_test_info[i].date == m_max_date || m_test_info[i].date == m_secondary_max)
 				{
 					std::string m_temp = strformat(QUICK_SCORE, m_test_info[i].kcmz, m_test_info[i].cj);
-					char *m_u8tmp = (char *)malloc(4096);
-					unsigned int u8len = 0;
+					unsigned int u8len = 4096;
+					char *m_u8tmp = (char *)malloc(u8len);
 					gbk_to_utf8(m_temp.c_str(), (unsigned int)m_temp.length(), &m_u8tmp, &u8len);
 					m_list.append(m_u8tmp);
 					free(m_u8tmp);
@@ -2936,8 +2948,8 @@ void parse_QuickQuery_Result()
 		}
 		else
 		{
-			char *m_xxmz_u8 = (char *)malloc(512);
-			unsigned int u8len = 0;
+			unsigned int u8len = 512;
+			char *m_xxmz_u8 = (char *)malloc(u8len);
 			gbk_to_utf8(m_xxmz, (unsigned int)strlen(m_xxmz), &m_xxmz_u8, &u8len);
 
 			if (!CGI_HTTP_X_IS_AJAX_REQUEST)
@@ -3291,10 +3303,9 @@ void parse_teaching_evaluation()
 		strncpy(te[counts].bpr, dst[1], sizeof(te[counts].bpr) - 1);
 		strncpy(te[counts].pgnr, dst[5], sizeof(te[counts].pgnr) - 1);
 		strncpy(te[counts].bprm, dst[2], sizeof(te[counts].bprm) - 1);
-		unsigned int to_len = 0;
 		unsigned int len = strlen(dst[4]);
-		char *tmp = (char *)malloc(len * 3 + 1);
-		memset(tmp, 0, len * 3 + 1);
+		unsigned int to_len = len * 3 + 1;
+		char *tmp = (char *)malloc(to_len);
 		gbk_to_utf8(dst[4], len, &tmp, &to_len);
 		strncpy(te[counts].name, tmp, sizeof(te[counts].name) - 1);
 		free(tmp);
@@ -3309,10 +3320,9 @@ void parse_teaching_evaluation()
 	for (int i = 0; i < counts; i++)
 	{
 		to_eval_list += "<div class=\"weui-cell\"><div class=\"weui-cell__bd\"><p><span style=\"color:#4a82e5\">[";
-			unsigned int to_len = 0;
 			unsigned int len = strlen(te[i].bprm);
-			char *tmp = (char *)malloc(len * 3 + 1);
-			memset(tmp, 0, len * 3 + 1);
+			unsigned int to_len = len * 3 + 1;
+			char *tmp = (char *)malloc(to_len);
 			gbk_to_utf8(te[i].bprm, len, &tmp, &to_len);
 			to_eval_list += tmp;
 			to_eval_list += "]&nbsp;</span>";
@@ -3410,9 +3420,8 @@ void teaching_evaluation()
 	char *temp = (char *)malloc(10240);
 	memset(temp, 0, 10240);
 	left(temp, zgpj, len);
-	char *decoded = (char *)malloc(10240);
-	memset(decoded, 0, 10240);
-	unsigned int dlen = 0;
+	unsigned int dlen = 10240;
+	char *decoded = (char *)malloc(dlen);
 	utf8_to_gbk(temp, strlen(temp), &decoded, &dlen);
 	free(temp);
 	int nlen = 0;

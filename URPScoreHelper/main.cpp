@@ -46,7 +46,6 @@ void initialize()
 	strcat(GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT, SOFTWARE_NAME);
 	strcat(GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT, "\r\n\r\n");
 
-	str_normalize_init();
 	FCGX_Init();
 	curl_global_init(CURL_GLOBAL_ALL);
 	mysql_init(&db);

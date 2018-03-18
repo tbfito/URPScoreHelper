@@ -21,13 +21,13 @@ OBJS =	$(DIR_OBJ)/headers.o\
 		$(DIR_OBJ)/ini.o\
 		$(DIR_OBJ)/main.o
 
-LIBS =  -lstdc++ -lcurl -lfcgi++ -lfcgi -lm -lpthread -ldl -lmysqlclient -L "$(DIR_SRC)/libmysql"
+LIBS =  -lstdc++ -lcurl -lfcgi++ -lfcgi -lm -lpthread -ldl -lmariadbclient
 
 $(DIR_OBJ)/%.o : $(DIR_SRC)/%.cpp
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS) $(LIBS) && strip $(TARGET)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS) $(LIBS)
 
 clean:
 	rm -f $(DIR_OBJ)/*.o $(TARGET)

@@ -4,6 +4,7 @@
 #include "General.h"
 #include "Encrypt.h"
 
+// 生成OAuth重定向的URL
 void getRedirectUri(char *buffer, size_t bufflen)
 {
 	memset(buffer, 0, bufflen);
