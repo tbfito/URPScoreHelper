@@ -2540,12 +2540,12 @@ void student_logout()
 	req.Exec(true, REQUEST_LOGOUT, CGI_HTTP_COOKIE);
 }
 
-// 免密查询入口 (/QuickQuery.fcgi)
+// 学号快查入口 (/QuickQuery.fcgi)
 void parse_QuickQuery_Intro()
 {
 	if (!ENABLE_QUICK_QUERY)
 	{
-		Error(u8"免密快速查询入口已关闭");
+		Error(u8"学号快速查询入口已关闭");
 		return;
 	}
 
