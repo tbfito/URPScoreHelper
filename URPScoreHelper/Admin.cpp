@@ -122,7 +122,7 @@ void admin_intro()
 		return;
 	}
 
-	if (strcmp(CGI_REQUEST_URI, "/admin/") == 0 || strcmp(CGI_SCRIPT_FILENAME, "/admin/") == 0)
+	if (strcmp(CGI_REQUEST_URI, "/admin/") == 0 || strcmp(CGI_SCRIPT_NAME, "/admin/") == 0)
 	{
 		parse_admin_index();
 		return;
@@ -138,7 +138,7 @@ void parse_admin_login()
 	if (_GET(std::string(CGI_QUERY_STRING), "act") == "logout")
 	{
 		cout << "Status: 302 Found\r\n"
-			 << "Set-Cookie: admin_sessid=; max-age=-1; path=/admin/\r\n"
+			 << "Set-Cookie: admin_sessid=; max-age=-1; path=" << APP_SUB_DIRECTORY << "/admin/\r\n"
 			 << "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
 			 << GLOBAL_HEADER;
 		return;
@@ -238,7 +238,7 @@ void do_admin_login()
 	}
 
 	cout << "Status: 302 Found\r\n"
-		 << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n"
+		 << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=" << APP_SUB_DIRECTORY << "/admin/\r\n"
 		 << "Location: " << getAppURL().c_str() << "/admin/index.fcgi\r\n"
 		 << GLOBAL_HEADER;
 }
@@ -311,7 +311,7 @@ bool session()
 	}
 	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
 	{
-		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=/admin/\r\n";
+		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=" << APP_SUB_DIRECTORY << "/admin/\r\n";
 		return true;
 	}
 }
@@ -578,11 +578,13 @@ void parse_admin_info()
 	}
 
 	char *server_software = FCGX_GetParam("SERVER_SOFTWARE", request.envp);
+	curl_version_info_data *curl_vid = curl_version_info(CURLVERSION_NOW);
 
 	cout << GLOBAL_HEADER
-		 << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
-			 SOFTWARE_NAME, g_users, g_QueryCounter,
-			 (server_software == NULL) ? "[未知]" : server_software, mysql_get_client_info(), mysql_get_server_info(&db),
+		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME,
+			SOFTWARE_NAME, g_users, g_QueryCounter,
+			(server_software == NULL) ? "[未知]" : server_software,
+			mysql_get_server_info(&db), mysql_get_client_info(), curl_vid->version,
 			__DATE__, __TIME__, SOFTWARE_COPYRIGHT).c_str();
 }
 

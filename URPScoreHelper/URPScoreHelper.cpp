@@ -61,7 +61,7 @@ void fastcgi_app_intro()
 
 		if (!isdbReady)
 		{
-			cout << "Status: 500 Internal Server Error\r\n"
+			std::cout << "Status: 500 Internal Server Error\r\n"
 				<< GLOBAL_HEADER
 				<< u8"<h1>数据库连接失败</h1><p>" << dbConnError << "</p>";
 			END_REQUEST(); continue;
@@ -96,6 +96,17 @@ void fastcgi_app_intro()
 			CGI_HTTP_HOST = (char *)emptystr;
 		}
 
+		size_t sub_direcotry_offset = strlen(APP_SUB_DIRECTORY);
+		if (sub_direcotry_offset != 0) {
+			if (strstr(CGI_SCRIPT_NAME, APP_SUB_DIRECTORY) != NULL) {
+				CGI_SCRIPT_NAME += sub_direcotry_offset;
+			}
+			if (CGI_REQUEST_URI != NULL && strstr(CGI_REQUEST_URI, APP_SUB_DIRECTORY) != NULL)
+			{
+				CGI_REQUEST_URI += sub_direcotry_offset;
+			}
+		}
+
 		// 单独为 Admin 做处理，将其请求转发到 admin.cpp 控制器。
 		if (strlen(CGI_REQUEST_URI) >= 6)
 		{
@@ -113,7 +124,7 @@ void fastcgi_app_intro()
 			LoadPageSrc();
 			if (!isPageSrcLoadSuccess)
 			{
-				cout << "Status: 500 Internal Server Error\r\n"
+				std::cout << "Status: 500 Internal Server Error\r\n"
 					<< GLOBAL_HEADER
 					<< u8"<p>网页模板文件缺失或异常</p>";
 				END_REQUEST(); continue;
@@ -127,7 +138,7 @@ void fastcgi_app_intro()
 			char _3rd_party[4096] = { 0 };
 			strncpy(_3rd_party, str_qs_3rd_party.c_str(), sizeof(_3rd_party) - 1);
 			std::cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << CGI_SCRIPT_NAME << "\r\n";
-			std::cout << "Set-Cookie: 3rd_party=" << _3rd_party << "; max-age=1800; path=/\r\n";
+			std::cout << "Set-Cookie: 3rd_party=" << _3rd_party << "; max-age=1800; path=" << APP_SUB_DIRECTORY << "/\r\n";
 			std::cout << GLOBAL_HEADER;
 			END_REQUEST(); continue;
 		}
@@ -144,12 +155,17 @@ void fastcgi_app_intro()
 		// 普通请求处理
 		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0) // 如果是 GET 请求
 		{
+			if (strcmp(CGI_SCRIPT_NAME, "") == 0)
+			{
+				std::cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
+				END_REQUEST(); continue;
+			}
 			if (strcmp(CGI_SCRIPT_NAME, "/") == 0 || strcmp(CGI_SCRIPT_NAME, "/index.fcgi") == 0)
 			{
 				if (_GET(std::string(CGI_QUERY_STRING), "act") == "logout")
 				{
 					student_logout();
-					cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
+					std::cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 					END_REQUEST(); continue;
 				}
 				if (_GET(std::string(CGI_QUERY_STRING), "act") == "linking")
@@ -159,19 +175,19 @@ void fastcgi_app_intro()
 					process_cookie(&m_need_update_cookie, photo);
 					if (photo.empty())
 					{
-						cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
+						std::cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 						END_REQUEST(); continue;
 					}
 					char student_id[512] = { 0 };
 					get_student_id(student_id);
 					student_logout();
 					EnCodeStr(student_id, student_id);
-					cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/OAuth2.fcgi?user=" << student_id << "\r\n" << GLOBAL_HEADER;
+					std::cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/OAuth2.fcgi?user=" << student_id << "\r\n" << GLOBAL_HEADER;
 					END_REQUEST(); continue;
 				}
 				if (strcmp(CGI_REQUEST_URI, "/index.fcgi") == 0)
 				{
-					cout << "Status: 301 Moved Permanently\r\n" << "Location: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
+					std::cout << "Status: 301 Moved Permanently\r\n" << "Location: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 					END_REQUEST(); continue;
 				}
 				parse_index();
@@ -232,12 +248,17 @@ void fastcgi_app_intro()
 				parse_discussion();
 				END_REQUEST(); continue;
 			}
-			cout << "Status: 404 Not Found\r\n";
+			std::cout << "Status: 404 Not Found\r\n";
 			Error(u8"<p>找不到该页面</p>");
 			END_REQUEST(); continue;
 		}
 		if (strcmp(CGI_REQUEST_METHOD, "POST") == 0) // 如果是 POST 请求
 		{
+			if (strcmp(CGI_SCRIPT_NAME, "") == 0)
+			{
+				std::cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
+				END_REQUEST(); continue;
+			}
 			if (strcmp(CGI_SCRIPT_NAME, "/changePassword.fcgi") == 0)
 			{
 				do_change_password();
@@ -282,7 +303,7 @@ void fastcgi_app_intro()
 				}
 			}
 		}
-		cout << "Status: 405 Method Not Allowed\r\n";
+		std::cout << "Status: 405 Method Not Allowed\r\n";
 		Error(u8"<p>发生错误，请求的方法不被允许</p>");
 		END_REQUEST(); continue;
 	}
@@ -1168,7 +1189,7 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 
 	if (m_need_update_cookie)
 	{
-		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 	}
 
 	if (!m_photo.empty() && !m_need_update_cookie) // 登录了就通报已经登录
@@ -1233,7 +1254,7 @@ void parse_ajax_avatar()
 
 	if (m_need_update_cookie)
 	{
-		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 	}
 
 	if (m_photo.empty() || m_need_update_cookie)
@@ -1273,7 +1294,7 @@ void parse_query()
 
 	if (m_photo.empty()) // 还没登录就丢去登录。
 	{
-		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
@@ -2078,7 +2099,7 @@ void parse_query_tests()
 {
 	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
 	{
-		cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
@@ -2291,7 +2312,7 @@ int system_registration()
 {
 	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
 	{
-		cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 		return -1;
 	}
 
@@ -2580,7 +2601,7 @@ void parse_QuickQuery_Result()
 	if (m_post_length <= 0 || m_post_length >= 512)
 	{
 		if (m_need_update_cookie)
-			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 		Error(u8"<p>发生错误，POST 数据长度异常</p>");
 		return;
 	}
@@ -2594,7 +2615,7 @@ void parse_QuickQuery_Result()
 	if (str_xuehao.empty())
 	{
 		if (m_need_update_cookie)
-			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 		Error(u8"<p>无法获取学号信息</p>");
 		return;
 	}
@@ -2613,7 +2634,7 @@ void parse_QuickQuery_Result()
 	if (m_xhgs > 5 || m_xhgs <= 0)
 	{
 		if (m_need_update_cookie)
-			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 		Error(u8"<p>输入的学号个数存在问题，请确认！</p>");
 		return;
 	}
@@ -2636,7 +2657,7 @@ void parse_QuickQuery_Result()
 			if (strlen(m_xh[xh_index]) > 36)
 			{
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 				Error(u8"<p>输入的学号中有长度存在问题，请确认！</p>");
 				return;
 			}
@@ -2648,7 +2669,7 @@ void parse_QuickQuery_Result()
 			if (!req.Exec(true, REQUEST_SET_REPORT_PARAMS, COOKIE.c_str(), true, m_query_param))
 			{
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 				Error(u8"<p>投递免密查询请求失败</p><p>请确认教务系统是可用的</p>");
 				return;
 			}
@@ -2658,7 +2679,7 @@ void parse_QuickQuery_Result()
 			if (pStr1 == NULL)
 			{
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 				Error(u8"<p>获取报表ID错误 (1)</p>");
 				return;
 			}
@@ -2666,7 +2687,7 @@ void parse_QuickQuery_Result()
 			if (pStr1 == NULL)
 			{
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 				Error(u8"<p>获取报表ID错误 (2)</p>");
 				return;
 			}
@@ -2684,7 +2705,7 @@ void parse_QuickQuery_Result()
 			if (!req2.Exec(false, m_query_report, COOKIE.c_str()))
 			{
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 				Error(u8"<p>通过ID免密查询失败</p><p>发生了未知错误</p>");
 				return;
 			}
@@ -2693,7 +2714,7 @@ void parse_QuickQuery_Result()
 			if (pStr1 != NULL)
 			{
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 				Error(u8"<p>教务系统出错了，免密查询失败，请稍后重试</p>");
 				return;
 			}
@@ -2704,7 +2725,7 @@ void parse_QuickQuery_Result()
 			if (pStr1 == NULL)
 			{
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 				Error(u8"<p>免密查询返回参数错误 (1)</p>");
 				return;
 			}
@@ -2712,7 +2733,7 @@ void parse_QuickQuery_Result()
 			if (pStr1 == NULL)
 			{
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 				Error(u8"<p>免密查询返回参数错误 (2)</p>");
 				return;
 			}
@@ -2729,7 +2750,7 @@ void parse_QuickQuery_Result()
 			if (!req3.Exec(false, m_query_score, COOKIE.c_str()))
 			{
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 				Error(u8"<p>接收分数信息失败！</p>");
 				return;
 			}
@@ -2739,7 +2760,7 @@ void parse_QuickQuery_Result()
 			if (pStr1 == NULL)
 			{
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 				Error(u8"<p>学生姓名获取失败 (1)</p>");
 				return;
 			}
@@ -2747,7 +2768,7 @@ void parse_QuickQuery_Result()
 			if (pStr2 == NULL)
 			{
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 				Error(u8"<p>学生姓名获取失败 (2)</p>");
 				return;
 			}
@@ -2755,7 +2776,7 @@ void parse_QuickQuery_Result()
 			if ((pStr2 - pStr1) <= 4)
 			{
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 				Error(strformat(u8"<p><b>出现错误，请确认输入正确</b></p><p>发生错误的学号: %s</p>", m_xh[xh_index]).c_str());
 				return;
 			}
@@ -2763,7 +2784,7 @@ void parse_QuickQuery_Result()
 			if (strlen(m_xxmz) < 2)
 			{
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 				Error(strformat(u8"<p><b>获取信息失败，请确认输入正确</b></p><p>发生错误的学号: %s</p>", m_xh[xh_index]).c_str());
 				return;
 			}
@@ -2781,7 +2802,7 @@ void parse_QuickQuery_Result()
 			if (pStr1 == NULL)
 			{
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 				Error(strformat(u8"<p><b>接收到的数据存在问题</b></p><p>发生错误的学号: %s</p>", m_xh[xh_index]).c_str());
 				return;
 			}
@@ -2881,7 +2902,7 @@ void parse_QuickQuery_Result()
 			if (!m_success)
 			{
 				if (m_need_update_cookie)
-					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 				Error(u8"<p>还没有出成绩或者发生了错误</p>");
 				return;
 			}
@@ -3235,7 +3256,7 @@ void parse_teaching_evaluation()
 
 	if (m_photo.empty()) // 还没登录就丢去登录。
 	{
-		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
@@ -3390,7 +3411,7 @@ void teaching_evaluation()
 
 	if (m_photo.empty()) // 还没登录就丢去登录。
 	{
-		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
@@ -3631,14 +3652,14 @@ void parse_change_password()
 
 	if (m_photo.empty()) // 还没登录就丢去登录。
 	{
-		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
 	std::string m_lpszQuery = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
 	if (m_need_update_cookie)
-		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=/\r\n";
+		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 	cout << GLOBAL_HEADER;
 
 	if (!CGI_HTTP_X_IS_AJAX_REQUEST)
@@ -3664,7 +3685,7 @@ void do_change_password() //(POST /changePassword.fcgi)
 
 	if (m_photo.empty()) // 还没登录就丢去登录。
 	{
-		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
@@ -3759,7 +3780,7 @@ void do_change_password() //(POST /changePassword.fcgi)
 
 	mysql_stmt_close(stmt);
 	student_logout();
-	cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "\r\n" << GLOBAL_HEADER;
+	cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 }
 
 // 交流讨论板块

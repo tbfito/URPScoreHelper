@@ -40,22 +40,23 @@
 		  </div>
 		  <div class="form-group">
 			<div class="label">
-			  <label><b>Web 服务器：</b></label>
+			  <label><b>服务器信息：</b></label>
 			</div>
 			<div class="field">
 				<div class="label">
-				  <label>%s</label>
+				  <label>Web 服务器：%s</label>
+				  <label>MySQL 服务器：%s</label>
 				</div>
 			</div>
 		  </div>
-		   <div class="form-group">
+		  <div class="form-group">
 			<div class="label">
-			  <label><b>MySQL 信息：</b></label>
+			  <label><b>库信息：</b></label>
 			</div>
 			<div class="field">
 				<div class="label">
-				  <label>MySQL Connector 库版本：%s</label>
-				  <label>服务器版本：%s</label>
+				  <label>mysql 库版本：%s</label>
+				  <label>curl 库版本：%s</label>
 				</div>
 			</div>
 		  </div>

@@ -4,7 +4,7 @@
 </header>
 <div class="content">
 	%s
-	<form id="ajax_submit" data-ajax-submit="/main.fcgi" class="weui-cells weui-cells_form">
+	<form id="ajax_submit" data-ajax-submit="main.fcgi" class="weui-cells weui-cells_form">
 		<div class="signbox">
 			%s
 			<div class="weui-cell weui-cell_vcode">
@@ -42,7 +42,7 @@
 					<input class="weui-input" name="yzm" id="i_yzm" type="text" placeholder="输入验证码" />
 				</div>
 				<div class="weui-cell__ft">
-					<div class="weui-vcode-img"><img onclick="get_captcha();" id="login_captcha" alt="验证码" src="/img/refresh.png" width="60" height="20" /></div>
+					<div class="weui-vcode-img"><img onclick="get_captcha();" id="login_captcha" alt="验证码" src="img/refresh.png" width="60" height="20" /></div>
 				</div>
 			</div>
 		</div>

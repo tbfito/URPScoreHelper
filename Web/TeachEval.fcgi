@@ -1,11 +1,11 @@
 <div class="i_page-navbar">
-	<a href="/main.fcgi" class="return"><i class="fa fa-arrow-left"></i>返回</a>
+	<a href="main.fcgi" class="return"><i class="fa fa-arrow-left"></i>返回</a>
 	<i class="fa fa-hand-o-right"></i>一键教学评估
 </div>
 <div class="i_page-padding"></div>
 <div class="content">
 	<div id="i_total"><p>%s</p></div>
-	<form id="ajax_submit" data-ajax-submit="/TeachEval.fcgi?act=Evaluate" class="weui-cells weui-cells_form" style="display:%s">
+	<form id="ajax_submit" data-ajax-submit="TeachEval.fcgi?act=Evaluate" class="weui-cells weui-cells_form" style="display:%s">
 		<div class="weui-cells weui-cells_form bigbox evalbox">
 			<div class="weui-cell">
 				<div class="weui-cell__bd">

@@ -29,22 +29,22 @@ function get_captcha() {
 		return;
 	$.ajax({
 		type: "GET",
-		url: "/captcha.fcgi",
+		url: "captcha.fcgi",
 		dataType: "text",
 		cache: false,
 		beforeSend: function() {
-			obj.src = "/img/loading.gif";
+			obj.src = "img/loading.gif";
 		},
 		success: function(data) {
 			if(data == "LOGGED-IN")
 			{
 				$.toast("已登录过，跳转中", "text");
-				ajax_page("/main.fcgi");
+				ajax_page("main.fcgi");
 			}
 			else if(data == "REQUEST-FAILED")
 			{
 				$.toast("学校后端连接失败", "text");
-				obj.src = "/img/refresh.png";
+				obj.src = "img/refresh.png";
 			}
 			else
 			{
@@ -53,7 +53,7 @@ function get_captcha() {
 			}
 		},
 		error: function() {
-			obj.src = "/img/refresh.png";
+			obj.src = "img/refresh.png";
 		}
 	})
 }
@@ -63,14 +63,14 @@ function get_avatar() {
 		return;
 	$.ajax({
 		type: "GET",
-		url: "/avatar.fcgi",
+		url: "avatar.fcgi",
 		dataType: "text",
 		cache: false,
 		success: function(data) {
 			if(data == "LOGGED-OUT")
 			{
 				$.toast("尚未登录，请登录", "text");
-				ajax_page("/index.fcgi?act=logout");
+				ajax_page("index.fcgi?act=logout");
 			}
 			else
 			{
@@ -101,14 +101,14 @@ function getcharnum() {
 function logout() {
 	$.confirm("确认要退出系统吗？", function() {
 		$.toptip("正在登出...", 2000, 'success');
-		ajax_page("/index.fcgi?act=logout");
+		ajax_page("index.fcgi?act=logout");
 	}, function() {
 	});
 }
 function unlink(id) {
 	$.confirm("确定要解除与微信帐号的绑定吗？", function() {
 		$.toptip("正在解绑...", 2000, 'success');
-		ajax_page("/OAuth2.fcgi?act=link&release=" + id);
+		ajax_page("OAuth2.fcgi?act=link&release=" + id);
 	}, function() {
 	});
 }
@@ -140,12 +140,12 @@ function change_password() {
 }
 function adjust_form(href) {
 	if(href != null) {
-		if(href == "/" || href == "/index.fcgi" || href == "/index.fcgi?act=logout" || href == "/changePassword.fcgi")
+		if(href.slice(-1) == "/" || href.slice(-10) == "index.fcgi" || href.slice(-21) == "index.fcgi?act=logout" || href.slice(-19) == "changePassword.fcgi")
 		{
 			return;
 		}
 	}
-	else if(window.location.pathname == "/")
+	else if(window.location.pathname.slice(-1) == "/")
 	{
 		return;
 	}

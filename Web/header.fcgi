@@ -6,11 +6,11 @@
 		<title>%s - %s</title>
 		<meta name="keywords" content="%s">
 		<meta name="description" content="%s">
-		<link rel="stylesheet" href="/css/weui.min.css">
-		<link rel="stylesheet" href="/css/jquery-weui.min.css">
-		<link rel="stylesheet" href="/css/project.css?ver=18.2.6">
-		<link rel="stylesheet" href="/css/font-logo.css">
-		<link rel="stylesheet" href="/css/font-awesome.min.css">
+		<link rel="stylesheet" href="css/weui.min.css">
+		<link rel="stylesheet" href="css/jquery-weui.min.css">
+		<link rel="stylesheet" href="css/project.css?ver=18.3.19">
+		<link rel="stylesheet" href="css/font-logo.css">
+		<link rel="stylesheet" href="css/font-awesome.min.css">
 		<link rel="shortcut icon" href="URPScoreHelper.ico">
 	</head>
 	<body>

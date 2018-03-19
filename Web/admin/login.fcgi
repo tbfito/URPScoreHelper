@@ -10,6 +10,7 @@
 	<link rel="shortcut icon" href="../URPScoreHelper.ico">
     <script src="../js/jquery.min.js"></script>
     <script src="js/pintuer.js"></script>
+	<script type="text/javascript">if(self!=top){top.location.href=self.location.href;}</script>
 </head>
 <body>
 <div class="bg"></div>

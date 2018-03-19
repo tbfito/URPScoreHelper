@@ -50,13 +50,13 @@ void initialize()
 	curl_global_init(CURL_GLOBAL_ALL);
 	mysql_init(&db);
 
-	INIReader reader("Database.ini");
+	INIReader reader("config.ini");
 	if (reader.ParseError() != 0) {
 		strncpy(MYSQL_HOST, "127.0.0.1", sizeof(MYSQL_HOST) - 1);
 		strncpy(MYSQL_PORT_NUMBER, "3306", sizeof(MYSQL_PORT_NUMBER) - 1);
 		strncpy(MYSQL_USERNAME, "root", sizeof(MYSQL_USERNAME) - 1);
 		strncpy(MYSQL_PASSWORD, "root", sizeof(MYSQL_PASSWORD) - 1);
-		strncpy(MYSQL_DBNAME, "database", sizeof(MYSQL_DBNAME) - 1);
+		strncpy(MYSQL_DBNAME, "urp", sizeof(MYSQL_DBNAME) - 1);
 	}
 	else
 	{
@@ -64,7 +64,11 @@ void initialize()
 		strncpy(MYSQL_PORT_NUMBER, reader.Get("MySQL", "MYSQL_PORT_NUMBER", "3306").c_str(), sizeof(MYSQL_PORT_NUMBER) - 1);
 		strncpy(MYSQL_USERNAME, reader.Get("MySQL", "MYSQL_USERNAME", "root").c_str(), sizeof(MYSQL_USERNAME) - 1);
 		strncpy(MYSQL_PASSWORD, reader.Get("MySQL", "MYSQL_PASSWORD", "root").c_str(), sizeof(MYSQL_PASSWORD) - 1);
-		strncpy(MYSQL_DBNAME, reader.Get("MySQL", "MYSQL_DBNAME", "database").c_str(), sizeof(MYSQL_DBNAME) - 1);
+		strncpy(MYSQL_DBNAME, reader.Get("MySQL", "MYSQL_DBNAME", "urp").c_str(), sizeof(MYSQL_DBNAME) - 1);
+		strncpy(APP_SUB_DIRECTORY, reader.Get("Settings", "SUB_DIRECTORY", "").c_str(), sizeof(APP_SUB_DIRECTORY) - 1);
+	}
+	if (strlen(APP_SUB_DIRECTORY) < 2 || strcmp(APP_SUB_DIRECTORY, "/") == 0) {	// 如果子目录为'/'，或者输入无效
+		*APP_SUB_DIRECTORY = '\0';
 	}
 
 	LoadConfig(); // 首次调用初始化一些资源
