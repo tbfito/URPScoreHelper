@@ -1276,7 +1276,7 @@ void parse_ajax_avatar()
 		}
 		else
 		{
-			cout << "/img/default_avatar.jpg";
+			cout << APP_SUB_DIRECTORY << "/img/default_avatar.jpg";
 		}
 	}
 	else
