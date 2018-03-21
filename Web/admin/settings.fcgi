@@ -115,7 +115,7 @@
 		  </div>
 		  <div class="form-group">
 			<div class="label">
-			  <label><b>统计代码：</b>(用于放置第三方统计的代码)</label>
+			  <label><b>尾部代码：</b>(可放置自定义JS或统计代码)</label>
 			</div>
 			<div class="field">
 			  <textarea class="input" name="ANALYSIS_CODE">%s</textarea>

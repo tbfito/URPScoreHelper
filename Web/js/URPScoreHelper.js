@@ -38,7 +38,7 @@ function get_captcha() {
 		success: function(data) {
 			if(data == "LOGGED-IN")
 			{
-				$.toast("已登录过，跳转中", "text");
+				$.toast("已登录，跳转中", "text");
 				ajax_page("main.fcgi");
 			}
 			else if(data == "REQUEST-FAILED")
@@ -131,7 +131,7 @@ function change_password() {
 		return false;
 	}
 	if(!document.getElementById("i_chk").checked){
-		$.toast("滑动右边开关来确认输入无误 :)", "text");
+		$.toast("滑动右边开关来确认输入无误！", "text");
 		return false;
 	}
 	$.toptip("正在修改...", 2000, 'success');
@@ -190,12 +190,12 @@ function init(href){
 		var r4 = document.getElementById("weuiAgree");
 		if(r1 != undefined && r1.value == "")
 		{
-			$.toast("学号还没输呢","cancel");
+			$.toast("请输入学号","cancel");
 			return false;
 		}
 		if(r2 != undefined && r2.value == "")
 		{
-			$.toast("密码还没输呢","cancel");
+			$.toast("请输入密码","cancel");
 			return false;
 		}
 		if(r3 != undefined && r3.value == "")
@@ -205,7 +205,7 @@ function init(href){
 		}
 		if(r4 != undefined && !r4.checked)
 		{
-			$.toast("请同意条款哦","cancel");
+			$.toast("请同意条款","cancel");
 			return false;
 		}
 		if(r5 != undefined && r5.value == "")

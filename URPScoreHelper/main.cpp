@@ -38,13 +38,13 @@ int main(int argc, const char *argv[])
 
 void initialize()
 {
-	strcat(GLOBAL_HEADER, "Content-Type: text/html; charset=utf-8\r\nX-Powered-By: ");
+	strcat(GLOBAL_HEADER, "Content-Type: text/html; charset=utf-8\r\nCache-Control: no-cache, no-store, must-revalidate\r\nPragma: no-cache\r\nExpires: Thu, 16 Oct 1997 00:00:00 GMT\r\nX-Powered-By: ");
 	strcat(GLOBAL_HEADER, SOFTWARE_NAME);
 	strcat(GLOBAL_HEADER, "\r\n\r\n");
 
-	strcat(GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT, "Content-Type: text/plain; charset=utf-8\r\nCache-Control: no-cache\r\nPragma: no-cache\r\nExpires: Thu, 16 Oct 1997 00:00:00 GMT\r\nX-Powered-By: ");
-	strcat(GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT, SOFTWARE_NAME);
-	strcat(GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT, "\r\n\r\n");
+	strcat(GLOBAL_HEADER_TYPE_PLAIN_TEXT, "Content-Type: text/plain; charset=utf-8\r\nCache-Control: no-cache, no-store, must-revalidate\r\nPragma: no-cache\r\nExpires: Thu, 16 Oct 1997 00:00:00 GMT\r\nX-Powered-By: ");
+	strcat(GLOBAL_HEADER_TYPE_PLAIN_TEXT, SOFTWARE_NAME);
+	strcat(GLOBAL_HEADER_TYPE_PLAIN_TEXT, "\r\n\r\n");
 
 	FCGX_Init();
 	curl_global_init(CURL_GLOBAL_ALL);

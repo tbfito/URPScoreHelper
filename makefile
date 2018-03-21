@@ -4,7 +4,7 @@ CFLAGS = -O3 -Wall -std=c++11
 DIR_SRC := ./URPScoreHelper
 DIR_OBJ := ./obj
 
-TARGET := URPScoreHelper.exe
+TARGET := URPScoreHelper.run
 
 OBJS =	$(DIR_OBJ)/headers.o\
 		$(DIR_OBJ)/gbkutf8.o\

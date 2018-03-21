@@ -101,7 +101,7 @@ Listen 8123
     ServerName glxy.iedon.com
 	<IfModule mod_fcgid.c>
 		AddHandler fcgid-script .fcgi
-		FcgidWrapper "/data/URPScoreHelper/Guangling/URPScoreHelper.exe" .fcgi
+		FcgidWrapper "/data/URPScoreHelper/Guangling/URPScoreHelper.run" .fcgi
 		AddType application/x-iedon-urpscorehelper .fcgi
 	</IfModule>
 	<Directory "/data/URPScoreHelper/Web">
@@ -120,7 +120,7 @@ Listen 8123
     ServerName yzu.iedon.com
 	<IfModule mod_fcgid.c>
 		AddHandler fcgid-script .fcgi
-		FcgidWrapper "/data/URPScoreHelper/Yangda/URPScoreHelper.exe" .fcgi
+		FcgidWrapper "/data/URPScoreHelper/Yangda/URPScoreHelper.run" .fcgi
 		AddType application/x-iedon-urpscorehelper .fcgi
 	</IfModule>
 	<Directory "/data/URPScoreHelper/Web">

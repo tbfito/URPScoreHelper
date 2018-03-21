@@ -976,7 +976,7 @@ void parse_main()
 		int m_post_length = atoi(CGI_CONTENT_LENGTH);
 		if (m_post_length <= 0 || m_post_length > 127)
 		{
-			Error(u8"<p>帐号或密码输入有问题，请重试</p>");
+			Error(u8"<p>输入的帐号或密码有问题，请重试</p>");
 			return;
 		}
 		char *m_post_data = (char *)malloc(m_post_length + 2);
@@ -1182,7 +1182,7 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 	bool m_need_update_cookie = false;
 	std::string m_photo(" "); // 有数据，需要获取照片
 	if (process_cookie(&m_need_update_cookie, m_photo) == -1) {
-		cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
+		cout << GLOBAL_HEADER_TYPE_PLAIN_TEXT;
 		cout << "REQUEST-FAILED";
 		return;
 	}
@@ -1194,7 +1194,7 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 
 	if (!m_photo.empty() && !m_need_update_cookie) // 登录了就通报已经登录
 	{
-		cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
+		cout << GLOBAL_HEADER_TYPE_PLAIN_TEXT;
 		cout << "LOGGED-IN";
 		return;
 	}
@@ -1218,7 +1218,7 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 	}
 	if (!req.Exec(false, Captcha, cookie))
 	{
-		cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
+		cout << GLOBAL_HEADER_TYPE_PLAIN_TEXT;
 		cout << "REQUEST-FAILED";
 		return;
 	}
@@ -1234,7 +1234,7 @@ void parse_ajax_captcha() //(AJAX: GET /captcha.fcgi)
 	strncpy(m_DataURL, "data:image/jpg;base64,", m_CaptchaLength * 2 + 24 - 1);
 	strcat(m_DataURL, m_base64);
 
-	cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
+	cout << GLOBAL_HEADER_TYPE_PLAIN_TEXT;
 	cout << m_DataURL;
 
 	delete[]m_base64;
@@ -1247,7 +1247,7 @@ void parse_ajax_avatar()
 	bool m_need_update_cookie = false;
 	std::string m_photo(" "); // 有数据，需要获取照片
 	if (process_cookie(&m_need_update_cookie, m_photo) == -1) {
-		cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
+		cout << GLOBAL_HEADER_TYPE_PLAIN_TEXT;
 		cout << "LOGGED-OUT";
 		return;
 	}
@@ -1259,11 +1259,11 @@ void parse_ajax_avatar()
 
 	if (m_photo.empty() || m_need_update_cookie)
 	{
-		cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
+		cout << GLOBAL_HEADER_TYPE_PLAIN_TEXT;
 		cout << "LOGGED-OUT";
 		return;
 	}
-	cout << GLOBAL_HEADER_NO_CACHE_PLAIN_TEXT;
+	cout << GLOBAL_HEADER_TYPE_PLAIN_TEXT;
 	char m_student_id[512] = { 0 };
 	char m_avatar_url[MAX_PATH] = { 0 };
 	char m_student_name[1024] = { 0 };
@@ -2466,7 +2466,7 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 		MYSQL_STMT *stmt = mysql_stmt_init(&db);
 		MYSQL_BIND bind[3];
 		memset(bind, 0, sizeof(bind));
-		std::string query("INSERT INTO `userinfo` (`id`, `password`, `name`) VALUES (?, ?, ?)");
+		std::string query("INSERT INTO `userinfo` (`id`, `password`, `name`, `lastlogin`) VALUES (?, ?, ?, now())");
 
 		if (stmt == NULL)
 		{
@@ -2587,7 +2587,7 @@ void parse_QuickQuery_Intro()
 	}
 }
 
-// 免密查询结果 (/query.fcgi?act=QuickQuery)
+// 学号快速查询结果 (/query.fcgi?act=QuickQuery)
 void parse_QuickQuery_Result()
 {
 	bool m_need_update_cookie = false;
@@ -3153,7 +3153,7 @@ void OAuth2_linking(bool isPOST)
 		int m_post_length = atoi(CGI_CONTENT_LENGTH);
 		if (m_post_length <= 0 || m_post_length > 127)
 		{
-			Error(u8"<p>帐号或密码输入有问题，请重试</p>");
+			Error(u8"<p>输入的帐号或密码有问题，请重试</p>");
 			return;
 		}
 		char *m_post_data = (char *)malloc(m_post_length + 2);
