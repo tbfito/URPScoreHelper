@@ -26,8 +26,8 @@
 	extern char *FOOTER_TEMPLATE_LOCATION;
 
 	extern char APP_SUB_DIRECTORY[MAX_PATH];
-	extern char GLOBAL_HEADER[256];
-	extern char GLOBAL_HEADER_TYPE_PLAIN_TEXT[512];
+	extern char GLOBAL_HEADER[1024];
+	extern char GLOBAL_HEADER_TYPE_PLAIN_TEXT[1024];
 	extern const char *SCORE_TEMPLATE;
 	extern const char *BEFORE_TEMPLATE;
 	extern const char *AFTER_TEMPLATE;
