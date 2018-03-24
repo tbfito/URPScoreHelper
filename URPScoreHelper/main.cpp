@@ -38,11 +38,15 @@ int main(int argc, const char *argv[])
 
 void initialize()
 {
-	strcat(GLOBAL_HEADER, "Content-Type: text/html; charset=utf-8\r\nCache-Control: no-cache, no-store, must-revalidate\r\nPragma: no-cache\r\nExpires: Thu, 16 Oct 1997 00:00:00 GMT\r\nX-Powered-By: ");
+	static const char *HTTP_HEADER = "Cache-Control: no-cache, no-store, must-revalidate\r\nPragma: no-cache\r\nExpires: Thu, 16 Oct 1997 00:00:00 GMT\r\nX-Powered-By: ";
+	
+	strcat(GLOBAL_HEADER, "Content-Type: text/html; charset=utf-8\r\n");
+	strcat(GLOBAL_HEADER, HTTP_HEADER);
 	strcat(GLOBAL_HEADER, SOFTWARE_NAME);
 	strcat(GLOBAL_HEADER, "\r\n\r\n");
 
-	strcat(GLOBAL_HEADER_TYPE_PLAIN_TEXT, "Content-Type: text/plain; charset=utf-8\r\nCache-Control: no-cache, no-store, must-revalidate\r\nPragma: no-cache\r\nExpires: Thu, 16 Oct 1997 00:00:00 GMT\r\nX-Powered-By: ");
+	strcat(GLOBAL_HEADER_TYPE_PLAIN_TEXT, "Content-Type: text/plain; charset=utf-8\r\n");
+	strcat(GLOBAL_HEADER, HTTP_HEADER);
 	strcat(GLOBAL_HEADER_TYPE_PLAIN_TEXT, SOFTWARE_NAME);
 	strcat(GLOBAL_HEADER_TYPE_PLAIN_TEXT, "\r\n\r\n");
 
@@ -109,5 +113,6 @@ void cleanup()
 	}
 
 	mysql_close(&db);
+	mysql_library_end();
 	curl_global_cleanup();
 }

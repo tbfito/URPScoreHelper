@@ -15,7 +15,6 @@
 	#include <string>
 	#include <algorithm>
 	#include "libfcgi/fcgio.h"
-	#include "libcurl/curl.h"
 	#include "libmysql/mysql.h"
 
 	using std::cout;
@@ -26,9 +25,11 @@
 	extern "C"
 	{
 		#ifdef WIN32 // Windows 平台
+			#include "libcurl/curl.h"
 			#include "libiconv/iconv.h"
 			#include "resource.h"
 		#else // Unix Like or other platforms
+			#include <curl/curl.h>
 			#include <iconv.h>
 			#include <unistd.h>
 		#endif

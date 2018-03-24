@@ -87,7 +87,7 @@ void OAuth2_callback()
 
 	std::string html;
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
-	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, CURL_TIMEOUT);
+	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, CURL_CONN_TIMEOUT);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &html);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, OAuth2_curl_receive);
 	curl_easy_setopt(curl, CURLOPT_URL, access_token_req.c_str());
@@ -313,7 +313,7 @@ void PullOAuthUserInfo(char *access_token, char *openid, std::string & OAuth_nam
 	std::string html;
 	std::string get_user_info_req = strformat(OAUTH2_GET_USER_INFO, access_token, openid);
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
-	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, CURL_TIMEOUT);
+	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, CURL_CONN_TIMEOUT);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &html);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, OAuth2_curl_receive);
 	curl_easy_setopt(curl, CURLOPT_URL, get_user_info_req.c_str());

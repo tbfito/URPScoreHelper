@@ -138,7 +138,7 @@ void parse_admin_login()
 	if (_GET(std::string(CGI_QUERY_STRING), "act") == "logout")
 	{
 		cout << "Status: 302 Found\r\n"
-			 << "Set-Cookie: admin_sessid=; max-age=-1; path=" << APP_SUB_DIRECTORY << "/admin/\r\n"
+			 << "Set-Cookie: admin_session=; max-age=-1; path=" << APP_SUB_DIRECTORY << "/admin/\r\n"
 			 << "Location: " << getAppURL().c_str() << "/admin/login.fcgi\r\n"
 			 << GLOBAL_HEADER;
 		return;
@@ -238,12 +238,12 @@ void do_admin_login()
 	}
 
 	cout << "Status: 302 Found\r\n"
-		 << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=" << APP_SUB_DIRECTORY << "/admin/\r\n"
+		 << "Set-Cookie: admin_session=" << generate_session().c_str() << "; max-age=600; path=" << APP_SUB_DIRECTORY << "/admin/\r\n"
 		 << "Location: " << getAppURL().c_str() << "/admin/index.fcgi\r\n"
 		 << GLOBAL_HEADER;
 }
 
-// 生成登录会话 Session，由 sessino() 调用
+// 生成登录会话 Session，由 session() 调用
 std::string generate_session()
 {
 	size_t result = time(NULL);
@@ -256,13 +256,13 @@ std::string generate_session()
 	return txt;
 }
 
-// 验证登录会话 Session，由 sessino() 调用
+// 验证登录会话 Session，由 session() 调用
 bool verify_session()
 {
 	char *session = (char *)malloc(1024);
 	memset(session, 0, 1024);
 
-	std::string str_admin_sesid = _COOKIE(std::string(CGI_HTTP_COOKIE), "admin_sessid");
+	std::string str_admin_sesid = _COOKIE(std::string(CGI_HTTP_COOKIE), "admin_session");
 	if (!str_admin_sesid.empty())
 	{
 		strncpy(session, str_admin_sesid.c_str(), 1024 - 1);
@@ -311,7 +311,7 @@ bool session()
 	}
 	else // 如果已登录，那么这是一个新操作，更新cookie过期时间
 	{
-		cout << "Set-Cookie: admin_sessid=" << generate_session().c_str() << "; max-age=600; path=" << APP_SUB_DIRECTORY << "/admin/\r\n";
+		cout << "Set-Cookie: admin_session=" << generate_session().c_str() << "; max-age=600; path=" << APP_SUB_DIRECTORY << "/admin/\r\n";
 		return true;
 	}
 }
@@ -335,7 +335,7 @@ void parse_admin_settings()
 	cout << GLOBAL_HEADER
 		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(),
 			APP_NAME, APP_NAME, SECONDARY_TITLE, APP_DESCRIPTION, APP_KEYWORDS, SERVER_URL,
-			USER_AGENT, CURL_TIMEOUT, CURL_USE_PROXY ? 1 : 0, CURL_PROXY_URL, ENABLE_QUICK_QUERY ? 1 : 0,
+			USER_AGENT, CURL_CONN_TIMEOUT, CURL_USE_PROXY ? 1 : 0, CURL_PROXY_URL, ENABLE_QUICK_QUERY ? 1 : 0,
 			FOOTER_TEXT, ANALYSIS_CODE).c_str();
 }
 
@@ -363,7 +363,7 @@ void save_admin_settings()
 	std::string m_APP_KEYWORDS = _POST(post, "APP_KEYWORDS");
 	std::string m_SERVER_URL = _POST(post, "SERVER_URL");
 	std::string m_USER_AGENT = _POST(post, "USER_AGENT");
-	std::string m_CURL_TIMEOUT = _POST(post, "CURL_TIMEOUT");
+	std::string m_CURL_CONN_TIMEOUT = _POST(post, "CURL_CONN_TIMEOUT");
 	std::string m_CURL_USE_PROXY = _POST(post, "CURL_USE_PROXY");
 	std::string m_CURL_PROXY_URL = _POST(post, "CURL_PROXY_URL");
 	std::string m_ENABLE_QUICK_QUERY = _POST(post, "ENABLE_QUICK_QUERY");
@@ -376,7 +376,7 @@ void save_admin_settings()
 	decode_post_data(m_APP_KEYWORDS);
 	decode_post_data(m_SERVER_URL);
 	decode_post_data(m_USER_AGENT);
-	decode_post_data(m_CURL_TIMEOUT);
+	decode_post_data(m_CURL_CONN_TIMEOUT);
 	decode_post_data(m_CURL_USE_PROXY);
 	decode_post_data(m_CURL_PROXY_URL);
 	decode_post_data(m_ENABLE_QUICK_QUERY);
@@ -389,7 +389,7 @@ void save_admin_settings()
 	UpdateSettings("APP_KEYWORDS", m_APP_KEYWORDS.c_str());
 	UpdateSettings("SERVER_URL", m_SERVER_URL.c_str());
 	UpdateSettings("USER_AGENT", m_USER_AGENT.c_str());
-	UpdateSettings("CURL_TIMEOUT", m_CURL_TIMEOUT.c_str());
+	UpdateSettings("CURL_CONN_TIMEOUT", m_CURL_CONN_TIMEOUT.c_str());
 	UpdateSettings("CURL_USE_PROXY", m_CURL_USE_PROXY.c_str());
 	UpdateSettings("CURL_PROXY_URL", m_CURL_PROXY_URL.c_str());
 	UpdateSettings("ENABLE_QUICK_QUERY", m_ENABLE_QUICK_QUERY.c_str());
@@ -439,9 +439,11 @@ void UpdateSettings(const char *name, const char *value)
 void decode_post_data(std::string & str)
 {
 	int len = url_decode((char *)str.c_str(), str.length());
-	char temp[4096] = { 0 };
+	char *temp = (char *)malloc(10240);
+	memset(temp, 0, 10240);
 	left(temp, (char *)str.c_str(), len);
 	str = temp;
+	free(temp);
 }
 
 // 处理修改管理员信息页面 (GET /admin/change-pass.fcgi)

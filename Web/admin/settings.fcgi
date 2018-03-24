@@ -70,10 +70,10 @@
 		  </div>
 		   <div class="form-group">
 			<div class="label">
-			  <label><b>爬虫连接超时：</b>(单位：秒。推荐2，若数值过大且遇到教务系统无法访问时会遇到挂起等待问题)</label>
+			  <label><b>爬虫连接超时：</b>(单位：秒。推荐3，若数值过大且遇到教务系统无法访问时会遇到挂起等待问题)</label>
 			</div>
 			<div class="field">
-			  <input type="text" class="input" name="CURL_TIMEOUT" value="%d" />
+			  <input type="text" class="input" name="CURL_CONN_TIMEOUT" value="%d" />
 			  <div class="tips"></div>
 			</div>
 		  </div>

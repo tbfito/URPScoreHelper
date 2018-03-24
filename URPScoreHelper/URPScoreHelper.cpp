@@ -451,19 +451,19 @@ void LoadConfig()
 
 		isdbReady = true;
 
-		std::string query("CREATE TABLE IF NOT EXISTS `userinfo` (`id` varchar(36) NOT NULL,`password` varchar(1024) NOT NULL,`name` varchar(36) DEFAULT NULL,`openid` varchar(1024) DEFAULT NULL,`OAuth_name` varchar(1024) DEFAULT NULL,`OAuth_avatar` varchar(4096) DEFAULT NULL,`lastlogin` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+		std::string query("CREATE TABLE IF NOT EXISTS `userinfo` (`id` varchar(36) NOT NULL,`password` varchar(1024) NOT NULL,`name` varchar(36) DEFAULT NULL,`openid` varchar(1024) DEFAULT NULL,`OAuth_name` varchar(1024) DEFAULT NULL,`OAuth_avatar` varchar(4096) DEFAULT NULL,`lastlogin` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 		if (mysql_query(&db, query.c_str()) != 0)
 		{
 			return;
 		}
 
-		query = "CREATE TABLE IF NOT EXISTS `settings` (`name` varchar(254) NOT NULL,`value` varchar(10240) NOT NULL,PRIMARY KEY (`name`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+		query = "CREATE TABLE IF NOT EXISTS `settings` (`name` varchar(254) NOT NULL,`value` varchar(10240) NOT NULL,PRIMARY KEY (`name`)) ENGINE=InnoDB DEFAULT CHARSET=utf8";
 		if (mysql_query(&db, query.c_str()) != 0)
 		{
 			return;
 		}
 
-		query = "SET NAMES UTF8;";
+		query = "SET NAMES UTF8";
 		mysql_query(&db, query.c_str());
 
 		// 如果数据库没有下面配置，则自动增加并写入默认值以确保首次能够正常运行。
@@ -475,7 +475,7 @@ void LoadConfig()
 		AddSettings("OAUTH2_SECRET", "");
 		AddSettings("CURL_PROXY_URL", "");
 		AddSettings("APP_NAME", SOFTWARE_NAME);
-		AddSettings("CURL_TIMEOUT", "2");
+		AddSettings("CURL_CONN_TIMEOUT", "3");
 		AddSettings("CURL_USE_PROXY", "0");
 		AddSettings("CARD_AD_BANNER_1_IMG", "");
 		AddSettings("CARD_AD_BANNER_2_IMG", "");
@@ -648,10 +648,10 @@ void LoadConfig()
 	GetSettings("DISCUSSION_PAGE_CODE", DISCUSSION_PAGE_CODE);
 	GetSettings("SITE_MAINTENANCE", SITE_MAINTENANCE);
 
-	GetSettings("CURL_TIMEOUT", lpvBuffer);
-	CURL_TIMEOUT = atoi(lpvBuffer);
-	if (CURL_TIMEOUT <= 0)
-		CURL_TIMEOUT = 2;
+	GetSettings("CURL_CONN_TIMEOUT", lpvBuffer);
+	CURL_CONN_TIMEOUT = atoi(lpvBuffer);
+	if (CURL_CONN_TIMEOUT <= 0)
+		CURL_CONN_TIMEOUT = 3;
 	memset(lpvBuffer, 0, 10240);
 
 	GetSettings("CURL_USE_PROXY", lpvBuffer);

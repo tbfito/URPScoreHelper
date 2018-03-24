@@ -50,7 +50,7 @@
 	extern char MYSQL_PASSWORD[1024];
 	extern char MYSQL_DBNAME[1024];
 
-	extern int CURL_TIMEOUT;
+	extern int CURL_CONN_TIMEOUT;
 	extern bool CURL_USE_PROXY;
 	extern char *SERVER_URL;
 	extern char *USER_AGENT;

@@ -1,7 +1,6 @@
 ﻿#include "headers.h"
 #include "General.h"
 #include "CCurlTask.h"
-#include "gbkutf8.h"
 
 CCurlTask::CCurlTask()
 {
@@ -56,7 +55,7 @@ bool CCurlTask::Exec(bool headonly, std::string url, std::string cookie, bool is
 		curl_easy_setopt(curl, CURLOPT_POST, 1);
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postdata.c_str());
 	}
-	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, CURL_TIMEOUT);
+	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, CURL_CONN_TIMEOUT);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &this->result);
 	if (!cookie.empty())
 	{
