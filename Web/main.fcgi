@@ -12,7 +12,7 @@
 			<div class="swiper-slide">
 				<div class="i_header">
 					<div class="i_user-photo-container">
-						<img class="i_user-photo" src="img/avatar.gif" width="84" height="84" />
+						<img class="i_user-photo" src="img/avatar.gif" />
 					</div>
 					<div class="i_user-info-container">
 						<h1>%s</h1>
