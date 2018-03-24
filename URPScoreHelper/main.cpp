@@ -46,7 +46,7 @@ void initialize()
 	strcat(GLOBAL_HEADER, "\r\n\r\n");
 
 	strcat(GLOBAL_HEADER_TYPE_PLAIN_TEXT, "Content-Type: text/plain; charset=utf-8\r\n");
-	strcat(GLOBAL_HEADER, HTTP_HEADER);
+	strcat(GLOBAL_HEADER_TYPE_PLAIN_TEXT, HTTP_HEADER);
 	strcat(GLOBAL_HEADER_TYPE_PLAIN_TEXT, SOFTWARE_NAME);
 	strcat(GLOBAL_HEADER_TYPE_PLAIN_TEXT, "\r\n\r\n");
 
