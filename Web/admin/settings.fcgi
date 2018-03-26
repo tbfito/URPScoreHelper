@@ -20,7 +20,7 @@
 			  <label><b>站点名称：</b></label>
 			</div>
 			<div class="field">
-			  <input type="text" class="input" name="APP_NAME" value="%s" />
+			  <input type="text" class="input" name="APP_NAME" value='%s' />
 			  <div class="tips"></div>
 			</div>
 		  </div>
@@ -29,7 +29,7 @@
 			  <label><b>站点副标题：</b>(站点名称后的副标题)</label>
 			</div>
 			<div class="field">
-			  <input type="text" class="input" name="SECONDARY_TITLE" value="%s" />
+			  <input type="text" class="input" name="SECONDARY_TITLE" value='%s' />
 			  <div class="tips"></div>
 			</div>
 		  </div>
@@ -56,7 +56,7 @@
 			  <label><b>教务系统URL：</b>(URP综合教务系统服务端URL，末尾不加"/")</label>
 			</div>
 			<div class="field">
-			  <input type="text" class="input" name="SERVER_URL" value="%s" />
+			  <input type="text" class="input" name="SERVER_URL" value='%s' />
 			</div>
 		  </div>
 		  <div class="form-group">
@@ -64,7 +64,7 @@
 			  <label><b>爬虫UA：</b>(设置爬虫UA名称，当教务系统封杀自定义UA时，这里应该伪装为普通浏览器的标识)</label>
 			</div>
 			<div class="field">
-			  <input type="text" class="input" name="USER_AGENT" value="%s" />
+			  <input type="text" class="input" name="USER_AGENT" value='%s' />
 			  <div class="tips"></div>
 			</div>
 		  </div>
@@ -91,7 +91,7 @@
 			  <label><b>代理URL：</b>(支持：SOCKS4, SOCKS5, HTTP, HTTPS 格式：scheme://usr:pwd@host.suffix)</label>
 			</div>
 			<div class="field">
-			  <input type="text" class="input" name="CURL_PROXY_URL" value="%s" />
+			  <input type="text" class="input" name="CURL_PROXY_URL" value='%s' />
 			  <div class="tips"></div>
 			</div>
 		  </div>

@@ -19,7 +19,7 @@
 			  <label><b>是否开启微信 OAuth 2.0 功能：</b>(提供微信绑定，微信登录，信息关联等功能。0-禁用, 1-启用)</label>
 			</div>
 			<div class="field">
-			  <input type="text" class="input" name="ENABLE_OAUTH2" value="%s" />
+			  <input type="text" class="input" name="ENABLE_OAUTH2" value='%s' />
 			  <div class="tips"></div>
 			</div>
 		  </div>		
@@ -28,7 +28,7 @@
 			  <label><b>微信 OAuth 2.0 应用ID(AppID)：</b></label>
 			</div>
 			<div class="field">
-			  <input type="text" class="input" name="OAUTH2_APPID" value="%s" />
+			  <input type="text" class="input" name="OAUTH2_APPID" value='%s' />
 			  <div class="tips"></div>
 			</div>
 		  </div>
@@ -37,7 +37,7 @@
 			  <label><b>微信 OAuth 2.0 应用密钥(Secret)：</b></label>
 			</div>
 			<div class="field">
-			  <input type="text" class="input" name="OAUTH2_SECRET" value="%s" />
+			  <input type="text" class="input" name="OAUTH2_SECRET" value='%s' />
 			  <div class="tips"></div>
 			</div>
 		  </div>

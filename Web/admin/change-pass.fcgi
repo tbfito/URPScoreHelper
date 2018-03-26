@@ -19,7 +19,7 @@
 			  <label for="sitename">管理员帐号：</label>
 			</div>
 			<div class="field">
-				<input type="text" class="input" id="musr" name="ADMIN_USER_NAME" size="16" placeholder="请输入管理员帐号名" data-validate="required:请输入管理员帐号名" value="%s" autofocus /> 
+				<input type="text" class="input" id="musr" name="ADMIN_USER_NAME" size="16" placeholder="请输入管理员帐号名" data-validate="required:请输入管理员帐号名" value='%s' autofocus /> 
 			</div>
 		  </div>      
 		  <div class="form-group">

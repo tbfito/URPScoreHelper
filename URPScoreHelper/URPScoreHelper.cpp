@@ -3025,8 +3025,7 @@ void OAuth2_linking(bool isPOST)
 
 		if (stmt == NULL)
 		{
-			std::string Err_Msg(u8"<b>解除绑定失败</b><p>数据库错误 (statement 初始化失败)</p>");
-			Error(Err_Msg.c_str());
+			Error(u8"<b>解除绑定失败</b><p>数据库错误 (statement 初始化失败)</p>");
 			return;
 		}
 
@@ -3056,19 +3055,13 @@ void OAuth2_linking(bool isPOST)
 		Error(u8"鉴权失败 (openid)");
 		return;
 	}
-	size_t qslen = strlen(CGI_QUERY_STRING);
-	char *openid = new char[qslen];
-	strncpy(openid, str_openid.c_str(), qslen - 1);
 
-	char access_token[1024] = { 0 };
-	std::string str_proc = _GET(std::string(CGI_QUERY_STRING), "proc");
-	if (str_proc.empty())
+	std::string access_token = _GET(std::string(CGI_QUERY_STRING), "proc");
+	if (access_token.empty())
 	{
 		Error(u8"没有过程状态信息 (proc)");
-		delete[]openid;
 		return;
 	}
-	strncpy(access_token, str_proc.c_str(), sizeof(access_token) - 1);
 
 	if (!isPOST)
 	{
@@ -3121,27 +3114,27 @@ void OAuth2_linking(bool isPOST)
 		cout << strformat(header.c_str(), title.c_str());
 
 		char access_token_dec[1024] = { 0 };
-		strncpy(access_token_dec, access_token, sizeof(access_token_dec) - 1);
+		strncpy(access_token_dec, access_token.c_str(), sizeof(access_token_dec) - 1);
 		DeCodeStr(access_token_dec);
 		std::string m_OAuth_name;
 		std::string m_OAuth_avatar;
-		PullOAuthUserInfo(access_token_dec, openid, m_OAuth_name, m_OAuth_avatar);
+		PullOAuthUserInfo(access_token_dec, (char *)str_openid.c_str(), m_OAuth_name, m_OAuth_avatar);
 
 		if (strlen(stid) == 0 || strcmp(stid, "NONE") == 0)
 		{
-			cout << strformat(OAUTH2_HTML.c_str(), APP_NAME, u8"微信用户绑定", openid, access_token,
+			cout << strformat(OAUTH2_HTML.c_str(), APP_NAME, u8"微信用户绑定", str_openid.c_str(), access_token.c_str(),
 								(!m_OAuth_name.empty() && !m_OAuth_avatar.empty()) ? strformat(LOGGED_USER_HTML, m_OAuth_avatar.c_str(), m_OAuth_name.c_str()).c_str() : "",
 								 "", pass);
 		}
 		else if(strlen(pass) == 0)
 		{
-			cout << strformat(OAUTH2_HTML.c_str(), APP_NAME, u8"微信用户绑定", openid, access_token,
+			cout << strformat(OAUTH2_HTML.c_str(), APP_NAME, u8"微信用户绑定", str_openid.c_str(), access_token.c_str(),
 								(!m_OAuth_name.empty() && !m_OAuth_avatar.empty()) ? strformat(LOGGED_USER_HTML, m_OAuth_avatar.c_str(), m_OAuth_name.c_str()).c_str() : "",
 								stid, "");
 		}
 		else
 		{
-			cout << strformat(OAUTH2_HTML.c_str(), APP_NAME, u8"微信用户绑定", openid, access_token,
+			cout << strformat(OAUTH2_HTML.c_str(), APP_NAME, u8"微信用户绑定", str_openid.c_str(), access_token.c_str(),
 								(!m_OAuth_name.empty() && !m_OAuth_avatar.empty()) ? strformat(LOGGED_USER_HTML, m_OAuth_avatar.c_str(), m_OAuth_name.c_str()).c_str() : "",
 								stid, pass);
 		}
@@ -3178,7 +3171,7 @@ void OAuth2_linking(bool isPOST)
 			Error(u8"<p>无法获取密码信息</p>");
 			return;
 		}
-		char m_password[4096] = { 0 };
+		char m_password[MAX_PATH] = { 0 };
 		strncpy(m_password, str_password.c_str(), sizeof(m_password) - 1);
 
 		// 获取验证码
@@ -3191,9 +3184,55 @@ void OAuth2_linking(bool isPOST)
 		char m_captcha[128] = { 0 };
 		strncpy(m_captcha, str_captcha.c_str(), sizeof(m_captcha) - 1);
 
+		// 取得了学号密码验证码，下面先检查该账号是否已绑定微信帐号
+		MYSQL_STMT *idcheck_stmt = mysql_stmt_init(&db);
+		if (idcheck_stmt == NULL)
+		{
+			Error(u8"<b>很抱歉，微信绑定失败</b><p>数据库错误，请稍后再试</p>");
+			return;
+		}
+		MYSQL_BIND idcheck_bind[1];
+		MYSQL_BIND idcheck_query_ret[1];
+		my_bool idcheck_is_null[1];
+		memset(idcheck_query_ret, 0, sizeof(idcheck_query_ret));
+		memset(idcheck_is_null, 0, sizeof(idcheck_is_null));
+		std::string idcheck_query("SELECT `openid` FROM `userinfo` WHERE `id`=?");
+		char *idcheck_openid = (char *)malloc(MAX_PATH);
+		memset(idcheck_openid, 0, MAX_PATH);
+		idcheck_bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+		idcheck_bind[0].buffer = (void *)m_xuehao;
+		idcheck_bind[0].buffer_length = strlen(m_xuehao);
+		idcheck_query_ret[0].buffer_type = MYSQL_TYPE_VAR_STRING;
+		idcheck_query_ret[0].buffer = (void *)idcheck_openid;
+		if (mysql_stmt_prepare(idcheck_stmt, idcheck_query.c_str(), idcheck_query.length()) != 0 ||
+			mysql_stmt_bind_param(idcheck_stmt, idcheck_bind) != 0 ||
+			mysql_stmt_bind_result(idcheck_stmt, idcheck_query_ret) != 0 ||
+			mysql_stmt_store_result(idcheck_stmt) != 0 ||
+			mysql_stmt_execute(idcheck_stmt) != 0
+			)
+		{
+			free(idcheck_openid);
+			char Err_Msg[1024] = u8"<b>很抱歉，微信绑定失败</b><p>数据库错误 (";
+			strcat(Err_Msg, mysql_stmt_error(idcheck_stmt));
+			strcat(Err_Msg, u8")</p><p>请稍后再试</p>");
+			Error(Err_Msg);
+			mysql_stmt_close(idcheck_stmt);
+			return;
+		}
+		mysql_stmt_fetch(idcheck_stmt);
+		if (!idcheck_is_null[0] || strlen(idcheck_openid) != 0) {
+			free(idcheck_openid);
+			char Err_Msg[1024] = u8"<b>学号已有绑定的微信帐号</b><p>如需更换，请先解除原有绑定</p>";
+			Error(Err_Msg);
+			mysql_stmt_close(idcheck_stmt);
+			return;
+		}
+		free(idcheck_openid);
+		mysql_stmt_close(idcheck_stmt);
+
+		// 如果学号没有绑定过微信，那么可以放行绑定，继续操作，登录学生
 		if (!student_login(m_xuehao, m_password, m_captcha))
 		{
-			delete[]openid;
 			return;
 		}
 
@@ -3205,15 +3244,13 @@ void OAuth2_linking(bool isPOST)
 
 		if (stmt == NULL)
 		{
-			char Err_Msg[1024] = u8"<b>很抱歉，微信绑定失败</b><p>数据库错误，请稍后再试</p>";
-			Error(Err_Msg);
-			delete[]openid;
+			Error(u8"<b>很抱歉，微信绑定失败</b><p>数据库错误，请稍后再试</p>");
 			return;
 		}
 
 		bind[0].buffer_type = MYSQL_TYPE_VAR_STRING;
-		bind[0].buffer = (void *)openid;
-		bind[0].buffer_length = strlen(openid);
+		bind[0].buffer = (void *)str_openid.c_str();
+		bind[0].buffer_length = str_openid.length();
 
 		bind[1].buffer_type = MYSQL_TYPE_VAR_STRING;
 		bind[1].buffer = (void *)m_xuehao;
@@ -3228,22 +3265,24 @@ void OAuth2_linking(bool isPOST)
 			strcat(Err_Msg, mysql_stmt_error(stmt));
 			strcat(Err_Msg, u8")</p><p>请稍后再试</p>");
 			Error(Err_Msg);
-			delete[]openid;
 			mysql_stmt_close(stmt);
 			return;
 		}
 		mysql_stmt_close(stmt);
 
-		DeCodeStr(access_token);
-		WriteOAuthUserInfo(access_token, openid, m_xuehao);
+		char *mem_access_token = (char *)malloc(MAX_PATH);
+		memset(mem_access_token, 0, MAX_PATH);
+		strncpy(mem_access_token, access_token.c_str(), MAX_PATH - 1);
+		DeCodeStr(mem_access_token);
+		WriteOAuthUserInfo(mem_access_token, (char *)str_openid.c_str(), m_xuehao);
 
 		cout << "Status: 302 Found\r\n";
 		output_token_header(m_xuehao, m_password);
 		cout << "Location: " << getAppURL().c_str() << "/main.fcgi\r\n";
 		cout << GLOBAL_HEADER;
+
+		free(mem_access_token);
 	}
-	
-	delete[]openid;
 	return;
 }
 

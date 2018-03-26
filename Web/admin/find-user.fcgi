@@ -19,7 +19,7 @@
 			  <label for="sitename">请输入学生帐号：</label>
 			</div>
 			<div class="field">
-				<input type="text" class="input" id="musr" name="STUDENT_ID" size="16" placeholder="请输入学生帐号" data-validate="required:请输入学生帐号" value="%s" autofocus /> 
+				<input type="text" class="input" id="musr" name="STUDENT_ID" size="16" placeholder="请输入学生帐号" data-validate="required:请输入学生帐号" value='%s' autofocus /> 
 			</div>
 		  </div>
 		  <div class="form-group">
@@ -70,7 +70,7 @@
 				  <label for="sitename">请输入学生姓名：</label>
 				</div>
 				<div class="field">
-					<input type="text" class="input" id="musr" name="STUDENT_NAME" size="16" placeholder="请输入学生姓名" data-validate="required:请输入学生姓名" value="%s" autofocus /> 
+					<input type="text" class="input" id="musr" name="STUDENT_NAME" size="16" placeholder="请输入学生姓名" data-validate="required:请输入学生姓名" value='%s' autofocus /> 
 				</div>
 			  </div>
 			  <div class="form-group">

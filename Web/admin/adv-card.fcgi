@@ -19,7 +19,7 @@
 			  <label>广告一：图片URL</label>
 			</div>
 			<div class="field">
-			  <input type="text" class="input" name="CARD_AD_BANNER_1_IMG" value="%s" />
+			  <input type="text" class="input" name="CARD_AD_BANNER_1_IMG" value='%s' />
 			  <div class="tips"></div>
 			</div>
 		  </div>
@@ -28,7 +28,7 @@
 			  <label>广告一：链接URL</label>
 			</div>
 			<div class="field">
-			  <input type="text" class="input" name="CARD_AD_BANNER_1_URL" value="%s" />
+			  <input type="text" class="input" name="CARD_AD_BANNER_1_URL" value='%s' />
 			  <div class="tips"></div>
 			</div>
 		  </div>
@@ -37,7 +37,7 @@
 			  <label>广告二：图片URL</label>
 			</div>
 			<div class="field">
-			  <input type="text" class="input" name="CARD_AD_BANNER_2_IMG" value="%s" />
+			  <input type="text" class="input" name="CARD_AD_BANNER_2_IMG" value='%s' />
 			  <div class="tips"></div>
 			</div>
 		  </div>
@@ -46,7 +46,7 @@
 			  <label>广告二：链接URL</label>
 			</div>
 			<div class="field">
-			  <input type="text" class="input" name="CARD_AD_BANNER_2_URL" value="%s" />
+			  <input type="text" class="input" name="CARD_AD_BANNER_2_URL" value='%s' />
 			  <div class="tips"></div>
 			</div>
 		  </div>

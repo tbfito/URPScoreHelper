@@ -20,7 +20,7 @@
 	  <div class="leftnav-title"><strong><i class="fa fa-list"></i>菜单列表</strong></div>
 	  <h2><i class="fa fa-user"></i>设置</h2>
 	  <ul style="display:block">
-		<li><a href="settings.fcgi" target="right"><i class="fa fa-caret-right"></i>站点设置</a></li>
+		<li><a href="settings.fcgi" target="right"><i class="fa fa-caret-right on"></i>站点设置</a></li>
 		<li><a href="homepage-notice.fcgi" target="right"><i class="fa fa-caret-right"></i>首页公告</a></li>
 		<li><a href="set-discussion.fcgi" target="right"><i class="fa fa-caret-right"></i>交流讨论</a></li>
 		<li><a href="adv-card.fcgi" target="right"><i class="fa fa-caret-right"></i>广告轮播</a></li>
