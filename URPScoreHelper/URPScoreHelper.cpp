@@ -3206,9 +3206,9 @@ void OAuth2_linking(bool isPOST)
 		idcheck_query_ret[0].buffer = (void *)idcheck_openid;
 		if (mysql_stmt_prepare(idcheck_stmt, idcheck_query.c_str(), idcheck_query.length()) != 0 ||
 			mysql_stmt_bind_param(idcheck_stmt, idcheck_bind) != 0 ||
-			mysql_stmt_bind_result(idcheck_stmt, idcheck_query_ret) != 0 ||
-			mysql_stmt_store_result(idcheck_stmt) != 0 ||
-			mysql_stmt_execute(idcheck_stmt) != 0
+			mysql_stmt_bind_result(idcheck_stmt, idcheck_query_ret) != 0 ||	
+			mysql_stmt_execute(idcheck_stmt) != 0 ||
+			mysql_stmt_store_result(idcheck_stmt) != 0
 			)
 		{
 			free(idcheck_openid);
