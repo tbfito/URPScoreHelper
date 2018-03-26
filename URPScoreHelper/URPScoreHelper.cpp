@@ -2576,7 +2576,7 @@ void parse_QuickQuery_Intro()
 
 	if (!CGI_HTTP_X_IS_AJAX_REQUEST)
 	{
-		std::string title(u8"免密成绩查询 - ");
+		std::string title(u8"学号快速查询 - ");
 		title += APP_NAME;
 		cout << strformat(header.c_str(), title.c_str());
 	}
@@ -2961,7 +2961,7 @@ void parse_QuickQuery_Result()
 		{
 			if (!CGI_HTTP_X_IS_AJAX_REQUEST)
 			{
-				std::string title(u8"多人查询 - 免密成绩查询 - ");
+				std::string title(u8"多人查询 - 学号快速查询 - ");
 				title += APP_NAME;
 				cout << strformat(header.c_str(), title.c_str());
 			}
@@ -2976,7 +2976,7 @@ void parse_QuickQuery_Result()
 			if (!CGI_HTTP_X_IS_AJAX_REQUEST)
 			{
 				std::string title(m_xxmz_u8);
-				title += u8" - 免密成绩查询 - ";
+				title += u8" - 学号快速查询 - ";
 				title += APP_NAME;
 				cout << strformat(header.c_str(), title.c_str());
 			}
@@ -3204,6 +3204,7 @@ void OAuth2_linking(bool isPOST)
 		idcheck_bind[0].buffer_length = strlen(m_xuehao);
 		idcheck_query_ret[0].buffer_type = MYSQL_TYPE_VAR_STRING;
 		idcheck_query_ret[0].buffer = (void *)idcheck_openid;
+		idcheck_query_ret[0].is_null = &idcheck_is_null[0];
 		if (mysql_stmt_prepare(idcheck_stmt, idcheck_query.c_str(), idcheck_query.length()) != 0 ||
 			mysql_stmt_bind_param(idcheck_stmt, idcheck_bind) != 0 ||
 			mysql_stmt_bind_result(idcheck_stmt, idcheck_query_ret) != 0 ||	
@@ -3221,9 +3222,8 @@ void OAuth2_linking(bool isPOST)
 		}
 		mysql_stmt_fetch(idcheck_stmt);
 		if (!idcheck_is_null[0] || strlen(idcheck_openid) != 0) {
+			Error(u8"<b>学号已有绑定的微信帐号</b><p>如需更换，请先解除原有绑定</p>");
 			free(idcheck_openid);
-			char Err_Msg[1024] = u8"<b>学号已有绑定的微信帐号</b><p>如需更换，请先解除原有绑定</p>";
-			Error(Err_Msg);
 			mysql_stmt_close(idcheck_stmt);
 			return;
 		}
