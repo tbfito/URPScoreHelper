@@ -29,11 +29,12 @@ def test_speed(input_url):
     return '%.2f' % http_total_time
 
 def server_list():
+    # test_speed() 可获取服务器响应时间, -1 为超时宕机。 -2为校园网线路(需要手工添加)
     list = [\
-    ["open", "扬大 (公网)", "YZU Public", "https://urpsh.iedon.com/yzu/OAuth2.fcgi", test_speed("https://urpsh.iedon.com/yzu/captcha.fcgi")],\
-    ["open", "扬大 (内测)", "YZU Beta, Internal", "http://urpsh-internal.iedon.com/yzu/", "校园网"],\
-    ["open", "广陵 (公网)", "GLC Public", "https://urpsh.iedon.com/glxy/OAuth2.fcgi", test_speed("https://urpsh.iedon.com/glxy/captcha.fcgi")],\
-    ["open", "广陵 (内测)", "GLC Beta, Internal", "http://urpsh-internal.iedon.com/glxy/", "校园网"]\
+    ["open", "扬大教务", "YZU Public", "https://urpsh.iedon.com/yzu/OAuth2.fcgi", test_speed("https://urpsh.iedon.com/yzu/captcha.fcgi")],\
+    ["close", "扬大内测", "YZU Beta, Internal", "http://urpsh-intranet.iedon.com/yzu/", "-2"],\
+    ["open", "广陵教务", "GLC Public", "https://urpsh.iedon.com/glxy/OAuth2.fcgi", test_speed("https://urpsh.iedon.com/glxy/captcha.fcgi")],\
+    ["open", "广陵内测", "GLC Beta, Internal", "http://urpsh-intranet.iedon.com/glxy/", "-2"]\
     ]
     return list
 	

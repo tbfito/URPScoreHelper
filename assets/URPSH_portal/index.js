@@ -1,5 +1,6 @@
 var servers = 0;
 var ready = false;
+var _3rd_party = GetQS("3rd_party");
 function get_server_list() {
 	$.ajax({
 		type: "GET",
@@ -50,13 +51,14 @@ function GetQS(name) {
     }
     return items;
 }
-
+if(_3rd_party != null) {
+	document.getElementById("title").innerText = _3rd_party;
+}
 function enter_jw() {
 	if(!ready) {
 		$.alert({title: '提示 Alert',text: '服务器列表还未加载<br />Server list is not ready',onOK: function () {return;}});
 		return;
 	}
-    var _3rd_party = GetQS("3rd_party");
 	for (var i = 0; i <= servers; i++) {
 		if(document.getElementById("server_x" + i).checked) {
 			if(document.getElementById("server_sel" + i).getAttribute("data-status") != "open") {
@@ -92,16 +94,16 @@ function show_speed() {
 		if (speed == -1) {
 			document.getElementById("server_sel" + i).innerHTML = '<i class="weui-icon-cancel"></i>' + document.getElementById("server_sel" + i).innerHTML;
 			document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed down">超时</span>';
-		} else if (speed == "校园网") {
+		} else if (speed == -2) {
 			document.getElementById("server_sel" + i).innerHTML = '<i class="weui-icon-download" style="transform: rotate(-90deg)"></i>' + document.getElementById("server_sel" + i).innerHTML;
 			document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed intranet">校园网</span>';
 		} else {
 			if (speed >= 1.2) {
 				document.getElementById("server_sel" + i).innerHTML = '<i class="weui-icon-download" style="color:#c0bc04;transform: rotate(-90deg)"></i>' + document.getElementById("server_sel" + i).innerHTML;
-				document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed slow">' + speed + "s</span>";
+				document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed slow">' + speed + "s 忙</span>";
 			} else {
 				document.getElementById("server_sel" + i).innerHTML = '<i class="weui-icon-download" style="transform: rotate(-90deg)"></i>' + document.getElementById("server_sel" + i).innerHTML;
-				document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed fast">' + speed + "s</span>";
+				document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed fast">' + speed + "s 优</span>";
 			}
 		}
 	}
