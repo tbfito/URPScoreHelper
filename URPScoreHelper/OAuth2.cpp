@@ -53,7 +53,7 @@ void OAuth2_process()
 	}
 
 	cout << "Status: 302 Found\r\n";
-	cout << "Location: " << m_lpszURL.c_str() << "/\r\n";
+	cout << "Location: " << m_lpszURL.c_str() << "\r\n";
 	cout << GLOBAL_HEADER;
 }
 
