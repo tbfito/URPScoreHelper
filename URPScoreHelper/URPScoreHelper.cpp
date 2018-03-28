@@ -2670,7 +2670,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
-				Error(u8"<p>投递免密查询请求失败</p><p>请确认教务系统是可用的</p>");
+				Error(u8"<p>投递快速查询请求失败</p><p>请稍后再试</p>");
 				return;
 			}
 
@@ -2706,7 +2706,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
-				Error(u8"<p>通过ID免密查询失败</p><p>发生了未知错误</p>");
+				Error(u8"<p>通过学号快速查询失败</p><p>发生了未知错误</p>");
 				return;
 			}
 			m_lpvBuffer = req2.GetResult();
@@ -2715,7 +2715,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
-				Error(u8"<p>教务系统出错了，免密查询失败，请稍后重试</p>");
+				Error(u8"<p>教务系统出错了，快速查询失败，请稍后再试</p>");
 				return;
 			}
 			pStr1 = NULL;
@@ -2726,7 +2726,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
-				Error(u8"<p>免密查询返回参数错误 (1)</p>");
+				Error(u8"<p>快速查询返回参数错误 (1)</p>");
 				return;
 			}
 			pStr2 = strstr(pStr1 + 46, "\";");
@@ -2734,7 +2734,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
-				Error(u8"<p>免密查询返回参数错误 (2)</p>");
+				Error(u8"<p>快速查询返回参数错误 (2)</p>");
 				return;
 			}
 			char m_txt_req_path[512] = { 0 };

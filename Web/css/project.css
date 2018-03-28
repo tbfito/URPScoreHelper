@@ -12,18 +12,20 @@
 .i_page-padding{height:40px;width:100px}
 .demos-header{padding-top:35px}
 .content .page{margin:15px auto 15px auto;text-align:center;width:95%}
-.demos-title{text-align:center;font-size:34px;color:#3cc51f;font-weight:400;margin:0 15%}
+.demos-title{text-align:center;font-size:34px;color:#535353;font-weight:400;margin:0 15%}
 .signbox{padding-right:15px}
 .evalbox{margin-right:15px}
 .col-50{width: 48% !important;float:left;margin:0 1% 10px 1% !important}
-.quickquery{background-color:#006fe2;margin-top:10px !important}
-.quickquery:active{background-color:#0061c5}
+.quickquery{background-color:#94a1ac;margin-top:10px !important}
+.quickquery:active{background-color:#76818b}
 .weui-label{width:95px !important}
 .weui-cells__title.status{text-align:center}
 .weui-cells:before{border-top:0}
 .weui-cells:after{border-bottom:0}
 .weui-cells.weui-cells_form.bigbox{margin-top:0;margin-left:15px;border:1px solid rgba(81, 203, 238, 1);border-radius:3px}
 .weui-footer{margin-top:60px}
+.weui-vcode-btn,.weui-agree__checkbox:checked:before{color:#82bdcc !important}
+.weui-vcode-btn:active{color:#73a8b6 !important}
 #login_captcha{margin:10px;border-radius:2px}
 .info_tag{padding-top:5px;font-size:12px}
 .info_tag a{font-size:12px !important}
@@ -62,7 +64,8 @@
 .logged-user{margin:0 auto 10px auto;text-align:center}
 .logged-user .avatar{border-radius:50%;border:1px solid #e6e6e6}
 .logged-user p{color:#3d4145;font-size:16px}
-#i_submit{cursor:pointer}
+#i_submit{cursor:pointer;background-color:#5bc0de}
+.oauth{background-color:#73c272}
 #i_total p{padding:10px 0 0 20px}
 #i_total center{margin:0 auto;font-size:3em;color:#0092bf}
 #list_page{background-color:#FFF}
