@@ -25,8 +25,8 @@ def http():
         userIp = request.remote_addr
     global access_counter
     access_counter = access_counter + 1
-    print('[' + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '] /' + userIp + ' 检查服务器列表... #' + str(access_counter))
-    resp = Response(server_list_response, status=200, mimetype='text/json')
+    print('[' + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '] /' + userIp + ' 获取服务器列表... #' + str(access_counter))
+    resp = Response(server_list_response, status=200, mimetype='application/json')
     resp.headers['Access-Control-Allow-Origin'] = 'https://urpsh.iedon.com'
     resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     resp.headers['Pragma'] = 'no-cache'

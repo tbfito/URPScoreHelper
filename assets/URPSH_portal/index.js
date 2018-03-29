@@ -88,7 +88,7 @@ function show_speed() {
 		var speed = document.getElementById("server_sel" + i).getAttribute("data-speed");
 		if (document.getElementById("server_sel" + i).getAttribute("data-status") != "open") {
 			document.getElementById("server_sel" + i).innerHTML = '<i class="weui-icon-cancel"></i>' + document.getElementById("server_sel" + i).innerHTML;
-			document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed down">维护</span>';
+			document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed down">停机维护</span>';
 			continue;
 		}
 		if (speed == -1) {
@@ -98,9 +98,9 @@ function show_speed() {
 			document.getElementById("server_sel" + i).innerHTML = '<i class="weui-icon-download" style="transform: rotate(-90deg)"></i>' + document.getElementById("server_sel" + i).innerHTML;
 			document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed intranet">校园网</span>';
 		} else {
-			if (speed >= 1.2) {
+			if (speed >= 1.5) {
 				document.getElementById("server_sel" + i).innerHTML = '<i class="weui-icon-download" style="color:#c0bc04;transform: rotate(-90deg)"></i>' + document.getElementById("server_sel" + i).innerHTML;
-				document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed slow">' + speed + "s 忙</span>";
+				document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed slow">' + speed + "s 良</span>";
 			} else {
 				document.getElementById("server_sel" + i).innerHTML = '<i class="weui-icon-download" style="transform: rotate(-90deg)"></i>' + document.getElementById("server_sel" + i).innerHTML;
 				document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed fast">' + speed + "s 优</span>";
