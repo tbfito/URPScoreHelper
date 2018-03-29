@@ -1,12 +1,37 @@
 #!/usr/bin/python
 # coding: UTF-8
-import pycurl,sys,os,time,json
+
+from flask import Flask, request, Response, render_template
+from datetime import datetime
+import pycurl, sys, os, time, json, _thread, logging
+
+server_list_response = ''
+access_counter = 0
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+app = Flask(__name__)
  
 class idctest:
     def __init__(self):
         self.contents = ''
     def body_callback(self,buf):
         self.contents = ''
+
+@app.route('/urpsh', methods=['GET', 'POST'])
+def http():
+    try:
+        userIp = request.headers['X-Forwarded-For']
+    except:
+        userIp = request.remote_addr
+    global access_counter
+    access_counter = access_counter + 1
+    print('[' + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '] /' + userIp + ' 检查服务器列表... #' + str(access_counter))
+    resp = Response(server_list_response, status=200, mimetype='text/json')
+    resp.headers['Access-Control-Allow-Origin'] = 'https://urpsh.iedon.com'
+    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    resp.headers['Pragma'] = 'no-cache'
+    resp.headers['Expires'] = 'Thu, 16 Oct 1997 00:00:00 GMT'
+    return resp
 
 def test_speed(input_url):
     t = idctest()
@@ -28,49 +53,50 @@ def test_speed(input_url):
 
     return '%.2f' % http_total_time
 
-def server_list():
+def get_server_list():
     # test_speed() 可获取服务器响应时间, -1 为超时宕机。 -2为校园网线路(需要手工添加)
     list = [\
     ["open", "扬大教务", "YZU Public", "https://urpsh.iedon.com/yzu/OAuth2.fcgi", test_speed("https://urpsh.iedon.com/yzu/captcha.fcgi")],\
-    ["close", "扬大内测", "YZU Beta, Internal", "http://urpsh-intranet.iedon.com/yzu/", "-2"],\
-    ["open", "广陵教务", "GLC Public", "https://urpsh.iedon.com/glxy/OAuth2.fcgi", test_speed("https://urpsh.iedon.com/glxy/captcha.fcgi")],\
-    ["open", "广陵内测", "GLC Beta, Internal", "http://urpsh-intranet.iedon.com/glxy/", "-2"]\
+    ["open", "扬大内测", "YZU Beta, Internal", "http://urpsh-intranet.iedon.com/yzu/", "-2"],\
+    ["close", "广陵教务", "GLC Public", "https://urpsh.iedon.com/glxy/OAuth2.fcgi", test_speed("https://urpsh.iedon.com/glxy/captcha.fcgi")],\
+    ["close", "广陵内测", "GLC Beta, Internal", "http://urpsh-intranet.iedon.com/glxy/", "-2"]\
     ]
     return list
 	
-def run():
-    list = server_list()
-    length = len(list)
-    ret = '{"servers": ['
-    for index,value in enumerate(list):
-        ret += '{'
-        for i,data in enumerate(value):
-            if (i == 0):
-                ret = ret + '"status": "' + data + '", '
-            if (i == 1):
-                ret = ret + '"cn_name": "' + data + '", '
-            if (i == 2):
-                ret = ret + '"en_name": "' + data + '", '
-            if (i == 3):
-                ret = ret + '"url": "' + data + '", '
-            if (i == 4):
-                ret = ret + '"speed": "' + data + '"'
-        if (index == length - 1):
-            ret += '}'
-        else:
-            ret += '},'
-    ret += ']}'
-    f = open('server.json', 'wb+')
-    f.write(ret.encode("UTF-8"))
-    f.close()
-
-if __name__ == '__main__':
-
+def update_response():
     while True:
         try:
-            run()
+            list = get_server_list()
+            length = len(list)
+            ret = '{"servers": ['
+            for index,value in enumerate(list):
+                ret += '{'
+                for i,data in enumerate(value):
+                    if (i == 0):
+                        ret = ret + '"status": "' + data + '", '
+                    if (i == 1):
+                        ret = ret + '"cn_name": "' + data + '", '
+                    if (i == 2):
+                        ret = ret + '"en_name": "' + data + '", '
+                    if (i == 3):
+                        ret = ret + '"url": "' + data + '", '
+                    if (i == 4):
+                        ret = ret + '"speed": "' + data + '"'
+                if (index == length - 1):
+                    ret += '}'
+                else:
+                    ret += '},'
+            ret += ']}'
+            global server_list_response
+            server_list_response = ret.encode("UTF-8")
         except Exception as e:
             print (e)
             pass
-
         time.sleep(60)
+
+if __name__ == '__main__':
+    try:
+        _thread.start_new_thread(update_response, ())
+    except:
+        print ("[ERROR] Unable to start thread.")
+    app.run(port = 8124, host = '0.0.0.0', debug = False)

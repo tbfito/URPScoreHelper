@@ -4,7 +4,7 @@ var _3rd_party = GetQS("3rd_party");
 function get_server_list() {
 	$.ajax({
 		type: "GET",
-		url: "https://api.iedon.com/urpsh/server.php",
+		url: "https://api.iedon.com/urpsh",
 		dataType: "json",
 		cache: false, 
 		success: function(data) {
