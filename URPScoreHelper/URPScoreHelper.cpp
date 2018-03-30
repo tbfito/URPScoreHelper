@@ -3184,10 +3184,17 @@ void OAuth2_linking(bool isPOST)
 		char m_captcha[128] = { 0 };
 		strncpy(m_captcha, str_captcha.c_str(), sizeof(m_captcha) - 1);
 
-		// 取得了学号密码验证码，下面先检查该账号是否已绑定微信帐号
+		// 登录学生
+		if (!student_login(m_xuehao, m_password, m_captcha))
+		{
+			return;
+		}
+
+		// 取得了学号密码验证码，检查该账号是否已绑定微信帐号
 		MYSQL_STMT *idcheck_stmt = mysql_stmt_init(&db);
 		if (idcheck_stmt == NULL)
 		{
+			student_logout();
 			Error(u8"<b>很抱歉，微信绑定失败</b><p>数据库错误，请稍后再试</p>");
 			return;
 		}
@@ -3212,6 +3219,7 @@ void OAuth2_linking(bool isPOST)
 			mysql_stmt_store_result(idcheck_stmt) != 0
 			)
 		{
+			student_logout();
 			free(idcheck_openid);
 			char Err_Msg[1024] = u8"<b>很抱歉，微信绑定失败</b><p>数据库错误 (";
 			strcat(Err_Msg, mysql_stmt_error(idcheck_stmt));
@@ -3222,6 +3230,7 @@ void OAuth2_linking(bool isPOST)
 		}
 		mysql_stmt_fetch(idcheck_stmt);
 		if (!idcheck_is_null[0] || strlen(idcheck_openid) != 0) {
+			student_logout();
 			Error(u8"<b>学号已有绑定的微信帐号</b><p>如需更换，请先解除原有绑定</p>");
 			free(idcheck_openid);
 			mysql_stmt_close(idcheck_stmt);
@@ -3229,12 +3238,6 @@ void OAuth2_linking(bool isPOST)
 		}
 		free(idcheck_openid);
 		mysql_stmt_close(idcheck_stmt);
-
-		// 如果学号没有绑定过微信，那么可以放行绑定，继续操作，登录学生
-		if (!student_login(m_xuehao, m_password, m_captcha))
-		{
-			return;
-		}
 
 		// 这里表示登录成功，应该写入数据库了。
 		MYSQL_STMT *stmt = mysql_stmt_init(&db);
@@ -3244,6 +3247,7 @@ void OAuth2_linking(bool isPOST)
 
 		if (stmt == NULL)
 		{
+			student_logout();
 			Error(u8"<b>很抱歉，微信绑定失败</b><p>数据库错误，请稍后再试</p>");
 			return;
 		}
@@ -3261,6 +3265,7 @@ void OAuth2_linking(bool isPOST)
 			mysql_stmt_execute(stmt) != 0
 			)
 		{
+			student_logout();
 			char Err_Msg[1024] = u8"<b>很抱歉，微信绑定失败</b><p>数据库错误 (";
 			strcat(Err_Msg, mysql_stmt_error(stmt));
 			strcat(Err_Msg, u8")</p><p>请稍后再试</p>");
