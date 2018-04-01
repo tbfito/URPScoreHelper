@@ -98,12 +98,17 @@ function show_speed() {
 			document.getElementById("server_sel" + i).innerHTML = '<i class="weui-icon-download" style="transform: rotate(-90deg)"></i>' + document.getElementById("server_sel" + i).innerHTML;
 			document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed intranet">校园网</span>';
 		} else {
-			if (speed >= 1.5) {
+			if (speed >= 1.5 && speed < 3) {
 				document.getElementById("server_sel" + i).innerHTML = '<i class="weui-icon-download" style="color:#c0bc04;transform: rotate(-90deg)"></i>' + document.getElementById("server_sel" + i).innerHTML;
-				document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed slow">' + speed + "s 良</span>";
+				document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed slow">' + speed + "s 一般</span>";
+				return;
+			}
+			if (speed >= 3.0) {
+				document.getElementById("server_sel" + i).innerHTML = '<i class="weui-icon-download" style="color:#cc317c;transform: rotate(-90deg)"></i>' + document.getElementById("server_sel" + i).innerHTML;
+				document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed down">' + speed + "s 拥堵</span>";
 			} else {
 				document.getElementById("server_sel" + i).innerHTML = '<i class="weui-icon-download" style="transform: rotate(-90deg)"></i>' + document.getElementById("server_sel" + i).innerHTML;
-				document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed fast">' + speed + "s 优</span>";
+				document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed fast">' + speed + "s 畅通</span>";
 			}
 		}
 	}
