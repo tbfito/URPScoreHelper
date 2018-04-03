@@ -336,7 +336,7 @@ void parse_admin_settings()
 		<< strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(),
 			APP_NAME, APP_NAME, SECONDARY_TITLE, APP_DESCRIPTION, APP_KEYWORDS, SERVER_URL,
 			USER_AGENT, CURL_CONN_TIMEOUT, CURL_USE_PROXY ? 1 : 0, CURL_PROXY_URL, ENABLE_QUICK_QUERY ? 1 : 0,
-			FOOTER_TEXT, ANALYSIS_CODE).c_str();
+			ENABLE_TEACH_EVAL ? 1 : 0, FOOTER_TEXT, ANALYSIS_CODE).c_str();
 }
 
 // 保存站点信息 (POST /admin/settings.fcgi)
@@ -369,6 +369,7 @@ void save_admin_settings()
 	std::string m_ENABLE_QUICK_QUERY = _POST(post, "ENABLE_QUICK_QUERY");
 	std::string m_FOOTER_TEXT = _POST(post, "FOOTER_TEXT");
 	std::string m_ANALYSIS_CODE = _POST(post, "ANALYSIS_CODE");
+	std::string m_ENABLE_TEACH_EVAL = _POST(post, "ENABLE_TEACH_EVAL");
 
 	decode_post_data(m_APP_NAME);
 	decode_post_data(m_SECONDARY_TITLE);
@@ -382,6 +383,7 @@ void save_admin_settings()
 	decode_post_data(m_ENABLE_QUICK_QUERY);
 	decode_post_data(m_FOOTER_TEXT);
 	decode_post_data(m_ANALYSIS_CODE);
+	decode_post_data(m_ENABLE_TEACH_EVAL);
 
 	UpdateSettings("APP_NAME", m_APP_NAME.c_str());
 	UpdateSettings("SECONDARY_TITLE", m_SECONDARY_TITLE.c_str());
@@ -395,6 +397,7 @@ void save_admin_settings()
 	UpdateSettings("ENABLE_QUICK_QUERY", m_ENABLE_QUICK_QUERY.c_str());
 	UpdateSettings("FOOTER_TEXT", m_FOOTER_TEXT.c_str());
 	UpdateSettings("ANALYSIS_CODE", m_ANALYSIS_CODE.c_str());
+	UpdateSettings("ENABLE_TEACH_EVAL", m_ENABLE_TEACH_EVAL.c_str());
 
 	// 因为header(部分)内容一直缓存在内存中，所以需要单独对其进行更新。(footer 内容每请求都会在 LoadConfig() 当中更新)
 	header = strformat(ReadTextFileToMem(HEADER_TEMPLATE_LOCATION).c_str(), "%s", m_SECONDARY_TITLE.c_str(), m_APP_KEYWORDS.c_str(), m_APP_DESCRIPTION.c_str());

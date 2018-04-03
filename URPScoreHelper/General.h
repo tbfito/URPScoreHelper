@@ -64,6 +64,7 @@
 	extern char *CARD_AD_BANNER_1_URL;
 	extern char *CARD_AD_BANNER_2_URL;
 	extern bool ENABLE_QUICK_QUERY;
+	extern bool ENABLE_TEACH_EVAL;
 	extern char *ADMIN_USER_NAME;
 	extern char *ADMIN_PASSWORD;
 	extern char *SECONDARY_TITLE;

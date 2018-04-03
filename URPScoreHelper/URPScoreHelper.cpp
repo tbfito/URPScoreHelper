@@ -661,6 +661,10 @@ void LoadConfig()
 	GetSettings("ENABLE_OAUTH2", lpvBuffer);
 	ENABLE_OAUTH2 = (atoi(lpvBuffer) >= 1);
 
+	memset(lpvBuffer, 0, 10240);
+	GetSettings("ENABLE_TEACH_EVAL", lpvBuffer);
+	ENABLE_TEACH_EVAL = (atoi(lpvBuffer) >= 1);
+
 	free(lpvBuffer);
 
 	if (FOOTER_TEMPLATE_LOCATION != NULL) // 每次更新 footer 的缓存
@@ -1145,13 +1149,13 @@ void parse_index()
 		if (token_xh.empty() == false && token_mm.empty() == false)
 		{
 			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, u8"教务系统登录", hasNotice ? notice.c_str() : "", "",
-								token_xh.c_str(), token_mm.c_str(), ENABLE_OAUTH2 ? " col-50" : "", u8"登录",
+								token_xh.c_str(), token_mm.c_str(), (ENABLE_OAUTH2 || ENABLE_QUICK_QUERY) ? " col-50" : "", u8"登录",
 								ENABLE_OAUTH2 ? OAUTH2_LOGIN_HTML : "", ENABLE_QUICK_QUERY ? QUICKQUERY_HTML : "");
 		}
 		else
 		{
 			cout << strformat(m_lpszHomepage.c_str(), APP_NAME, u8"教务系统登录", hasNotice ? notice.c_str() : "", "",
-								"", "", ENABLE_OAUTH2 ? " col-50" : "", u8"登录",
+								"", "", (ENABLE_OAUTH2 || ENABLE_QUICK_QUERY) ? " col-50" : "", u8"登录",
 								ENABLE_OAUTH2 ? OAUTH2_LOGIN_HTML : "", ENABLE_QUICK_QUERY ? QUICKQUERY_HTML : "");
 		}
 	}
@@ -2999,7 +3003,7 @@ void OAuth2_linking(bool isPOST)
 		get_student_id(student_id);
 		if (strlen(student_id) == 0)
 		{
-			Error(u8"非法操作 (尚未登录)");
+			Error(u8"非法操作 (未登录)");
 			return;
 		}
 
@@ -3290,6 +3294,11 @@ void OAuth2_linking(bool isPOST)
 // 教学评估页面 (/TeachEval.fcgi)
 void parse_teaching_evaluation()
 {
+	if (!ENABLE_TEACH_EVAL) {
+		Error(u8"教学评估功能已关闭");
+		return;
+	}
+
 	bool m_need_update_cookie = false;
 	std::string m_photo(" "); // 有数据，需要获取照片
 	process_cookie(&m_need_update_cookie, m_photo);

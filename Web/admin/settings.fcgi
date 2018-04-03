@@ -106,6 +106,15 @@
 		  </div>
 		  <div class="form-group">
 			<div class="label">
+			  <label><b>是否启用一键教学评估功能：</b>(0-禁用, 1-启用)</label>
+			</div>
+			<div class="field">
+			  <input type="text" class="input" name="ENABLE_TEACH_EVAL" value="%d" />
+			  <div class="tips"></div>
+			</div>
+		  </div>
+		  <div class="form-group">
+			<div class="label">
 			  <label><b>页面尾部文字：</b>(版权说明或其他自定义文本，可以使用 &lt;p&gt; 内允许使用的 HTML 标签)</label>
 			</div>
 			<div class="field">

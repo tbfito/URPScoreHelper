@@ -36,7 +36,7 @@
 		  <img src="img/TeachEval.png" alt="">
 		</div>
 		<p class="weui-grid__label">
-		  一键评教
+		  教学评估
 		</p>
 	  </a>
 	  <a href="query.fcgi" class="weui-grid js_grid">
