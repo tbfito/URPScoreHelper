@@ -485,6 +485,7 @@ void LoadConfig()
 		AddSettings("FOOTER_TEXT", SOFTWARE_NAME);
 		AddSettings("ANALYSIS_CODE", "");
 		AddSettings("ENABLE_QUICK_QUERY", "0");
+		AddSettings("ENABLE_TEACH_EVAL", "0");
 		AddSettings("HOMEPAGE_NOTICE", "");
 		AddSettings("DISCUSSION_PAGE_CONTENT", "");
 		AddSettings("DISCUSSION_PAGE_CODE", "");
