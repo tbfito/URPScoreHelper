@@ -1,6 +1,8 @@
 var servers = 0;
 var ready = false;
 var _3rd_party = GetQS("3rd_party");
+document.getElementById("login").innerText = "刷新服务器 Refresh";
+document.getElementById("status_txt").innerText = '正在连接登录服务器...'; 
 function get_server_list() {
 	$.ajax({
 		type: "GET",
@@ -20,14 +22,21 @@ function get_server_list() {
 				clicked(0);
 				document.getElementById("status_txt").innerText = '已选：'; 
 				ready = true;
+				document.getElementById("login").innerText = "进入 Login";
 			}
 		},
 		beforeSend: function() {
+			document.getElementById("login").innerText = "刷新服务器 Refresh";
+			document.getElementById("status_txt").innerText = '正在连接登录服务器...'; 
+			$.toptip("正在刷新服务器列表...", 2000, 'success');
 			document.getElementById("server_list").innerHTML = '<center><img src="loading.gif" width="30%" height="30%" /></center>';
 		},
 		error: function() {
 			if(!ready) {
+				document.getElementById("status_txt").innerText = '登录服务器炸了 /(ㄒoㄒ)/~~'; 
+				document.getElementById("server_list").innerHTML = '<center><img src="error.jpg" width="50%" height="25%" /></center>';
 				$.alert({title: '提示 Alert',text: '服务器列表加载失败<br />Unable to load server list',onOK: function () {return;}});
+				document.getElementById("login").innerText = "刷新服务器 Refresh";
 			}
 		}
 	})
@@ -56,7 +65,8 @@ if(_3rd_party != null) {
 }
 function enter_jw() {
 	if(!ready) {
-		$.alert({title: '提示 Alert',text: '服务器列表还未加载<br />Server list is not ready',onOK: function () {return;}});
+		$.toptip("正在刷新服务器列表...", 2000, 'success');
+		get_server_list();
 		return;
 	}
 	for (var i = 0; i <= servers; i++) {
@@ -102,8 +112,7 @@ function show_speed() {
 				document.getElementById("server_sel" + i).innerHTML = '<i class="weui-icon-download" style="color:#c0bc04;transform: rotate(-90deg)"></i>' + document.getElementById("server_sel" + i).innerHTML;
 				document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed slow">' + speed + "s 一般</span>";
 				return;
-			}
-			if (speed >= 3.0) {
+			} else if (speed >= 3.0) {
 				document.getElementById("server_sel" + i).innerHTML = '<i class="weui-icon-download" style="color:#cc317c;transform: rotate(-90deg)"></i>' + document.getElementById("server_sel" + i).innerHTML;
 				document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed down">' + speed + "s 拥堵</span>";
 			} else {
