@@ -111,7 +111,6 @@ function show_speed() {
 			if (speed >= 1.5 && speed < 3) {
 				document.getElementById("server_sel" + i).innerHTML = '<i class="weui-icon-download" style="color:#c0bc04;transform: rotate(-90deg)"></i>' + document.getElementById("server_sel" + i).innerHTML;
 				document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed slow">' + speed + "s 一般</span>";
-				return;
 			} else if (speed >= 3.0) {
 				document.getElementById("server_sel" + i).innerHTML = '<i class="weui-icon-download" style="color:#cc317c;transform: rotate(-90deg)"></i>' + document.getElementById("server_sel" + i).innerHTML;
 				document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed down">' + speed + "s 拥堵</span>";
