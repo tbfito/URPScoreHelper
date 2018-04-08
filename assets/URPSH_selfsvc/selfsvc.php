@@ -1,6 +1,7 @@
 <?php
 
 date_default_timezone_set('PRC');
+
 define("PDODB_DRIVER", "mysql");
 define("PDODB_SERVER_IP", "172.17.32.28");
 define("PDODB_SERVER_PORT", "3306");
@@ -45,9 +46,10 @@ function get_current_sxm() {
 function do_find_pass() {
 	
 		$id = isset($_POST['xh']) ? $_POST['xh'] : "";
+		$xm = isset($_POST['xm']) ? $_POST['xm'] : "";
 		$sxm = isset($_POST['sxm']) ? $_POST['sxm'] : "";
 		
-		if($id == "" || $sxm == "") {
+		if($id == "" || $sxm == "" || $xm == "") {
 			$arr = array ('code'=>'400','reason'=>'找回失败：提交数据不全');
 			echo json_encode($arr);
 			write_log("[ERR] 提交数据不全。");
@@ -58,41 +60,47 @@ function do_find_pass() {
 		
 		$current_sxm = get_current_sxm();
 		if($current_sxm == "ERROR") {
-			$arr = array ('code'=>'500','reason'=>'找回失败：服务器错误');
+			$arr = array ('code'=>'500','reason'=>'服务器错误');
 			echo json_encode($arr);
-			write_log("提交学号: " . $id . ", [ERR] 服务器错误(SXM)");
+			write_log("提交姓名: " . $xm . ", 提交学号: " . $id . ", [ERR] 服务器错误(SXM)");
 			return;
 		}
 		
 		if($current_sxm != $sxm) {
-			$arr = array ('code'=>'400','reason'=>'找回失败：时效码错误');
+			$arr = array ('code'=>'400','reason'=>'时效码错误');
 			echo json_encode($arr);
-			write_log("提交学号: " . $id . ", [ERR] 时效码错误。");
+			write_log("提交姓名: " . $xm . ", 提交学号: " . $id . ", [ERR] 时效码错误。用户提交时效码为: " . $sxm . ", 此时正确值应为: " . $current_sxm);
 			return;
 		}
 		
-		$query_str = "SELECT password FROM " . ($yzu_or_glxy ? "yangda." : "guangling.") . "userinfo WHERE id=:id";
+		$query_str = "SELECT name, password FROM " . ($yzu_or_glxy ? "yangda." : "guangling.") . "userinfo WHERE id=:id";
 		$query = PDODB::getInstance()->prepare($query_str);
 		$query->bindValue(':id', $id, PDO::PARAM_STR);
 		$query->execute();
 		$result = $query->fetch(PDO::FETCH_ASSOC);
 		
-		if(!isset($result['password'])) {
-			$arr = array ('code'=>'500','reason'=>'找回失败：没有您的记录');
+		if(!isset($result['password']) || !isset($result['name'])) {
+			$arr = array ('code'=>'404','reason'=>'没有您的记录');
 			echo json_encode($arr);
-			write_log("提交学号: " . $id . ", [ERR] 找不到记录。");
+			write_log("提交姓名: " . $xm . ", 提交学号: " . $id . ", [ERR] 找不到记录。");
 		} else {
+			if($result['name'] != $xm) {
+				$arr = array ('code'=>'404','reason'=>'姓名不匹配');
+				echo json_encode($arr);
+				write_log("提交姓名: " . $xm . ", 提交学号: " . $id . ", [ERR] 姓名不匹配。用户提交姓名为: " . $xm . ", 此时正确值应为: " . $result['name']);
+				return;
+			}
 			$ret = array();
 			exec('"C:/iEdon Cluster/idn_gen_token_tools/gen_token.exe" ' . $id . ' ' . $result['password'], $ret, $status);
 			if(!isset($ret[0]) || $status != 0) {
-				$arr = array ('code'=>'500','reason'=>'找回失败：服务器错误');
+				$arr = array ('code'=>'500','reason'=>'服务器错误');
 				echo json_encode($arr);
-				write_log("[ERR] 服务器错误(SHELL, Status: " . $status . " )");
+				write_log("提交姓名: " . $xm . ", 提交学号: " . $id . ", [ERR] 服务器错误(SHELL, Status: " . $status . " )");
 				return;
 			}
 			$arr = array ('code'=>'200','reason'=>'OK','token'=>$ret[0],'school'=>($yzu_or_glxy ? "YZU" : "GLC"));
 			echo json_encode($arr);
-			write_log("提交学号: " . $id . ", [OK] 受理成功。");
+			write_log("提交姓名: " . $xm . ", 提交学号: " . $id . ", [OK] 受理成功。");
 		}
 }
 
@@ -100,15 +108,24 @@ function entry_point() {
 	
 	if( $_SERVER['REQUEST_METHOD'] == 'GET' ) {
 		
+		header('Content-Type: text/html; charset=utf-8');
 		render_page();
 		return;
 		
 	} elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		
+		header('Cache-Control: no-cache, no-store, must-revalidate');
+		header('Pragma: no-cache');
+		header('Content-Type: application/json; charset=utf-8');
+		
 		do_find_pass();
 		return;
 		
 	} else {
+		
+		header('Cache-Control: no-cache, no-store, must-revalidate');
+		header('Pragma: no-cache');
+		header('Content-Type: application/json; charset=utf-8');
 		
 		$arr = array ('code'=>'400','reason'=>'错误的请求方法');
 		echo json_encode($arr);
@@ -165,7 +182,7 @@ function render_page() {
 				<br />
 		</div>
 		<script type="text/javascript">
-			var HTML = '<div class="weui-cell"><div class="weui-cell__hd"><label class="weui-label">学号</label></div><div class="weui-cell__bd"><input class="weui-input"id="i_xh"name="xh"type="text"placeholder="输入学号"value=""></div></div><div class="weui-cell"><div class="weui-cell__hd"><label class="weui-label">点击拨打</label></div><div class="weui-cell__bd"><a href="tel:18052637607"class="weui-input">180-5263-7607</a></div></div><div class="weui-cell"><div class="weui-cell__hd"><label class="weui-label">时效码</label></div><div class="weui-cell__bd"><input class="weui-input"name="sxm"id="i_sxm"type="text"placeholder="输入时效码"></div></div><label for="weuiAgree"class="weui-agree"><input id="weuiAgree"type="checkbox"class="weui-agree__checkbox"checked="checked"><span class="weui-agree__text">&nbsp;同意服务条款</span></label>';
+			var HTML = '<div class="weui-cell"><div class="weui-cell__hd"><label class="weui-label">姓名</label></div><div class="weui-cell__bd"><input class="weui-input"id="i_xm"name="xm"type="text"placeholder="输入姓名"value=""></div></div><div class="weui-cell"><div class="weui-cell__hd"><label class="weui-label">学号</label></div><div class="weui-cell__bd"><input class="weui-input"id="i_xh"name="xh"type="text"placeholder="输入学号"value=""></div></div><div class="weui-cell"><div class="weui-cell__hd"><label class="weui-label">点击拨打</label></div><div class="weui-cell__bd"><a href="tel:18052637607"class="weui-input">180-5263-7607</a></div></div><div class="weui-cell"><div class="weui-cell__hd"><label class="weui-label">时效码</label></div><div class="weui-cell__bd"><input class="weui-input"name="sxm"id="i_sxm"type="text"placeholder="输入时效码"></div></div><label for="weuiAgree"class="weui-agree"><input id="weuiAgree"type="checkbox"class="weui-agree__checkbox"checked="checked"><span class="weui-agree__text">&nbsp;同意服务条款</span></label>';
 			document.getElementById("status_txt").innerText = '请填写信息：';
 			document.getElementById("find_pass").innerHTML = HTML;
 			function ajax_submit() {
@@ -194,7 +211,8 @@ function render_page() {
 								$.toast(data.reason,"text");
 								return;
 							}
-							$.toptip("恭喜！找回成功，正在跳转...", 2000, 'success');
+							$.toast("密码找回成功！","text");
+							$.toptip("密码找回成功，正在登录...", 2000, 'success');
 							if(data.school == "GLC") {
 								window.location.href="https://urpsh.iedon.com/glxy/index.fcgi?token=" + data.token;
 							} else {
@@ -207,7 +225,8 @@ function render_page() {
 			$("#i_submit").on("click", function(e) {
 				var r1 = document.getElementById("i_xh");
 				var r2 = document.getElementById("i_sxm");
-				var r3 = document.getElementById("weuiAgree");
+				var r3 = document.getElementById("i_xm");
+				var r4 = document.getElementById("weuiAgree");
 				if(r1 != undefined && r1.value == "")
 				{
 					$.toast("请输入学号","cancel");
@@ -218,7 +237,12 @@ function render_page() {
 					$.toast("请输入时效码","cancel");
 					return false;
 				}
-				if(r3 != undefined && !r3.checked)
+				if(r3 != undefined && r3.value == "")
+				{
+					$.toast("请输入姓名","cancel");
+					return false;
+				}
+				if(r4 != undefined && !r4.checked)
 				{
 					$.toast("请同意条款","cancel");
 					return false;
