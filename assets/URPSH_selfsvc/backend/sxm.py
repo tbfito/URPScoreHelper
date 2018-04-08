@@ -2,7 +2,7 @@
 # coding: UTF-8
 
 from flask import Flask, request, Response, render_template
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 from urllib import parse
 import pycurl, sys, os, time, json, _thread, logging, random
@@ -48,13 +48,14 @@ def get_voice(input_url):
 
 	
 def update_random():
+    update_freq_minutes = 10
     while True:
         try:
             global random_number
             random_number = random.randint(100000, 999999)
-            text = '您好，感谢使用艾神的自助密码找回服务。为响应国家互联网应用实名政策，我们会收集您的实名信息。时效验证码为六位数字。当前的时效验证码为：' + str(random_number) + '。' + str(random_number) + '。' + str(random_number) + '。时效验证码会很快失效，请尽快使用。谢谢您的使用，再见。如果您还有任何问题，按4语音留言。'
+            text = '您好，感谢使用艾神的自助密码找回服务。为响应国家互联网应用实名政策，我们会收集您的实名信息。时效验证码为六位数。请注意：当前的时效验证码为：' + str(random_number) + '。' + str(random_number) + '。' + str(random_number) + '。时效验证码会在：' + (datetime.now() + timedelta(minutes=update_freq_minutes)).strftime('%H{h}%M{m}%S{s}').format(h='点', m='分', s='秒') + ' 失效，请尽快使用。如果您还有任何问题，按4语音留言。谢谢您的使用，再见。'
             text = parse.quote(text)
-            url = 'http://tts.baidu.com/text2audio?idx=1&tex={' + text + '}&cuid=baidu_speech_demo&cod=2&lan=zh&ctp=1&pdt=1&spd=4&per=0&vol=5&pit=5'
+            url = 'http://tts.baidu.com/text2audio?idx=1&tex={' + text + '}&cuid=baidu_speech_demo&cod=2&lan=zh&ctp=1&pdt=1&spd=5&per=0&vol=999&pit=5'
             with open("random.mp3", 'wb') as f:
                 f.write(get_voice(url).getvalue())
                 f.flush()
@@ -62,7 +63,7 @@ def update_random():
         except Exception as e:
             print (e)
             pass
-        time.sleep(600)
+        time.sleep(update_freq_minutes * 60)
 
 if __name__ == '__main__':
     try:

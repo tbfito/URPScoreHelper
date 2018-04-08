@@ -157,10 +157,10 @@ function render_page() {
 	  <body>
 		<div id="container">
 		  <header class="demos-header">
-			<h1 class="demos-title" id="title">密码自助</h1>
-			<div class="weui-cells__title status">Account Self-services</div></header>
+			<h1 class="demos-title" id="title"><?php if(isset($_GET['3rd_party'])) {echo $_GET['3rd_party'];} else {echo '密码自助';} ?></h1>
+			<div class="weui-cells__title status">艾神的自助服务</div></header>
 			<div class="content">
-				<div id="i_notice"><i class="fa fa-warning"></i>本自助服务不能保证一定成功找回密码。只有&nbsp;<b style="color:#cc2a2a">成功登录过掌上教务的用户</b>&nbsp;才有机会找回。操作成功后，将直接登录，请自行修改新密码。</div>
+				<div id="i_notice"><i class="fa fa-warning"></i>自助服务不能保证成功找回密码。只有&nbsp;<b style="color:#cc2a2a">成功登录过掌上教务的用户</b>&nbsp;才有机会找回。操作成功后，将直接登录，请自行修改新密码。</div>
 				<form id="ajax_submit" data-ajax-submit="selfsvc.php" class="weui-cells weui-cells_form">
 					<div class="signbox">
 						<div class="weui-cells__title"><span id="status_txt"></span></div>
@@ -177,6 +177,7 @@ function render_page() {
 		<div class="weui-footer">
 				<p class="weui-footer__text">IP: <?php echo $_SERVER['REMOTE_ADDR'] . ":" . $_SERVER['REMOTE_PORT']; ?></p>
 				<p class="weui-footer__text">你在本页面的所有操作将被监视并记录！</p>
+				<p class="weui-footer__text">对于滥用行为将直接封号，禁止使用！</p>
 				<p class="weui-footer__text">时效码电话绝不收任何费用，由运营商计入市话套餐时长。</p>
 				<p class="weui-footer__text">时效码电话若无自动应答，说明服务暂不可用。</p>
 				<br />
