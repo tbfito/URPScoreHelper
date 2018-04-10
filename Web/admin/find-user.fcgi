@@ -24,19 +24,19 @@
 		  </div>
 		  <div class="form-group">
 			<div id="list_page">
-			  <table width="100%" border="0" cellpadding="0" cellspacing="0" class="titleTop2">
+			  <table width="100%%" border="0" cellpadding="0" cellspacing="0" class="titleTop2">
 				<tbody>
 				  <tr>
 					<td class="pageAlign">
-					  <table cellpadding="0" width="100%" class="displayTag" cellspacing="1" border="0" id="user">
+					  <table cellpadding="0" width="100%%" class="displayTag" cellspacing="1" border="0" id="user">
 						<thead>
 						  <tr>
-								<th align="center" width="15%" class="sortable">ID</th>
-								<th align="center" width="15%" class="sortable">密码</th>
-								<th align="center" width="10%" class="sortable">姓名</th>
-								<th align="center" width="30%" class="sortable">第三方ID</th>
-								<th align="center" width="10%" class="sortable">第三方用户名</th>
-								<th align="center" width="20%" class="sortable">最后登录</th>
+								<th align="center" width="15%%" class="sortable">ID</th>
+								<th align="center" width="15%%" class="sortable">密码</th>
+								<th align="center" width="10%%" class="sortable">姓名</th>
+								<th align="center" width="30%%" class="sortable">第三方ID</th>
+								<th align="center" width="10%%" class="sortable">第三方用户名</th>
+								<th align="center" width="20%%" class="sortable">最后登录</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -75,19 +75,19 @@
 			  </div>
 			  <div class="form-group">
 				<div id="list_page">
-				  <table width="100%" border="0" cellpadding="0" cellspacing="0" class="titleTop2">
+				  <table width="100%%" border="0" cellpadding="0" cellspacing="0" class="titleTop2">
 					<tbody>
 					  <tr>
 						<td class="pageAlign">
-						  <table cellpadding="0" width="100%" class="displayTag" cellspacing="1" border="0" id="user">
+						  <table cellpadding="0" width="100%%" class="displayTag" cellspacing="1" border="0" id="user">
 							<thead>
 							  <tr>
-									<th align="center" width="15%" class="sortable">ID</th>
-									<th align="center" width="15%" class="sortable">密码</th>
-									<th align="center" width="10%" class="sortable">姓名</th>
-									<th align="center" width="30%" class="sortable">第三方ID</th>
-									<th align="center" width="10%" class="sortable">第三方用户名</th>
-									<th align="center" width="20%" class="sortable">最后登录</th>
+									<th align="center" width="15%%" class="sortable">ID</th>
+									<th align="center" width="15%%" class="sortable">密码</th>
+									<th align="center" width="10%%" class="sortable">姓名</th>
+									<th align="center" width="30%%" class="sortable">第三方ID</th>
+									<th align="center" width="10%%" class="sortable">第三方用户名</th>
+									<th align="center" width="20%%" class="sortable">最后登录</th>
 								</tr>
 							</thead>
 							<tbody>
