@@ -3,6 +3,7 @@
 
 from flask import Flask, request, Response, render_template
 from datetime import datetime
+from io import BytesIO
 import pycurl, sys, os, time, json, _thread, logging
 
 server_list_response = ''
@@ -10,12 +11,6 @@ access_counter = 0
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 app = Flask(__name__)
- 
-class idctest:
-    def __init__(self):
-        self.contents = ''
-    def body_callback(self,buf):
-        self.contents = ''
 
 @app.route('/urpsh', methods=['GET', 'POST'])
 def http():
@@ -34,10 +29,10 @@ def http():
     return resp
 
 def test_speed(input_url):
-    t = idctest()
+    buffer = BytesIO()
     c = pycurl.Curl()
     c.setopt(pycurl.SSL_VERIFYPEER, 0)
-    c.setopt(pycurl.WRITEFUNCTION, t.body_callback)
+    c.setopt(c.WRITEDATA, buffer)
     c.setopt(pycurl.ENCODING, 'gzip')
     c.setopt(pycurl.URL,input_url)
     c.setopt(pycurl.MAXREDIRS, 5)
@@ -50,6 +45,9 @@ def test_speed(input_url):
         http_total_time = -1
 
     c.close()
+
+    if (buffer.getvalue() == b'\x52\x45\x51\x55\x45\x53\x54\x2D\x46\x41\x49\x4C\x45\x44'):
+        http_total_time = -1
 
     return '%.2f' % http_total_time
 
