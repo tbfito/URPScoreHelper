@@ -1289,12 +1289,6 @@ void parse_ajax_avatar()
 // 处理查询页面请求 (GET /query.fcgi)
 void parse_query()
 {
-	if (strlen(JSESSIONID) == 0) // 还没登录就丢去登录。
-	{
-		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
-		return;
-	}
-
 	// 开始查分(本学期)。
 	CCurlTask req;
 	if (!req.Exec(false, REQUEST_QUERY_SCORE, CGI_HTTP_COOKIE))
@@ -2099,12 +2093,6 @@ void parse_query()
 // 处理 期中/月考/补考/缓考/清考等各种疑难杂考 (GET /query.fcgi?order=tests)
 void parse_query_tests()
 {
-	if (strlen(JSESSIONID) == 0) // 还没登录就丢去登录。
-	{
-		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
-		return;
-	}
-
 	std::string m_lpszQuery = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
 	char m_Student[128] = { 0 };
@@ -2231,11 +2219,6 @@ void parse_query_tests()
 void get_student_name(char *p_lpszBuffer)
 {
 	memset(p_lpszBuffer, 0, 36);
-	if (strlen(JSESSIONID) == 0)
-	{
-		strncpy(p_lpszBuffer, APP_NAME, 36 - 1);
-		return;
-	}
 
 	CCurlTask req;
 	if (!req.Exec(false, REQUEST_GET_REGISTER_INTERFACE, CGI_HTTP_COOKIE))
@@ -2279,12 +2262,6 @@ void get_student_name(char *p_lpszBuffer)
 // 获取学生帐号
 void get_student_id(char *p_lpszBuffer)
 {
-	if (strlen(JSESSIONID) == 0)
-	{
-		*p_lpszBuffer = '\0';
-		return;
-	}
-
 	CCurlTask req;
 	if (!req.Exec(false, REQUEST_TOP, CGI_HTTP_COOKIE))
 	{
@@ -2312,12 +2289,6 @@ void get_student_id(char *p_lpszBuffer)
 // 教务系统电子注册
 int system_registration()
 {
-	if (strlen(JSESSIONID) == 0) // 还没登录就丢去登录。
-	{
-		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
-		return -1;
-	}
-
 	// 发送请求，获取电子注册信息。
 	CCurlTask req;
 	if (!req.Exec(false, REQUEST_GET_REGISTER_INTERFACE, CGI_HTTP_COOKIE))
@@ -3294,12 +3265,6 @@ void OAuth2_linking(bool isPOST)
 // 教学评估页面 (/TeachEval.fcgi)
 void parse_teaching_evaluation()
 {
-	if (strlen(JSESSIONID) == 0) // 还没登录就丢去登录。
-	{
-		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
-		return;
-	}
-
 	if (!ENABLE_TEACH_EVAL) {
 		Error(u8"教学评估功能已关闭");
 		return;
@@ -3450,12 +3415,6 @@ void parse_teaching_evaluation()
 // 教学评估流程 (POST /TeachEval.fcgi?act=Evaluate)
 void teaching_evaluation()
 {
-	if (strlen(JSESSIONID) == 0) // 还没登录就丢去登录。
-	{
-		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
-		return;
-	}
-
 	// 获取 POST 数据。
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0 || m_post_length > 10240)
@@ -3687,12 +3646,6 @@ void teaching_evaluation()
 // 修改密码页面 (/changePassword.fcgi)
 void parse_change_password()
 {
-	if (strlen(JSESSIONID) == 0) // 还没登录就丢去登录。
-	{
-		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
-		return;
-	}
-
 	std::string m_lpszQuery = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
 	cout << GLOBAL_HEADER;
@@ -3714,12 +3667,6 @@ void parse_change_password()
 // 修改密码 (POST /changePassword.fcgi)
 void do_change_password() //(POST /changePassword.fcgi)
 {
-	if (strlen(JSESSIONID) == 0) // 还没登录就丢去登录。
-	{
-		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
-		return;
-	}
-
 	// 获取 POST 数据。
 	int m_post_length = atoi(CGI_CONTENT_LENGTH);
 	if (m_post_length <= 0 || m_post_length > 127)
