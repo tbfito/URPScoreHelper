@@ -1289,11 +1289,7 @@ void parse_ajax_avatar()
 // 处理查询页面请求 (GET /query.fcgi)
 void parse_query()
 {
-	bool m_need_update_cookie = false;
-	std::string m_photo(" "); // 有数据，需要获取照片
-	process_cookie(&m_need_update_cookie, m_photo);
-
-	if (m_photo.empty()) // 还没登录就丢去登录。
+	if (strlen(JSESSIONID) == 0) // 还没登录就丢去登录。
 	{
 		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 		return;
@@ -1333,7 +1329,7 @@ void parse_query()
 		char *p1 = strstr(req.GetResult(), "] = new Array(\"");
 		if (p1 == NULL)
 		{
-			Error(u8"<p><b>从服务器拉取分数失败 (BeginOfList)</b></p><p>可能现在还没出成绩</p>");
+			Error(u8"<p><b>获取信息失败 (BeginOfList)</b></p><p>可能现在还没出成绩</p>");
 			return;
 		}
 		std::string script(u8"<script type=\"text/javascript\">function init_test_list() {$(\"#tests\").select({title:\"选择考试\",items:[");
@@ -1343,7 +1339,7 @@ void parse_query()
 			char *p2 = strstr(p1+16, "\");");
 			if (p2 == NULL)
 			{
-				Error(u8"<p><b>从服务器拉取分数失败 (EndOfLine)</b></p><p>请稍后再试</p>");
+				Error(u8"<p><b>获取信息失败 (EndOfLine)</b></p><p>请稍后再试</p>");
 				return;
 			}
 			char Line[4096] = { 0 };
@@ -1355,7 +1351,7 @@ void parse_query()
 			int matches = sscanf(Line, "%*[^\"]\"%[^\"]\",\"%[^\"]\",\"%[^\"]\");", testName, testID, termID);
 			if (matches != 3)
 			{
-				Error(u8"<p><b>从服务器拉取分数失败 (MatchLineError)</b></p><p>请稍后再试</p>");
+				Error(u8"<p><b>获取信息失败 (MatchLineError)</b></p><p>请稍后再试</p>");
 				return;
 			}
 
@@ -1363,7 +1359,7 @@ void parse_query()
 			int termMatches = sscanf(termID, "%d-%d-%d-%d", &lowYear, &highYear, &season, &season_part);
 			if (termMatches != 4)
 			{
-				Error(u8"<p><b>从服务器拉取分数失败 (MatchTermError)</b></p><p>请稍后再试</p>");
+				Error(u8"<p><b>获取信息失败 (MatchTermError)</b></p><p>请稍后再试</p>");
 				return;
 			}
 
@@ -1428,7 +1424,7 @@ void parse_query()
 		char *m_result = strstr(m_rep_body, "<body leftmargin=\"0\" topmargin=\"0\" marginwidth=\"0\" marginheight=\"0\" style=\"overflow:auto;\">");
 		if (m_result == NULL)
 		{
-			Error(u8"<p><b>从服务器拉取分数失败 (BeginOfRet)</b></p><p>系统可能正忙，请稍后再试</p>");
+			Error(u8"<p><b>获取信息失败 (BeginOfRet)</b></p><p>系统可能正忙，请稍后再试</p>");
 			return;
 		}
 		m_result += 92;
@@ -1439,7 +1435,7 @@ void parse_query()
 		if (m_end_body == NULL)
 		{
 			free(m_prep);
-			Error(u8"<p>从服务器拉取分数失败 (EndOfBodyNotFound)</p>");
+			Error(u8"<p>获取信息失败 (EndOfBodyNotFound)</p>");
 			return;
 		}
 
@@ -1489,7 +1485,7 @@ void parse_query()
 		char *m_result = strstr(m_rep_body, "<body leftmargin=\"0\" topmargin=\"0\" marginwidth=\"0\" marginheight=\"0\" style=\"overflow:auto;\">");
 		if (m_result == NULL)
 		{
-			Error(u8"<p><b>从服务器拉取分数失败 (BeginOfRet)</b></p><p>系统可能正忙，请稍后再试</p>");
+			Error(u8"<p><b>获取信息失败 (BeginOfRet)</b></p><p>系统可能正忙，请稍后再试</p>");
 			return;
 		}
 
@@ -1548,6 +1544,8 @@ void parse_query()
 		float f_xuefen = 0.0;
 		float f_chengji = 0.0;
 		float f_jidian = 0.0;
+		float total_xuefen = 0.0;
+		float total_jidian = 0.0;
 		bool hasChengji = true;
 
 		if (p1 == NULL)
@@ -1663,6 +1661,11 @@ void parse_query()
 					std::string  m_StrTmp = strformat(SCORE_TEMPLATE_BY_PLAN,
 														(f_chengji < 60 && f_xuefen != 0) ? "background-color:rgba(255,0,0,0.5);color:#fff" : "",
 														m_kechengming, m_shuxing, m_chengji, m_xuefen, f_jidian, m_weiguoyuanyin);
+					if (strstr(m_shuxing, "\xc8\xce\xd1\xa1" /* 任选 */) == NULL && strstr(m_kechengming, "\xcc\xe5\xd3\xfd" /*体育*/) == NULL && strstr(m_kechengming, "\xbe\xfc\xca\xc2\xd1\xb5\xc1\xb7" /*军事训练*/) == NULL)
+					{
+						total_xuefen += f_xuefen;
+						total_jidian += f_jidian;
+					}
 					unsigned int u8len = m_StrTmp.length() * 3 + 1;
 					char *u8strtmp = (char *)malloc(u8len);
 					gbk_to_utf8(m_StrTmp.c_str(), (unsigned int)m_StrTmp.length(), &u8strtmp, &u8len);
@@ -1707,6 +1710,12 @@ void parse_query()
 
 		m_Output.append(AFTER_TEMPLATE);
 
+		if (total_xuefen != 0 && total_jidian != 0) {
+			double gpa = total_jidian / total_xuefen;
+			std::string m_jiaquanfen = strformat(u8"<div id=\"i_total\"><p>当前的 GPA (平均学分绩点，仅参考)：</p><center>%.2f</center></div>", gpa);
+			m_Output.insert(0, m_jiaquanfen);
+		}
+
 		cout << GLOBAL_HEADER;
 
 		if (!CGI_HTTP_X_IS_AJAX_REQUEST)
@@ -1744,13 +1753,13 @@ void parse_query()
 		char *m_result = strstr(m_rep_body, "<table width=\"100%\"  border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\">");
 		if (m_result == NULL)
 		{
-			Error(u8"<p><b>从服务器拉取分数失败 (BeginOfRet)</b></p><p>系统可能正忙，请稍后再试</p>");
+			Error(u8"<p><b>获取信息失败 (BeginOfRet)</b></p><p>系统可能正忙，请稍后再试</p>");
 			return;
 		}
 		m_result = strstr(m_result + 92, "<table width=\"100%\"  border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\">");
 		if (m_result == NULL)
 		{
-			Error(u8"<p><b>从服务器拉取分数失败 (MidOfRet-Table)</b></p><p>系统可能正忙，请稍后再试</p>");
+			Error(u8"<p><b>获取信息失败 (MidOfRet-Table)</b></p><p>系统可能正忙，请稍后再试</p>");
 			return;
 		}
 		char *m_prep = (char *)malloc(req.GetLength());
@@ -1764,7 +1773,7 @@ void parse_query()
 		if (m_result == NULL)
 		{
 			free(m_prep);
-			Error(u8"<p>从服务器拉取分数失败 (EndOfBodyNotFound)</p>");
+			Error(u8"<p>获取信息失败 (EndOfBodyNotFound)</p>");
 			return;
 		}
 		cout << GLOBAL_HEADER;
@@ -1838,7 +1847,7 @@ void parse_query()
 		if (m_result == NULL)
 		{
 			free(m_prep);
-			Error(u8"<p>从服务器拉取课程表失败。(EndOfBodyNotFound)</p>");
+			Error(u8"<p>获取课程表失败。(EndOfBodyNotFound)</p>");
 			return;
 		}
 		m_result -= 81;
@@ -2007,7 +2016,7 @@ void parse_query()
 		mid(m_submingci, pStr2, pStr3 - pStr2 - 19, 19);
 		//Trim(m_submingci);
 
-		// （分数x学分）全都加起来/总学分 = 加权分，排除体育和课程设计，任选类课程
+		// （分数x学分）全都加起来/总学分 = 加权分，排除体育和任选类课程
 		float m_xuefen = atof(m_subXuefen);
 		float m_chengji = atof(m_subchengji);
 		float m_kcxfjd = m_xuefen * cj2jd(m_chengji);
@@ -2023,14 +2032,6 @@ void parse_query()
 				m_Total_pointsxxuefen += m_pointsxxuefen;
 			}
 			m_Total_jidian += m_kcxfjd;
-			/*if (m_chengji != 0)
-			{
-				double m_pointsxxuefen = m_xuefen * m_chengji;
-				if (m_pointsxxuefen != 0)
-				{
-					m_Total_pointsxxuefen += m_pointsxxuefen;
-				}
-			}*/
 		}
 
 		
@@ -2074,8 +2075,8 @@ void parse_query()
 		jiaquan = 0.0;
 		gpa = 0.0;
 	}
-		std::string m_jiaquanfen = strformat(u8"<div id=\"i_total\"><p>加权平均分 / GPA (仅供参考)：</p><center>%.1f&nbsp;&nbsp;%.2f</center></div>", jiaquan, gpa);
-		m_Output.insert(0, m_jiaquanfen);
+	std::string m_jiaquanfen = strformat(u8"<div id=\"i_total\"><p>加权平均分 / GPA (本学期，仅参考)：</p><center>%.1f&nbsp;&nbsp;%.2f</center></div>", jiaquan, gpa);
+	m_Output.insert(0, m_jiaquanfen);
 
 	cout << GLOBAL_HEADER;
 
@@ -2098,9 +2099,9 @@ void parse_query()
 // 处理 期中/月考/补考/缓考/清考等各种疑难杂考 (GET /query.fcgi?order=tests)
 void parse_query_tests()
 {
-	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
+	if (strlen(JSESSIONID) == 0) // 还没登录就丢去登录。
 	{
-		cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
@@ -2171,7 +2172,7 @@ void parse_query_tests()
 	char *m_result = strstr(m_rep_body, "<table cellpadding=\"0\" width=\"100%\" class=\"displayTag\" cellspacing=\"1\" border=\"0\" id=\"user\">");
 	if (m_result == NULL)
 	{
-		Error(u8"<p><b>从服务器拉取分数失败 (BeginOfTable)</b></p><p>系统可能正忙，请稍后再试</p>");
+		Error(u8"<p><b>获取信息失败 (BeginOfTable)</b></p><p>系统可能正忙，请稍后再试</p>");
 		return;
 	}
 
@@ -2190,7 +2191,7 @@ void parse_query_tests()
 	if (m_result == NULL)
 	{
 		free(m_prep);
-		Error(u8"<p>从服务器拉取分数失败 (EndOfBodyNotFound)</p>");
+		Error(u8"<p>获取信息失败 (EndOfBodyNotFound)</p>");
 		return;
 	}
 	m_result -= 93;
@@ -2230,7 +2231,7 @@ void parse_query_tests()
 void get_student_name(char *p_lpszBuffer)
 {
 	memset(p_lpszBuffer, 0, 36);
-	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
+	if (strlen(JSESSIONID) == 0)
 	{
 		strncpy(p_lpszBuffer, APP_NAME, 36 - 1);
 		return;
@@ -2278,7 +2279,7 @@ void get_student_name(char *p_lpszBuffer)
 // 获取学生帐号
 void get_student_id(char *p_lpszBuffer)
 {
-	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
+	if (strlen(JSESSIONID) == 0)
 	{
 		*p_lpszBuffer = '\0';
 		return;
@@ -2311,9 +2312,9 @@ void get_student_id(char *p_lpszBuffer)
 // 教务系统电子注册
 int system_registration()
 {
-	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
+	if (strlen(JSESSIONID) == 0) // 还没登录就丢去登录。
 	{
-		cout << "Status: 302 Found\r\n" << "Location: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 		return -1;
 	}
 
@@ -2398,13 +2399,13 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 	char *m_login_not_auth = strstr(m_result, "\xd6\xa4\xbc\xfe\xba\xc5" /*"证件号"*/); // for some urp systems
 	if (m_login_not_auth != NULL)
 	{
-		Error(u8"<p><b>学号或密码不对</b></p><p>如果修改过帐号密码，用新密码试一试</p>");
+		Error(u8"<p><b>学号或密码不对</b></p><p>如果修改过，用新的试一试</p>");
 		return false;
 	}
 	m_login_not_auth = strstr(m_result, "\xc3\xdc\xc2\xeb\xb2\xbb\xd5\xfd\xc8\xb7" /*密码不正确*/);
 	if (m_login_not_auth != NULL)
 	{
-		Error(u8"<p><b>学号或密码不对</b></p><p>如果修改过帐号密码，用新密码试一试</p>");
+		Error(u8"<p><b>学号或密码不对</b></p><p>如果修改过，用新的试一试</p>");
 		return false;
 	}
 	m_login_not_auth = strstr(m_result, "\xd1\xe9\xd6\xa4\xc2\xeb\xb4\xed\xce\xf3" /*验证码错误*/);
@@ -2556,8 +2557,6 @@ bool student_login(char *p_xuehao, char *p_password, char *p_captcha)
 // 登出学生
 void student_logout()
 {
-	if (strcmp(CGI_HTTP_COOKIE, "") == 0)
-		return;
 	CCurlTask req;
 	req.Exec(true, REQUEST_LOGOUT, CGI_HTTP_COOKIE);
 }
@@ -2593,7 +2592,7 @@ void parse_QuickQuery_Result()
 {
 	bool m_need_update_cookie = false;
 	std::string nullphoto;
-	process_cookie(&m_need_update_cookie, nullphoto);
+	process_cookie(&m_need_update_cookie, nullphoto); // 获取 COOKIE 以进行快查。
 
 	std::string m_lpszQuery = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
@@ -3295,18 +3294,14 @@ void OAuth2_linking(bool isPOST)
 // 教学评估页面 (/TeachEval.fcgi)
 void parse_teaching_evaluation()
 {
-	if (!ENABLE_TEACH_EVAL) {
-		Error(u8"教学评估功能已关闭");
+	if (strlen(JSESSIONID) == 0) // 还没登录就丢去登录。
+	{
+		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 		return;
 	}
 
-	bool m_need_update_cookie = false;
-	std::string m_photo(" "); // 有数据，需要获取照片
-	process_cookie(&m_need_update_cookie, m_photo);
-
-	if (m_photo.empty()) // 还没登录就丢去登录。
-	{
-		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
+	if (!ENABLE_TEACH_EVAL) {
+		Error(u8"教学评估功能已关闭");
 		return;
 	}
 
@@ -3455,11 +3450,7 @@ void parse_teaching_evaluation()
 // 教学评估流程 (POST /TeachEval.fcgi?act=Evaluate)
 void teaching_evaluation()
 {
-	bool m_need_update_cookie = false;
-	std::string m_photo(" "); // 有数据，需要获取照片
-	process_cookie(&m_need_update_cookie, m_photo);
-
-	if (m_photo.empty()) // 还没登录就丢去登录。
+	if (strlen(JSESSIONID) == 0) // 还没登录就丢去登录。
 	{
 		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 		return;
@@ -3696,11 +3687,7 @@ void teaching_evaluation()
 // 修改密码页面 (/changePassword.fcgi)
 void parse_change_password()
 {
-	bool m_need_update_cookie = false;
-	std::string m_photo(" "); // 有数据，需要获取照片
-	process_cookie(&m_need_update_cookie, m_photo);
-
-	if (m_photo.empty()) // 还没登录就丢去登录。
+	if (strlen(JSESSIONID) == 0) // 还没登录就丢去登录。
 	{
 		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 		return;
@@ -3708,8 +3695,6 @@ void parse_change_password()
 
 	std::string m_lpszQuery = ReadTextFileToMem(CGI_SCRIPT_FILENAME);
 
-	if (m_need_update_cookie)
-		cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
 	cout << GLOBAL_HEADER;
 
 	if (!CGI_HTTP_X_IS_AJAX_REQUEST)
@@ -3729,11 +3714,7 @@ void parse_change_password()
 // 修改密码 (POST /changePassword.fcgi)
 void do_change_password() //(POST /changePassword.fcgi)
 {
-	bool m_need_update_cookie = false;
-	std::string m_photo(" "); // 有数据，需要获取照片
-	process_cookie(&m_need_update_cookie, m_photo);
-
-	if (m_photo.empty()) // 还没登录就丢去登录。
+	if (strlen(JSESSIONID) == 0) // 还没登录就丢去登录。
 	{
 		cout << "Status: 302 Found\r\nLocation: " << getAppURL().c_str() << "/\r\n" << GLOBAL_HEADER;
 		return;
