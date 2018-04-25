@@ -54,13 +54,24 @@ def test_speed(input_url):
 def get_server_list():
     # test_speed() 可获取服务器响应时间, -1 为超时宕机。 -2为校园网线路(需要手工添加)
     list = [\
-    ["open", "扬大教务", "YZU Public", "https://urpsh.iedon.com/yzu/OAuth2.fcgi", test_speed("https://urpsh.iedon.com/yzu/captcha.fcgi")],\
-    ["open", "扬大内测", "YZU Beta, Internal", "http://urpsh-intranet.iedon.com/yzu/", "-2"],\
-    ["close", "广陵教务", "GLC Public", "https://urpsh.iedon.com/glxy/OAuth2.fcgi", test_speed("https://urpsh.iedon.com/glxy/captcha.fcgi")],\
-    ["close", "广陵内测", "GLC Beta, Internal", "http://urpsh-intranet.iedon.com/glxy/", "-2"]\
+    ["open", "扬州大学", "YZU Public", "https://urpsh.iedon.com/yzu/OAuth2.fcgi", test_speed("https://urpsh.iedon.com/yzu/captcha.fcgi")],\
+    ["open", "广院入口", "GLC Public", "https://urpsh.iedon.com/glxy/OAuth2.fcgi", test_speed("https://urpsh.iedon.com/glxy/captcha.fcgi")],\
+	#["closed", "扬大测试版", "YZU Beta, Internal", "http://urpsh-intranet.iedon.com/yzu/", "-2"],\
+    #["closed", "广院测试版", "GLC Beta, Internal", "http://urpsh-intranet.iedon.com/glxy/", "-2"],\
+	["open", "密码自助服务", "Acc. Self-Service", "http://urpsh-selfsvc.iedon.com/selfsvc.php", test_speed("http://home.iedon.com:9287/get_number")]\
     ]
     return list
-	
+
+def get_server_notice():
+    list = [\
+    ["密码自助服务因系统故障 😂", ""],\
+    ["将暂时封闭入口 😭", ""],\
+    ["请移步微信群寻求人工服务！", ""],\
+    ["谢谢亲的理解 😂", ""],\
+    ["ご利用ありがとうございました", ""]\
+    ]
+    return list
+
 def update_response():
     while True:
         try:
@@ -80,6 +91,20 @@ def update_response():
                         ret = ret + '"url": "' + data + '", '
                     if (i == 4):
                         ret = ret + '"speed": "' + data + '"'
+                if (index == length - 1):
+                    ret += '}'
+                else:
+                    ret += '},'
+            list = get_server_notice()
+            length = len(list)
+            ret += '], "notices": ['
+            for index,value in enumerate(list):
+                ret += '{'
+                for i,data in enumerate(value):
+                    if (i == 0):
+                        ret = ret + '"content": "' + data + '", '
+                    if (i == 1):
+                        ret = ret + '"link": "' + data + '"'
                 if (index == length - 1):
                     ret += '}'
                 else:

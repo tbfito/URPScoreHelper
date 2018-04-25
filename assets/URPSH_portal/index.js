@@ -1,8 +1,15 @@
+
 var servers = 0;
 var ready = false;
 var _3rd_party = GetQS("3rd_party");
+var marqueeContent = new Array();
+var marqueeInterval = new Array(); 
+var marqueeId = 0; 
+var marqueeDelay = 2000; 
+var marqueeHeight = 20; 
 document.getElementById("login").innerText = "刷新服务器 Refresh";
 document.getElementById("status_txt").innerText = '正在连接登录服务器...'; 
+
 function get_server_list() {
 	$.ajax({
 		type: "GET",
@@ -21,6 +28,15 @@ function get_server_list() {
 				show_speed();
 				clicked(0);
 				document.getElementById("status_txt").innerText = '已选：'; 
+				
+				if(data.notices.length > 0) {
+					for(var j in data.notices){
+						marqueeContent[j] = '<a href="' + data.notices[j].link + '" target="_blank">' + data.notices[j].content + '</a>';
+					}
+					initMarquee();
+					document.getElementById("i_notice").style.display="block";
+				}
+				
 				ready = true;
 				document.getElementById("login").innerText = "进入 Login";
 			}
@@ -119,5 +135,36 @@ function show_speed() {
 				document.getElementById("server_sel" + i).innerHTML += '&nbsp;&nbsp;<span class="speed fast">' + speed + "s 畅通</span>";
 			}
 		}
+	}
+}
+
+function initMarquee() { 
+	var str = marqueeContent[0]; 
+	document.getElementById("i_notice").innerHTML = '<div id="marqueeBox" style="overflow:hidden;height:' + marqueeHeight + 'px" onmouseover="clearInterval(marqueeInterval[0])" onmouseout="marqueeInterval[0]=setInterval(\'startMarquee()\',marqueeDelay)"><div>' + str + '</div></div>'; 
+	marqueeId++; 
+	marqueeInterval[0] = setInterval("startMarquee()", marqueeDelay); 
+}
+
+function startMarquee() { 
+	var str = marqueeContent[marqueeId];
+	marqueeId++;
+	if(marqueeId >= marqueeContent.length) marqueeId = 0;
+	if(document.getElementById("marqueeBox").childNodes.length == 1) {
+		var nextLine = document.createElement('div');
+		nextLine.innerHTML = str;
+		document.getElementById("marqueeBox").appendChild(nextLine);
+	} else {
+		document.getElementById("marqueeBox").childNodes[0].innerHTML = str;
+		document.getElementById("marqueeBox").appendChild(document.getElementById("marqueeBox").childNodes[0]);
+		document.getElementById("marqueeBox").scrollTop = 0;
+	}
+	clearInterval(marqueeInterval[1]);
+	marqueeInterval[1] = setInterval("scrollMarquee()", 20);
+}
+
+function scrollMarquee() {
+	document.getElementById("marqueeBox").scrollTop++;
+	if(document.getElementById("marqueeBox").scrollTop%marqueeHeight == (marqueeHeight - 1)) {
+		clearInterval(marqueeInterval[1]);
 	}
 }
