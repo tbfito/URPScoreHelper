@@ -42,6 +42,8 @@ function get_server_list() {
 			}
 		},
 		beforeSend: function() {
+			document.getElementById("sound").load();
+			document.getElementById("sound").play();
 			document.getElementById("login").innerText = "刷新服务器 Refresh";
 			document.getElementById("status_txt").innerText = '正在连接登录服务器...'; 
 			$.toptip("正在刷新服务器列表...", 2000, 'success');
