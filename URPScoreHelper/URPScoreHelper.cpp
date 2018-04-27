@@ -1030,7 +1030,7 @@ void parse_main()
 	char m_student_id[512] = { 0 };
 	char m_avatar_url[MAX_PATH] = { 0 };
 	get_student_id(m_student_id);
-	if (!GetOAuthUserInfo(m_student_id, m_student_name, m_avatar_url, sizeof(m_student_name), sizeof(m_avatar_url)))
+	if (!ENABLE_OAUTH2 || !GetOAuthUserInfo(m_student_id, m_student_name, m_avatar_url, sizeof(m_student_name), sizeof(m_avatar_url)))
 	{
 		memset(m_student_name, 0, sizeof(m_student_name));
 		get_student_name(m_student_name);
@@ -1269,7 +1269,11 @@ void parse_ajax_avatar()
 	char m_avatar_url[MAX_PATH] = { 0 };
 	char m_student_name[1024] = { 0 };
 	get_student_id(m_student_id);
-	if (!GetOAuthUserInfo(m_student_id, m_student_name, m_avatar_url, sizeof(m_student_name), sizeof(m_avatar_url)))
+	if (ENABLE_OAUTH2 && GetOAuthUserInfo(m_student_id, m_student_name, m_avatar_url, sizeof(m_student_name), sizeof(m_avatar_url)))
+	{
+		cout << m_avatar_url;
+	}
+	else
 	{
 		if (m_photo != "data:image/jpg;base64,") // 判断教务系统中有无头像，即 datauri 有没有值
 		{
@@ -1279,10 +1283,6 @@ void parse_ajax_avatar()
 		{
 			cout << APP_SUB_DIRECTORY << "/img/default_avatar.jpg";
 		}
-	}
-	else
-	{
-		cout << m_avatar_url;
 	}
 }
 
@@ -1819,7 +1819,7 @@ void parse_query()
 			Error(u8"<p><b>从服务器拉取课程表失败。(BeginOfTable)</b></p><p>建议你稍后再试</p>");
 			return;
 		}
-		m_result += 81;
+		m_result += 82;
 		char *m_prep = (char *)malloc(req.GetLength());
 		replace_string(m_result, "&nbsp;", "");
 		replace_string(m_result, "\t", "");
@@ -1844,7 +1844,7 @@ void parse_query()
 			Error(u8"<p>获取课程表失败。(EndOfBodyNotFound)</p>");
 			return;
 		}
-		m_result -= 81;
+		m_result -= 82;
 		cout << GLOBAL_HEADER;
 		std::string m_before = strformat("<a name=\"qb_731\"></a><table width=\"100%%\" border=\"0\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td class=\"Linetop\"></td></tr></tbody></table><table width=\"100%%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"title\" id=\"tblHead\"><tbody><tr><td width=\"100%%\"><table border=\"0\" align=\"left\" cellpadding=\"0\" cellspacing=\"0\"><tbody><tr><td>&nbsp;</td><td valign=\"middle\">&nbsp;<b>%s</b> &nbsp;</td></tr></tbody></table></td></tr></tbody></table>", u8"我的课程表 / 选课结果");
 		*(m_end_body + 26) = '<';

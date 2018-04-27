@@ -7,7 +7,8 @@
 	char * left(char *dst, char *src, int n);
 	char * mid(char *dst, char *src, int n, int m);
 	char * right(char *dst, char *src, int n);
-	void replace_string(char * source_str, const char * targ_str, const char *val);
+	void replace_string(char * source_str, const char * search, const char *replace_with);
+	void findAndReplaceAll(std::string & data, std::string toSearch, std::string replaceStr);
 	char * url_encode(char const *s, int len, int *new_length);
 	int url_decode(char *str, int len);
 	int split(char dst[][128], char* str, const char* spliter);

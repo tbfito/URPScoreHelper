@@ -47,25 +47,29 @@ char *right(char *dst, char *src, int n)
 	return(dst);
 }
 
-// 只允许将长串替换为短串
+// 注意串长容量
 void replace_string(char * source_str, const char * search, const char *replace_with)
 {
-	size_t dst_size = strlen(source_str);
-	char * replace_buf = (char *)malloc(dst_size);
-	if (replace_buf)
+	std::string data(source_str);
+	std::string toSearch(search);
+	std::string replaceStr(replace_with);
+	findAndReplaceAll(data, toSearch, replaceStr);
+	strncpy(source_str, data.c_str(), data.size());
+	source_str[data.size() + 1] = '\0';
+}
+
+void findAndReplaceAll(std::string & data, std::string toSearch, std::string replaceStr)
+{
+	// Get the first occurrence
+	size_t pos = data.find(toSearch);
+
+	// Repeat till end is reached
+	while (pos != std::string::npos)
 	{
-		replace_buf[0] = 0;
-		char * p = (char *)source_str;
-		char * pos = NULL;
-		while ((pos = strstr(p, search)) != NULL)
-		{
-			size_t n = (size_t)(pos - p);
-			strncat(replace_buf, p, n > dst_size ? dst_size : n);
-			strncat(replace_buf, replace_with, dst_size - strlen(replace_buf) - 1);
-			p = pos + strlen(search);
-		}
-		snprintf(source_str, dst_size, "%s%s", replace_buf, p);
-		free(replace_buf);
+		// Replace this occurrence of Sub String
+		data.replace(pos, toSearch.size(), replaceStr);
+		// Get the next occurrence from the current position
+		pos = data.find(toSearch, pos + toSearch.size());
 	}
 }
 
