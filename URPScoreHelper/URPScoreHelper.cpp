@@ -1425,6 +1425,12 @@ void parse_query()
 		char *m_prep = (char *)malloc(req.GetLength());
 		memset(m_prep, 0, req.GetLength());
 		strncpy(m_prep, "<div id=\"list_page\">", req.GetLength() - 1);
+
+		replace_string(m_result, "&nbsp;", "");
+		replace_string(m_result, "\t", "");
+		replace_string(m_result, "\r", "");
+		replace_string(m_result, "\n", "");
+
 		char *m_end_body = strstr(m_result, "</body>");
 		if (m_end_body == NULL)
 		{
@@ -1432,11 +1438,6 @@ void parse_query()
 			Error(u8"<p>获取信息失败 (EndOfBodyNotFound)</p>");
 			return;
 		}
-
-		replace_string(m_result, "&nbsp;", "");
-		replace_string(m_result, "\t", "");
-		replace_string(m_result, "\r", "");
-		replace_string(m_result, "\n", "");
 
 		cout << GLOBAL_HEADER;
 		*(m_end_body + 2) = 'd';
