@@ -153,7 +153,7 @@ void fastcgi_app_intro()
 		}
 
 		// 普通请求处理
-		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0) // 如果是 GET 请求
+		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0 || strcmp(CGI_REQUEST_METHOD, "HEAD") == 0) // 如果是 GET, HEAD 请求
 		{
 			if (strcmp(CGI_SCRIPT_NAME, "") == 0)
 			{

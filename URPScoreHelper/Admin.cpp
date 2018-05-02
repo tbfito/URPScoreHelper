@@ -10,7 +10,7 @@ void admin_intro()
 {
 	if (strcmp(CGI_SCRIPT_NAME, "/admin/login.fcgi") == 0)
 	{
-		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0 || strcmp(CGI_REQUEST_METHOD, "HEAD") == 0)
 		{
 			parse_admin_login();
 			return;
@@ -24,7 +24,7 @@ void admin_intro()
 
 	if (strcmp(CGI_SCRIPT_NAME, "/admin/settings.fcgi") == 0)
 	{
-		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0 || strcmp(CGI_REQUEST_METHOD, "HEAD") == 0)
 		{
 			parse_admin_settings();
 			return;
@@ -44,7 +44,7 @@ void admin_intro()
 
 	if (strcmp(CGI_SCRIPT_NAME, "/admin/change-pass.fcgi") == 0)
 	{
-		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0 || strcmp(CGI_REQUEST_METHOD, "HEAD") == 0)
 		{
 			parse_admin_change_password();
 			return;
@@ -76,7 +76,7 @@ void admin_intro()
 
 	if (strcmp(CGI_SCRIPT_NAME, "/admin/find-user.fcgi") == 0)
 	{
-		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0 || strcmp(CGI_REQUEST_METHOD, "HEAD") == 0)
 		{
 			parse_find_user();
 			return;
@@ -90,7 +90,7 @@ void admin_intro()
 
 	if (strcmp(CGI_SCRIPT_NAME, "/admin/adv-card.fcgi") == 0)
 	{
-		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0 || strcmp(CGI_REQUEST_METHOD, "HEAD") == 0)
 		{
 			parse_admin_adv_card();
 			return;
@@ -104,7 +104,7 @@ void admin_intro()
 
 	if (strcmp(CGI_SCRIPT_NAME, "/admin/maintenance.fcgi") == 0)
 	{
-		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+		if (strcmp(CGI_REQUEST_METHOD, "GET") == 0 || strcmp(CGI_REQUEST_METHOD, "HEAD") == 0)
 		{
 			site_maintenance();
 			return;
@@ -792,7 +792,7 @@ void homepage_notice()
 	if (!session())
 		return;
 
-	if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+	if (strcmp(CGI_REQUEST_METHOD, "GET") == 0 || strcmp(CGI_REQUEST_METHOD, "HEAD") == 0)
 	{
 		cout << GLOBAL_HEADER;
 		cout << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, HOMEPAGE_NOTICE).c_str();
@@ -828,7 +828,7 @@ void set_discussion()
 	if (!session())
 		return;
 
-	if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+	if (strcmp(CGI_REQUEST_METHOD, "GET") == 0 || strcmp(CGI_REQUEST_METHOD, "HEAD") == 0)
 	{
 		cout << GLOBAL_HEADER;
 		cout << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, 
@@ -870,7 +870,7 @@ void site_maintenance()
 	if (!session())
 		return;
 
-	if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+	if (strcmp(CGI_REQUEST_METHOD, "GET") == 0 || strcmp(CGI_REQUEST_METHOD, "HEAD") == 0)
 	{
 		cout << GLOBAL_HEADER;
 		cout << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, SITE_MAINTENANCE).c_str();
@@ -908,7 +908,7 @@ void set_oauth2()
 	if (!session())
 		return;
 
-	if (strcmp(CGI_REQUEST_METHOD, "GET") == 0)
+	if (strcmp(CGI_REQUEST_METHOD, "GET") == 0 || strcmp(CGI_REQUEST_METHOD, "HEAD") == 0)
 	{
 		cout << GLOBAL_HEADER;
 		cout << strformat(ReadTextFileToMem(CGI_SCRIPT_FILENAME).c_str(), APP_NAME, ENABLE_OAUTH2 ? "1" : "0", OAUTH2_APPID, OAUTH2_SECRET).c_str();
