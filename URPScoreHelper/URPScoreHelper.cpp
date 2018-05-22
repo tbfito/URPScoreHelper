@@ -108,7 +108,7 @@ void fastcgi_app_intro()
 		}
 
 		// 单独为 Admin 做处理，将其请求转发到 admin.cpp 控制器。
-		if (strlen(CGI_REQUEST_URI) >= 6)
+		if (CGI_REQUEST_URI != NULL && strlen(CGI_REQUEST_URI) >= 6)
 		{
 			char left_str[128] = { 0 };
 			left(left_str, CGI_REQUEST_URI, 6);
