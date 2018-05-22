@@ -35,13 +35,11 @@
 		#endif
 
 		#ifdef _WIN64 // Windows amd64(x86-64) 平台
-			#pragma comment(lib, "libfcgi/libfcgi_win64.lib")
 			#pragma comment(lib, "libcurl/libcurl_win64.lib")
 			#pragma comment(lib, "libmysql/libmysql_win64.lib")
 			#pragma comment(lib, "libiconv/libiconv_win64.lib")
 		#else
 			#ifdef _WIN32 // Windows x86 平台
-				#pragma comment(lib, "libfcgi/libfcgi_win32.lib")
 				#pragma comment(lib, "libcurl/libcurl_win32.lib")
 				#pragma comment(lib, "libmysql/libmysql_win32.lib")
 				#pragma comment(lib, "libiconv/libiconv_win32.lib")

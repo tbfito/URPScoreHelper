@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="源文件\libfcgi">
+      <UniqueIdentifier>{9f5f825f-a67e-408f-9163-af553b8db7c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\libfcgi">
+      <UniqueIdentifier>{b97a9d1b-e970-4b12-866a-4912c81c994f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -63,6 +69,30 @@
     <ClInclude Include="headers.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="libfcgi\fastcgi.h">
+      <Filter>头文件\libfcgi</Filter>
+    </ClInclude>
+    <ClInclude Include="libfcgi\fcgi_config.h">
+      <Filter>头文件\libfcgi</Filter>
+    </ClInclude>
+    <ClInclude Include="libfcgi\fcgi_config_x86.h">
+      <Filter>头文件\libfcgi</Filter>
+    </ClInclude>
+    <ClInclude Include="libfcgi\fcgi_stdio.h">
+      <Filter>头文件\libfcgi</Filter>
+    </ClInclude>
+    <ClInclude Include="libfcgi\fcgiapp.h">
+      <Filter>头文件\libfcgi</Filter>
+    </ClInclude>
+    <ClInclude Include="libfcgi\fcgimisc.h">
+      <Filter>头文件\libfcgi</Filter>
+    </ClInclude>
+    <ClInclude Include="libfcgi\fcgio.h">
+      <Filter>头文件\libfcgi</Filter>
+    </ClInclude>
+    <ClInclude Include="libfcgi\fcgios.h">
+      <Filter>头文件\libfcgi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="General.cpp">
@@ -106,6 +136,21 @@
     </ClCompile>
     <ClCompile Include="headers.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="libfcgi\fcgi_stdio.c">
+      <Filter>源文件\libfcgi</Filter>
+    </ClCompile>
+    <ClCompile Include="libfcgi\fcgiapp.c">
+      <Filter>源文件\libfcgi</Filter>
+    </ClCompile>
+    <ClCompile Include="libfcgi\os_win32.c">
+      <Filter>源文件\libfcgi</Filter>
+    </ClCompile>
+    <ClCompile Include="libfcgi\strerror.c">
+      <Filter>源文件\libfcgi</Filter>
+    </ClCompile>
+    <ClCompile Include="libfcgi\fcgio.cpp">
+      <Filter>源文件\libfcgi</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
