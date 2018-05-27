@@ -3524,33 +3524,28 @@ void teaching_evaluation()
 			return;
 		}
 
-		std::string dst0(dst[0]);
-		std::string dst1(dst[1]);
-		std::string dst2(dst[2]);
-		std::string dst3(dst[3]);
-		std::string dst4(dst[4]);
-		std::string dst5(dst[5]);
-		trim(dst0);
-		trim(dst1);
-		trim(dst2);
-		trim(dst3);
-		trim(dst4);
-		trim(dst5);
-
-		strncpy(te[counts].wjbm, dst0.c_str(), sizeof(te[counts].wjbm) - 1);
-		strncpy(te[counts].bpr, dst1.c_str(), sizeof(te[counts].bpr) - 1);
-		strncpy(te[counts].pgnr, dst5.c_str(), sizeof(te[counts].pgnr) - 1);
-		strncpy(te[counts].name, dst4.c_str(), sizeof(te[counts].name) - 1);
 		int new_len = 0;
-		char *tmp = url_encode(dst3.c_str(), dst3.length(), &new_len);
+		char *tmp = url_encode(dst[3], strlen(dst[3]), &new_len);
 		left(te[counts].wjmc, tmp, new_len);
 		free(tmp);
-		char *tmp2 = url_encode(dst2.c_str(), dst2.length(), &new_len);
+		char *tmp2 = url_encode(dst[2], strlen(dst[2]), &new_len);
 		left(te[counts].bprm, tmp2, new_len);
 		free(tmp2);
-		char *tmp3 = url_encode(dst4.c_str(), dst4.length(), &new_len);
+		char *tmp3 = url_encode(dst[4], strlen(dst[4]), &new_len);
 		left(te[counts].pgnrm, tmp3, new_len);
 		free(tmp3);
+		char *tmp0 = url_encode(dst[0], strlen(dst[0]), &new_len);
+		left(te[counts].wjbm, tmp0, new_len);
+		free(tmp0);
+		char *tmp1 = url_encode(dst[1], strlen(dst[1]), &new_len);
+		left(te[counts].bpr, tmp1, new_len);
+		free(tmp1);
+		char *tmp5 = url_encode(dst[5], strlen(dst[5]), &new_len);
+		left(te[counts].pgnr, tmp5, new_len);
+		free(tmp5);
+		char *tmp4 = url_encode(dst[4], strlen(dst[4]), &new_len);
+		left(te[counts].name, tmp4, new_len);
+		free(tmp4);
 
 		counts++;
 		m_result1 = strstr(m_result, "\x3C\x74\x64\x20\x61\x6C\x69\x67\x6E\x3D\x22\x63\x65\x6E\x74\x65\x72\x22\x3E\xCA\xC7\x3C\x2F\x74\x64\x3E" /*"<td align=\"center\">是</td>"*/);
