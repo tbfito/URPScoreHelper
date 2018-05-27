@@ -1,5 +1,7 @@
 ﻿#include "headers.h"
 #include "StringHelper.h"
+#include <algorithm>   
+#include <functional>
 
 // 取文本左边
 char *left(char *dst, char *src, int n)
@@ -377,4 +379,25 @@ std::string strformat(const char *format, ...)
 	std::string str(p);
 	free(p);
 	return str;
+}
+
+std::string & ltrim(std::string & src)
+{
+	std::string::iterator p = std::find_if(src.begin(), src.end(), std::not1(std::ptr_fun<int, int>(isspace)));
+	src.erase(src.begin(), p);
+	return src;
+}
+
+std::string & rtrim(std::string & src)
+{
+	std::string::reverse_iterator p = std::find_if(src.rbegin(), src.rend(), std::not1(std::ptr_fun<int, int>(isspace)));
+	src.erase(p.base(), src.end());
+	return src;
+}
+
+std::string & trim(std::string & src)
+{
+	rtrim(src);
+	ltrim(src);
+	return src;
 }

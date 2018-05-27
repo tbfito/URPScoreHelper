@@ -3331,11 +3331,22 @@ void parse_teaching_evaluation()
 			return;
 		}
 
-		strncpy(te[counts].wjbm, dst[0], sizeof(te[counts].wjbm) - 1);
-		strncpy(te[counts].bpr, dst[1], sizeof(te[counts].bpr) - 1);
-		strncpy(te[counts].pgnr, dst[5], sizeof(te[counts].pgnr) - 1);
-		strncpy(te[counts].bprm, dst[2], sizeof(te[counts].bprm) - 1);
-		unsigned int len = strlen(dst[4]);
+		std::string dst0(dst[0]);
+		std::string dst1(dst[1]);
+		std::string dst2(dst[2]);
+		std::string dst4(dst[4]);
+		std::string dst5(dst[5]);
+		trim(dst0);
+		trim(dst1);
+		trim(dst2);
+		trim(dst4);
+		trim(dst5);
+
+		strncpy(te[counts].wjbm, dst0.c_str(), sizeof(te[counts].wjbm) - 1);
+		strncpy(te[counts].bpr, dst1.c_str(), sizeof(te[counts].bpr) - 1);
+		strncpy(te[counts].pgnr, dst5.c_str(), sizeof(te[counts].pgnr) - 1);
+		strncpy(te[counts].bprm, dst2.c_str(), sizeof(te[counts].bprm) - 1);
+		unsigned int len = (unsigned int)dst4.length();
 		unsigned int to_len = len * 3 + 1;
 		char *tmp = (char *)malloc(to_len);
 		gbk_to_utf8(dst[4], len, &tmp, &to_len);
@@ -3391,11 +3402,11 @@ void parse_teaching_evaluation()
 	bool need_eval = true;
 	if (to_eval && counts)
 	{
-		out_head = strformat(u8"<div class=\"weui-cells__title\">嗯，当前还有 %d 门课程需要评估，总共 %d 门</div>", to_eval, counts);
+		out_head = strformat(u8"<div class=\"weui-cells__title\">当前还有 %d 门课程需要评估，总共 %d 门</div>", to_eval, counts);
 	}
 	else
 	{
-		out_head = u8"<div class=\"weui-cells__title\"><p>嗯，你都评价好啦</div>";
+		out_head = u8"<div class=\"weui-cells__title\"><p>你都评价好啦~</div>";
 		need_eval = false;
 	}
 
@@ -3513,18 +3524,31 @@ void teaching_evaluation()
 			return;
 		}
 
-		strncpy(te[counts].wjbm, dst[0], sizeof(te[counts].wjbm) - 1);
-		strncpy(te[counts].bpr, dst[1], sizeof(te[counts].bpr) - 1);
-		strncpy(te[counts].pgnr, dst[5], sizeof(te[counts].pgnr) - 1);
-		strncpy(te[counts].name, dst[4], sizeof(te[counts].name) - 1);
+		std::string dst0(dst[0]);
+		std::string dst1(dst[1]);
+		std::string dst2(dst[2]);
+		std::string dst3(dst[3]);
+		std::string dst4(dst[4]);
+		std::string dst5(dst[5]);
+		trim(dst0);
+		trim(dst1);
+		trim(dst2);
+		trim(dst3);
+		trim(dst4);
+		trim(dst5);
+
+		strncpy(te[counts].wjbm, dst0.c_str(), sizeof(te[counts].wjbm) - 1);
+		strncpy(te[counts].bpr, dst1.c_str(), sizeof(te[counts].bpr) - 1);
+		strncpy(te[counts].pgnr, dst5.c_str(), sizeof(te[counts].pgnr) - 1);
+		strncpy(te[counts].name, dst4.c_str(), sizeof(te[counts].name) - 1);
 		int new_len = 0;
-		char *tmp = url_encode(dst[3], strlen(dst[3]), &new_len);
+		char *tmp = url_encode(dst3.c_str(), dst3.length(), &new_len);
 		left(te[counts].wjmc, tmp, new_len);
 		free(tmp);
-		char *tmp2 = url_encode(dst[2], strlen(dst[2]), &new_len);
+		char *tmp2 = url_encode(dst2.c_str(), dst2.length(), &new_len);
 		left(te[counts].bprm, tmp2, new_len);
 		free(tmp2);
-		char *tmp3 = url_encode(dst[4], strlen(dst[4]), &new_len);
+		char *tmp3 = url_encode(dst4.c_str(), dst4.length(), &new_len);
 		left(te[counts].pgnrm, tmp3, new_len);
 		free(tmp3);
 
@@ -3562,8 +3586,12 @@ void teaching_evaluation()
 				if (m_result == NULL)
 				{
 					std::string err_msg = u8"<p>出现错误</p><p>很抱歉，在评估《";
-					err_msg = err_msg + te[i].name + u8"》课程时出现了错误</p><p>(进入详细页面失败)</p>";
+					unsigned int len = (strlen(te[i].name) + 1) * 3;
+					char* tmp = (char *)malloc(len);
+					gbk_to_utf8(te[i].name, strlen(te[i].name), &tmp, &len);
+					err_msg = err_msg + tmp + u8"》课程时出现了错误</p><p>(进入详细页面失败)</p>";
 					Error(err_msg.c_str());
+					free(tmp);
 					return;
 				}
 
@@ -3575,8 +3603,12 @@ void teaching_evaluation()
 					if (p1 == NULL)
 					{
 						std::string err_msg = u8"<p>出现错误</p><p>很抱歉，在评估《";
-						err_msg = err_msg + te[i].name + u8"》课程时出现了错误</p><p>(名称条目引号闭合失败)</p>";
+						unsigned int len = (strlen(te[i].name) + 1) * 3;
+						char* tmp = (char *)malloc(len);
+						gbk_to_utf8(te[i].name, strlen(te[i].name), &tmp, &len);
+						err_msg = err_msg + tmp + u8"》课程时出现了错误</p><p>(名称条目引号闭合失败)</p>";
 						Error(err_msg.c_str());
+						free(tmp);
 						return;
 					}
 					char num[64] = { 0 };
@@ -3595,16 +3627,24 @@ void teaching_evaluation()
 					if (p2 == NULL)
 					{
 						std::string err_msg = u8"<p>出现错误</p><p>很抱歉，在评估《";
-						err_msg = err_msg + te[i].name + u8"》课程时出现了错误</p><p>(值条目引号开启失败)</p>";
+						unsigned int len = (strlen(te[i].name) + 1) * 3;
+						char* tmp = (char *)malloc(len);
+						gbk_to_utf8(te[i].name, strlen(te[i].name), &tmp, &len);
+						err_msg = err_msg + tmp + u8"》课程时出现了错误</p><p>(值条目引号开启失败)</p>";
 						Error(err_msg.c_str());
+						free(tmp);
 						return;
 					}
 					char *p3 = strstr(p2 + 7, "\"");
 					if (p2 == NULL)
 					{
 						std::string err_msg = u8"<p>出现错误</p><p>很抱歉，在评估《";
-						err_msg = err_msg + te[i].name + u8"》课程时出现了错误</p><p>(值条目引号闭合失败)</p>";
+						unsigned int len = (strlen(te[i].name) + 1) * 3;
+						char* tmp = (char *)malloc(len);
+						gbk_to_utf8(te[i].name, strlen(te[i].name), &tmp, &len);
+						err_msg = err_msg + tmp + u8"》课程时出现了错误</p><p>(值条目引号闭合失败)</p>";
 						Error(err_msg.c_str());
+						free(tmp);
 						return;
 					}
 
@@ -3624,8 +3664,13 @@ void teaching_evaluation()
 				if (!req3.Exec(false, POST_TEACH_EVAL, CGI_HTTP_COOKIE, true, post_data.c_str()))
 				{
 					std::string err_msg = u8"<p>出现错误</p><p>很抱歉，在评估《";
-					err_msg = err_msg + te[i].name + u8"》课程时出现了错误</p><p>网络通信异常</p>";
+					unsigned int len = (strlen(te[i].name) + 1) * 3;
+					char* tmp = (char *)malloc(len);
+					gbk_to_utf8(te[i].name, strlen(te[i].name), &tmp, &len);
+					err_msg = err_msg + tmp + u8"》课程时出现了错误</p><p>(网络通信异常)</p>";
 					Error(err_msg.c_str());
+					free(tmp);
+					return;
 				}
 
 				m_rep_body = req3.GetResult();
@@ -3633,8 +3678,12 @@ void teaching_evaluation()
 				if (m_result == NULL)
 				{
 					std::string err_msg = u8"<p>出现错误</p><p>很抱歉，在评估《";
-					err_msg = err_msg + te[i].name + u8"》课程时出现了错误</p>";
+					unsigned int len = (strlen(te[i].name) + 1) * 3;
+					char* tmp = (char *)malloc(len);
+					gbk_to_utf8(te[i].name, strlen(te[i].name), &tmp, &len);
+					err_msg = err_msg + tmp + u8"》课程时出现了错误</p><p>(没有收到成功消息)</p>";
 					Error(err_msg.c_str());
+					free(tmp);
 					return;
 				}
 			}

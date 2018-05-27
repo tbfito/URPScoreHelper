@@ -20,5 +20,8 @@
 	bool base64_decode(const char *strIn, unsigned char *pOut, size_t *uOutLen);
 	std::string ReadTextFileToMem(const char *lpszLocalPath);
 	std::string strformat(const char *format, ...);
+	std::string & ltrim(std::string & src);
+	std::string & rtrim(std::string & src);
+	std::string & trim(std::string & src);
 
 #endif
