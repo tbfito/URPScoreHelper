@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <vector>
 
 #ifndef __URPSCOREHELPER_H__
 
