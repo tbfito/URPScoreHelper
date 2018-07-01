@@ -2,6 +2,7 @@
 #include "StringHelper.h"
 #include <algorithm>   
 #include <functional>
+#include <vector>
 
 // 取文本左边
 char *left(char *dst, char *src, int n)
@@ -73,6 +74,22 @@ void findAndReplaceAll(std::string & data, std::string toSearch, std::string rep
 		// Get the next occurrence from the current position
 		pos = data.find(toSearch, pos + toSearch.size());
 	}
+}
+
+void split(const std::string & src, std::vector<std::string> & result, const std::string & seperator)
+{
+	std::string::size_type pos1, pos2;
+	pos2 = src.find(seperator);
+	pos1 = 0;
+	while (std::string::npos != pos2)
+	{
+		result.push_back(src.substr(pos1, pos2 - pos1));
+
+		pos1 = pos2 + seperator.size();
+		pos2 = src.find(seperator, pos1);
+	}
+	if (pos1 != src.length())
+		result.push_back(src.substr(pos1));
 }
 
 static unsigned char hexchars[] = "0123456789ABCDEF";

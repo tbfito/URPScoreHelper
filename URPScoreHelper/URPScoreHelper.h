@@ -61,6 +61,7 @@
 	bool AddSettings(const char *name, const char *value);
 	void parse_query_tests();
 	void parse_discussion();
+	void split(const std::string & src, std::vector<std::string> & result, const std::string & seperator);
 
 	typedef struct test_info
 	{

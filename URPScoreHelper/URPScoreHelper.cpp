@@ -2593,17 +2593,9 @@ void parse_QuickQuery_Result()
 	}
 	char m_xuehao[1024] = { 0 };
 	strncpy(m_xuehao, str_xuehao.c_str(), sizeof(m_xuehao) - 1);
-	if(strstr(m_xuehao, "%0D%0A") != NULL)
-		replace_string(m_xuehao, "%0D%0A", "|");
-	char *p = strtok(m_xuehao, "|");
-	char *m_xh[512] = { NULL };
-	int m_xhgs = 0;
-	while (p)
-	{
-		m_xh[m_xhgs++] = p;
-		p = strtok(NULL, "|");
-	}
-	if (m_xhgs > 5 || m_xhgs <= 0)
+	std::vector<std::string> xhs;
+	split(str_xuehao, xhs, "%0D%0A");
+	if (xhs.size() > 5 || xhs.size() == 0)
 	{
 		if (m_need_update_cookie)
 			cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
@@ -2624,9 +2616,9 @@ void parse_QuickQuery_Result()
 		COOKIE = CGI_HTTP_COOKIE;
 	}
 
-	for (int xh_index = 0; xh_index < m_xhgs; xh_index++)
+	for (int xh_index = 0; xh_index < xhs.size(); xh_index++)
 		{
-			if (strlen(m_xh[xh_index]) > 36)
+		if (xhs[xh_index].length() > 36)
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
@@ -2634,7 +2626,7 @@ void parse_QuickQuery_Result()
 				return;
 			}
 
-			std::string m_query_param = strformat("LS_XH=%s", m_xh[xh_index]);
+			std::string m_query_param = strformat("LS_XH=%s", xhs[xh_index].c_str());
 			m_query_param.append("&resultPage=%3F"); // this is ok.
 
 			CCurlTask req;
@@ -2749,7 +2741,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
-				Error(strformat(u8"<p><b>出现错误，请确认输入正确</b></p><p>发生错误的学号: %s</p>", m_xh[xh_index]).c_str());
+				Error(strformat(u8"<p><b>出现错误，请确认输入正确</b></p><p>发生错误的学号: %s</p>", xhs[xh_index].c_str()).c_str());
 				return;
 			}
 			mid(m_xxmz, pStr1 + 4, pStr2 - pStr1 - 5, 1);
@@ -2757,7 +2749,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
-				Error(strformat(u8"<p><b>获取信息失败，请确认输入正确</b></p><p>发生错误的学号: %s</p>", m_xh[xh_index]).c_str());
+				Error(strformat(u8"<p><b>获取信息失败，请确认输入正确</b></p><p>发生错误的学号: %s</p>", xhs[xh_index].c_str()).c_str());
 				return;
 			}
 			std::string m_xxmz_div = strformat("<div class=\"weui-cells__title\">%s</div>", m_xxmz);
@@ -2775,7 +2767,7 @@ void parse_QuickQuery_Result()
 			{
 				if (m_need_update_cookie)
 					cout << "Set-Cookie: JSESSIONID=" << JSESSIONID << "; path=" << APP_SUB_DIRECTORY << "/\r\n";
-				Error(strformat(u8"<p><b>接收到的数据存在问题</b></p><p>发生错误的学号: %s</p>", m_xh[xh_index]).c_str());
+				Error(strformat(u8"<p><b>接收到的数据存在问题</b></p><p>发生错误的学号: %s</p>", xhs[xh_index].c_str()).c_str());
 				return;
 			}
 
@@ -2929,7 +2921,7 @@ void parse_QuickQuery_Result()
 
 		cout << GLOBAL_HEADER;
 
-		if (m_xhgs > 1)
+		if (xhs.size() > 1)
 		{
 			if (!CGI_HTTP_X_IS_AJAX_REQUEST)
 			{
@@ -2960,7 +2952,7 @@ void parse_QuickQuery_Result()
 			cout << footer.c_str();
 		}
 
-		g_QueryCounter += m_xhgs;
+		g_QueryCounter += xhs.size();
 		SetQueryCounter(g_QueryCounter);
 }
 
