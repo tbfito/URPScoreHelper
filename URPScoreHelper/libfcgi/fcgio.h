@@ -49,7 +49,7 @@ typedef char char_type;
 /*
  *  fcgi_streambuf
  */
-class /* DLLAPI */ fcgi_streambuf : public std::streambuf
+class DLLAPI fcgi_streambuf : public std::streambuf
 {
 public:
 
@@ -109,7 +109,7 @@ private:
 /*
  *  fcgi_istream - deprecated
  */
-class /* DLLAPI */ fcgi_istream : public std::istream
+class DLLAPI fcgi_istream : public std::istream
 {
 public:
 
@@ -130,7 +130,7 @@ private:
 /*
  *  fcgi_ostream - deprecated
  */
-class /* DLLAPI */ fcgi_ostream : public std::ostream
+class DLLAPI fcgi_ostream : public std::ostream
 {
 public:
     

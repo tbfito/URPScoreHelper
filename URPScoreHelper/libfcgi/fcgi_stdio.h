@@ -19,7 +19,6 @@
 #include <sys/types.h>
 #include "fcgiapp.h"
 
-#define environ _environ
 #if defined (c_plusplus) || defined (__cplusplus)
 extern "C" {
 #endif

@@ -267,14 +267,6 @@
     <ClInclude Include="General.h" />
     <ClInclude Include="ini.h" />
     <ClInclude Include="INIReader.h" />
-    <ClInclude Include="libfcgi\fastcgi.h" />
-    <ClInclude Include="libfcgi\fcgiapp.h" />
-    <ClInclude Include="libfcgi\fcgimisc.h" />
-    <ClInclude Include="libfcgi\fcgio.h" />
-    <ClInclude Include="libfcgi\fcgios.h" />
-    <ClInclude Include="libfcgi\fcgi_config.h" />
-    <ClInclude Include="libfcgi\fcgi_config_x86.h" />
-    <ClInclude Include="libfcgi\fcgi_stdio.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="OAuth2.h" />
     <ClInclude Include="URPRequests.h" />
@@ -292,11 +284,6 @@
     <ClCompile Include="General.cpp" />
     <ClCompile Include="ini.cpp" />
     <ClCompile Include="INIReader.cpp" />
-    <ClCompile Include="libfcgi\fcgiapp.c" />
-    <ClCompile Include="libfcgi\fcgio.cpp" />
-    <ClCompile Include="libfcgi\fcgi_stdio.c" />
-    <ClCompile Include="libfcgi\os_win32.c" />
-    <ClCompile Include="libfcgi\strerror.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OAuth2.cpp" />
     <ClCompile Include="URPRequests.cpp" />
