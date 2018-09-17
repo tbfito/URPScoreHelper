@@ -4,8 +4,8 @@
 #include "StringHelper.h"
 #include "AES.h"
 
-static uint8_t key[] = "e360b63e-4b61-4171-9531-8165a1af"; //加密密钥
-static uint8_t iv[] = "c986fcfa-5c41-4fd6-ad8f-81000661"; //初始化向量
+static uint8_t key[] = "这里这里这里这里这里这里这里"; //加密密钥
+static uint8_t iv[] = "改掉改掉改掉改掉改掉改掉改掉"; //初始化向量
 
 //长度有限，注意内存分配
 void EnCodeStr(const char *str, char *out)
